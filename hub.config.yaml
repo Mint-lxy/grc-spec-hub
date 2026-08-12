@@ -1,0 +1,39 @@
+# hub.config.yaml — 本中枢仓库绑定的“唯一项目”锚点
+#
+# 一个 hub 只服务一个平台项目（single-project）。它拥有该项目的全部事实源：
+# 宪法 / specs / 契约 / 架构 / 记忆 / 标准 / 能力 / 门禁。
+# 若组织内有第二个平台项目，请为其克隆一份独立的 hub，不要在本仓库混入第二个项目。
+#
+# 第 0 周奠基时填实下方 [待确认] 字段，之后本文件基本只读（仅随项目重大信息变更）。
+
+project:
+  id: grc
+  name: "GRC AI platform"      # 展示名
+  org: mercedes-benz.china                 # GitHub 组织
+  description: "本平台是企业内部的智能体统一上架平台。各智能体的安全与质量由其所属业务场景方自行负责；平台提供测评工具、基础通用的内容防护能力，以及统一的授权、凭据与审计底座"
+
+hub:
+  repo: https://mercedes-benz.ghe.com/china/grc-spec-hub      # 本 hub 仓库
+  created: "2026-08-12"            # 奠基日，如 2026-07-20
+
+scope:
+  single_project: true           # 一个 hub 仅绑定一个项目；跨项目请另建 hub
+
+# 事实源锚点（脚本与 agent 据此定位；改动目录结构时同步更新）
+sources:
+  constitution:     .specify/memory/constitution.md
+  sop:              sop/README.md                           # 框架无关 SOP（阶段/工件/判据）
+  adapters:         adapters/README.md                      # 框架适配层（spec-kit/claude/copilot）
+  platform_spec:    specs/000-platform/spec.md
+  service_manifest: architecture/services.manifest.yaml   # 已拆解服务的“声明清单”（批量孵化输入）
+  service_map:      architecture/service-map.md           # 由清单生成/校验的“世界观”
+  memory_now:       memory/now/state.md
+  contracts_policy: contracts/POLICY.md
+
+# 需要人审的守门点（落实宪法第六条；与分支保护规则对应）
+gatekeepers:
+  - specs/**
+  - contracts/**
+  - memory/now/**
+  - .specify/memory/constitution.md
+  - hub.config.yaml

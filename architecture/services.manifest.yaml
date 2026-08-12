@@ -1,0 +1,30 @@
+# services.manifest.yaml — 已拆解服务的“声明清单”（批量孵化的单一输入）
+#
+# 用途：当项目启动时子服务已经拆解完毕，在此一次性声明全部服务。
+# 它是 service-map.md 的“上游事实源”：
+#   /onboard-services 读取本清单 → 批量生成 service-map 段落 + 记忆卡 + 服务仓库 + 门禁。
+# 之后日常新增单个服务仍可用 /new-service，但务必回填本清单，保持两者一致。
+#
+# 依赖必须单向无环（DAG）。孵化前 /onboard-services 会校验拓扑；成环会被拒绝。
+
+project: your-project-id       # 必须与 hub.config.yaml 的 project.id 一致
+
+# 各服务契约文件的约定路径（供生成 provides/consumes 时对齐 contracts/POLICY.md）
+conventions:
+  openapi: contracts/openapi/<svc>.yaml
+  events:  contracts/events/<domain>.asyncapi.yaml
+  shared:  contracts/shared/<name>.schema.json
+
+services:
+  # ↓↓↓ 占位样例：第 0 周用真实服务整体替换本段（可多条）。
+  - name: svc-example              # 服务名（小写-连字符，将作为 service-map 三级标题）
+    repo: your-org/svc-example     # 服务仓库（同级 clone 的来源）
+    owner: "@todo-owner"           # 负责人 GitHub handle
+    domain: "[待确认] 一句话职责边界"
+    milestone: M1                  # 归属里程碑（对齐 specs/000-platform）
+    status: planned                # planned | scaffolding | active
+    provides:                      # 本服务对外提供的契约（文件路径，可空）
+      - contracts/openapi/example.yaml
+    consumes: []                   # 本服务消费的上游契约（文件路径，可空）
+    depends-on: []                 # 依赖的其它服务名（用于无环校验，可空）
+  # ↑↑↑ 复制上面这一段来添加更多服务；provides/consumes 用逗号或列表均可。

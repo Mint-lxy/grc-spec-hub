@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.example.internal/shared/money.schema.json",
+  "title": "Money",
+  "description": "样例共享模型：金额。正式模型请置于 contracts/shared/。",
+  "type": "object",
+  "required": ["amount", "currency"],
+  "properties": {
+    "amount": {
+      "type": "integer",
+      "description": "最小货币单位（如分），避免浮点误差"
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    }
+  }
+}
