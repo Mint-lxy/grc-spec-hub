@@ -1,7 +1,7 @@
 <!-- 自动区块：由 memory-digest 管线维护摘要性内容；人工可在人审 PR 中订正 -->
 # 项目现状总览
 
-> 更新于：2026-W28（占位）· 维持 ≤ 2 页
+> 更新于：2026-W33 · 维持 ≤ 2 页
 
 ## 所处阶段
 项目启动，第 0 周奠基中。PRD v1.0 已定稿，specs 已拆解为 9 个 feature spec，服务拆分 ADR 已产出。
@@ -14,7 +14,9 @@
 
 ## 当前风险
 - 记忆腐化是本体系最大单点风险 → 依赖每周 digest 审核纪律。
-- 5 项架构待确认项（护栏实现/BFF/会话存储/Health Check/mgmt 拆分时机）需尽快 PoC。
+- 12 项架构待确认项（ADR-001 §待确认）：含原始 5 项 + 新增 7 项（模型凭据解析/Gateway 状态投影/knowledge→mcp 凭据链路/knowledge→mgmt 隐藏依赖/会话快照语义/agent 事件消费/eval REST 消费）。
+- 各 spec 共 21 项未决问题散布在 §4 章节，其中合规类（3 项）与外部依赖类（Key Vault/Alice/Nexus，4 项）阻塞面最大。
+- 里程碑日期（M1/M2/M3）仍为 `[待确认]`。
 
 ## 近期重要变化
 - 2026-08-13：ADR-001 状态升为 Accepted；依赖关系修正（knowledge→parser、agent→mcp、gateway→mcp）同步至 service-map 与 manifest。
