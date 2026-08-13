@@ -17,6 +17,7 @@
 - 5 项架构待确认项（护栏实现/BFF/会话存储/Health Check/mgmt 拆分时机）需尽快 PoC。
 
 ## 近期重要变化
+- 2026-08-13：ADR-001 状态升为 Accepted；依赖关系修正（knowledge→parser、agent→mcp、gateway→mcp）同步至 service-map 与 manifest。
 - 2026-08-13：PRD v1.0 定稿，9 个 feature spec 拆解完成。
 - 2026-08-13：ADR-001（服务拆分）、ADR-002（错误码规范）产出。
 - 2026-08-13：services.manifest.yaml 与 service-map.md 填实为 8 服务。

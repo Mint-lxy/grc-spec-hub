@@ -72,7 +72,7 @@ graph LR
 - owner: @todo-owner
 - provides: contracts/openapi/grc-api-gateway.yaml
 - consumes: contracts/openapi/grc-auth-service.yaml, contracts/openapi/grc-mgmt-service.yaml, contracts/openapi/grc-agent-service.yaml, contracts/openapi/grc-evaluation-service.yaml, contracts/openapi/grc-knowledge-engine.yaml
-- depends-on: grc-auth-service, grc-mgmt-service, grc-agent-service, grc-evaluation-service, grc-knowledge-engine
+- depends-on: grc-auth-service, grc-mgmt-service, grc-agent-service, grc-evaluation-service, grc-knowledge-engine, grc-mcp-server
 
 ### grc-auth-service
 - repo: mercedes-benz.china/grc-auth-service
@@ -93,7 +93,7 @@ graph LR
 - owner: @todo-owner
 - provides: contracts/openapi/grc-agent-service.yaml
 - consumes: contracts/openapi/grc-knowledge-engine.yaml, contracts/openapi/grc-mgmt-service.yaml
-- depends-on: grc-knowledge-engine, grc-mgmt-service
+- depends-on: grc-knowledge-engine, grc-mgmt-service, grc-mcp-server
 
 ### grc-evaluation-service
 - repo: mercedes-benz.china/grc-evaluation-service
@@ -106,8 +106,8 @@ graph LR
 - repo: mercedes-benz.china/grc-knowledge-engine
 - owner: @todo-owner
 - provides: contracts/openapi/grc-knowledge-engine.yaml, contracts/events/knowledge-build.asyncapi.yaml
-- consumes:
-- depends-on: grc-auth-service
+- consumes: contracts/openapi/grc-parser-engine.yaml
+- depends-on: grc-auth-service, grc-parser-engine
 
 ### grc-parser-engine
 - repo: mercedes-benz.china/grc-parser-engine

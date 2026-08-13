@@ -1,6 +1,6 @@
 # ADR-001: 服务拆分——以 C4 容器为基线的八服务架构
 
-> 状态：Proposed
+> 状态：Accepted
 > 日期：2026-08-13 · 决策者：@todo-owner · 关联 spec：`specs/000-platform`
 
 ## 背景
@@ -13,6 +13,17 @@ PRD v1.0 的建议模块划分（§10.1）列出了 10 个逻辑模块（对话/
 2. **Python/Java 双栈分界**——对话编排与知识管线依赖 Python 生态（LangChain/向量库 SDK/解析器），
    管理侧（资产 CRUD/订阅审批/权限映射）适合 Java/Spring 生态，两栈各聚一个服务。
 3. **GPU 资源隔离**——文档解析需要 GPU，独立为 grc-parser-engine 可按需扩缩。
+
+### 拆分驱动力（Service Decomposition 分析）
+
+| 驱动力 | 体现 | 结论 |
+|--------|------|------|
+| 独立部署/发布节奏 | Python 服务（agent/knowledge/eval/parser）与 Java 服务（mgmt/auth/gateway）迭代节奏不同 | 按语言栈分服务 |
+| 差异化伸缩 | parser-engine 需 GPU、knowledge-engine 向量化高 CPU、agent-service 高并发长连接 | 三者独立部署 |
+| 数据所有权 | mgmt-service 拥有资产/订阅/凭据/通知数据；knowledge-engine 拥有知识库与向量数据；agent-service 拥有会话数据 | 一服务一数据 |
+| 团队所有权 | 管理侧 Java 团队、AI 侧 Python 团队、前端团队 | 三组独立交付 |
+| 跨服务事务风险 | 资产状态机涉及订阅/发布/通知联动——拆则需 saga | 合并为 mgmt-service 内部模块化 |
+| 网络延迟预算 | 对话链路 agent→knowledge 仅一跳同步；构建链路 knowledge→parser 仅一跳 | 可接受 |
 
 ---
 
@@ -260,6 +271,13 @@ knowledge-engine / parser-engine / eval-service
 - [ ] **会话数据持久化**：agent-service 用独立 schema / 独立 PG 实例 / 经 mgmt-service API 间接写入——待确认数据归属边界
 - [ ] **Health Check 探测**：P0 是否实现周期性探测；若实现，由 mgmt-service 定时任务还是独立 CronJob——待 P0 范围确认
 - [ ] **grc-mgmt-service 拆分时机**：第 3–4 周用真实 feature 验证，若订阅审批链或通知投递出现性能瓶颈则拆出
+- [ ] **模型凭据解析路径**：agent-service 直连 Nexus 时，按触发人解析个人优先/平台兜底的逻辑由谁执行——候选：① agent-service 查 mgmt-service 获取凭据 ② agent→gateway→Nexus 复用网关解析 ③ 凭据解析 SDK/sidecar
+- [ ] **Gateway 运行时状态投影**：资产下架（004 AC-19）、出站停用（008 AC-2）、护栏模板变更（006 AC-3）三类即时感知——候选：① mgmt 写 Redis + gateway 旁路读 ② gateway 订阅 Service Bus ③ mgmt push webhook 到 gateway
+- [ ] **Knowledge-engine → MCP-server 依赖**：四通道导入的外部通道（Confluence/SharePoint/S3）需调用 mcp-server，且需注入操作人个人出站凭据——凭据由谁解析注入待定
+- [ ] **Knowledge-engine → mgmt-service 隐藏依赖**：文件消费链路（D11）需调 mgmt /internal/file/{id}/sas 获取只读 SAS URL；平台资源实例连接信息（008 AC-7）亦需从 mgmt 获取——是否正式声明依赖待定
+- [ ] **会话级知识库快照语义**：agent-service 会话挂载的知识库不因停用/权限回收而改变检索行为（001 AC-10）——knowledge-engine 检索 API 是否需支持"忽略停用状态"的内部模式待定
+- [ ] **Agent-service 事件消费**：D7 已列 agent-service 为 `asset-lifecycle` 消费者，但 manifest 未声明 AsyncAPI 消费——需确认 agent-service 如何感知资产下架（事件 vs 同步查询）
+- [ ] **Eval-service → mgmt-service REST 消费**：D8 回写结果需调 mgmt 内部接口，manifest 缺少 OpenAPI 消费声明
 
 ---
 
@@ -275,3 +293,14 @@ knowledge-engine / parser-engine / eval-service
 - 护栏 gRPC 调用引入外部依赖，需在网关层实现熔断与降级（护栏不可达时是放行还是拒绝——PRD 未定义，建议默认拒绝）。
 - 凭据解析在网关层意味着网关需要访问 Key Vault 和 Redis，安全面增大，需限制网关的 Managed Identity 权限为只读。
 - MCP Server 各子模块独立容器部署会增加 K8s 资源声明数量，需统一 Helm chart 管理。
+
+## 压力点与缓解措施
+
+| 压力场景 | 影响 | 缓解 |
+|----------|------|------|
+| 对话链路 fan-out（agent→knowledge+mcp） | 尾延迟叠加，单慢依赖阻塞回答 | knowledge 与 mcp 并行调用；对 mcp 设超时降级（spec 001 AC-13） |
+| 护栏全文缓冲首段延迟 | 用户感知到明显等待 | 网关缓冲后按段回放；需性能基准测试确认可接受 |
+| mgmt-service 内部模块耦合退化 | 拆分成本急剧上升 | 强制 domain package 隔离 + ApplicationEvent 通信；第 3–4 周真实 feature 验证 |
+| eval-service 高并发测评 | Nexus LLM 限流，任务堆积 | Service Bus 削峰；eval-service 控制并发度；失败可重测 |
+| 知识构建管线阻塞 | parser-engine GPU 饱和，队列深度增长 | 构建互斥（spec 005 AC-16）；Service Bus 任务调度；parser 独立扩缩 |
+| gateway/auth 单点故障 | 全平台不可用 | 多副本 + 就绪探针；auth-service Redis 缓存 Token；gateway 熔断降级 |

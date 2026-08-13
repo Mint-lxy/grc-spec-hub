@@ -43,7 +43,7 @@ services:
       - contracts/openapi/grc-agent-service.yaml
       - contracts/openapi/grc-evaluation-service.yaml
       - contracts/openapi/grc-knowledge-engine.yaml
-    depends-on: [grc-auth-service, grc-mgmt-service, grc-agent-service, grc-evaluation-service, grc-knowledge-engine]
+    depends-on: [grc-auth-service, grc-mgmt-service, grc-agent-service, grc-evaluation-service, grc-knowledge-engine, grc-mcp-server]
 
   # ---- 认证服务 ----
   - name: grc-auth-service
@@ -84,7 +84,7 @@ services:
     consumes:
       - contracts/openapi/grc-knowledge-engine.yaml
       - contracts/openapi/grc-mgmt-service.yaml
-    depends-on: [grc-knowledge-engine, grc-mgmt-service]
+    depends-on: [grc-knowledge-engine, grc-mgmt-service, grc-mcp-server]
 
   # ---- 测评服务 ----
   - name: grc-evaluation-service
@@ -109,8 +109,9 @@ services:
     provides:
       - contracts/openapi/grc-knowledge-engine.yaml
       - contracts/events/knowledge-build.asyncapi.yaml
-    consumes: []
-    depends-on: [grc-auth-service]
+    consumes:
+      - contracts/openapi/grc-parser-engine.yaml
+    depends-on: [grc-auth-service, grc-parser-engine]
 
   # ---- 文档解析引擎 ----
   - name: grc-parser-engine
