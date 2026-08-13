@@ -1,0 +1,146 @@
+@startuml GRC-AI平台-C4容器架构图
+' ============================================================
+' GRC AI 平台 C4 容器架构图 (Container Diagram)
+' 图例: 实线 = 同步调用 (Sync) ; 虚线 = 异步/外部 (Async/Ext)
+' ============================================================
+!include <C4/C4_Container>
+' 若本地 PlantUML 无内置 stdlib, 可改用下面在线引用:
+' !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title GRC AI 平台 C4 容器架构图 (Container Diagram)
+
+' ---- 布局调优：增大节点/层级间距，减少线条重叠 ----
+LAYOUT_TOP_DOWN()
+skinparam nodesep 60
+skinparam ranksep 80
+
+' ---- 连线样式: 与原图图例保持一致 ----
+AddRelTag("sync",  $lineStyle=SolidLine(),  $legendText="同步调用 (Sync)")
+AddRelTag("async", $lineStyle=DashedLine(), $legendText="异步/外部 (Async/Ext)")
+
+' ============================================================
+' 人员 (Person)
+' ============================================================
+Person(admin,     "系统管理员", "管理员·系统管理")
+Person(ops,       "运营团队",   "平台运营等工作")
+Person(dev_agent, "开发人员",   "Agent 开发与测评")
+Person(dev_coder, "开发人员",   "程序编写")
+
+' ============================================================
+' 外部系统 (External System)
+' ============================================================
+System_Ext(alice,      "Alice",                 "企业 SSO 身份提供方")
+System_Ext(nexus,      "Nexus / AI Gateway",    "DeepSeek/Qwen/Doubao\nLLM 推理服务")
+System_Ext(m365,       "Microsoft 365",        "SharePoint/OneDrive/Teams")
+System_Ext(github,     "GitHub / GitLab",       "代码仓库")
+System_Ext(confluence, "Confluence / Wiki",     "企业知识库")
+System_Ext(adf,        "Azure Data Factory",    "微软云数据工厂")
+System_Ext(databricks, "Databricks",            "数据湖-Notebook")
+System_Ext(ext_agent,  "External Agent Server", "外部Agent Server 服务")
+System_Ext(ext_mcp,    "External MCP Server",   "外部 MCP 工具服务")
+
+' ============================================================
+' GRC AI Platform System 边界
+' ============================================================
+System_Boundary(ai_platform, "GRC AI Platform System") {
+
+    Container(ai_portal,   "grc-ai-portal",   "Container: Web Application",  "AI 平台前端门户\n提供管理、配置、测评界面")
+    Container(api_gateway, "grc-api-gateway",  "Container: JAVA Application", "统一 API 网关\n路由 · 限流 · 鉴权转发")
+    Container(auth_service,"grc-auth-service", "Container: JAVA Application", "统一身份认证\nToken 颁发与校验")
+    Container(mgt_service, "grc-mgmt-service", "Container: JAVA Application", "管理服务\n1. Agent 配置管理\n2. 用户/权限管理\n3. 菜单/角色管理")
+    Container(agent_service,    "grc-agent-service",      "Container: Python Application", "Agent 服务\n1. 对话编排\n2. MCP Tool 调用\n3. LLM 推理调度")
+    Container(eval_service,     "grc-evaluation-service", "Container: Python Application", "测评服务\n1. 批量测评任务\n2. 测评结果分析\n3. 订阅测评 topic")
+    Container(knowledge_engine, "grc-knowledge-engine",   "Container: Python Application", "知识引擎\n1. 文档解析与入库\n2. 向量检索\n3. 订阅文档创建 Topic")
+    Container(parser_engine,    "grc-parser-engine\n(GPU Optimize)", "Container: Python Application", "文档解析\nDocling/MinerU")
+    Container(langfuse,    "Langfuse",    "Container: Langfuse 镜像", "链路追踪\n监控token消耗，调用链路")
+
+    ' ---- grc-mcp-server 子边界 ----
+    Container_Boundary(mcp_server, "grc-mcp-server") {
+        Container(mcp_m365_server, "mcp-m365-server", "Container", "Microsoft 365 MCP 工具\nSharePoint/OneDrive")
+        Container(mcp_conf_server, "mcp-conf-server", "Container", "Confluence MCP 工具")
+        Container(mcp_dp_server,   "mcp-dp-server",   "Container", "数据平台服务 MCP 工具")
+        Container(mcp_web_server,  "mcp-web-server",  "Container", "Web 抓取 MCP 工具")
+    }
+
+    ' ---- 数据与中间件 ----
+    ContainerDb(postgres, "Azure Database for PostgreSQL", "Container: PostgreSQL",      "主业务数据库\nAgent/User/Eval 数据")
+    ContainerDb(redis,    "Azure Cache for Redis",         "Container: Redis",           "缓存与会话存储\nToken / Session / 热点数据")
+    ContainerDb(milvus,   "Milvus",                        "Container: K8s-Image-Milvus","向量数据库\n知识库 Embedding 存储")
+    ContainerDb(keyvault, "Azure Key Vault",               "Container: Secret Mgmt",     "密钥与证书管理\nAPI Key / 连接串")
+    ContainerDb(blob,     "Azure Blob Storage",            "Container: Object Storage",  "文档与文件存储\n原始文档/附件")
+    ContainerQueue(sb_eval, "Azure Service Bus", "Container: Message Broker", "消息总线\ntopic: eval_task")
+    ContainerQueue(sb_doc,  "Azure Service Bus", "Container: Message Broker", "消息总线\ntopic: doc_build_task")
+}
+
+' ============================================================
+' 关系 (Relationships)
+' ============================================================
+
+' ---- 人员入口 ----
+Rel_D(admin,     ai_portal,   "访问门户", "HTTPS", $tags="async")
+Rel_D(ops,       ai_portal,   " ",        $tags="async")
+Rel_D(dev_agent, ai_portal,   " ",        $tags="async")
+Rel_D(dev_coder, api_gateway, "PAT 调用 OpenAPI", "JSON/HTTPS", $tags="sync")
+
+' ---- 前端 → 网关 ----
+Rel_D(ai_portal, api_gateway, "API 请求", "JSON/HTTPS", $tags="sync")
+
+' ---- 网关路由 ----
+Rel_D(api_gateway, auth_service,     "Token 校验", $tags="sync")
+Rel_D(api_gateway, mgt_service,      " ",          $tags="sync")
+Rel_D(api_gateway, agent_service,    " ",          $tags="sync")
+Rel_D(api_gateway, eval_service,     " ",          $tags="sync")
+Rel_D(api_gateway, knowledge_engine, " ",          $tags="sync")
+Rel_R(api_gateway, mcp_server,       "反向代理", "streamable-http", $tags="sync")
+Rel_R(api_gateway, ext_mcp,          "反向代理", "streamable-http", $tags="sync")
+Rel_R(api_gateway, ext_agent,        "反向代理", "A2A",            $tags="sync")
+
+' ---- auth-service ----
+Rel(auth_service, alice, "SSO 认证", "OAuth2/OIDC", $tags="async")
+Rel(auth_service, redis, "Token 存储", $tags="sync")
+Rel(auth_service, keyvault, "获取签名密钥", "HTTPS", $tags="sync")
+
+' ---- mgt-service ----
+Rel_D(mgt_service, postgres, "读写", "JDBC", $tags="sync")
+Rel_D(mgt_service, redis,    "缓存", "Redis Protocol", $tags="sync")
+Rel_R(mgt_service, blob,     "文档持久化", $tags="sync")
+Rel_D(mgt_service, sb_eval,  "发布测评任务", $tags="sync")
+Rel(mgt_service, keyvault,   "密钥库管理", "HTTPS", $tags="sync")
+
+' ---- grc-agent-service ----
+Rel(agent_service, nexus,      "LLM 推理调用", "HTTPS", $tags="async")
+Rel(agent_service, redis,      "会话缓存", $tags="sync")
+Rel(agent_service, postgres,   "记录存储", $tags="sync")
+Rel(agent_service, mcp_server, "MCP Call", "JSON/HTTP", $tags="async")
+Rel(agent_service, langfuse,   " ", $tags="async")
+
+' ---- eval-service ----
+Rel(eval_service, postgres, "维护测评结果/状态", $tags="sync")
+Rel(eval_service, langfuse, " ", $tags="async")
+Rel(sb_eval, eval_service,  "订阅测评任务", $tags="sync")
+
+' ---- knowledge-engine ----
+Rel(knowledge_engine, parser_engine, "解析文档", $tags="sync")
+Rel(knowledge_engine, nexus,      "Embedding API", "HTTPS", $tags="async")
+BiRel(knowledge_engine, postgres, "元数据存储", $tags="sync")
+BiRel(knowledge_engine, milvus,   "向量操作", "JDBC", $tags="sync")
+Rel(knowledge_engine, langfuse,   "链路采集", $tags="async")
+Rel(knowledge_engine, sb_doc,     "发布构建任务", $tags="sync")
+Rel(sb_doc, knowledge_engine,     "订阅构建任务", $tags="sync")
+
+' ---- 文档存储 ----
+Rel(parser_engine,    blob, "读取原始文档", "HTTPS", $tags="sync")
+Rel(knowledge_engine, blob, "存取文档", "HTTPS", $tags="sync")
+
+' ---- mgmt-service 查询监控 ----
+Rel(mgt_service, langfuse, "查询监控数据", "REST API", $tags="sync")
+
+' ---- mcp-server → 外部系统 ----
+Rel(mcp_m365_server, m365,       "读取 M365 资源", "Graph API", $tags="async")
+Rel(mcp_conf_server, confluence, " ", $tags="async")
+Rel(mcp_dp_server,   adf,        " ", $tags="async")
+Rel(mcp_dp_server,   databricks, " ", $tags="async")
+Rel(mcp_server,      auth_service, "获取凭据", "内部 API", $tags="sync")
+
+SHOW_LEGEND()
+@enduml

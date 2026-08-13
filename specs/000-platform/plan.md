@@ -23,14 +23,14 @@
 
 | 主题 | 选型 | 说明/ADR |
 |------|------|----------|
-| 运行时/语言 | [待确认] | 建议后端 Java/Python；前端 React/TypeScript |
+| 运行时/语言 | 后端 Java/Python,前端 React/TypeScript  | 建议后端 Java/Python；前端 React/TypeScript |
 | 服务间通信 | REST + 事件 | 同步调用 REST、异步通知经事件总线 |
 | 消息中间件 | Azure Service Bus | Azure Service Bus |
 | 认证 | Alice（SSO）+ PAT（入站） | cross-cutting/auth.md |
 | 模型网关 | Nexus | 企业统一模型调用入口 |
 | 密钥托管 | 企业 Key Vault | 密钥库以 Key Vault 为底层存储 |
 | 向量数据库 | Milvus / PGVector（P0）/ Azure AI Search（P1） | ADR-0013 |
-| 向量化模型 | [待确认]  | 知识库级锁定 |
+| 向量化模型 | P0不允许切换  | 知识库级锁定 |
 | 文档解析器 | Docling / MinerU / Azure Document Intelligence（P1） | 知识管线 |
 | 护栏执行 | [待确认]  | ADR-0008；命中即拦截 |
 | 可观测性 | langfuse | cross-cutting/observability.md |

@@ -29,25 +29,99 @@
 
 ```mermaid
 graph LR
-  %% 第 0 周奠基后按真实服务补全
-  svc_example[svc-example]:::todo
-  classDef todo fill:#f5f5f5,stroke:#bbb,stroke-dasharray:4;
+  portal[grc-ai-portal]
+  gateway[grc-api-gateway]
+  auth[grc-auth-service]
+  mgmt[grc-mgmt-service]
+  agent[grc-agent-service]
+  eval[grc-evaluation-service]
+  knowledge[grc-knowledge-engine]
+  parser[grc-parser-engine]
+  mcp[grc-mcp-server]
+
+  portal --> gateway
+  gateway --> auth
+  gateway --> mgmt
+  gateway --> agent
+  gateway --> eval
+  gateway --> knowledge
+  gateway -->|反向代理| mcp
+  agent --> knowledge
+  agent --> mgmt
+  agent --> mcp
+  eval --> mgmt
+  knowledge --> parser
+  knowledge --> auth
+  mgmt --> auth
+  mcp --> auth
 ```
 
 ---
 
 ## 服务清单
 
-<!--
-下面是一个占位样例，演示格式。第 0 周把真实服务替换进来，删除本样例。
--->
-
-### svc-example
-- repo: your-org/svc-example
+### grc-ai-portal
+- repo: mercedes-benz.china/grc-ai-portal
 - owner: @todo-owner
-- provides: contracts/openapi/example.yaml
+- provides:
+- consumes: contracts/openapi/grc-api-gateway.yaml
+- depends-on: grc-api-gateway
+
+### grc-api-gateway
+- repo: mercedes-benz.china/grc-api-gateway
+- owner: @todo-owner
+- provides: contracts/openapi/grc-api-gateway.yaml
+- consumes: contracts/openapi/grc-auth-service.yaml, contracts/openapi/grc-mgmt-service.yaml, contracts/openapi/grc-agent-service.yaml, contracts/openapi/grc-evaluation-service.yaml, contracts/openapi/grc-knowledge-engine.yaml
+- depends-on: grc-auth-service, grc-mgmt-service, grc-agent-service, grc-evaluation-service, grc-knowledge-engine
+
+### grc-auth-service
+- repo: mercedes-benz.china/grc-auth-service
+- owner: @todo-owner
+- provides: contracts/openapi/grc-auth-service.yaml
 - consumes:
 - depends-on:
+
+### grc-mgmt-service
+- repo: mercedes-benz.china/grc-mgmt-service
+- owner: @todo-owner
+- provides: contracts/openapi/grc-mgmt-service.yaml, contracts/events/asset-lifecycle.asyncapi.yaml, contracts/events/subscription.asyncapi.yaml, contracts/events/notification.asyncapi.yaml
+- consumes:
+- depends-on: grc-auth-service
+
+### grc-agent-service
+- repo: mercedes-benz.china/grc-agent-service
+- owner: @todo-owner
+- provides: contracts/openapi/grc-agent-service.yaml
+- consumes: contracts/openapi/grc-knowledge-engine.yaml, contracts/openapi/grc-mgmt-service.yaml
+- depends-on: grc-knowledge-engine, grc-mgmt-service
+
+### grc-evaluation-service
+- repo: mercedes-benz.china/grc-evaluation-service
+- owner: @todo-owner
+- provides: contracts/openapi/grc-evaluation-service.yaml
+- consumes: contracts/events/asset-lifecycle.asyncapi.yaml
+- depends-on: grc-mgmt-service
+
+### grc-knowledge-engine
+- repo: mercedes-benz.china/grc-knowledge-engine
+- owner: @todo-owner
+- provides: contracts/openapi/grc-knowledge-engine.yaml, contracts/events/knowledge-build.asyncapi.yaml
+- consumes:
+- depends-on: grc-auth-service
+
+### grc-parser-engine
+- repo: mercedes-benz.china/grc-parser-engine
+- owner: @todo-owner
+- provides: contracts/openapi/grc-parser-engine.yaml
+- consumes:
+- depends-on:
+
+### grc-mcp-server
+- repo: mercedes-benz.china/grc-mcp-server
+- owner: @todo-owner
+- provides:
+- consumes:
+- depends-on: grc-auth-service
 - 职责：`[待确认]` 示例服务，用于验证脚手架与管线。边界见 000-platform。
 
 ---
