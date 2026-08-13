@@ -17,6 +17,7 @@
 - 12 项架构待确认项（ADR-001 §待确认）：含原始 5 项 + 新增 7 项（模型凭据解析/Gateway 状态投影/knowledge→mcp 凭据链路/knowledge→mgmt 隐藏依赖/会话快照语义/agent 事件消费/eval REST 消费）。
 - 各 spec 共 21 项未决问题散布在 §4 章节，其中合规类（3 项）与外部依赖类（Key Vault/Alice/Nexus，4 项）阻塞面最大。
 - 里程碑日期（M1/M2/M3）仍为 `[待确认]`。
+- 环境与账号阻塞（4 项）：GitHub 账号未开通、Alice admin 账号待申请、Azure→SharePoint 方案进行中、Nexus Teams 与模型列表待对齐——影响开发启动。
 
 ## 近期重要变化
 - 2026-08-13：ADR-001 状态升为 Accepted；依赖关系修正（knowledge→parser、agent→mcp、gateway→mcp）同步至 service-map 与 manifest。
