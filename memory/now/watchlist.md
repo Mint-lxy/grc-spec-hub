@@ -27,7 +27,7 @@
 | 24 | 开发人员 GitHub 账号开通 | 账号 | 全服务 | `[待确认]` | open |
 | 25 | Alice 应用 admin 账号申请（阻塞 SSO 集成调研验证） | 账号+集成 | spec 000/007, auth-service | `[待确认]` | open |
 | 26 | Azure 账号→SharePoint 方案落地（进行中） | 基础设施 | spec 005 AC-10, mcp-m365-server | `[待确认]` | in-progress |
-| 27 | Nexus Teams 创建 + 模型订阅 + 支持模型列表对齐 | 外部依赖 | spec 001/004, agent-service, eval-service | `[待确认]` | open |
+| 27 | Nexus Teams 创建 + 模型订阅 + 支持模型列表对齐 | 外部依赖 | spec 001/004, agent-service, eval-service | `[待确认]` | closed |
 
 ## Spec 高优未决（来源：各 spec §4）
 
