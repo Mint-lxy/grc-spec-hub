@@ -283,6 +283,7 @@ knowledge-engine / parser-engine / eval-service
 - [x] **会话级知识库快照语义**：agent-service 会话创建时缓存 KB ID 列表，检索时传列表；knowledge-engine 无需特殊模式（2026-08-14 确认）
 - [x] **Agent-service 事件消费**：不主动感知资产生命周期；下游调用失败时按统一错误码（ADR-002）降级提示，agent-service 无需订阅事件（2026-08-14 确认）
 - [x] **Eval-service → mgmt-service 结果回写**：改为事件驱动——eval-service 发布 eval-completed 事件到 Service Bus，mgmt-service 消费并写入结果（2026-08-14 确认）
+- [ ] **多模态/OCR 模型自部署**：Nexus 不提供多模态/OCR 模型，parser-engine（Docling/MinerU）与 knowledge-engine 的图片理解需自行部署——待确认模型选型、托管方式与 API 暴露方案（2026-08-14 登记）
 
 ---
 
