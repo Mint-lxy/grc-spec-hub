@@ -14,12 +14,15 @@
 
 ## 当前风险
 - 记忆腐化是本体系最大单点风险 → 依赖每周 digest 审核纪律。
-- 12 项架构待确认项（ADR-001 §待确认）：含原始 5 项 + 新增 7 项（模型凭据解析/Gateway 状态投影/knowledge→mcp 凭据链路/knowledge→mgmt 隐藏依赖/会话快照语义/agent 事件消费/eval REST 消费）。
-- 各 spec 共 21 项未决问题散布在 §4 章节，其中合规类（3 项）与外部依赖类（Key Vault/Alice/Nexus，4 项）阻塞面最大。
+- 架构待确认项已收窄至 **1 项**（护栏检测服务实现，待 PoC），其余 11 项均已确认关闭。
+- 各 spec 共 21 项未决问题散布在 §4 章节，其中合规类（3 项）与外部依赖类（Key Vault/Alice，3 项）阻塞面最大。
 - 里程碑日期（M1/M2/M3）仍为 `[待确认]`。
-- 环境与账号阻塞（4 项）：GitHub 账号未开通、Alice admin 账号待申请、Azure→SharePoint 方案进行中、Nexus Teams 与模型列表待对齐——影响开发启动。
+- 环境与账号阻塞（3 项 open）：GitHub 账号未开通、Alice admin 账号待申请、Azure→SharePoint 方案进行中。
 
 ## 近期重要变化
+- 2026-08-14：ADR-001 架构待确认项批量收窄（11/12 已关闭）：BFF 选 mgmt、不拆分 mgmt、模型凭据经 SDK、会话数据归 mgmt chat-agent domain、gateway 拉取缓存、mcp 自行解析凭据、KB 快照缓存 ID 列表、agent 不订阅事件、eval 改事件驱动、P0 不做 Health Check、knowledge→mgmt 依赖正式声明。
+- 2026-08-14：ADR-003（AI SDK）产出——grc-ai-sdk 将凭据解析与模型调用合并，状态 Proposed。
+- 2026-08-14：Nexus Teams 创建 + 模型订阅已关闭。
 - 2026-08-13：ADR-001 状态升为 Accepted；依赖关系修正（knowledge→parser、agent→mcp、gateway→mcp）同步至 service-map 与 manifest。
 - 2026-08-13：PRD v1.0 定稿，9 个 feature spec 拆解完成。
 - 2026-08-13：ADR-001（服务拆分）、ADR-002（错误码规范）产出。

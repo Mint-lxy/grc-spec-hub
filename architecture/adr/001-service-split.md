@@ -60,8 +60,9 @@ PRD v1.0 的建议模块划分（§10.1）列出了 10 个逻辑模块（对话/
 | admin | 008-admin | PlatformResource, RoleMapping, ModelConfig, RecommendSlot |
 | notification | 009-notification | Notification, NotificationEvent |
 | file | 横切（各 spec 共用） | SysFile（元数据 + Blob 路径映射） |
+| chat-agent | 001-conversation | Session, Message, MemoryConfig |
 
-模块间通过进程内事件（Spring ApplicationEvent）通信，不做跨数据库写入。
+模块间通过进程内事件（Spring ApplicationEvent）或 service 方法通信，不共享表，不做跨数据库写入（2026-08-14 确认不拆分、domain 隔离）。
 若后续需拆分，通知模块最先独立（事件驱动，天然解耦）。
 
 ### D3 — 护栏运行时架构
@@ -89,6 +90,7 @@ PRD v1.0 的建议模块划分（§10.1）列出了 10 个逻辑模块（对话/
 | 资产级服务凭据存储 | 资产属性，mgmt-service 管理其元数据，密钥值加密存入 Key Vault |
 | 个人出站凭据存储 | mgmt-service 管理，密钥值加密存入 Key Vault |
 | 凭据缓存 | Redis（TTL 5min），Key Vault 不可达时降级使用缓存 |
+| 模型凭据解析 | **grc-ai-sdk** 将凭据解析与模型调用合并，SDK 内部调用 auth-service 凭据转换接口（独立于 gateway 出站凭据解析）（详见 [ADR-003](003-ai-sdk.md)）（2026-08-14 确认） |
 
 ### D5 — 知识检索调用链
 
@@ -117,10 +119,11 @@ Azure Service Bus，按业务域划分 topic：
 
 | Topic | 生产者 | 消费者 | 事件举例 |
 |-------|--------|--------|----------|
-| `asset-lifecycle` | grc-mgmt-service | grc-evaluation-service, grc-agent-service | 资产发布/下架/删除、出站停用 |
+| `asset-lifecycle` | grc-mgmt-service | grc-evaluation-service | 资产发布/下架/删除、出站停用 |
 | `subscription` | grc-mgmt-service | (内部消费) | 订阅通过/取消/下架清除 |
 | `knowledge-build` | grc-knowledge-engine | (自身 worker 消费) | 文档构建任务调度 |
 | `eval-task` | grc-mgmt-service | grc-evaluation-service | 测评任务触发 |
+| `eval-result` | grc-evaluation-service | grc-mgmt-service | 测评完成结果回写 |
 | `notification` | grc-mgmt-service | (内部消费或未来独立通知服务) | 十三类通知事件 |
 
 ### D8 — 测评触发与结果回写
@@ -129,13 +132,13 @@ Azure Service Bus，按业务域划分 topic：
 mgmt-service ──publish eval-task topic──→ eval-service
                                               │ 执行测评
                                               │ 完成
-eval-service ──REST callback──→ mgmt-service /internal/eval/result
-                                              │ 写结果 + 更新资产发布状态
+eval-service ──publish eval-result topic──→ mgmt-service
+                                              │ 消费事件 + 写结果 + 更新资产发布状态
 ```
 
 - 触发：mgmt-service 发布 `eval-task` 消息到 Service Bus。
 - 执行：eval-service 订阅并执行（调用 Nexus LLM 做裁判模型）。
-- 回写：eval-service 完成后 REST 回调 mgmt-service 内部接口写入结果。
+- 回写：eval-service 完成后发布 `eval-result` 事件到 Service Bus，mgmt-service 消费并写入结果（2026-08-14 改为事件驱动）。
 
 ### D9 — 通知投递
 
@@ -226,7 +229,7 @@ knowledge-engine / parser-engine / eval-service
 | 001 | Chat agent-runtime（对话/知识检索/原生工具） | agent-service | knowledge-engine, mcp-server | REST 同步 |
 | 001 | 资产 Agent 透传 | agent-service | api-gateway（护栏+凭据） | 网关代理 |
 | 001 | 流式输出与护栏 | api-gateway | 护栏检测服务 | gRPC |
-| 001 | 历史会话持久化 | agent-service | — | `[待确认]` 存储位置 |
+| 001 | 历史会话持久化 | mgmt-service（chat-agent domain） | — | BFF 直接写入 |
 | 002 | Marketplace 列表/搜索/详情 | mgmt-service | — | REST |
 | 002 | 订阅申请与审批 | mgmt-service | — | 内部事件 |
 | 002 | 创作者中心/资产控制台 | mgmt-service | — | REST |
@@ -248,7 +251,7 @@ knowledge-engine / parser-engine / eval-service
 | 008 | 平台资源注册表 | mgmt-service | — | REST |
 | 008 | 出站调用停用 | mgmt-service | api-gateway（运行时感知） | 内部事件 → Redis |
 | 009 | 十三类通知 | mgmt-service | — | 同步写表 + SSE |
-| 009 | Health Check 探测 | `[待确认]` | — | `[待确认]` P0 是否实现 |
+| 009 | Health Check 探测 | P0 不做（K8s 探针即可） | — | — |
 
 ---
 
@@ -267,17 +270,17 @@ knowledge-engine / parser-engine / eval-service
 ## 待确认
 
 - [ ] **护栏检测服务实现**：云原生（Azure AI Content Safety）还是自建 guardrail-service——需 PoC 比较延迟与准确率
-- [ ] **BFF 层**：① mgmt-service 同时承担 BFF ② 前端直走网关 ③ 独立 BFF 服务——待前端团队确认页面聚合需求
-- [ ] **会话数据持久化**：agent-service 用独立 schema / 独立 PG 实例 / 经 mgmt-service API 间接写入——待确认数据归属边界
-- [ ] **Health Check 探测**：P0 是否实现周期性探测；若实现，由 mgmt-service 定时任务还是独立 CronJob——待 P0 范围确认
-- [ ] **grc-mgmt-service 拆分时机**：第 3–4 周用真实 feature 验证，若订阅审批链或通知投递出现性能瓶颈则拆出
-- [ ] **模型凭据解析路径**：agent-service 直连 Nexus 时，按触发人解析个人优先/平台兜底的逻辑由谁执行——候选：① agent-service 查 mgmt-service 获取凭据 ② agent→gateway→Nexus 复用网关解析 ③ 凭据解析 SDK/sidecar
-- [ ] **Gateway 运行时状态投影**：资产下架（004 AC-19）、出站停用（008 AC-2）、护栏模板变更（006 AC-3）三类即时感知——候选：① mgmt 写 Redis + gateway 旁路读 ② gateway 订阅 Service Bus ③ mgmt push webhook 到 gateway
-- [ ] **Knowledge-engine → MCP-server 依赖**：四通道导入的外部通道（Confluence/SharePoint/S3）需调用 mcp-server，且需注入操作人个人出站凭据——凭据由谁解析注入待定
-- [ ] **Knowledge-engine → mgmt-service 隐藏依赖**：文件消费链路（D11）需调 mgmt /internal/file/{id}/sas 获取只读 SAS URL；平台资源实例连接信息（008 AC-7）亦需从 mgmt 获取——是否正式声明依赖待定
-- [ ] **会话级知识库快照语义**：agent-service 会话挂载的知识库不因停用/权限回收而改变检索行为（001 AC-10）——knowledge-engine 检索 API 是否需支持"忽略停用状态"的内部模式待定
-- [ ] **Agent-service 事件消费**：D7 已列 agent-service 为 `asset-lifecycle` 消费者，但 manifest 未声明 AsyncAPI 消费——需确认 agent-service 如何感知资产下架（事件 vs 同步查询）
-- [ ] **Eval-service → mgmt-service REST 消费**：D8 回写结果需调 mgmt 内部接口，manifest 缺少 OpenAPI 消费声明
+- [x] **BFF 层**：选 ① mgmt-service 同时承担 BFF（2026-08-14 确认）
+- [x] **会话数据持久化**：会话数据归 mgmt-service，新增 chat-agent domain 直接存储；mgmt 作为 BFF 包装 chat 接口时直接写入（2026-08-14 确认）
+- [x] **Health Check 探测**：P0 不做周期探测，各服务自带 K8s liveness/readiness 探针即可（2026-08-14 确认）
+- [x] **grc-mgmt-service 拆分时机**：当前不拆分；按 domain 内部隔离，domain 间不共享表，跨 domain 通过 service 方法调用（2026-08-14 确认）
+- [x] **模型凭据解析路径**：选 ③ Python SDK——SDK 内部调用 auth-service 密钥转换接口完成凭据解析（2026-08-14 确认）
+- [x] **Gateway 运行时状态投影**：gateway 拉取 mgmt 资产清单 API，Redis + 本地双层缓存，~30s TTL（2026-08-14 确认）
+- [x] **Knowledge-engine → MCP-server 依赖**：mcp-server 自行经 grc-ai-sdk 解析凭据，knowledge-engine 只传 user context（2026-08-14 确认）
+- [x] **Knowledge-engine → mgmt-service 依赖**：正式声明；knowledge-engine 通过 mgmt-service 文件接口获取/下载文件（2026-08-14 确认）
+- [x] **会话级知识库快照语义**：agent-service 会话创建时缓存 KB ID 列表，检索时传列表；knowledge-engine 无需特殊模式（2026-08-14 确认）
+- [x] **Agent-service 事件消费**：不主动感知资产生命周期；下游调用失败时按统一错误码（ADR-002）降级提示，agent-service 无需订阅事件（2026-08-14 确认）
+- [x] **Eval-service → mgmt-service 结果回写**：改为事件驱动——eval-service 发布 eval-completed 事件到 Service Bus，mgmt-service 消费并写入结果（2026-08-14 确认）
 
 ---
 

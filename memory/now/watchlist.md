@@ -8,17 +8,17 @@
 | # | 项目 | 类型 | 关联 | 状态 |
 |---|------|------|------|------|
 | 1 | 护栏检测服务实现（云原生 vs 自建） | PoC | ADR-001, spec 006 | open |
-| 2 | BFF 层三选一 | 架构决策 | ADR-001 | open |
-| 3 | 会话数据持久化归属 | 数据边界 | ADR-001, spec 001 | open |
-| 4 | Health Check 探测归属 | P0 范围 | ADR-001, spec 002/009 | open |
-| 5 | mgmt-service 拆分时机 | 性能验证 | ADR-001 | open |
-| 6 | 模型凭据解析路径（agent→Nexus） | 架构决策 | ADR-001, spec 007 AC-21 | open |
-| 7 | Gateway 运行时状态投影机制 | 架构决策 | ADR-001, spec 004/006/008 | open |
-| 8 | Knowledge→MCP 导入凭据注入方 | 依赖+凭据 | ADR-001, spec 005 AC-11 | open |
-| 9 | Knowledge→mgmt 隐藏依赖是否正式声明 | manifest 对齐 | ADR-001 D11, spec 008 | open |
-| 10 | 会话级知识库快照跨服务语义 | API 设计 | ADR-001, spec 001 AC-10 | open |
-| 11 | Agent-service 事件消费方式 | manifest 对齐 | ADR-001 D7 | open |
-| 12 | Eval→mgmt REST 消费声明 | manifest 对齐 | ADR-001 D8 | open |
+| 2 | BFF 层三选一——结论：保持 mgmt-service 同时承担 BFF 功能（用户确认 2026-08-14） | 架构决策 | ADR-001 | closed |
+| 3 | 会话数据持久化归属——结论：mgmt-service 新增 chat-agent domain 直接存储会话数据（用户确认 2026-08-14） | 数据边界 | ADR-001, spec 001 | closed |
+| 4 | Health Check 探测归属——结论：P0 不做周期探测，各服务自带 K8s liveness/readiness 探针即可（用户确认 2026-08-14） | P0 范围 | ADR-001, spec 002/009 | closed |
+| 5 | mgmt-service 拆分时机——结论：当前不拆分，按 domain 内部隔离，domain 间不共享表、通过 service 方法调用（用户确认 2026-08-14） | 性能验证 | ADR-001 | closed |
+| 6 | 模型凭据解析路径（agent→Nexus）——结论：通过 Python SDK 内部转换调用，转换依赖 auth-service 密钥转换接口（用户确认 2026-08-14） | 架构决策 | ADR-001, spec 007 AC-21 | closed |
+| 7 | Gateway 运行时状态投影机制——结论：拉取 mgmt 资产清单 API，Redis + 本地双层缓存，~30s TTL（用户确认 2026-08-14） | 架构决策 | ADR-001, spec 004/006/008 | closed |
+| 8 | Knowledge→MCP 导入凭据注入方——结论：mcp-server 自行经 grc-ai-sdk 解析凭据，knowledge 只传 user context（用户确认 2026-08-14） | 依赖+凭据 | ADR-001, spec 005 AC-11 | closed |
+| 9 | Knowledge→mgmt 隐藏依赖是否正式声明——结论：正式声明，Knowledge 需通过 mgmt-service 文件接口获取/下载文件（用户确认 2026-08-14） | manifest 对齐 | ADR-001 D11, spec 008 | closed |
+| 10 | 会话级知识库快照跨服务语义——结论：agent 会话创建时缓存 KB ID 列表，检索时传列表（用户确认 2026-08-14） | API 设计 | ADR-001, spec 001 AC-10 | closed |
+| 11 | Agent-service 事件消费方式——结论：不主动感知，下游调用失败时按统一错误码（ADR-002）降级提示（用户确认 2026-08-14） | manifest 对齐 | ADR-001 D7 | closed |
+| 12 | Eval→mgmt REST 消费声明——结论：改为事件驱动，eval 发 eval-completed 事件，mgmt 消费（用户确认 2026-08-14） | manifest 对齐 | ADR-001 D8 | closed |
 
 ## 环境与账号前置依赖
 
