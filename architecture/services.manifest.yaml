@@ -66,10 +66,10 @@ services:
     status: planned
     provides:
       - contracts/openapi/grc-mgmt-service.yaml
-      - contracts/events/asset-lifecycle.asyncapi.yaml
-      - contracts/events/subscription.asyncapi.yaml
+      - contracts/events/eval-task.asyncapi.yaml
       - contracts/events/notification.asyncapi.yaml
-    consumes: []
+    consumes:
+      - contracts/events/eval-result.asyncapi.yaml
     depends-on: [grc-auth-service]
 
   # ---- 对话/Agent 服务 ----
@@ -95,8 +95,9 @@ services:
     status: planned
     provides:
       - contracts/openapi/grc-evaluation-service.yaml
+      - contracts/events/eval-result.asyncapi.yaml
     consumes:
-      - contracts/events/asset-lifecycle.asyncapi.yaml
+      - contracts/events/eval-task.asyncapi.yaml
     depends-on: [grc-mgmt-service]
 
   # ---- 知识引擎 ----

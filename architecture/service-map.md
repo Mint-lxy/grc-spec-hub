@@ -84,8 +84,8 @@ graph LR
 ### grc-mgmt-service
 - repo: mercedes-benz.china/grc-mgmt-service
 - owner: @todo-owner
-- provides: contracts/openapi/grc-mgmt-service.yaml, contracts/events/asset-lifecycle.asyncapi.yaml, contracts/events/subscription.asyncapi.yaml, contracts/events/notification.asyncapi.yaml
-- consumes:
+- provides: contracts/openapi/grc-mgmt-service.yaml, contracts/events/eval-task.asyncapi.yaml, contracts/events/notification.asyncapi.yaml
+- consumes: contracts/events/eval-result.asyncapi.yaml
 - depends-on: grc-auth-service
 
 ### grc-agent-service
@@ -99,7 +99,7 @@ graph LR
 - repo: mercedes-benz.china/grc-evaluation-service
 - owner: @todo-owner
 - provides: contracts/openapi/grc-evaluation-service.yaml
-- consumes: contracts/events/asset-lifecycle.asyncapi.yaml
+- consumes: contracts/events/eval-task.asyncapi.yaml
 - depends-on: grc-mgmt-service
 
 ### grc-knowledge-engine

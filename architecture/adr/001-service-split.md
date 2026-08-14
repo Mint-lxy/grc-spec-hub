@@ -119,12 +119,14 @@ Azure Service Bus，按业务域划分 topic：
 
 | Topic | 生产者 | 消费者 | 事件举例 |
 |-------|--------|--------|----------|
-| `asset-lifecycle` | grc-mgmt-service | grc-evaluation-service | 资产发布/下架/删除、出站停用 |
-| `subscription` | grc-mgmt-service | (内部消费) | 订阅通过/取消/下架清除 |
+| `asset-lifecycle` | grc-mgmt-service | 预留（当前无外部消费者） | 资产发布/下架/删除、出站停用 |
+| `subscription` | 预留（当前走 Spring ApplicationEvent） | — | 订阅通过/取消/下架清除 |
 | `knowledge-build` | grc-knowledge-engine | (自身 worker 消费) | 文档构建任务调度 |
 | `eval-task` | grc-mgmt-service | grc-evaluation-service | 测评任务触发 |
 | `eval-result` | grc-evaluation-service | grc-mgmt-service | 测评完成结果回写 |
 | `notification` | grc-mgmt-service | (内部消费或未来独立通知服务) | 十三类通知事件 |
+
+> `asset-lifecycle` 当前无真实消费者（agent 已确认不订阅，eval 的触发/回写走独立 topic），保留为预留。若 spec 004 后续增加“下架时取消进行中测评”等需求，再激活消费方。`subscription` 当前为 mgmt 内部事件（Spring ApplicationEvent），未来通知模块独立时升级为 Service Bus。
 
 ### D8 — 测评触发与结果回写
 
