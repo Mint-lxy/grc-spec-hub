@@ -213,13 +213,32 @@
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
 | POST | `/chat/sessions` | 创建会话 | `{ assetId?(平台Chat为空), modelId?, title? }` | `{ id, assetId, title, createdAt }` | 001 |
-| GET | `/chat/sessions` | 会话列表 | `?page, size, keyword?` | `{ items[]{id, assetId?, assetName?, title, lastMessageAt}, total }` | 001 |
-| GET | `/chat/sessions/{id}` | 会话详情（含历史消息） | — | `{ id, assetId, title, modelId, messages[]{id, role, content, citations[]?, thinkingProcess?, createdAt}, knowledgeMounts[] }` | 001 |
-| DELETE | `/chat/sessions/{id}` | 删除会话 | — | `204 No Content` | 001 |
-| POST | `/chat/sessions/{id}/messages` | 发送消息（SSE 流式） | `{ content, deepAnalysis?: bool }` | SSE stream: `event: delta\|citation\|thinking\|tool_call\|done` `data: { ... }` | 001 |
+| GET | `/chat/sessions` | 会话列表 | `?page, size, keyword?, assetId?` | `{ items[]{id, assetId?, assetName?, title, lastMessageAt}, total }` | 001 |
+| GET | `/chat/sessions/{id}` | 会话详情（含历史消息） | — | `{ id, assetId, title, modelId, messages[]{id, role, content, citations[]?, toolCalls[]?, thinkingProcess?, createdAt}, knowledgeMounts[] }` | 001 |
+| PATCH | `/chat/sessions/{id}` | 重命名会话 | `{ title }` | 更新后的会话摘要 | 001 |
+| DELETE | `/chat/sessions/{id}` | 删除会话（软删除，消息记录保留审计留痕） | — | `204 No Content` | 001 |
+| POST | `/chat/sessions/{id}/messages` | 发送消息（SSE 流式） | `{ content, deepAnalysis?: bool }` | SSE stream: `event: delta\|citation\|tool_call\|thinking\|done` `data: { ... }` | 001 |
 | POST | `/chat/sessions/{id}/messages/{msgId}/regenerate` | 重新生成回复 | — | SSE stream（同上） | 001 |
-| PUT | `/chat/sessions/{id}/knowledge-mounts` | 挂载/卸载知识库 | `{ knowledgeBaseIds[] }` | `{ mounts[]{knowledgeBaseId, name, snapshotAt} }` | 001 |
+| POST | `/chat/sessions/{id}/cancel` | 中止正在进行的流式生成 | — | `{ id, cancelled: bool }` | 001 |
+| PUT | `/chat/sessions/{id}/knowledge-mounts` | 挂载/卸载知识库（挂载前校验用户对目标知识库的访问权限） | `{ knowledgeBaseIds[] }` | `{ mounts[]{knowledgeBaseId, name, snapshotAt} }` | 001 |
 | GET | `/chat/sessions/{id}/knowledge-mounts` | 已挂载知识库列表 | — | `{ mounts[]{knowledgeBaseId, name, directoryPath} }` | 001 |
+
+**补充说明（来自 grc-agent-service 技术方案验证，供本节评审参考）**：
+
+- `PATCH /chat/sessions/{id}`、`POST /chat/sessions/{id}/cancel` 为本次新增：原清单只有创建/列表/详情/删除，
+  缺重命名与中止生成两个端点——中止生成是 SSE 流式场景下的硬需求（客户端断开连接不代表服务端已停止生成，
+  需要显式信号），已用真实 LLM 网关验证过中止时序（并发触发 cancel 与流式读取的竞态需要客户端边读流边中止，
+  单纯断连不保证及时停止）。
+- `messages[].toolCalls[]`：会话消息触发平台原生工具（`grc-mcp-server`：Confluence / SharePoint-OneDrive /
+  数据平台 / Web）时的调用记录，`{ toolName, arguments, resultSummary }`；流式场景对应 SSE `tool_call` 事件，
+  工具执行完成后一次性推送（不分片）。
+- `PUT /chat/sessions/{id}/knowledge-mounts`：建议内部实现挂载前调用 `grc-mgt-service`
+  `POST /mgt/internal/check`（`resource=knowledge_base`）逐个校验用户权限，无权限的 `knowledgeBaseId`
+  建议静默剔除并返回实际生效的 `mounts[]`（而非整体报错），避免因为单个知识库权限问题中断整个挂载操作；
+  用户身份（`userId`）的真实性仍依赖网关鉴权，本服务只做"给定 userId 有没有权限"的判定，不做身份鉴权本身。
+- `deepAnalysis` 字段的具体行为（更长的工具调用轮数上限？还是切换到支持推理链路输出的模型？）待产品/架构明确。
+- 中止生成端点未列出请求体是因为语义上不需要额外参数，仅路径 `{id}` 标识要中止的会话；如果同一会话允许并发多轮
+  生成，可能需要额外的 `messageId` 参数区分中止哪一轮，待评审确认是否存在这种并发场景。
 
 ---
 
@@ -291,3 +310,7 @@ MCP Server 端点遵循 MCP 协议（JSON-RPC over stdio/SSE），不是标准 R
 - [ ] 开放 API（PAT 认证）的路径前缀（`/open/...` vs 与内部 API 同路径）
 - [ ] 文件上传的直传 SAS 方案是否需要网关参与
 - [ ] 通知推送方式（仅轮询 / SSE / WebSocket）
+- [ ] grc-agent-service 中止生成（`POST /chat/sessions/{id}/cancel`）是否需要 `messageId` 区分并发多轮生成
+- [ ] grc-agent-service 知识库挂载权限校验方式：调用 `grc-mgt-service` 的具体接口/参数形态待与该服务对齐
+      （landscape 里 `/mgt/internal/check` 当前入参是 `{ userId?, resource, action, ... }`，`resource=knowledge_base`
+      时具体怎么传知识库 ID 待统一）
