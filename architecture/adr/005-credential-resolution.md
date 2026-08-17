@@ -43,8 +43,8 @@ auth-service 不拥有上述任何数据，若放 auth-service 则需反调 mgmt
 ### D2 — 两个独立接口，不做合并
 
 ```
-POST /credentials/resolve-asset    ← gateway 调用
-POST /credentials/resolve-model    ← AI SDK 调用
+POST /mgt/vault/inbound/resolve-asset    ← gateway 调用
+POST /mgt/vault/inbound/resolve-model    ← AI SDK 调用
 ```
 
 不合并为单一接口的理由：
@@ -87,7 +87,7 @@ POST /credentials/resolve-model    ← AI SDK 调用
 | 方案 | 优点 | 缺点 | 为何不选 |
 |------|------|------|----------|
 | 解析放 auth-service | 语义上"凭据"与 auth 相关 | 不拥有数据，需反调 mgmt，变成 pass-through proxy | 增加一跳延迟且无实际逻辑 |
-| 单一统一接口 `POST /credentials/resolve` + targetType | 端点数少 | 入参/出参/校验均需条件分支，接口契约不精确，测试矩阵翻倍 | 表面统一，实际两套行为 |
+| 单一统一接口 `POST /mgt/vault/inbound/resolve` + targetType | 端点数少 | 入参/出参/校验均需条件分支，接口契约不精确，测试矩阵翻倍 | 表面统一，实际两套行为 |
 | gateway 直接访问 Key Vault 自行解析 | 少一次网络调用 | gateway 需理解认证模式/订阅/admin 停用等业务逻辑，侵入网关 | 违反关注点分离 |
 
 ## 影响

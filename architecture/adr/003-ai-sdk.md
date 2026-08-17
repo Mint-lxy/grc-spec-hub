@@ -67,7 +67,7 @@ ADR-001 D4 只覆盖 gateway 侧出站凭据解析，内部服务直连场景不
 | 场景 | 解析点 | 机制 |
 |------|--------|------|
 | 用户出站调用资产 API | gateway（D4） | gateway 从 Key Vault 取凭据注入出站请求 |
-| 内部服务调用平台托管 AI API | grc-ai-sdk（本 ADR） | SDK 经 mgmt-service `POST /credentials/resolve-model` 解析凭据后直调目标 API（见 [ADR-005](005-credential-resolution.md)） |
+| 内部服务调用平台托管 AI API | grc-ai-sdk（本 ADR） | SDK 经 mgmt-service `POST /mgt/vault/inbound/resolve-model` 解析凭据后直调目标 API（见 [ADR-005](005-credential-resolution.md)） |
 
 ### SDK 的边界红线
 
@@ -105,7 +105,7 @@ SDK 只负责：**用正确的凭据、以正确的格式、调用正确的端�
 - **受影响服务**：mgmt-service（credential 模块新增 resolve-model 接口）、agent-service / evaluation-service / knowledge-engine / parser-engine（接入 SDK）
 - **mgmt-service 职责明确**：凭据 CRUD 与解析均归 credential 模块，无需跨服务取数据（见 [ADR-005](005-credential-resolution.md)）
 - **新增跨服务依赖**：agent-service / evaluation-service / knowledge-engine / parser-engine → mgmt-service（均 via SDK）
-- **契约影响**：mgmt-service 需新增 `POST /credentials/resolve-model` OpenAPI 接口定义
+- **契约影响**：mgmt-service 需新增 `POST /mgt/vault/inbound/resolve-model` OpenAPI 接口定义
 - **service-map / manifest 更新**：待本 ADR 状态确认后统一对齐
 
 ## 后果
