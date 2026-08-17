@@ -34,124 +34,178 @@
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| POST | `/auth/login` | Alice SSO 登录回调，颁发平台 Token | `{ ssoCode, redirectUri }` | `{ accessToken, refreshToken, expiresIn, user }` | 007 |
-| POST | `/auth/logout` | 登出，吊销 Token | Header: `Authorization` | `204 No Content` | 007 |
-| POST | `/auth/refresh` | 刷新 Token | `{ refreshToken }` | `{ accessToken, refreshToken, expiresIn }` | 007 |
 | GET | `/auth/userinfo` | 获取当前用户信息 | Header: `Authorization` | `{ userId, name, email, avatar, roles[] }` | 007 |
-| POST | `/auth/validate` | `[内部]` 校验 Token / PAT | `{ token, type: "bearer"\|"pat" }` | `{ valid, userId, permissions[], scopes[]? }` | 007 |
+| POST | `/auth/verify` | 校验 Access Token 并返回用户上下文 | `{ token }` | `{ valid, userId, roles[], tenantId, exp }` | 001 |
+| POST | `/auth/logout` | 登出，吊销 Token | Header: `Authorization` | `{ code, message, data: null }` | 001 |
+| POST | `/auth/refresh` | 刷新 Token | `{ refreshToken, clientId }` | `{ accessToken, refreshToken, expiresIn }` | 001 |
+| GET | `/auth/oidc/authorize` | 发起 OIDC 授权并生成一次性 state | `?provider, redirectUri?` | `{ url, state, expireIn }` | 003 |
+| GET | `/auth/oidc/callback` | OIDC 回调登录，完成身份映射并颁发平台 Token | `?provider, code, state` | `{ accessToken, refreshToken?, userInfo, redirectUrl? }` | 003 |
+| GET | `/auth/oauth/authorize` | `[兼容]` 获取 OAuth 授权地址 | — | `{ url, state }` | 001 |
+| POST | `/auth/alice/users/sync` | `[内部]` 手动触发 Alice 用户同步 | — | `{ correlationId, triggerType, status, tasks[] }` | 002 |
+| GET | `/auth/alice/users/sync-jobs/{correlationId}` | `[内部]` 查询 Alice 用户同步任务 | — | `{ correlationId, triggerType, status, tasks[] }` | 002 |
 
 ---
 
 ## 3. grc-mgmt-service
 
-### 3.1 资产目录 & Marketplace（002-marketplace）
+> 当前服务接口使用 `/mgt` 作为服务内路由前缀；经网关暴露时仍由网关统一加 `/api/v1`。
+> 服务统一返回 `ApiResponse` 包络，具体业务字段以对应 feature contract 为准。
+
+### 3.1 Marketplace 资产（002-marketplace / 005-marketplace-redesign）
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| GET | `/assets` | 资产列表 | `?page, size, keyword?, type?, channel?(recommended\|hot\|all)` | `{ items[]{id, name, type, icon, description, subscriberCount, status}, total }` | 002 |
-| GET | `/assets/{id}` | 资产详情 | — | `{ id, name, type, description, icon, owner, version, capabilities[], subscriptionConfig, guardrailTemplate, status, createdAt }` | 002 |
-| GET | `/assets/{id}/versions` | 版本历史 | `?page, size` | `{ items[]{versionId, version, releaseNotes, isBreaking, publishedAt}, total }` | 004 |
-| GET | `/assets/{id}/versions/{versionId}` | 指定版本详情 | — | `{ versionId, version, releaseNotes, isBreaking, migrationGuide?, diff?, publishedAt }` | 004 |
+| POST | `/mgt/marketplace/assets` | 创建资产 | `{ type, name, description?, ... }` | `{ assetId, ... }` | 002/003 |
+| GET | `/mgt/marketplace/assets` | 查询资产列表 | `?page, pageSize, keyword?, type?, status?` | `{ records[], total }` | 002 |
+| GET | `/mgt/marketplace/assets/{assetId}` | 查询资产详情 | — | `{ assetId, name, type, owner, status, ... }` | 002 |
+| PUT | `/mgt/marketplace/assets/{assetId}` | 更新资产 | `{ name?, description?, ... }` | 更新后的资产 | 003 |
+| POST | `/mgt/marketplace/assets/{assetId}/precheck` | 执行发布前预检 | — | `{ passed, checks[], ... }` | 005 |
+| POST | `/mgt/marketplace/assets/{assetId}/publish` | 发布资产 | — | `{ assetId, status, ... }` | 004/005 |
+| POST | `/mgt/marketplace/assets/{assetId}/unpublish` | 下架资产 | — | `{ data: null }` | 004 |
+| POST | `/mgt/marketplace/assets/{assetId}/archive` | 归档资产 | — | `{ data: null }` | 004 |
+| POST | `/mgt/marketplace/assets/{assetId}/transfer-owner` | 转移资产 Owner | `{ newOwnerId }` | `{ assetId, ownerId, ... }` | 005 |
+| POST | `/mgt/marketplace/assets/yaml-preview` | 预览资产 YAML | `{ ...assetConfig }` | `{ yaml, ... }` | 003 |
+| DELETE | `/mgt/marketplace/assets/draft/{assetId}` | 删除编辑态缓存 | — | `{ data: null }` | 003 |
 
-### 3.2 资产创建 & 配置（003-asset-creation）
-
-| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
-|------|------|------|---------|---------|------|
-| POST | `/assets` | 创建资产（草稿） | `{ type: "Agent"\|"MCP", name, description, icon? }` | `{ id, status: "draft", createdAt }` | 003 |
-| PUT | `/assets/{id}` | 更新基本信息 | `{ name?, description?, icon?, tags[]? }` | 更新后的资产对象 | 003 |
-| PUT | `/assets/{id}/connection` | 配置连接信息 | Agent: `{ endpoint, healthCheckUrl }` / MCP: `{ transportType, url }` | `{ connectionStatus, lastCheckedAt }` | 003 |
-| PUT | `/assets/{id}/auth` | 配置认证方式 | `{ authMode: "service"\|"per-user"\|"none", credentialType? }` | 确认后的认证配置 | 003 |
-| PUT | `/assets/{id}/capabilities` | 配置能力声明 | Agent: `{ card, toolList[] }` / MCP: `{ tools[], resources[]? }` | 确认后的能力列表 | 003 |
-| PUT | `/assets/{id}/subscription-config` | 配置订阅策略 | `{ approvalChain[]{level, approvers[]}, termsOfUse, termsVersion }` | 确认后的订阅配置 | 003 |
-| PUT | `/assets/{id}/guardrail` | 绑定护栏模板 | `{ guardrailTemplateId }` | `{ guardrailTemplateId, templateName, status }` | 003 |
-| POST | `/assets/{id}/quality-check` | 触发质量门禁 | — | `{ passed, checks[]{name, result, message?} }` | 003 |
-
-### 3.3 发布管线（004-publish）
+### 3.2 Marketplace 订阅与审批（002-marketplace / 005-marketplace-redesign）
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| POST | `/assets/{id}/publish` | 提交发布 | `{ version, releaseNotes, isBreaking, migrationGuide? }` | `{ publishFlowId, status: "pending", evaluationId? }` | 004 |
-| POST | `/assets/{id}/publish/light` | 轻量发布（仅更新条款） | `{ termsOfUse, termsVersion }` | `{ version, publishedAt }` | 004 |
-| POST | `/assets/{id}/delist` | 下架 | `{ reason }` | `{ status: "delisted", delistedAt }` | 004 |
-| POST | `/assets/{id}/relist` | 重新上架 | — | `{ publishFlowId, status: "pending" }` | 004 |
-| DELETE | `/assets/{id}` | 软删除 | — | `204 No Content` | 004 |
+| GET | `/mgt/marketplace/assets/{assetId}/subscribe/page-init` | 初始化订阅提交页 | — | `{ asset, terms, approvalConfig, ... }` | 002 |
+| POST | `/mgt/marketplace/assets/{assetId}/subscribe` | 提交订阅申请 | `{ ...subscriptionRequest }` | `{ subscriptionId, status, ... }` | 002/005 |
+| GET | `/mgt/marketplace/subscriber-center/summary` | 查询订阅者中心统计 | — | `{ ...summary }` | 002 |
+| GET | `/mgt/marketplace/subscriptions` | 查询我的订阅 | `?page, pageSize, status?` | `{ records[], total }` | 002 |
+| GET | `/mgt/marketplace/subscriptions/{subscriptionId}` | 查询订阅详情 | — | `{ subscriptionId, status, approvalProgress[], ... }` | 002 |
+| POST | `/mgt/marketplace/subscriptions/{subscriptionId}/resubmit` | 驳回后重新提交订阅 | `{ ...subscriptionRequest }` | `{ subscriptionId, status, ... }` | 005 |
+| POST | `/mgt/marketplace/subscriptions/{subscriptionId}/cancel` | 取消订阅申请 | — | `{ data: null }` | 002 |
+| GET | `/mgt/marketplace/approval-flows/{flowId}` | 查询审批流详情 | — | `{ flowId, steps[], status, ... }` | 005 |
+| GET | `/mgt/marketplace/approval-flows/my-pending` | 查询我的待审批事项 | `?page, pageSize` | `{ records[], total }` | 005 |
+| POST | `/mgt/marketplace/approval-flows/{flowId}/steps/{stepId}/approve` | 审批通过当前步骤 | `{ comment? }` | `{ flowId, stepId, status, ... }` | 005 |
+| POST | `/mgt/marketplace/approval-flows/{flowId}/steps/{stepId}/reject` | 驳回当前审批步骤 | `{ reason }` | `{ flowId, stepId, status, ... }` | 005 |
+| GET | `/mgt/marketplace/creator-center/summary` | 查询创作者中心统计 | — | `{ ...summary }` | 005 |
+| GET | `/mgt/marketplace/creator-center/assets` | 查询创作者资产 | `?page, pageSize, status?` | `{ records[], total }` | 005 |
+| GET | `/mgt/marketplace/creator-center/pending-subscriptions` | 查询待处理订阅 | `?page, pageSize` | `{ records[], total }` | 005 |
+| GET | `/mgt/marketplace/creator-center/pending-publish-assets` | 查询待发布资产 | `?page, pageSize` | `{ records[], total }` | 005 |
+| GET | `/mgt/marketplace/creator-center/assets/{assetId}/console` | 查询创作者资产控制台 | — | `{ asset, subscriptions, publishState, ... }` | 005 |
+| PUT | `/mgt/marketplace/creator-center/assets/{assetId}/subscription-settings` | 保存订阅设置 | `{ ...subscriptionSettings }` | 更新后的订阅设置 | 005 |
+| POST | `/mgt/marketplace/creator-center/subscriptions/{subscriptionId}/decision` | 处理订阅审批决定 | `{ decision, reason? }` | `{ subscriptionId, status, ... }` | 005 |
+| POST | `/mgt/marketplace/creator-center/subscriptions/{subscriptionId}/revoke` | 撤回订阅处理结果 | `{ reason? }` | `{ subscriptionId, status, ... }` | 005 |
+| POST | `/mgt/marketplace/assets/{assetId}/publish-evaluations` | 创建发布测评 | `{ ...evaluationRequest }` | `{ evaluationId, status, ... }` | 005 |
+| GET | `/mgt/marketplace/assets/{assetId}/publish-evaluations/{evaluationId}` | 查询发布测评 | — | `{ evaluationId, status, checks[], ... }` | 005 |
+| GET | `/mgt/marketplace/tags` | 查询全部资产标签 | — | `{ items[] }` | 002 |
 
-### 3.4 订阅引擎（002-marketplace）
+### 3.3 知识库门面（005-knowledge）
 
-| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
-|------|------|------|---------|---------|------|
-| POST | `/subscriptions` | 申请订阅 | `{ assetId, agreedTermsVersion }` | `{ id, status: "pending", approvalChain[] }` | 002 |
-| GET | `/subscriptions` | 我的订阅列表 | `?page, size, status?` | `{ items[]{id, assetId, assetName, status, subscribedAt}, total }` | 002 |
-| GET | `/subscriptions/{id}` | 订阅详情 | — | `{ id, assetId, status, approvalProgress[]{level, approver, result, at}, subscribedAt }` | 002 |
-| POST | `/subscriptions/{id}/cancel` | 取消申请 | — | `{ status: "cancelled" }` | 002 |
-| POST | `/subscriptions/{id}/unsubscribe` | 退订 | — | `{ status: "unsubscribed" }` | 002 |
-| GET | `/assets/{id}/subscriptions` | 资产订阅列表（Owner） | `?page, size, status?` | `{ items[]{subscriptionId, userId, userName, status, subscribedAt}, total }` | 002 |
-| POST | `/subscriptions/{id}/approve` | 审批通过 | `{ comment? }` | `{ status, currentLevel }` | 002 |
-| POST | `/subscriptions/{id}/reject` | 审批拒绝 | `{ reason }` | `{ status: "rejected" }` | 002 |
-
-### 3.5 凭据管理（007-credential）
-
-| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
-|------|------|------|---------|---------|------|
-| POST | `/pats` | 签发 PAT | `{ name, scopes[], expiresAt? }` | `{ id, name, token(仅返回一次), scopes[], expiresAt }` | 007 |
-| GET | `/pats` | 我的 PAT 列表 | — | `{ items[]{id, name, scopes[], lastUsedAt, expiresAt, createdAt} }` | 007 |
-| DELETE | `/pats/{id}` | 吊销 PAT | — | `204 No Content` | 007 |
-| PUT | `/assets/{id}/service-credentials` | 配置资产级服务凭据 | `{ credentialType, credentials{} }` 密钥值加密存入 Key Vault | `{ credentialType, maskedValue, updatedAt }` | 007 |
-| GET | `/credentials/personal` | 个人出站凭据列表 | — | `{ items[]{type, maskedValue, updatedAt} }` | 007 |
-| PUT | `/credentials/personal/{type}` | 设置个人出站凭据 | `{ credentials{} }` type: nexus\|外部服务标识 | `{ type, maskedValue, updatedAt }` | 007 |
-| DELETE | `/credentials/personal/{type}` | 删除个人出站凭据 | — | `204 No Content` | 007 |
-| GET | `/credentials/resolve/{assetId}` | `[内部]` 凭据解析 | Header: `X-User-Id` (网关注入) | `{ authMode, resolvedCredentials{}, fallback: bool }` | 007 |
-
-### 3.6 护栏模板管理（006-guardrail）
+知识库接口由 mgmt-service 对 knowledge-engine 提供前端门面；Stage 运行与任务查询中标 `[内部]` 的接口仅供平台服务调用。
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| GET | `/guardrail-templates` | 模板列表 | `?page, size, enabled?` | `{ items[]{id, name, sensitivity, side, enabled, boundAssetCount}, total }` | 006 |
-| GET | `/guardrail-templates/{id}` | 模板详情 | — | `{ id, name, description, sensitivity, side: "input"\|"output"\|"both", rules[], enabled, boundAssets[] }` | 006 |
-| POST | `/guardrail-templates` | 创建模板（Admin） | `{ name, description?, sensitivity: 0-100, side, rules[] }` | `{ id, ...创建后的模板 }` | 006 |
-| PUT | `/guardrail-templates/{id}` | 更新模板（Admin） | `{ name?, description?, sensitivity?, side?, rules[]? }` | 更新后的模板对象 | 006 |
-| POST | `/guardrail-templates/{id}/enable` | 启用模板 | — | `{ id, enabled: true }` | 006 |
-| POST | `/guardrail-templates/{id}/disable` | 禁用模板 | — | `{ id, enabled: false }` | 006 |
+| GET | `/mgt/knowledge/directories/tree` | 查询知识目录树 | `?includeKbCount?, keyword?` | `{ nodes[] }` | 005 |
+| POST | `/mgt/knowledge/directories` | 创建知识目录 | `{ name, parentId?, ... }` | `{ directoryId, ... }` | 005 |
+| PATCH | `/mgt/knowledge/directories/{directoryId}/rename` | 重命名目录 | `{ name }` | `{ directoryId, name, ... }` | 005 |
+| PATCH | `/mgt/knowledge/directories/{directoryId}` | 更新目录 | `{ ...directoryConfig }` | 更新后的目录 | 005 |
+| DELETE | `/mgt/knowledge/directories/{directoryId}` | 删除目录 | — | `{ directoryId, deleted: true }` | 005 |
+| POST | `/mgt/knowledge/knowledge-bases` | 创建知识库 | `{ name, directoryId, pipelineConfig{parser, chunking, enhance, embedding, vectorStore} }` | `{ kbId, status, ... }` | 005 |
+| GET | `/mgt/knowledge/knowledge-bases` | 查询知识库列表 | `?directoryId?, keyword?, status?, retrievalReady?, page?, pageSize?` | `{ records[], total }` | 005 |
+| GET | `/mgt/knowledge/knowledge-bases/{kbId}` | 查询知识库详情 | — | `{ kbId, pipelineConfig, status, ... }` | 005 |
+| PATCH | `/mgt/knowledge/knowledge-bases/{kbId}/config` | 更新知识库默认配置 | `{ pipelineConfig }` | `{ pipelineConfig, effectScope: "future-builds-only" }` | 005 |
+| POST | `/mgt/knowledge/knowledge-bases/{kbId}/documents` | 创建知识库文档 | `{ fileId, ...documentConfig }` | `{ docId, status, ... }` | 005 |
+| GET | `/mgt/knowledge/knowledge-bases/{kbId}/documents` | 查询文档列表 | `?keyword?, sourceType?, status?, retrievalReady?, page?, pageSize?` | `{ records[], total }` | 005 |
+| GET | `/mgt/knowledge/knowledge-bases/{kbId}/stats` | 查询知识库统计 | — | `{ ...statistics }` | 005 |
+| GET | `/mgt/knowledge/knowledge-bases/{kbId}/documents/{docId}` | 查询文档详情 | — | `{ docId, status, ... }` | 005 |
+| PATCH | `/mgt/knowledge/knowledge-bases/{kbId}/documents/{docId}/stage-config` | 更新文档 Stage 配置 | `{ stageConfig }` | `{ stageConfig, ... }` | 005 |
+| GET | `/mgt/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks` | 查询文档切片 | `?jobId?, page?, pageSize?, snippetContext?` | `{ records[], total }` | 005 |
+| GET | `/mgt/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks/{chunkId}` | 查询切片详情 | `?jobId?, snippetContext?` | `{ chunkId, content, sourceSnippet, ... }` | 005 |
+| GET | `/mgt/knowledge/knowledge-bases/{kbId}/documents/{docId}/parse` | 查询文档解析产物 | `?jobId?` | `{ ...parseArtifact }` | 005 |
+| GET | `/mgt/knowledge/knowledge-bases/{kbId}/documents/{docId}/enhance/{enhanceType}` | 查询文档增强产物 | `?jobId?, page?, pageSize?` | `{ records[], total }` | 005 |
+| POST | `/mgt/knowledge/knowledge-bases/{kbId}/build-jobs` | 创建批量构建任务 | `{ documentIds?, runMode? }` | `{ jobId, status, ... }` | 005 |
+| GET | `/mgt/knowledge/jobs/{jobId}` | `[内部]` 查询构建任务 | — | `{ jobId, status, stages[], ... }` | 005 |
+| POST | `/mgt/knowledge/documents/{docId}/stages/{stageType}/run` | `[内部]` 运行文档 Stage | `{ ...stageConfig }` | `{ jobId, status, ... }` | 005 |
+| POST | `/mgt/knowledge/retrievals` | 执行知识检索 | `{ knowledgeBaseIds[], query, retrievalConfig?, topK? }` | `{ results[] }` | 005 |
+| POST | `/mgt/knowledge/knowledge-bases/{kbId}/publish` | 发布知识库 | — | `{ kbId, status: "available", ... }` | 005 |
+| POST | `/mgt/knowledge/knowledge-bases/{kbId}/offline` | 下线知识库 | — | `{ kbId, status, ... }` | 005 |
 
-### 3.7 通知（009-notification）
-
-| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
-|------|------|------|---------|---------|------|
-| GET | `/notifications` | 通知列表 | `?page, size, read?` | `{ items[]{id, type, title, body, read, relatedAssetId?, createdAt}, total }` | 009 |
-| GET | `/notifications/unread-count` | 未读数 | — | `{ count }` | 009 |
-| POST | `/notifications/read` | 批量标记已读 | `{ ids[] }` | `{ updatedCount }` | 009 |
-| POST | `/notifications` | `[内部]` 发送通知 | `{ type, recipientIds[], title, body, relatedAssetId?, metadata? }` | `{ notificationIds[] }` | 009 |
-
-### 3.8 管理后台（008-admin）
-
-| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
-|------|------|------|---------|---------|------|
-| GET | `/admin/assets` | 治理中心：资产概览 | `?page, size, status?, keyword?` | `{ items[]{id, name, type, owner, status, outboundEnabled, subscriberCount}, total }` | 008 |
-| POST | `/admin/assets/{id}/disable-outbound` | 禁用出站调用 | `{ reason }` | `{ outboundEnabled: false, disabledAt }` | 008 |
-| POST | `/admin/assets/{id}/enable-outbound` | 恢复出站调用 | — | `{ outboundEnabled: true }` | 008 |
-| PUT | `/admin/assets/{id}/reassign-owner` | 孤儿资产重新指派 | `{ newOwnerId }` | `{ ownerId, ownerName }` | 008 |
-| GET | `/admin/native-tools` | 原生工具配置列表 | — | `{ items[]{id, name, type, endpoint, authConfigured} }` | 008 |
-| PUT | `/admin/native-tools/{id}` | 更新原生工具配置 | `{ endpoint?, authConfig?{} }` | 更新后的工具对象 | 008 |
-| GET | `/admin/platform-resources` | 平台资源列表 | `?type?` | `{ items[]{id, type: "milvus"\|"pgvector"\|..., name, endpoint, scope, available} }` | 008 |
-| POST | `/admin/platform-resources` | 注册平台资源 | `{ type, name, endpoint, credentials{}, scope? }` | `{ id, probeResult }` | 008 |
-| PUT | `/admin/platform-resources/{id}` | 更新平台资源 | `{ name?, endpoint?, credentials?{}, scope? }` | 更新后的资源对象 | 008 |
-| DELETE | `/admin/platform-resources/{id}` | 注销平台资源 | — | `204 No Content` | 008 |
-| GET | `/admin/evaluation-config` | 测评开关状态 | — | `{ blockingEnabled }` | 008 |
-| PUT | `/admin/evaluation-config` | 切换测评开关 | `{ blockingEnabled }` | `{ blockingEnabled }` | 008 |
-| GET | `/admin/recommended-slots` | 推荐位列表 | — | `{ slots[]{position, assetId?, assetName?} }` | 008 |
-| PUT | `/admin/recommended-slots` | 更新推荐位 | `{ slots[]{position, assetId} }` | 更新后的推荐位列表 | 008 |
-| GET | `/admin/users` | 用户列表 | `?page, size, keyword?` | `{ items[]{userId, name, email, roles[], lastLoginAt}, total }` | 008 |
-| GET | `/admin/roles` | 角色-功能映射 | — | `{ roles[]{name, features[]} }` | 008 |
-| GET | `/admin/model-settings` | 模型设置 | — | `{ settings[]{type: "chat"\|"multimodal"\|"reranker"\|"embedding", modelId, provider, hasDefaultCredential} }` | 008 |
-| PUT | `/admin/model-settings/{type}` | 更新模型设置 | `{ modelId, provider, defaultCredential?{} }` | 更新后的模型设置 | 008 |
-
-### 3.9 文件服务（横切）
+### 3.4 RBAC 与权限（001-create-mgt-service-modules / 003-rbac-permission-mgmt）
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| POST | `/files/upload-url` | 获取直传 SAS URL | `{ fileName, contentType, size }` | `{ uploadUrl, fileId, expiresAt }` | 000 |
-| POST | `/files` | 注册文件元数据 | `{ fileId, blobPath, size, contentType, md5? }` | `{ id, fileName, size, createdAt }` | 000 |
-| GET | `/files/{id}/download-url` | 获取下载 SAS URL | — | `{ downloadUrl, expiresAt }` | 000 |
+|------|------|------|---------|---------|------|
+| POST | `/mgt/users` | 创建用户 | `{ ...user }` | `{ userId, ... }` | 001/003 |
+| GET | `/mgt/users/{userId}` | 查询用户详情 | — | `{ userId, ... }` | 001/003 |
+| PUT | `/mgt/users/{userId}` | 更新用户 | `{ ...user }` | 更新后的用户 | 003 |
+| DELETE | `/mgt/users/{userId}` | 删除用户 | — | `{ data: null }` | 003 |
+| GET | `/mgt/users` | 查询用户列表 | `?keyword?, status?, pageNum?, pageSize?` | `{ records[], total }` | 001/003 |
+| POST | `/mgt/users/{userId}/enable` | 启用用户 | — | `{ data: null }` | 003 |
+| POST | `/mgt/users/{userId}/disable` | 禁用用户 | — | `{ data: null }` | 003 |
+| POST | `/mgt/users/{userId}/lock` | 锁定用户 | — | `{ data: null }` | 003 |
+| PUT | `/mgt/users/{userId}/roles` | 替换用户角色 | `{ roleIds[] }` | `{ userId, roleIds[] }` | 003 |
+| POST | `/mgt/users/{userId}/roles/{roleId}` | 为用户授予角色 | — | `{ data: null }` | 003 |
+| DELETE | `/mgt/users/{userId}/roles/{roleId}` | 移除用户角色 | — | `{ data: null }` | 003 |
+| POST | `/mgt/rbac/roles` | 创建角色 | `{ ...role }` | `{ roleId, ... }` | 003 |
+| GET | `/mgt/rbac/roles/{roleId}` | 查询角色详情 | — | `{ roleId, ... }` | 003 |
+| PUT | `/mgt/rbac/roles/{roleId}` | 更新角色 | `{ ...role }` | 更新后的角色 | 003 |
+| DELETE | `/mgt/rbac/roles/{roleId}` | 删除角色 | — | `{ data: null }` | 003 |
+| GET | `/mgt/rbac/roles` | 查询角色列表 | `?keyword?, status?, pageNum?, pageSize?` | `{ records[], total }` | 003 |
+| POST | `/mgt/rbac/roles/{roleId}/enable` | 启用角色 | — | `{ data: null }` | 003 |
+| POST | `/mgt/rbac/roles/{roleId}/disable` | 禁用角色 | — | `{ data: null }` | 003 |
+| PUT | `/mgt/roles/{roleId}/permissions` | 替换角色权限 | `{ permissionIds[] }` | `{ roleId, permissionIds[] }` | 003 |
+| POST | `/mgt/roles/{roleId}/permissions/{permissionId}` | 为角色授予权限 | — | `{ data: null }` | 003 |
+| DELETE | `/mgt/roles/{roleId}/permissions/{permissionId}` | 移除角色权限 | — | `{ data: null }` | 003 |
+| POST | `/mgt/permissions` | 创建权限 | `{ ...permission }` | `{ permissionId, ... }` | 003 |
+| GET | `/mgt/permissions/{permissionId}` | 查询权限详情 | — | `{ permissionId, ... }` | 003 |
+| PUT | `/mgt/permissions/{permissionId}` | 更新权限 | `{ ...permission }` | 更新后的权限 | 003 |
+| DELETE | `/mgt/permissions/{permissionId}` | 删除权限 | — | `{ data: null }` | 003 |
+| GET | `/mgt/permissions` | 查询权限列表 | `?resourceType?, keyword?, status?, pageNum?, pageSize?` | `{ records[], total }` | 003 |
+| POST | `/mgt/permissions/{permissionId}/enable` | 启用权限 | — | `{ data: null }` | 003 |
+| POST | `/mgt/permissions/{permissionId}/disable` | 禁用权限 | — | `{ data: null }` | 003 |
+| GET | `/mgt/permissions/effective/self` | 查询当前用户有效权限 | — | `{ permissions[], roles[] }` | 003 |
+| GET | `/mgt/permissions/effective` | 查询指定用户有效权限 | `?userId` | `{ permissions[], roles[] }` | 003 |
+| POST | `/mgt/check` | 检查当前用户权限 | `{ resource, action, ... }` | `{ allowed, reason? }` | 003 |
+| POST | `/mgt/internal/check` | `[内部]` 检查服务间调用权限 | `{ userId?, resource, action, ... }` | `{ allowed, reason? }` | 003 |
+
+### 3.5 凭据库与 PAT（004-vault / 007-credential）
+
+| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
+|------|------|------|---------|---------|------|
+| POST | `/mgt/vault/inbound/tokens` | 签发 PAT | `{ name, scopes[], expiresAt? }` | `{ id, token(仅返回一次), scopes[], ... }` | 007 |
+| GET | `/mgt/vault/inbound/tokens` | 查询 PAT 列表 | `?page?, pageSize?, status?` | `{ records[], total }` | 007 |
+| GET | `/mgt/vault/inbound/tokens/{id}` | 查询 PAT 详情 | — | `{ id, maskedToken, status, ... }` | 007 |
+| POST | `/mgt/vault/inbound/tokens/{id}/regenerate` | 重新生成 PAT | `{ ...regenerateRequest }` | `{ id, token(仅返回一次), ... }` | 007 |
+| PUT | `/mgt/vault/inbound/tokens/{id}/status` | 更新 PAT 状态 | `{ status }` | `{ data: null }` | 007 |
+| DELETE | `/mgt/vault/inbound/tokens/{id}` | 逻辑删除 PAT | — | `{ data: null }` | 007 |
+| GET | `/mgt/vault/inbound/tokens/stats` | 查询 PAT 统计 | — | `{ ...stats }` | 007 |
+| POST | `/mgt/vault/outbound/credentials` | 创建出站凭据 | `{ targetType, targetId, credentialType, credentials{} }` | `{ id, maskedValue, ... }` | 007 |
+| GET | `/mgt/vault/outbound/credentials` | 查询出站凭据列表 | `?page?, pageSize?, targetType?, status?` | `{ records[], total }` | 007 |
+| GET | `/mgt/vault/outbound/credentials/{id}` | 查询出站凭据详情 | — | `{ id, maskedValue, ... }` | 007 |
+| PUT | `/mgt/vault/outbound/credentials/{id}` | 更新出站凭据 | `{ credentialType?, credentials?{} }` | `{ id, maskedValue, ... }` | 007 |
+| PUT | `/mgt/vault/outbound/credentials/{id}/status` | 更新出站凭据状态 | `{ status }` | `{ data: null }` | 007 |
+| DELETE | `/mgt/vault/outbound/credentials/{id}` | 删除出站凭据 | — | `{ data: null }` | 007 |
+| GET | `/mgt/vault/outbound/credentials/presets` | 查询认证参数预设 | — | `{ targetType: [...presets] }` | 007 |
+| GET | `/mgt/vault/outbound/credentials/presets/{targetType}/{targetId}` | 查询目标资源认证预设 | — | `{ ...preset }` | 007 |
+| GET | `/mgt/vault/outbound/credentials/stats` | 查询出站凭据统计 | — | `{ ...stats }` | 007 |
+| POST | `/mgt/vault/inbound/tokens/verify` | `[内部]` 验证 PAT | `{ token }` | `{ valid, userId?, scopes[], ... }` | 007 |
+| GET | `/mgt/vault/outbound/credentials/{id}/resolve` | `[内部]` 解析出站凭据 | — | `{ credentialType, resolvedCredentials, ... }` | 007 |
+
+### 3.6 文件服务（横切）
+
+| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
+|------|------|------|---------|---------|------|
+| POST | `/mgt/files/upload-sessions` | 创建上传会话 | `{ fileName, contentType, size, bizType, bizRefId? }` | `{ sessionId, uploadUrl, ... }` | 000/002 |
+| POST | `/mgt/files/upload-sessions/batch` | 批量创建上传会话 | `{ items[] }` | `{ items[] }` | 000 |
+| POST | `/mgt/files/upload-sessions/{sessionId}/complete` | 完成上传会话 | `{ parts?, checksum? }` | `{ fileId, status, ... }` | 000 |
+| POST | `/mgt/files/upload` | 直接上传文件 | `{ fileName, contentType, fileContent, bizType, bizRefId }` | `{ fileId, status, ... }` | 000 |
+| POST | `/mgt/files/upload/multipart` | Multipart 上传文件 | Form: `bizType, bizRefId, file` | `{ fileId, status, ... }` | 000 |
+| POST | `/mgt/files/upload/multipart/batch` | 批量 Multipart 上传 | Form: `bizType, bizRefId?, files[]` | `{ items[] }` | 000 |
+| GET | `/mgt/files/{fileId}` | 查询文件详情 | — | `{ fileId, fileName, size, status, ... }` | 000 |
+| POST | `/mgt/files/{fileId}/download-url` | 获取文件下载 URL | `{ ttlSeconds?, usage? }` | `{ downloadUrl, expiresAt, ... }` | 000 |
+| DELETE | `/mgt/files/{fileId}` | 删除文件 | — | `{ deleted: true }` | 000 |
+| POST | `/mgt/files/results` | 注册处理结果文件 | `{ fileName, blobPath, ... }` | `{ fileId, ... }` | 000 |
+| POST | `/mgt/internal/files/{fileId}/download-url` | `[内部]` 获取文件下载 URL | `{ usage, ttlSeconds?, requestId? }` | `{ sasUrl, expiresAt, contentType, size }` | 000/005 |
+| POST | `/mgt/internal/files/results` | `[内部]` 注册解析结果文件 | `{ ...resultFile }` | `{ fileId, ... }` | 005 |
+
+### 3.7 当前未在 grc-mgmt-service 中落地的总览接口
+
+以下能力仍在平台 API 草案或上位设计中，但当前服务源码未发现对应控制器，暂不作为本节已实现端点：Agent 配置 `/mgt/agents/**`、菜单 `/mgt/menus/**`、通知 `/notifications/**`、护栏模板 `/guardrail-templates/**`、管理后台 `/admin/**` 及旧版个人出站凭据 `/credentials/personal/**`。待对应 feature 实现并形成契约后再补入本节。
 
 ---
 
