@@ -29,6 +29,8 @@ hub 与本仓库克隆在**同级目录**：`../{{HUB_DIR}}/`。
 3. **Spec 可追溯**：每个 PR 引用 hub 的 `specs/NNN-<slug>`。
 4. **不改 hub 事实源的守门内容**：`specs/** contracts/** memory/now/**` 与宪法
    只能经 PR 人审变更。
+5. **错误码必须注册**：新增接口错误必须在 hub `architecture/cross-cutting/error-codes.md` 注册编码（ADR-002）。
+6. **AI API 调用经 SDK**：调用 LLM/Embedding/Rerank 等 AI API 统一经 `grc-ai-sdk`，不直接调用 provider API（ADR-003）。
 
 ## 构建与测试
 
@@ -39,6 +41,17 @@ hub 与本仓库克隆在**同级目录**：`../{{HUB_DIR}}/`。
 
 lint · 单测 · 契约一致性（provider/consumer）· 密钥扫描 · 依赖许可证
 （清单与阈值见 hub `gates/GATES.md`）。coding agent 的 PR 必须由人类 approve，发起人不可自批。
+
+## 服务内部技术文档
+
+hub 的 spec 覆盖需求与跨服务方案，服务内部技术设计在本仓库维护：
+
+| 目录 | 写什么 |
+|------|--------|
+| `docs/design/` | 数据模型、内部模块划分、关键算法、性能方案 |
+| `docs/adr/` | 服务内部架构决策（ORM 选型、缓存策略、框架选型等） |
+
+跨服务决策放 hub `architecture/adr/`，服务内部决策放本仓库 `docs/adr/`。
 
 ## 路径级指令
 

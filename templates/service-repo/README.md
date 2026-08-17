@@ -10,6 +10,13 @@
 | `copilot-instructions.template.md` | `.github/copilot-instructions.md` |
 | `instructions/*.instructions.md` | `.github/instructions/` |
 
+孵化时还会创建以下空目录（不在模板中，由 skill 脚本生成）：
+
+| 目录 | 用途 |
+|------|------|
+| `docs/design/` | 服务内部技术设计（数据模型、内部模块、关键算法） |
+| `docs/adr/` | 服务内部架构决策（ORM 选型、缓存策略等） |
+
 占位符（孵化时替换）：
 `{{SERVICE_NAME}}`、`{{HUB_REPO}}`、`{{HUB_DIR}}`（hub 的目录名，通常 `grc-spec-hub`）、
 `{{BUILD_CMD}}`、`{{TEST_CMD}}`。
