@@ -13,3 +13,4 @@
 | [002](002-error-codes.md) | 统一错误码与错误响应规范 | Proposed | 2026-08-13 |
 | [003](003-ai-sdk.md) | AI SDK——凭据解析与模型调用统一抽象 | Proposed | 2026-08-14 |
 | [004](004-api-design-top-down.md) | API 设计采用自顶向下流程——先全局概览再逐服务契约化 | Accepted | 2026-08-17 |
+| [005](005-credential-resolution.md) | 凭据解析归属 mgmt-service，双接口分离资产与模型两条路径 | Accepted | 2026-08-17 |

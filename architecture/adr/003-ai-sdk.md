@@ -34,7 +34,7 @@ ADR-001 D4 只覆盖 gateway 侧出站凭据解析，内部服务直连场景不
 ├─────────────────────────────────────────────────┤
 │  Provider Adapters: Nexus / AzureOpenAI / ...   │  ← 请求构造 + 响应归一化
 ├─────────────────────────────────────────────────┤
-│  Credential Resolver: → auth-service            │  ← 角色→密钥映射
+│  Credential Resolver: → mgmt-service            │  ← POST /credentials/resolve-model
 ├─────────────────────────────────────────────────┤
 │  Infra: 缓存 / 重试 / 流式 / 降级              │  ← 横切关注点
 └─────────────────────────────────────────────────┘
@@ -67,7 +67,7 @@ ADR-001 D4 只覆盖 gateway 侧出站凭据解析，内部服务直连场景不
 | 场景 | 解析点 | 机制 |
 |------|--------|------|
 | 用户出站调用资产 API | gateway（D4） | gateway 从 Key Vault 取凭据注入出站请求 |
-| 内部服务调用平台托管 AI API | grc-ai-sdk（本 ADR） | SDK 经 auth-service 解析凭据后直调目标 API |
+| 内部服务调用平台托管 AI API | grc-ai-sdk（本 ADR） | SDK 经 mgmt-service `POST /credentials/resolve-model` 解析凭据后直调目标 API（见 [ADR-005](005-credential-resolution.md)） |
 
 ### SDK 的边界红线
 
@@ -87,7 +87,7 @@ SDK 只负责：**用正确的凭据、以正确的格式、调用正确的端�
 | 组件 | 职责 |
 |------|------|
 | grc-ai-sdk | 凭据解析 + provider adapter + 规范类型 + 缓存/重试/流式 |
-| auth-service | 维护角色→密钥映射表；执行凭据转换业务逻辑；密钥值从 Key Vault 获取 |
+| mgmt-service (credential 模块) | 维护个人 Nexus PAT 列表与平台默认凭据；执行解析逻辑（个人优先→平台默认兜底）；密钥值从 Key Vault 获取（见 [ADR-005](005-credential-resolution.md)） |
 | 功能服务 | 只调 SDK typed methods，不感知凭据来源、provider 差异与响应格式 |
 
 ## 备选方案
@@ -102,10 +102,10 @@ SDK 只负责：**用正确的凭据、以正确的格式、调用正确的端�
 
 ## 影响
 
-- **受影响服务**：auth-service（新增凭据转换接口）、agent-service / evaluation-service / knowledge-engine / parser-engine（接入 SDK）
-- **auth-service 职责扩展**：ADR-001 D1 表需新增"凭据转换"职责
-- **新增跨服务依赖**：agent-service / evaluation-service / knowledge-engine / parser-engine → auth-service（均 via SDK）
-- **契约影响**：auth-service 需新增 `/internal/credential/resolve` OpenAPI 接口定义
+- **受影响服务**：mgmt-service（credential 模块新增 resolve-model 接口）、agent-service / evaluation-service / knowledge-engine / parser-engine（接入 SDK）
+- **mgmt-service 职责明确**：凭据 CRUD 与解析均归 credential 模块，无需跨服务取数据（见 [ADR-005](005-credential-resolution.md)）
+- **新增跨服务依赖**：agent-service / evaluation-service / knowledge-engine / parser-engine → mgmt-service（均 via SDK）
+- **契约影响**：mgmt-service 需新增 `POST /credentials/resolve-model` OpenAPI 接口定义
 - **service-map / manifest 更新**：待本 ADR 状态确认后统一对齐
 
 ## 后果
@@ -117,10 +117,10 @@ SDK 只负责：**用正确的凭据、以正确的格式、调用正确的端�
 - 流式、重试、错误处理等横切逻辑只实现一次
 
 ### 负面
-- auth-service 成为凭据解析的关键路径，需保证高可用
+- mgmt-service 成为凭据解析的关键路径，需保证高可用
 - SDK 版本升级需协调所有 Python 服务（建议 semver + 兼容性保证）
 - SDK 需处理流式（SSE）解析，增加实现复杂度
 
 ### 风险
-- auth-service 不可用时所有 AI API 调用失败——缓解：SDK 本地缓存凭据（TTL 内可用）
+- mgmt-service 不可用时所有 AI API 调用失败——缓解：SDK 本地缓存凭据（TTL 内可用）
 - SDK 滑向 "隐藏的 monolith"——缓解：严守边界红线，不引入业务逻辑

@@ -97,10 +97,14 @@
 | GET | `/pats` | 我的 PAT 列表 | — | `{ items[]{id, name, scopes[], lastUsedAt, expiresAt, createdAt} }` | 007 |
 | DELETE | `/pats/{id}` | 吊销 PAT | — | `204 No Content` | 007 |
 | PUT | `/assets/{id}/service-credentials` | 配置资产级服务凭据 | `{ credentialType, credentials{} }` 密钥值加密存入 Key Vault | `{ credentialType, maskedValue, updatedAt }` | 007 |
-| GET | `/credentials/personal` | 个人出站凭据列表 | — | `{ items[]{type, maskedValue, updatedAt} }` | 007 |
+| GET | `/credentials/personal` | 个人出站凭据列表 | — | `{ items[]{targetType, targetId?, maskedValue, updatedAt} }` | 007 |
 | PUT | `/credentials/personal/{type}` | 设置个人出站凭据 | `{ credentials{} }` type: nexus\|外部服务标识 | `{ type, maskedValue, updatedAt }` | 007 |
 | DELETE | `/credentials/personal/{type}` | 删除个人出站凭据 | — | `204 No Content` | 007 |
-| GET | `/credentials/resolve/{assetId}` | `[内部]` 凭据解析 | Header: `X-User-Id` (网关注入) | `{ authMode, resolvedCredentials{}, fallback: bool }` | 007 |
+| GET | `/credentials/personal/nexus` | 个人 Nexus PAT 列表（有序） | — | `{ items[]{id, name, maskedValue, enabled, availableModels[], updatedAt} }` | 007 |
+| PUT | `/credentials/personal/nexus` | 设置个人 Nexus PAT（有序列表） | `{ pats[]{name, token, enabled} }` | `{ items[]{id, name, maskedValue, enabled, availableModels[]} }` 保存后自动检测可用模型 AC-11 | 007 |
+| POST | `/credentials/personal/nexus/refresh` | 手动刷新 Nexus 模型可用性快照 | — | `{ items[]{id, name, enabled, availableModels[]} }` | 007 |
+| POST | `/credentials/resolve-asset` | `[内部]` 资产凭据解析（gateway 调用） | `{ assetId, userId }` | `{ resolved, credential{type, token}, source: "asset_service"\|"personal", targetEndpoint }` | 007 |
+| POST | `/credentials/resolve-model` | `[内部]` 模型凭据解析（AI SDK 调用） | `{ userId }` | `{ resolved, credential{type, token}, source: "personal"\|"platform_default", availableModels[] }` | 007 |
 
 ### 3.6 护栏模板管理（006-guardrail）
 
