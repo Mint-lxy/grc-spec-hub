@@ -144,7 +144,6 @@ user -> gateway -> external
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-|------|------|------|---------|---------|------|
 | POST | `/mgt/users` | 创建用户 | `{ ...user }` | `{ userId, ... }` | 001/003 |
 | GET | `/mgt/users/{userId}` | 查询用户详情 | — | `{ userId, ... }` | 001/003 |
 | PUT | `/mgt/users/{userId}` | 更新用户 | `{ ...user }` | 更新后的用户 | 003 |
@@ -271,28 +270,84 @@ user -> gateway -> external
 
 ## 6. grc-knowledge-engine
 
+> 本服务退为**门面之后的内部服务**，不直接面向前端。前端通过 mgmt-service `/mgt/knowledge/**`（§3.3）门面调用。
+> 直接调用方：mgmt-service（门面透传）、agent-service（检索）。HTTP 方法只用 `GET` / `POST`。
+> 详细设计见 `KB-coding/docs/lasted/03-接口文档.md`（v2.0）。
+
+### 6.1 目录树
+
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| GET | `/knowledge/directories` | 知识目录树 | `?parentId?(根节点为空)` | `{ items[]{id, name, parentId, type: "public"\|"personal", children[]?} }` | 005 |
-| POST | `/knowledge/directories` | 创建目录节点 | `{ name, parentId?, type }` | `{ id, name, parentId, type }` | 005 |
-| PUT | `/knowledge/directories/{id}` | 更新目录节点 | `{ name? }` | 更新后的目录对象 | 005 |
-| DELETE | `/knowledge/directories/{id}` | 删除目录节点 | — | `204 No Content` | 005 |
-| POST | `/knowledge/bases` | 创建知识库 | `{ name, description?, directoryId, pipelineConfig{parser, chunkStrategy, enhancement, embeddingModel, vectorDbInstanceId, reranker?} }` | `{ id, name, status: "draft", createdAt }` | 005 |
-| GET | `/knowledge/bases` | 知识库列表 | `?page, size, directoryId?, status?, keyword?` | `{ items[]{id, name, directoryId, status, documentCount, lastBuildAt}, total }` | 005 |
-| GET | `/knowledge/bases/{id}` | 知识库详情 | — | `{ id, name, description, directoryId, status, pipelineConfig{}, documentCount, vectorCount, lastBuildAt, createdAt }` | 005 |
-| PUT | `/knowledge/bases/{id}` | 更新知识库配置 | `{ name?, description?, pipelineConfig?{} }` | 更新后的知识库对象 | 005 |
-| DELETE | `/knowledge/bases/{id}` | 删除知识库 | — | `204 No Content` | 005 |
-| POST | `/knowledge/bases/{id}/enable` | 启用知识库 | — | `{ status: "available" }` | 005 |
-| POST | `/knowledge/bases/{id}/disable` | 禁用知识库 | — | `{ status: "disabled" }` | 005 |
-| POST | `/knowledge/bases/{id}/documents` | 上传/导入文档 | `{ channel: "upload"\|"confluence"\|"sharepoint"\|"blob", files[]?\|sourceConfig?{} }` | `{ documentIds[], importStatus }` | 005 |
-| GET | `/knowledge/bases/{id}/documents` | 文档列表 | `?page, size` | `{ items[]{docId, fileName, channel, status, size, parsedAt?}, total }` | 005 |
-| DELETE | `/knowledge/bases/{id}/documents/{docId}` | 删除文档 | — | `204 No Content` | 005 |
-| POST | `/knowledge/bases/{id}/build` | 触发构建 | `{ fullRebuild?: bool }` | `{ buildId, status: "running", stages: ["parse","chunk","enhance","vectorize"] }` | 005 |
-| GET | `/knowledge/bases/{id}/build-status` | 构建状态 | — | `{ buildId, status, currentStage, progress, startedAt, errors[]? }` | 005 |
-| POST | `/knowledge/bases/{id}/search` | 向量检索 | `{ query, topK?: 5, filters?{} }` | `{ results[]{docId, chunk, score, metadata{}} }` | 005 |
-| GET | `/knowledge/bases/{id}/metadata` | `[开放]` 元数据 | Header: `X-PAT-Token` | `{ id, name, description, documentCount, lastBuildAt }` | 005 |
-| POST | `/knowledge/bases/{id}/open-search` | `[开放]` 检索 | Header: `X-PAT-Token`, `{ query, topK? }` | `{ results[]{chunk, score, metadata{}} }` | 005 |
-| PUT | `/knowledge/bases/{id}/open-content` | `[开放]` 更新内容 | Header: `X-PAT-Token`, `{ documents[]{action: "add"\|"delete", fileId?\|docId?} }` | `{ accepted, buildTriggered }` | 005 |
+| GET | `/knowledge/directories/tree` | 查询知识目录树（两棵完整树，含权限与操作按钮状态） | `?rootType?, keyword?` | `{ roots[]{dirId, name, level, isLeaf, kbCount, accessible, permissions{}, children[]} }` | 005 |
+| POST | `/knowledge/directories` | 创建子目录（含知识库下沉迁移） | `{ parentId, name, description? }` | `{ dirId, name, level, isLeaf, migratedKbCount }` | 005 |
+| POST | `/knowledge/directories/{dirId}/rename` | 重命名目录 | `{ name, description? }` | `{ dirId, name }` | 005 |
+| POST | `/knowledge/directories/{dirId}/delete` | 删除空目录 | — | `{ dirId, deleted: true, deletedSubDirCount? }` | 005 |
+| GET | `/knowledge/directories/{dirId}/permission` | 查询目录权限与 Alice 申请入口 | — | `{ roles[], applyUrl, myRoles[] }` | 005 |
+| POST | `/knowledge/directories/{dirId}/role-grants` | 授予 / 回收目录角色 | `{ action: "GRANT"\|"REVOKE", roleType, userIds[] }` | `{ results[]{userId, status, message?} }` | 005 |
+
+### 6.2 知识库
+
+| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
+|------|------|------|---------|---------|------|
+| GET | `/knowledge/knowledge-bases/pipeline-options` | 查询建库可选参数（前端表单渲染依据，不硬编码枚举） | — | `{ parser{types[], options{}}, chunking{}, enhance{}, embedding{}, vectorStore{}, retrieval{} }` | 005 |
+| POST | `/knowledge/knowledge-bases` | 创建知识库 | `{ directoryId, name, description?, visibility?, pipelineConfig{parser, chunking, enhance, embedding, vectorStore, retrieval} }` | `{ kbId, name, status: "DRAFT", embedding{model, dimensions, fingerprint}, vectorStore{type, collection}, myRoles[] }` | 005 |
+| GET | `/knowledge/knowledge-bases` | 查询知识库列表（按调用者可见范围过滤） | `?directoryId?, status?, keyword?, scope?, retrievalReady?, page?, pageSize?` | `{ items[]{kbId, name, status, hasFailedDocs, myRoles[], ...}, total }` | 005 |
+| GET | `/knowledge/knowledge-bases/{kbId}` | 查询知识库详情 | — | `{ kbId, pipelineConfig, status, stats{}, rebuildLock?, ... }` | 005 |
+| POST | `/knowledge/knowledge-bases/{kbId}/update` | 更新知识库基础信息（名称 / 描述 / 可见范围，不含管线参数） | `{ name?, description?, visibility? }` | 更新后的知识库摘要 | 005 |
+| POST | `/knowledge/knowledge-bases/{kbId}/pipeline-config` | 保存库级构建参数 | `{ parser?, chunking?, enhance?, retrieval? }` | `{ batchJobId?, affectedDocs?, rebuildRequired? }` | 005 |
+| POST | `/knowledge/knowledge-bases/{kbId}/publish` | 发布知识库（草稿→可用） | — | `{ kbId, status: "ACTIVE" }` | 005 |
+| POST | `/knowledge/knowledge-bases/{kbId}/offline` | 下线知识库（可用→已停用） | — | `{ kbId, status: "DISABLED", disabledAt }` | 005 |
+| POST | `/knowledge/knowledge-bases/{kbId}/delete` | 删除知识库（须先下线，软删除 + 回收向量） | — | `{ kbId, deleted: true, vectorReclaimJobId }` | 005 |
+| GET | `/knowledge/knowledge-bases/{kbId}/stats` | 查询知识库统计 | — | `{ docTotal, docVectorized, docFailed, chunkTotal, vectorCount, rebuildProgress? }` | 005 |
+
+### 6.3 文档
+
+| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
+|------|------|------|---------|---------|------|
+| POST | `/knowledge/knowledge-bases/{kbId}/documents/imports` | 导入文档（四通道统一批量入口） | `{ sourceType, items[], overwrite?, autoBuild?, runMode?, override?{parser?, chunking?, enhance?} }` | `{ batchJobId?, accepted[], rejected[] }` | 005 |
+| GET | `/knowledge/knowledge-bases/{kbId}/documents` | 查询文档列表 | `?status?, keyword?, retrievalReady?, failedFirst?, page?, pageSize?` | `{ items[]{docId, name, status, failedStage?, errorCode?, canRerunFrom?, chunkCount?, ...}, total }` | 005 |
+| GET | `/knowledge/knowledge-bases/{kbId}/documents/{docId}` | 查询文档详情（含四阶段进度与生效参数） | — | `{ docId, status, stages[], configSnapshot, stageConfig, liveJobId, currentJobId, ... }` | 005 |
+| POST | `/knowledge/knowledge-bases/{kbId}/documents/{docId}/stage-config` | 保存文档级参数覆盖 | `{ parser?, chunking?, enhance? }` | `{ stageConfig, configSnapshot }` | 005 |
+| GET | `/knowledge/knowledge-bases/{kbId}/documents/{docId}/parse` | 查询解析产物（Markdown + 大纲 + 图片名册） | `?jobId?, signUrls?` | `{ parseId, content, outline[], images[], pageCount, hasPageLayout }` | 005 |
+| GET | `/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks` | 查询切片列表（搜索 / 上下文展开） | `?keyword?, around?, radius?, jobId?, snippetContext?, signUrls?, page?, pageSize?` | `{ items[]{chunkId, content, images[], source{}, ...}, total }` | 005 |
+| GET | `/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks/{chunkId}` | 查询切片详情 | `?jobId?, signUrls?` | `{ chunkId, content, images[], source{breadcrumb[], pageRange?}, enhancement?, ... }` | 005 |
+| POST | `/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks/{chunkId}/update` | 保存切片正文编辑 | `{ content }` | `{ chunkId, jobId, rerunStages[], tokenCount, droppedImageAnchors[]? }` | 005 |
+| GET | `/knowledge/knowledge-bases/{kbId}/documents/{docId}/enhance/{enhanceType}` | 查询文档增强产物 | `?jobId?, page?, pageSize?` | `{ enhanceType, items[]{artifactId, sourceChunkId, ...}, total }` | 005 |
+| POST | `/knowledge/knowledge-bases/{kbId}/documents/{docId}/original-url` | 签发原文跳转 URL | `{ ttlSeconds? }` | `{ url, mimeType, fileName, expiresAt, urlReusable: true }` | 005 |
+| POST | `/knowledge/knowledge-bases/{kbId}/documents/{docId}/delete` | 删除文档（软删除 + 回收向量） | — | `{ docId, deleted: true, vectorReclaimJobId, kbStatusChangedTo? }` | 005 |
+
+### 6.4 构建
+
+| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
+|------|------|------|---------|---------|------|
+| POST | `/knowledge/knowledge-bases/{kbId}/build-jobs` | 批量构建 / 重跑失败文档 | `{ docIds?, runMode?, override?, scope?: "SELECTED"\|"ALL_FAILED" }` | `{ batchJobId, totalDocs, accepted[], rejected[] }` | 005 |
+| POST | `/knowledge/documents/{docId}/stages/{stageType}/run` | `[内部]` 执行 / 重跑单个阶段 | `{ stageConfig? }` | `{ jobId, status }` | 005 |
+| GET | `/knowledge/jobs/{jobId}` | `[内部]` 查询构建任务状态 | — | `{ jobId, status, stages[]?, progress?, failedDocs[]? }` | 005 |
+
+### 6.5 检索与图片证据
+
+| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
+|------|------|------|---------|---------|------|
+| POST | `/knowledge/retrievals` | 多知识库检索（返回召回片段证据：溯源 + 图片 + 位置） | `{ query, knowledgeBaseIds[], topK?, strategy?, filters?, rerank?, options?{hydrate?, signUrls?, expandParent?, imageVariant?, ...} }` | `{ results[]{vectorId, recordType, chunkId, content, chunkContent?, source{docName, breadcrumb[], pageRange?, ...}, images[], chunkImages[], score, rerankScore?} }` | 005 |
+| POST | `/knowledge/image-urls` | 签发 / 刷新召回图片访问 URL | `{ items[]{chunkId, imageIds[]}, ttlSeconds? }` | `{ items[]{chunkId, imageId, url?, thumbUrl?, expiresAt?, error?} }` | 005 |
+
+### 6.6 开放接口（PAT）
+
+> PAT 校验委托 mgmt-service `POST /mgt/vault/inbound/tokens/verify`。
+> 凭据：`Authorization: Bearer <PAT>`。路径前缀独立为 `/open/knowledge/**`。
+
+| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
+|------|------|------|---------|---------|------|
+| GET | `/open/knowledge/knowledge-bases/{kbId}` | `[开放]` 查询知识库元数据 | — | `{ kbId, name, description, documentCount, embeddingModel, dimensions, lastBuildAt }` | 005 |
+| POST | `/open/knowledge/retrievals` | `[开放]` 检索（不接受 `snapshotMode`） | `{ query, knowledgeBaseIds[], topK?, ... }` | 同 §6.5 检索响应 | 005 |
+| POST | `/open/knowledge/knowledge-bases/{kbId}/documents` | `[开放]` 上传文档更新知识库内容（`sourceType` 限 `file`） | `{ sourceType: "file", items[]{fileId, name} }` | `{ accepted[], rejected[] }` | 005 |
+
+### 6.7 健康检查
+
+| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
+|------|------|------|---------|---------|------|
+| GET | `/health` | 存活探针（进程存活即 200，不检查依赖） | — | `{ status: "ok", service, version, mode }` | 005 |
+| GET | `/readyz` | 就绪探针（逐项检查依赖） | — | `{ status, ready, checks{database, redis, serviceBus, vectorStore, parserEngine, objectStore} }` | 005 |
 
 ---
 
