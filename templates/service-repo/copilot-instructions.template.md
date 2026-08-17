@@ -18,3 +18,8 @@
 
 - 祈使句提交，引用 hub 的 `specs/NNN-<slug>`。
 - 你（coding agent）的 PR 必须由**人类** approve，发起人不可自批。
+
+## 服务内部设计文档
+
+hub spec 覆盖需求与跨服务方案，服务内部技术设计在 `docs/design/` 维护，
+服务内部架构决策在 `docs/adr/` 记录。跨服务决策放 hub `architecture/adr/`。

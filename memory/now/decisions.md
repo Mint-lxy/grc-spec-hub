@@ -5,4 +5,6 @@
 
 | 决策 | 摘要 | ADR | 生效日期 |
 |------|------|-----|----------|
-| —    | （暂无） | —  | —        |
+| 服务拆分 | 8 服务 + 前端架构，mgmt-service 大后端内部模块化+BFF+chat-agent domain，模型凭据经 AI SDK+auth-service，gateway 拉取缓存 30s TTL，eval 事件驱动回写，agent 不订阅事件（12/12 待确认项已关闭 11 项） | [ADR-001](../../architecture/adr/001-service-split.md) | 2026-08-13 |
+| 错误码统一规范 | RFC 9457 错误格式 + 按模块注册前缀 + 类别分级 + 幂等/超时约定 | [ADR-002](../../architecture/adr/002-error-codes.md) | 2026-08-13 |
+| AI SDK | grc-ai-sdk 将凭据解析与模型调用合并，提供 llm/embedding/rerank typed methods，规范类型归一化，provider adapter 先只实现 Nexus | [ADR-003](../../architecture/adr/003-ai-sdk.md) | 2026-08-14 |
