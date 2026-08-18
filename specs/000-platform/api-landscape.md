@@ -256,8 +256,7 @@
 ## 6. grc-knowledge-engine
 
 > 本服务退为**门面之后的内部服务**，不直接面向前端。前端通过 mgmt-service `/mgt/knowledge/**`（§3.3）门面调用。
-> 直接调用方：mgmt-service（门面透传）、agent-service（检索）。HTTP 方法只用 `GET` / `POST`。
-> 详细设计见 `KB-coding/docs/lasted/03-接口文档.md`（v2.0）。
+> 直接调用方：mgmt-service（门面透传）、agent-service（检索）。
 
 ### 6.1 目录树
 
@@ -314,7 +313,7 @@
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
 | POST | `/knowledge/retrievals` | 多知识库检索（返回召回片段证据：溯源 + 图片 + 位置） | `{ query, knowledgeBaseIds[], topK?, strategy?, filters?, rerank?, options?{hydrate?, signUrls?, expandParent?, imageVariant?, ...} }` | `{ results[]{vectorId, recordType, chunkId, content, chunkContent?, source{docName, breadcrumb[], pageRange?, ...}, images[], chunkImages[], score, rerankScore?} }` | 005 |
-| POST | `/knowledge/image-urls` | 签发 / 刷新召回图片访问 URL | `{ items[]{chunkId, imageIds[]}, ttlSeconds? }` | `{ items[]{chunkId, imageId, url?, thumbUrl?, expiresAt?, error?} }` | 005 |
+| POST | `/knowledge/artifacts/access-urls` | 批量签发 / 刷新解析与增强副产物（图片、表格、图表等）指定表示形式的短期访问 URL | `{ items[]{artifactId, representation}, ttlSeconds? }` | `{ items[]{artifactId, artifactType, representation, mediaType, url?, expiresAt?, status, error?} }` | 005 |
 
 ### 6.6 开放接口（PAT）
 
