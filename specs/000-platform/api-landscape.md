@@ -218,7 +218,38 @@ user -> gateway -> external
 | POST | `/mgt/internal/files/{fileId}/download-url` | `[内部]` 获取文件下载 URL | `{ usage, ttlSeconds?, requestId? }` | `{ sasUrl, expiresAt, contentType, size }` | 000/005 |
 | POST | `/mgt/internal/files/results` | `[内部]` 注册解析结果文件 | `{ ...resultFile }` | `{ fileId, ... }` | 005 |
 
-### 3.7 当前未在 grc-mgmt-service 中落地的总览接口
+### 3.7 Chat 会话与知识库挂载（001-agent-service-platform-chat）
+
+> **数据归属调整**（评审结论，见下方说明）：会话（session）、知识库挂载关系、消息历史
+> 三类业务数据的权威均归 **grc-mgt-service**，不归 grc-agent-service。
+> grc-agent-service 不维护业务表，只在收到一次"发消息"请求时，经内部接口向本服务取
+> 会话上下文（挂载了哪些知识库、历史消息是什么），生成完成后再经内部接口回写。
+
+| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
+|------|------|------|---------|---------|------|
+| POST | `/mgt/chat/sessions` | 创建会话 | `{ assetId?(平台Chat为空), modelId?, title? }` | `{ id, assetId, title, createdAt }` | 001 |
+| GET | `/mgt/chat/sessions` | 会话列表 | `?page, size, keyword?, assetId?` | `{ items[]{id, assetId?, assetName?, title, lastMessageAt}, total }` | 001 |
+| GET | `/mgt/chat/sessions/{id}` | 会话详情（含历史消息） | — | `{ id, assetId, title, modelId, messages[]{id, role, content, citations[]?, toolCalls[]?, thinkingProcess?, createdAt}, knowledgeMounts[] }` | 001 |
+| PATCH | `/mgt/chat/sessions/{id}` | 重命名会话 | `{ title }` | 更新后的会话摘要 | 001 |
+| DELETE | `/mgt/chat/sessions/{id}` | 删除会话（软删除，消息记录保留审计留痕） | — | `204 No Content` | 001 |
+| PUT | `/mgt/chat/sessions/{id}/knowledge-mounts` | 挂载/卸载知识库（校验用户对目标知识库的访问权限） | `{ knowledgeBaseIds[] }` | `{ mounts[]{knowledgeBaseId, name, snapshotAt} }` | 001 |
+| GET | `/mgt/chat/sessions/{id}/knowledge-mounts` | 已挂载知识库列表 | — | `{ mounts[]{knowledgeBaseId, name, directoryPath} }` | 001 |
+| GET | `/mgt/internal/chat/sessions/{id}/context` | `[内部]` 查询会话上下文（供 grc-agent-service 调用） | `?includeHistory?` | `{ sessionId, knowledgeBaseIds[], modelId?, messages[]{role, content, citations[]?, createdAt} }` | 001 |
+| POST | `/mgt/internal/chat/sessions/{id}/messages` | `[内部]` 追加一条已生成的消息（供 grc-agent-service 在生成完成后回写） | `{ role, content, citations[]?, toolCalls[]?, thinkingProcess? }` | `{ messageId, createdAt }` | 001 |
+
+**补充说明**：
+
+- 本节内容来自 grc-agent-service 技术方案验证过程中的一次架构调整：原方案里会话/知识库挂载/消息历史都由
+  grc-agent-service 自建 Postgres 持久化（`chat_sessions`/`chat_records` 两张表），评审后改为本节这个模型——
+  grc-agent-service 不建业务表，改成无状态的推理执行引擎，数据权威统一收敛到 grc-mgt-service。
+- `GET .../context` 与 `POST .../messages` 两个内部接口的具体调用时序：grc-agent-service 收到
+  `POST /chat/sessions/{id}/messages`（见 §4）后，先同步调 `GET .../context` 取挂载的知识库与历史消息，
+  推理/生成完成后再调 `POST .../messages` 回写这一轮的用户输入与最终回复；中途生成失败或被中止是否也要
+  回写（写部分内容还是不写），待评审确认。
+- 知识库挂载权限校验（无权限的 `knowledgeBaseId` 建议静默剔除、返回实际生效的 `mounts[]`，而非整体报错）
+  与 grc-mgt-service 自己的 RBAC 校验（`/mgt/internal/check`，`CATALOG` 类型）复用同一套判定逻辑。
+
+### 3.8 当前未在 grc-mgmt-service 中落地的总览接口
 
 以下能力仍在平台 API 草案或上位设计中，但当前服务源码未发现对应控制器，暂不作为本节已实现端点：Agent 配置 `/mgt/agents/**`、菜单 `/mgt/menus/**`、通知 `/notifications/**`、护栏模板 `/guardrail-templates/**`、管理后台 `/admin/**` 及旧版个人出站凭据 `/credentials/personal/**`。待对应 feature 实现并形成契约后再补入本节。
 
@@ -226,35 +257,36 @@ user -> gateway -> external
 
 ## 4. grc-agent-service
 
+> **架构调整**（对应 §3.7 说明）：grc-agent-service 是**无状态的推理执行引擎**，不建业务表，
+> 不拥有 session / 知识库挂载关系 / 消息历史的权威数据——这些归 grc-mgt-service。
+> 本节只保留"执行一次推理"相关的端点；会话的创建/列表/详情/重命名/删除/知识库挂载管理见 §3.7。
+
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| POST | `/chat/sessions` | 创建会话 | `{ assetId?(平台Chat为空), modelId?, title? }` | `{ id, assetId, title, createdAt }` | 001 |
-| GET | `/chat/sessions` | 会话列表 | `?page, size, keyword?, assetId?` | `{ items[]{id, assetId?, assetName?, title, lastMessageAt}, total }` | 001 |
-| GET | `/chat/sessions/{id}` | 会话详情（含历史消息） | — | `{ id, assetId, title, modelId, messages[]{id, role, content, citations[]?, toolCalls[]?, thinkingProcess?, createdAt}, knowledgeMounts[] }` | 001 |
-| PATCH | `/chat/sessions/{id}` | 重命名会话 | `{ title }` | 更新后的会话摘要 | 001 |
-| DELETE | `/chat/sessions/{id}` | 删除会话（软删除，消息记录保留审计留痕） | — | `204 No Content` | 001 |
-| POST | `/chat/sessions/{id}/messages` | 发送消息（SSE 流式） | `{ content, deepAnalysis?: bool }` | SSE stream: `event: delta\|citation\|tool_call\|thinking\|done` `data: { ... }` | 001 |
-| POST | `/chat/sessions/{id}/messages/{msgId}/regenerate` | 重新生成回复 | — | SSE stream（同上） | 001 |
+| POST | `/chat/sessions/{id}/messages` | 发送消息（SSE 流式）。内部先同步调用 `grc-mgt-service` 的 `GET /mgt/internal/chat/sessions/{id}/context` 取挂载知识库与历史消息，生成完成后调用 `POST /mgt/internal/chat/sessions/{id}/messages` 回写这一轮问答 | `{ content, deepAnalysis?: bool }` | SSE stream: `event: delta\|citation\|tool_call\|thinking\|done` `data: { ... }` | 001 |
+| POST | `/chat/sessions/{id}/messages/{msgId}/regenerate` | 重新生成回复（取上下文/回写逻辑同上） | — | SSE stream（同上） | 001 |
 | POST | `/chat/sessions/{id}/cancel` | 中止正在进行的流式生成 | — | `{ id, cancelled: bool }` | 001 |
-| PUT | `/chat/sessions/{id}/knowledge-mounts` | 挂载/卸载知识库（挂载前校验用户对目标知识库的访问权限） | `{ knowledgeBaseIds[] }` | `{ mounts[]{knowledgeBaseId, name, snapshotAt} }` | 001 |
-| GET | `/chat/sessions/{id}/knowledge-mounts` | 已挂载知识库列表 | — | `{ mounts[]{knowledgeBaseId, name, directoryPath} }` | 001 |
 
 **补充说明（来自 grc-agent-service 技术方案验证，供本节评审参考）**：
 
-- `PATCH /chat/sessions/{id}`、`POST /chat/sessions/{id}/cancel` 为本次新增：原清单只有创建/列表/详情/删除，
-  缺重命名与中止生成两个端点——中止生成是 SSE 流式场景下的硬需求（客户端断开连接不代表服务端已停止生成，
-  需要显式信号），已用真实 LLM 网关验证过中止时序（并发触发 cancel 与流式读取的竞态需要客户端边读流边中止，
-  单纯断连不保证及时停止）。
-- `messages[].toolCalls[]`：会话消息触发平台原生工具（`grc-mcp-server`：Confluence / SharePoint-OneDrive /
-  数据平台 / Web）时的调用记录，`{ toolName, arguments, resultSummary }`；流式场景对应 SSE `tool_call` 事件，
-  工具执行完成后一次性推送（不分片）。
-- `PUT /chat/sessions/{id}/knowledge-mounts`：建议内部实现挂载前调用 `grc-mgt-service`
-  `POST /mgt/internal/check`（`resource=knowledge_base`）逐个校验用户权限，无权限的 `knowledgeBaseId`
-  建议静默剔除并返回实际生效的 `mounts[]`（而非整体报错），避免因为单个知识库权限问题中断整个挂载操作；
-  用户身份（`userId`）的真实性仍依赖网关鉴权，本服务只做"给定 userId 有没有权限"的判定，不做身份鉴权本身。
+- `POST /chat/sessions/{id}/cancel` 是 SSE 流式场景下的硬需求：客户端断开连接不代表服务端已停止生成，
+  需要显式信号；已用真实 LLM 网关验证过中止时序（并发触发 cancel 与流式读取的竞态需要客户端边读流边中止，
+  单纯断连不保证及时停止）。中止生成端点未列请求体是因为语义上不需要额外参数，仅路径 `{id}` 标识要中止的
+  会话；如果同一会话允许并发多轮生成，可能需要额外的 `messageId` 参数区分中止哪一轮，待评审确认是否存在
+  这种并发场景。
+- `citations[]`/`toolCalls[]`/`thinkingProcess`：会话消息触发知识库检索、平台原生工具（`grc-mcp-server`：
+  Confluence / SharePoint-OneDrive / 数据平台 / Web）时的记录，`toolCalls[]` 形如
+  `{ toolName, arguments, resultSummary }`；流式场景对应 SSE `citation`/`tool_call`/`thinking` 事件，
+  工具调用完成后一次性推送（不分片）。这些字段最终由 grc-agent-service 生成完成后经内部接口回写给
+  grc-mgt-service 持久化，grc-agent-service 自身不存。
 - `deepAnalysis` 字段的具体行为（更长的工具调用轮数上限？还是切换到支持推理链路输出的模型？）待产品/架构明确。
-- 中止生成端点未列出请求体是因为语义上不需要额外参数，仅路径 `{id}` 标识要中止的会话；如果同一会话允许并发多轮
-  生成，可能需要额外的 `messageId` 参数区分中止哪一轮，待评审确认是否存在这种并发场景。
+- **待明确**：`GET .../context` 与 `POST .../messages` 两个内部接口的调用时序中，若生成过程中途失败或被
+  中止，是否仍要回写已生成的部分内容（还是整轮丢弃不存）？grc-agent-service 完全无状态后，`cancel_registry`
+  这类"进行中生成"的标记只能是 grc-agent-service 自己进程内/Redis 的技术态缓存，不能指望 grc-mgt-service
+  代为维护（它不知道具体是哪个 grc-agent-service 实例在处理这条流）。
+- 知识库权限校验（`/mgt/internal/check`，`CATALOG` 类型）由 grc-mgt-service 在处理
+  `PUT /mgt/chat/sessions/{id}/knowledge-mounts` 时执行，grc-agent-service 不再需要自己调用校验——
+  它拿到的 `knowledgeBaseIds[]`（经 `GET .../context` 返回）已经是校验过、生效的挂载结果。
 
 ---
 
@@ -383,6 +415,12 @@ MCP Server 端点遵循 MCP 协议（JSON-RPC over stdio/SSE），不是标准 R
 - [ ] 文件上传的直传 SAS 方案是否需要网关参与
 - [ ] 通知推送方式（仅轮询 / SSE / WebSocket）
 - [ ] grc-agent-service 中止生成（`POST /chat/sessions/{id}/cancel`）是否需要 `messageId` 区分并发多轮生成
-- [ ] grc-agent-service 知识库挂载权限校验方式：调用 `grc-mgt-service` 的具体接口/参数形态待与该服务对齐
-      （landscape 里 `/mgt/internal/check` 当前入参是 `{ userId?, resource, action, ... }`，`resource=knowledge_base`
-      时具体怎么传知识库 ID 待统一）
+- [x] ~~grc-agent-service 知识库挂载权限校验方式~~：已定案，权限校验与知识库挂载管理整体归
+      `grc-mgt-service`（§3.7），grc-agent-service 不再需要自己调用校验接口
+- [ ] grc-agent-service ↔ grc-mgt-service 内部接口时序：生成过程中途失败/被中止时，
+      `POST /mgt/internal/chat/sessions/{id}/messages` 是否仍要回写部分内容（见 §4 补充说明）
+- [ ] `GET /mgt/internal/chat/sessions/{id}/context` 返回的历史消息是否有长度/条数上限
+      （避免超长会话把整个历史都传给 grc-agent-service 撑爆单次请求体）
+- [ ] grc-agent-service 完全无状态后，`cancel_registry`（进行中生成的中止标记）只能是本地/Redis 技术态缓存，
+      多实例部署下如何保证"中止请求"路由到正确处理该流的实例（网关按 sessionId 做一致性哈希？还是
+      grc-agent-service 之间共享 Redis 状态？）待架构确认
