@@ -343,14 +343,74 @@
 
 ## 8. grc-mcp-server
 
-MCP Server 端点遵循 MCP 协议（JSON-RPC over stdio/SSE），不是标准 REST。
+MCP Server 使用 MCP JSON-RPC 2.0（`tools/list`、`tools/call`）与 Streamable HTTP，
+各端点按副本独立部署、故障隔离。下表路径为能力映射，实际 HTTP 挂载仍为对应的
+`/mcp/{category}` 端点，通过 `tools/call` 调用，不提供自定义 REST invoke。
 
-| 端点 | 工具能力 | 典型调用参数 | 典型返回 | Spec |
-|------|---------|-------------|---------|------|
-| `/mcp/confluence` | Confluence 页面搜索/读取 | `{ space, query?, pageId? }` | `{ pages[]{title, content, url} }` | 001 |
-| `/mcp/sharepoint` | SharePoint/OneDrive 文件搜索/读取 | `{ site?, path?, query? }` | `{ files[]{name, content, url} }` | 001 |
-| `/mcp/data-platform` | 数据平台查询 | `{ dataset, query }` | `{ rows[], columns[] }` | 001 |
-| `/mcp/web` | Web 搜索/抓取 | `{ url?\|query? }` | `{ content, title, url }` | 001 |
+| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
+|------|------|------|---------|---------|------|
+| GET | `/healthz` | `[内部]` 当前 MCP 副本存活检查 | — | `{ status: "ok", service: "grc-mcp-server", endpoint, version: "0.3.0" }` | 000 |
+
+### 8.1 Confluence MCP
+
+实际端点：`POST /mcp/confluence`。
+
+| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
+|------|------|------|---------|---------|------|
+| POST | `/mcp/confluence` | 搜索 Confluence 页面 | `tools/call`：`{ name: "confluence_search", arguments: { query, space_key?, credential? } }`；组 B 必须带 `credential` | `{ results[]{ page_id, title, space_key, url, excerpt } }`，最多 10 条，摘要最多 200 字 | 001/005 |
+| POST | `/mcp/confluence` | 读取 Confluence 页面 | `tools/call`：`{ name: "confluence_get_page", arguments: { page_id?\|url?, cursor?, credential? } }` | `{ title, url, content, has_more, next_cursor }`，内容分段约 4000 字符 | 001/005 |
+| POST | `/mcp/confluence` | 查询页面一层子节点 | `tools/call`：`{ name: "confluence_list_children", arguments: { page_id?\|space_key?, include_attachments?, credential } }` | `{ parent_page_id, children[], attachments[] }` | 005 |
+| POST | `/mcp/confluence` | 查询页面有界子树 | `tools/call`：`{ name: "confluence_get_page_tree", arguments: { start, max_depth?, max_nodes?, include_attachments?, credential } }` | `{ root, truncated, stats }` | 005 |
+| POST | `/mcp/confluence` | 导入整页及附件 | `tools/call`：`{ name: "confluence_import_page", arguments: { page_id?\|url?, credential } }` | `{ markdown, attachments[]{ local_ref, media_type, size }, manifest }` | 005 |
+
+### 8.2 SharePoint / OneDrive MCP
+
+实际端点：`POST /mcp/sharepoint`。
+
+| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
+|------|------|------|---------|---------|------|
+| POST | `/mcp/sharepoint` | 搜索文件或站点项 | `tools/call`：`{ name: "sharepoint_search", arguments: { query, site_id?, drive_id?, credential? } }` | `{ results[]{ item_id, name, web_url, site_id, drive_id, path, mime_type, size, excerpt } }` | 001/005 |
+| POST | `/mcp/sharepoint` | 读取文件正文 | `tools/call`：`{ name: "sharepoint_get_file", arguments: { item_id?\|web_url?, drive_id?, cursor?, credential? } }` | `{ name, web_url, mime_type, content, has_more, next_cursor }` | 001/005 |
+| POST | `/mcp/sharepoint` | 查询文件夹或文档库一层子项 | `tools/call`：`{ name: "sharepoint_list_children", arguments: { drive_id, item_id?, site_id?, credential } }` | `{ children[]{ item_id, name, is_folder, has_children, mime_type, size, web_url, path } }` | 005 |
+| POST | `/mcp/sharepoint` | 查询有界目录树 | `tools/call`：`{ name: "sharepoint_get_folder_tree", arguments: { drive_id, item_id?, site_id?, max_depth?, max_nodes?, credential } }` | `{ root, truncated, stats }` | 005 |
+| POST | `/mcp/sharepoint` | 导入单个文件 | `tools/call`：`{ name: "sharepoint_import_item", arguments: { item_id?\|web_url?, drive_id?, credential } }` | `{ name, text_or_markdown, raw_ref, mime_type, size, manifest }` | 005 |
+
+### 8.3 OSS MCP
+
+实际端点：`POST /mcp/oss`。
+
+| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
+|------|------|------|---------|---------|------|
+| POST | `/mcp/oss` | 列举白名单桶或容器 | `tools/call`：`{ name: "oss_list_buckets", arguments: { provider?, limit? } }` | `{ provider, buckets[]{ name, region } }` | 001 |
+| POST | `/mcp/oss` | 按前缀列举对象 | `tools/call`：`{ name: "oss_list_objects", arguments: { bucket, prefix?, provider?, delimiter?, cursor?, limit? } }` | `{ bucket, prefix, common_prefixes[], objects[], next_cursor }` | 001/005 |
+| POST | `/mcp/oss` | 读取对象正文 | `tools/call`：`{ name: "oss_get_object", arguments: { bucket, key, provider?, cursor?, credential? } }` | `{ bucket, key, content_type, size, content, has_more, next_cursor }` | 001/005 |
+| POST | `/mcp/oss` | 查询一层前缀或对象 | `tools/call`：`{ name: "oss_list_children", arguments: { bucket, prefix?, provider?, credential } }` | `{ children[]{ name, is_prefix, prefix, key, size, content_type, has_children } }` | 005 |
+| POST | `/mcp/oss` | 查询有界前缀树 | `tools/call`：`{ name: "oss_get_prefix_tree", arguments: { bucket, prefix?, provider?, max_depth?, max_nodes?, credential } }` | `{ root, truncated, stats }` | 005 |
+| POST | `/mcp/oss` | 导入单个对象 | `tools/call`：`{ name: "oss_import_object", arguments: { bucket, key, provider?, credential } }` | `{ name, key, text_or_markdown, raw_ref, content_type, size, manifest }` | 005 |
+
+### 8.4 数据平台 MCP
+
+实际端点：`POST /mcp/data-platform`。
+
+| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
+|------|------|------|---------|---------|------|
+| POST | `/mcp/data-platform` | 搜索数据集或数据资源 | `tools/call`：`{ name: "data_platform_search", arguments: { query, catalog?, limit? } }` | `{ datasets[]{ dataset, name, description, owner, location } }` | 001 |
+| POST | `/mcp/data-platform` | 查询数据集 | `tools/call`：`{ name: "data_platform_query", arguments: { dataset, query, parameters? } }` | `{ rows[], columns[], next_cursor? }` | 001 |
+| POST | `/mcp/data-platform` | 读取数据集结构 | `tools/call`：`{ name: "data_platform_get_schema", arguments: { dataset } }` | `{ dataset, columns[]{ name, type, nullable, description? } }` | 001 |
+
+### 8.5 Web MCP
+
+实际端点：`POST /mcp/web`。
+
+| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
+|------|------|------|---------|---------|------|
+| POST | `/mcp/web` | Web 搜索 | `tools/call`：`{ name: "web_search", arguments: { query, limit?, domains?[] } }` | `{ results[]{ title, url, excerpt } }` | 001 |
+| POST | `/mcp/web` | 抓取网页内容 | `tools/call`：`{ name: "web_fetch", arguments: { url, cursor? } }` | `{ title, url, content, content_type, has_more, next_cursor }` | 001 |
+
+组 A（Chat）工具参数禁止出现 `credential`，使用平台资源凭据；组 B（知识导入）工具
+必须携带操作人个人 `credential`，缺失即失败且禁止回落平台凭据。OSS 组 A 仅允许访问
+白名单桶。公共默认值：组 A 超时 10 秒、组 B 超时 60 秒、分段约 4000 字符、OSS
+对象下载上限 40 MB；错误以结构化 `body.error` 返回，凭据不缓存、不落库且不得写入日志。
 
 ---
 
