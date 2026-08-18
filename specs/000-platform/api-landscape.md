@@ -28,21 +28,6 @@
 | GET | `/health` | 健康检查 | — | `{ status, checks[] }` | 000 |
 | GET | `/ready` | 就绪检查 | — | `{ status }` | 000 |
 
-
-mcp/agent
-
-name: xxxx
-desc: xxxxx
-id: {web-search}
-
-xxxxx-xxxxx-xxxxxx-xxxx-xxx
-/openapi/mcp/web-search
-
-
-user -> gateway -> external
-       (mgmt -> )
-       
-
 ---
 
 ## 2. grc-auth-service
