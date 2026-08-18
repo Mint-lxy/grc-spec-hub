@@ -155,6 +155,15 @@ main { min-width: 0; }
   padding: 16px 20px; border-bottom: 1px solid var(--line); background: #fafbf9;
 }
 .flow-card-head h3 { margin: 0; font-size: 15px; }
+.role-badge-group { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.role-badge { display: inline-block; padding: 2px 9px; color: var(--accent); background: var(--accent-soft); border: 1px solid #b9cce8; border-radius: 4px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.role-badge-user { color: #173B7A; background: #EAF2FF; border-color: #4C78D8; }
+.role-badge-owner { color: #14512B; background: #EAF7EF; border-color: #3E9B61; }
+.role-badge-knowledge { color: #3B277D; background: #F1ECFF; border-color: #7B61D1; }
+.role-badge-admin { color: #7A1F25; background: #FFEDEE; border-color: #D85C63; }
+.role-badge-platform { color: #253858; background: #F4F6F8; border-color: #7A869A; }
+.journey-line { margin: 0 0 18px; padding: 10px 16px; color: var(--ink-2); background: var(--surface-2); border-left: 3px solid var(--line-strong); border-radius: 4px; font-size: 13px; line-height: 1.7; }
+.journey-line strong { color: var(--ink); }
 .flow-card-tools { display: flex; align-items: center; gap: 10px; }
 .flow-card-id { color: var(--muted); font-family: var(--font-mono); font-size: 10px; white-space: nowrap; }
 .zoom-btn {
@@ -174,6 +183,9 @@ pre.mermaid {
 }
 .mermaid svg {
   max-width: 100%; height: auto !important; margin: 0 auto; display: block; background: #ffffff !important;
+}
+.diagram-scale-sm svg {
+  max-width: 600px;
 }
 
 .footer { display: flex; justify-content: space-between; gap: 24px; margin-top: 60px; padding-top: 20px; color: var(--muted); border-top: 1px solid var(--line-strong); font-family: var(--font-mono); font-size: 9px; }
@@ -297,33 +309,37 @@ pre.mermaid {
         <p>按角色划分的用户旅程、关键状态图与功能对应表</p>
       </div>
       <nav class="toc">
-        <div class="toc-group"><span class="toc-group-no">01</span><span>阅读图例</span></div>
-        <a class="toc-l2" href="#sec-01-ctx-0"><span class="toc-no">1.0</span><span class="toc-label">图中标注规则</span></a>
-        <div class="toc-group"><span class="toc-group-no">02</span><span>全平台角色旅程总览</span></div>
-        <a class="toc-l2" href="#sec-02"><span class="toc-no">2.0</span><span class="toc-label">全平台角色旅程总览</span></a>
-        <div class="toc-group"><span class="toc-group-no">03</span><span>用户旅程：发现资产、申请订阅、开始使用</span></div>
-        <a class="toc-l2" href="#sec-03-ctx-0"><span class="toc-no">3.0</span><span class="toc-label">业务上下文（来源：用户旅程文档）</span></a>
-        <a class="toc-l2" href="#sec-03-3-1"><span class="toc-no">3.1</span><span class="toc-label">从发现资产到获得使用授权</span></a>
-        <a class="toc-l2" href="#sec-03-3-2"><span class="toc-no">3.2</span><span class="toc-label">订阅通过后如何使用不同能力</span></a>
-        <a class="toc-l2" href="#sec-03-3-3"><span class="toc-no">3.3</span><span class="toc-label">订阅变化、通知与重新申请</span></a>
-        <div class="toc-group"><span class="toc-group-no">04</span><span>创建者旅程：创建、上架、维护 Agent 或 MCP</span></div>
-        <a class="toc-l2" href="#sec-04-ctx-0"><span class="toc-no">4.0</span><span class="toc-label">业务上下文（来源：用户旅程文档）</span></a>
-        <a class="toc-l2" href="#sec-04-4-1"><span class="toc-no">4.1</span><span class="toc-label">创建高代码 Agent 并自助上架</span></a>
-        <a class="toc-l2" href="#sec-04-4-2"><span class="toc-no">4.2</span><span class="toc-label">创建低代码 Agent 并自助上架（二期）</span></a>
-        <a class="toc-l2" href="#sec-04-4-3"><span class="toc-no">4.3</span><span class="toc-label">创建 MCP 并自助上架</span></a>
-        <a class="toc-l2" href="#sec-04-4-4"><span class="toc-no">4.4</span><span class="toc-label">资产上架后的日常运营</span></a>
-        <div class="toc-group"><span class="toc-group-no">05</span><span>知识库管理员旅程：建库、导入、构建、开放使用</span></div>
-        <a class="toc-l2" href="#sec-05-ctx-0"><span class="toc-no">5.0</span><span class="toc-label">业务上下文（来源：用户旅程文档）</span></a>
-        <div class="toc-group"><span class="toc-group-no">06</span><span>平台管理员旅程：测评、护栏与管理后台治理</span></div>
-        <a class="toc-l2" href="#sec-06-ctx-0"><span class="toc-no">6.0</span><span class="toc-label">业务上下文（来源：用户旅程文档）</span></a>
-        <a class="toc-l2" href="#sec-06-6-1"><span class="toc-no">6.1</span><span class="toc-label">测评模板与发布准入测评</span></a>
-        <a class="toc-l2" href="#sec-06-6-2"><span class="toc-no">6.2</span><span class="toc-label">二期测评中心能力</span></a>
-        <a class="toc-l2" href="#sec-06-6-3"><span class="toc-no">6.3</span><span class="toc-label">护栏策略与运行时拦截</span></a>
-        <a class="toc-l2" href="#sec-06-6-4"><span class="toc-no">6.4</span><span class="toc-label">管理后台治理运营</span></a>
-        <div class="toc-group"><span class="toc-group-no">07</span><span>密钥库旅程：个人访问令牌与个人出站凭据</span></div>
-        <a class="toc-l2" href="#sec-07-ctx-0"><span class="toc-no">7.0</span><span class="toc-label">业务上下文（来源：用户旅程文档）</span></a>
-        <a class="toc-l2" href="#sec-07-7-1"><span class="toc-no">7.1</span><span class="toc-label">创建个人访问令牌供外部系统调用</span></a>
-        <a class="toc-l2" href="#sec-07-7-2"><span class="toc-no">7.2</span><span class="toc-label">配置个人出站凭据</span></a>
+        <div class="toc-group"><span class="toc-group-no">01</span><span>全平台角色旅程总览</span></div>
+        <a class="toc-l2" href="#sec-01"><span class="toc-no">1.0</span><span class="toc-label">全平台角色旅程总览</span></a>
+        <div class="toc-group"><span class="toc-group-no">02</span><span>资产订阅者旅程</span></div>
+        <a class="toc-l2" href="#sec-02-ctx-0"><span class="toc-no">2.0</span><span class="toc-label">业务上下文</span></a>
+        <a class="toc-l2" href="#sec-02-2-1"><span class="toc-no">2.1</span><span class="toc-label">发现资产，订阅申请</span></a>
+        <a class="toc-l2" href="#sec-02-2-2"><span class="toc-no">2.2</span><span class="toc-label">资产使用</span></a>
+        <a class="toc-l2" href="#sec-02-2-3"><span class="toc-no">2.3</span><span class="toc-label">资产变化通知</span></a>
+        <div class="toc-group"><span class="toc-group-no">03</span><span>资产创建者旅程</span></div>
+        <a class="toc-l2" href="#sec-03-ctx-0"><span class="toc-no">3.0</span><span class="toc-label">业务上下文</span></a>
+        <a class="toc-l2" href="#sec-03-3-1"><span class="toc-no">3.1</span><span class="toc-label">创建高代码Agent旅程</span></a>
+        <a class="toc-l2" href="#sec-03-3-2"><span class="toc-no">3.2</span><span class="toc-label">创建低代码Agent旅程（二期）</span></a>
+        <a class="toc-l2" href="#sec-03-3-3"><span class="toc-no">3.3</span><span class="toc-label">创建MCP旅程</span></a>
+        <a class="toc-l2" href="#sec-03-3-4"><span class="toc-no">3.4</span><span class="toc-label">资产上架运营</span></a>
+        <div class="toc-group"><span class="toc-group-no">04</span><span>知识库管理与使用</span></div>
+        <a class="toc-l2" href="#sec-04-ctx-0"><span class="toc-no">4.0</span><span class="toc-label">业务上下文</span></a>
+        <a class="toc-l2" href="#sec-04-4-1"><span class="toc-no">4.1</span><span class="toc-label">目录管理旅程</span></a>
+        <a class="toc-l2" href="#sec-04-4-2"><span class="toc-no">4.2</span><span class="toc-label">知识库创建旅程</span></a>
+        <a class="toc-l2" href="#sec-04-4-3"><span class="toc-no">4.3</span><span class="toc-label">知识库拥有者（Owner）</span></a>
+        <a class="toc-l2" href="#sec-04-4-4"><span class="toc-no">4.4</span><span class="toc-label">知识库贡献者（Contributor）</span></a>
+        <a class="toc-l2" href="#sec-04-4-5"><span class="toc-no">4.5</span><span class="toc-label">知识库使用者（Consumer）</span></a>
+        <div class="toc-group"><span class="toc-group-no">05</span><span>平台管理员旅程：测评、护栏与管理后台治理</span></div>
+        <a class="toc-l2" href="#sec-05-ctx-0"><span class="toc-no">5.0</span><span class="toc-label">业务上下文</span></a>
+        <a class="toc-l2" href="#sec-05-5-1"><span class="toc-no">5.1</span><span class="toc-label">测评模板与发布准入测评</span></a>
+        <a class="toc-l2" href="#sec-05-5-2"><span class="toc-no">5.2</span><span class="toc-label">二期测评中心能力</span></a>
+        <a class="toc-l2" href="#sec-05-5-3"><span class="toc-no">5.3</span><span class="toc-label">护栏策略与运行时拦截</span></a>
+        <a class="toc-l2" href="#sec-05-5-4"><span class="toc-no">5.4</span><span class="toc-label">管理后台治理运营</span></a>
+        <div class="toc-group"><span class="toc-group-no">06</span><span>密钥库旅程：个人访问令牌与个人出站凭据</span></div>
+        <a class="toc-l2" href="#sec-06-ctx-0"><span class="toc-no">6.0</span><span class="toc-label">业务上下文</span></a>
+        <a class="toc-l2" href="#sec-06-6-1"><span class="toc-no">6.1</span><span class="toc-label">配置个人入站凭据（PAT）</span></a>
+        <a class="toc-l2" href="#sec-06-6-2"><span class="toc-no">6.2</span><span class="toc-label">配置个人出站凭据</span></a>
+
         <div class="toc-group"><span class="toc-group-no">08</span><span>功能层级对应表</span></div>
         <a class="toc-l2" href="#sec-08"><span class="toc-no">8.0</span><span class="toc-label">功能层级对应表</span></a>
         <div class="toc-group"><span class="toc-group-no">09</span><span>首版与二期边界提示</span></div>
@@ -338,88 +354,60 @@ pre.mermaid {
         <section class="hero">
           <p class="eyebrow">AI Foundation Platform · Business User Journey</p>
           <h1>AI Foundation Platform 用户旅程交互图（业务视角版）</h1>
-          <div class="callout"><p>术语说明：Agent 是可对话的资产；MCP（Model Context Protocol）是可被系统或已订阅 Agent 调用的工具，不是对话对象；个人访问令牌是外部系统调用本平台开放能力时使用的入站凭据；Alice 是奔驰企业权限系统，负责账号、角色和知识授权。</p></div>
+          <div class="callout"><p>来源：<code>Prototype/AI_Foundation_Platform_User_Journey_v1.md</code> 与 <code>PRD/GRC-AI-Foundation-Platform-PRD-v1.0.md</code>。若两份来源冲突，以 PRD v1.0 为准；用户旅程文档用于补充交互细节。</p><p>本版面向业务评审：图中不使用需求编号、技术任务编号或时间缩写；所有顺序均写成「第一步、第二步……」。功能对应关系以「一级功能 &gt; 二级功能 &gt; 页面或动作」标注，便于回到产品设计和产品需求文档核对。</p><p>术语说明：Agent 是可对话的资产；MCP（Model Context Protocol）是可被系统或已订阅 Agent 调用的工具，不是对话对象；个人访问令牌是外部系统调用本平台开放能力时使用的入站凭据；Alice 是奔驰企业权限系统，负责账号、角色和知识授权。</p></div>
         </section>
 
-        <section class="section" id="sec-01" data-section>
+
+<section class="section" id="sec-01" data-section>
   <header class="section-head">
     <div class="section-no">01</div>
     <div class="section-title">
-      <h2>一、阅读图例</h2>
+      <h2>一、全平台角色旅程总览</h2>
     </div>
   </header>
+  <p class="journey-line">作为平台上的资产订阅者、资产创建者、知识库管理员或平台管理员，我可以在各自的入口（Marketplace、创作者中心、知识管理、管理后台）完成发现资产、创建与上架资产、构建知识库、维护测评与护栏等工作，以共同支撑起从资产诞生到被安全使用的完整闭环。</p>
   <div class="flow-card-container" id="sec-01-card">
   <div class="flow-card-head">
-    <div><h3>阅读图例</h3></div>
+    <div>
+      <h3>全平台角色旅程总览</h3>
+      <div class="role-badge-group">
+        <span class="role-badge role-badge-user">角色：资产订阅者</span>
+        <span class="role-badge role-badge-owner">角色：资产创建者</span>
+        <span class="role-badge role-badge-knowledge">角色：知识库管理员</span>
+        <span class="role-badge role-badge-admin">角色：平台管理员</span>
+        <span class="role-badge role-badge-platform">角色：平台系统</span>
+      </div>
+    </div>
     <div class="flow-card-tools">
       <span class="flow-card-id">1.0</span>
-      <button class="zoom-btn" type="button" onclick="openModal('fig-1-0', '阅读图例')">&#10021; 放大全屏</button>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-1-0', '全平台角色旅程总览')">&#10021; 放大全屏</button>
     </div>
   </div>
   <div class="flow-card-body">
     <div class="mermaid-diagram-wrap" id="fig-1-0">
-      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#7A869A", "clusterBkg": "#FAFBFC", "clusterBorder": "#DDE3EA"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 78}}}%%
-flowchart LR
-  User["资产订阅者&lt;br/&gt;发现、申请、使用"]:::user
-  Owner["资产创建者&lt;br/&gt;创建、上架、维护资产"]:::owner
-  Knowledge["知识库管理员&lt;br/&gt;建库、导入、维护知识"]:::knowledge
-  Admin["平台管理员&lt;br/&gt;维护平台规则与资源"]:::admin
-  Platform["平台系统&lt;br/&gt;校验、通知、审计、拦截"]:::platform
-
-  User --- Owner --- Knowledge --- Admin --- Platform
-
-  classDef user fill:#EAF2FF,stroke:#4C78D8,stroke-width:1.5px,color:#173B7A;
-  classDef owner fill:#EAF7EF,stroke:#3E9B61,stroke-width:1.5px,color:#14512B;
-  classDef knowledge fill:#F1ECFF,stroke:#7B61D1,stroke-width:1.5px,color:#3B277D;
-  classDef admin fill:#FFEDEE,stroke:#D85C63,stroke-width:1.5px,color:#7A1F25;
-  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
-    </div>
-  </div>
-</div>
-<div class="technical-subsection" id="sec-01-ctx-0"><div class="technical-subsection-head"><div class="technical-subsection-no">1.0</div><div><h3>图中标注规则</h3></div></div></div>
-<ul class="bullet-list"><li><strong>顺序</strong>：使用「第一步、第二步……」，代表用户操作或平台响应的逻辑顺序。</li><li><strong>功能层级</strong>：节点下方使用「功能：一级功能 &gt; 二级功能 &gt; 页面或动作」。</li><li><strong>业务结果</strong>：每张图最后都落到用户能感知的结果，例如「获得使用授权」「资产进入 Marketplace」「知识库可被挂载」。</li><li><strong>阶段划分</strong>：每张图按业务阶段分组，减少跨模块跳转带来的阅读负担。</li></ul>
-</section>
-
-<section class="section" id="sec-02" data-section>
-  <header class="section-head">
-    <div class="section-no">02</div>
-    <div class="section-title">
-      <h2>二、全平台角色旅程总览</h2>
-    </div>
-  </header>
-  <div class="flow-card-container" id="sec-02-card">
-  <div class="flow-card-head">
-    <div><h3>全平台角色旅程总览</h3></div>
-    <div class="flow-card-tools">
-      <span class="flow-card-id">2.0</span>
-      <button class="zoom-btn" type="button" onclick="openModal('fig-2-0', '全平台角色旅程总览')">&#10021; 放大全屏</button>
-    </div>
-  </div>
-  <div class="flow-card-body">
-    <div class="mermaid-diagram-wrap" id="fig-2-0">
       <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 72, "rankSpacing": 72}}}%%
 flowchart TB
   Start(["AI Foundation Platform&lt;br/&gt;业务用户旅程总览"]):::platform
 
-  subgraph Discover["用户旅程"]
+  subgraph Discover["资产订阅者"]
     D1["发现资产&lt;br/&gt;功能：Marketplace &gt; 资产浏览"]:::user
     D2["提交订阅申请&lt;br/&gt;功能：Marketplace &gt; 订阅申请"]:::user
     D3["使用对话Chat功能&lt;br/&gt;使用已订阅 Agent&lt;br/&gt;或调用已订阅 MCP"]:::user
   end
 
-  subgraph Build["创建者旅程"]
+  subgraph Build["资产创建者"]
     B1["创建 Agent 或 MCP&lt;br/&gt;功能：创作者中心 &gt; 创建向导"]:::owner
     B2["通过门控并自助上架&lt;br/&gt;功能：资产创建 &gt; 发布流程"]:::owner
     B3["审批订阅、维护版本、下架或重新上架&lt;br/&gt;功能：资产控制台"]:::owner
   end
 
-  subgraph KnowledgeJourney["知识侧旅程"]
+  subgraph KnowledgeJourney["知识库管理员"]
     K1["选择目录并建库&lt;br/&gt;功能：知识管理 &gt; 建库向导"]:::knowledge
     K2["导入资料并构建索引&lt;br/&gt;功能：知识管理 &gt; 文档导入与构建"]:::knowledge
     K3["开放给有权限用户检索&lt;br/&gt;功能：对话 &gt; 知识库挂载"]:::knowledge
   end
 
-  subgraph AdminJourney["平台管理员旅程"]
+  subgraph AdminJourney["平台管理员"]
     A1["维护测评与护栏模板&lt;br/&gt;功能：测评 / 护栏策略"]:::admin
     A2["维护平台资源、模型、推荐位和角色映射&lt;br/&gt;功能：管理后台"]:::admin
     A3["处理平台侧运行控制&lt;br/&gt;功能：治理中心"]:::admin
@@ -443,44 +431,48 @@ flowchart TB
 </div>
 </section>
 
-<section class="section" id="sec-03" data-section>
+<section class="section" id="sec-02" data-section>
   <header class="section-head">
-    <div class="section-no">03</div>
+    <div class="section-no">02</div>
     <div class="section-title">
-      <h2>三、用户旅程：发现资产、申请订阅、开始使用</h2>
+      <h2>二、资产订阅者旅程</h2>
     </div>
   </header>
-  <div class="technical-subsection" id="sec-03-ctx-0"><div class="technical-subsection-head"><div class="technical-subsection-no">3.0</div><div><h3>业务上下文（来源：用户旅程文档）</h3></div></div></div>
+  <div class="technical-subsection" id="sec-02-ctx-0"><div class="technical-subsection-head"><div class="technical-subsection-no">2.0</div><div><h3>业务上下文</h3></div></div></div>
 <p>用户在日常工作中需要使用一个 Agent 或 MCP。用户的核心目标是先在平台中找到适合自己业务场景的资产，再提交订阅申请、获得使用授权，并清楚知道订阅需要填写什么、由谁审批、审批通过后如何使用，以及后续资产变化会怎样影响自己。</p>
-<ul class="bullet-list"><li><strong>发现与判断</strong>：用户进入 Marketplace 后选择 Agent 或 MCP 频道，通过推荐、热门、全部列表或搜索浏览资产。列表只展示状态为「已发布」且质量门控全部通过的资产，资产卡片展示名称、类型、业务标签、状态、是否按人鉴权以及健康检查结果。Agent 详情包含基本信息、接入配置、测评信息和发布记录；基本信息展示能力标签、适用场景和负责人，测评信息展示准入测评结果、分项得分和执行时间，发布记录展示版本、发布说明和变更记录。MCP 详情包含基本信息、接入配置、工具能力和凭据状态。未订阅用户只看到订阅决策所需信息。</li><li><strong>提交申请</strong>：用户在详情页点击「订阅」后直接进入单页申请。申请表包含资产说明、业务系统、使用场景和创建者配置的自定义字段，并展示当前版本使用条款与并行多级审批人链。用户勾选同意后一次提交；申请记录锁定审批链快照，使用条款版本以审批通过生效时刻的现行版本为准。</li><li><strong>跟踪结果</strong>：用户可在订阅者中心通过「已通过、待审批、被驳回、已取消」四类统计查看申请状态；点击统计卡可查看对应资产，悬停状态可查看各级审批进展。待审批时可查看各级审批进展；被驳回时可查看理由并重新申请；已取消时可查看取消理由与取消来源。</li><li><strong>使用平台 Chat</strong>：用户登录后可直接进入对话工作台，默认使用平台 Chat；可选择模型、挂载有权限且可用的知识库，并调用平台原生工具。回答经过护栏检测后按段展示，可查看思考过程、检索证据和引用来源，也可随时停止生成。</li><li><strong>使用已订阅 Agent</strong>：Agent 订阅通过后，详情页出现「去使用」。用户进入该 Agent 的专属对话页，页面顶部展示 Agent 名称；该会话不能挂载知识库，能力以 Agent 自身返回内容为准。</li><li><strong>使用 MCP</strong>：MCP 不是对话对象，不能在 Chat 中直接调用；可由已订阅 Agent 的服务端接入，也可由外部系统通过平台开放接口调用。服务间鉴权通常无需用户配置凭据；按人鉴权时，用户需要在密钥库配置个人凭据，缺失或失效时调用失败且不使用共享身份替代。</li><li><strong>订阅变化与后续管理</strong>：资产下架时，已通过订阅失效、待审批申请自动取消，用户收到附原因的通知。资产重新上架后，原订阅不会自动恢复，重新上架通知不附带一键重新申请入口，用户需要从资产详情页重新申请。资产发布新版本或使用条款升版时，订阅者与待审批申请人会收到通知；申报为强治理变更时，通知附带影响说明与迁移指引。不再需要资产时，用户可在订阅者中心主动退订。</li></ul>
-<div class="technical-subsection" id="sec-03-3-1"><div class="technical-subsection-head"><div class="technical-subsection-no">3.1</div><div><h3>从发现资产到获得使用授权</h3></div></div></div>
-<div class="flow-card-container" id="sec-03-3-1-card">
+<ul class="bullet-list"><li><strong>发现与判断</strong>：用户进入 Marketplace 后选择 Agent 或 MCP 频道，通过推荐、热门、全部列表或搜索浏览资产。列表只展示状态为「已发布」且质量门控全部通过的资产，资产卡片展示名称、类型、业务标签、状态、是否按人鉴权以及健康检查结果。Agent 详情包含基本信息、接入配置、测评信息和发布记录；基本信息展示能力标签、适用场景和负责人，测评信息展示准入测评结果、分项得分和执行时间，发布记录展示版本、发布说明和变更记录。MCP 详情包含基本信息、接入配置、工具能力和凭据状态。未订阅用户只看到订阅决策所需信息。</li><li><strong>提交申请</strong>：用户在详情页点击「订阅」后直接进入单页申请。申请表包含资产说明、业务系统、使用场景和创建者配置的自定义字段，并展示当前版本使用条款与并行多级审批人链。用户勾选同意后一次提交；申请记录锁定审批链快照，使用条款版本以审批通过生效时刻的现行版本为准。</li><li><strong>跟踪结果</strong>：用户可在订阅者中心通过「已通过、待审批、被驳回、已取消」四类统计查看申请状态；点击统计卡可查看对应资产，悬停状态可查看各级审批进展。待审批时可查看各级审批进展；被驳回时可查看理由并重新申请；已取消时可查看取消理由与取消来源。</li><li><strong>使用已订阅 Agent</strong>：Agent 订阅通过后，详情页出现「去使用」。用户进入该 Agent 的专属对话页，页面顶部展示 Agent 名称；该会话不能挂载知识库，能力以 Agent 自身返回内容为准。</li><li><strong>使用 MCP</strong>：MCP 不是对话对象，不能在 Chat 中直接调用；可由已订阅 Agent 的服务端接入，也可由外部系统通过平台开放接口调用。服务间鉴权通常无需用户配置凭据；按人鉴权时，用户需要在密钥库配置个人凭据，缺失或失效时调用失败且不使用共享身份替代。</li><li><strong>订阅变化与后续管理</strong>：资产下架时，已通过订阅失效、待审批申请自动取消，用户收到附原因的通知。资产重新上架后，原订阅不会自动恢复，重新上架通知不附带一键重新申请入口，用户需要从资产详情页重新申请。资产发布新版本或使用条款升版时，订阅者与待审批申请人会收到通知；申报为强治理变更时，通知附带影响说明与迁移指引。不再需要资产时，用户可在订阅者中心主动退订。</li></ul>
+<div class="technical-subsection" id="sec-02-2-1"><div class="technical-subsection-head"><div class="technical-subsection-no">2.1</div><div><h3>发现资产，订阅申请</h3></div></div></div>
+<p class="journey-line">作为资产订阅者，我可以在 Marketplace 中浏览、搜索并查看 Agent 或 MCP 的详情，再提交订阅申请，以获得使用该资产所需的授权。</p>
+<div class="flow-card-container" id="sec-02-2-1-card">
   <div class="flow-card-head">
-    <div><h3>从发现资产到获得使用授权</h3></div>
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-user">角色：资产订阅者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
     <div class="flow-card-tools">
-      <span class="flow-card-id">3.1</span>
-      <button class="zoom-btn" type="button" onclick="openModal('fig-3-1', '从发现资产到获得使用授权')">&#10021; 放大全屏</button>
+      <span class="flow-card-id">2.1</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-2-1', '发现资产，订阅申请')">&#10021; 放大全屏</button>
     </div>
   </div>
   <div class="flow-card-body">
-    <div class="mermaid-diagram-wrap" id="fig-3-1">
+    <div class="mermaid-diagram-wrap" id="fig-2-1">
       <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
 flowchart LR
-  subgraph Phase1["阶段一：找到合适资产"]
-    U1["第一步：进入 Marketplace&lt;br/&gt;选择 Agent 或 MCP 频道&lt;br/&gt;&lt;br/&gt;功能：Marketplace &gt; 频道与榜单"]:::user
-    U2["第二步：浏览推荐、热门或全部列表&lt;br/&gt;也可以按名称、标签、简介搜索&lt;br/&gt;卡片展示名称、类型、标签和状态&lt;br/&gt;只展示已上架且通过门控的资产&lt;br/&gt;&lt;br/&gt;功能：Marketplace&lt;br/&gt;搜索与列表可见性"]:::user
-    U3["第三步：打开详情页判断是否适合&lt;br/&gt;未订阅时只展示做决策所需信息&lt;br/&gt;&lt;br/&gt;功能：Marketplace &gt; 资产详情"]:::user
+  subgraph Phase1["模块一：找到合适资产"]
+    U1["第一步：进入 Marketplace&lt;br/&gt;选择 Agent 或 MCP 频道"]:::user
+    U2["第二步：浏览推荐、热门或全部列表&lt;br/&gt;也可以按名称、标签、简介搜索&lt;br/&gt;卡片展示名称、类型、标签和状态"]:::user
+    U3["第三步：打开详情页判断是否适合&lt;br/&gt;含基本信息、接入配置、测评信息和发布记录四个页签"]:::user
   end
 
-  subgraph Phase2["阶段二：提交申请"]
+  subgraph Phase2["模块二：提交申请"]
     U4["第四步：点击订阅&lt;br/&gt;直接进入单页申请表&lt;br/&gt;不再经过只展示资产说明的中间页面&lt;br/&gt;&lt;br/&gt;功能：Marketplace &gt; 订阅申请"]:::user
     U5["第五步：填写申请信息&lt;br/&gt;包括业务系统、使用场景&lt;br/&gt;以及资产自定义字段&lt;br/&gt;阅读带版本号的使用条款并同意&lt;br/&gt;&lt;br/&gt;功能：Marketplace&lt;br/&gt;订阅申请表单"]:::user
     U6["第六步：查看审批人链并提交&lt;br/&gt;用户在提交前知道&lt;br/&gt;会由谁审批&lt;br/&gt;&lt;br/&gt;功能：Marketplace&lt;br/&gt;订阅审批预览"]:::user
   end
 
-  subgraph Phase3["阶段三：审批与结果"]
-    PlatformStepOne["第七步：平台创建申请记录&lt;br/&gt;锁定申请内容&lt;br/&gt;锁定审批链快照&lt;br/&gt;使用条款以审批通过时刻为准"]:::platform
-    PlatformStepTwo{"第八步：审批结果&lt;br/&gt;各审批级并行处理申请&lt;br/&gt;某级无有效审批人时&lt;br/&gt;自动回落给创建者"}:::platform
+  subgraph Phase3["模块三：审批与结果"]
+    PlatformStepOne["第七步：进入订阅者中心&lt;br/&gt;用户在卡片右上角的状态悬停时&lt;br/&gt;可以查看各级审批进展"]:::user
+    PlatformStepTwo{"第八步：审批结果&lt;br/&gt;各审批级并行处理申请"}:::platform
     U7["第九步（通过）&lt;br/&gt;用户获得使用授权&lt;br/&gt;&lt;br/&gt;功能：订阅者中心 &gt; 已通过"]:::user
     U8["第九步（驳回）&lt;br/&gt;用户查看理由&lt;br/&gt;并可重新申请&lt;br/&gt;&lt;br/&gt;功能：订阅者中心 &gt; 被驳回"]:::user
     U9["第九步（待审批）&lt;br/&gt;用户可查看各级审批进展&lt;br/&gt;&lt;br/&gt;功能：订阅者中心 &gt; 待审批"]:::user
@@ -497,51 +489,50 @@ flowchart LR
     </div>
   </div>
 </div>
-<div class="technical-subsection" id="sec-03-3-2"><div class="technical-subsection-head"><div class="technical-subsection-no">3.2</div><div><h3>订阅通过后如何使用不同能力</h3></div></div></div>
-<div class="flow-card-container" id="sec-03-3-2-card">
+<div class="technical-subsection" id="sec-02-2-2"><div class="technical-subsection-head"><div class="technical-subsection-no">2.2</div><div><h3>资产使用</h3></div></div></div>
+<p class="journey-line">作为资产订阅者，我可以在对话页面或通过平台网关调用已订阅的 Agent 和 MCP，以在日常工作中直接使用这些资产的能力。</p>
+<div class="flow-card-container" id="sec-02-2-2-card">
   <div class="flow-card-head">
-    <div><h3>订阅通过后如何使用不同能力</h3></div>
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-user">角色：资产订阅者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
     <div class="flow-card-tools">
-      <span class="flow-card-id">3.2</span>
-      <button class="zoom-btn" type="button" onclick="openModal('fig-3-2', '订阅通过后如何使用不同能力')">&#10021; 放大全屏</button>
+      <span class="flow-card-id">2.2</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-2-2', '资产使用')">&#10021; 放大全屏</button>
     </div>
   </div>
   <div class="flow-card-body">
-    <div class="mermaid-diagram-wrap" id="fig-3-2">
+    <div class="mermaid-diagram-wrap" id="fig-2-2">
       <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
 flowchart TB
   Start(["用户已登录平台&lt;br/&gt;使用资产时订阅已通过"]):::user
 
-  subgraph ChatPath["路径一：使用平台 Chat"]
-    C1["第一步：进入对话工作台&lt;br/&gt;默认会话对象是平台 Chat&lt;br/&gt;&lt;br/&gt;功能：对话 &gt; Chat 会话"]:::user
-    C2["第二步：选择模型&lt;br/&gt;并挂载可用知识库&lt;br/&gt;只显示本人有权限的可用库&lt;br/&gt;&lt;br/&gt;功能：对话 &gt; 模型选择 / 知识库挂载"]:::user
-    C3["第三步：提问并查看回答依据&lt;br/&gt;可查看思考过程、引用&lt;br/&gt;检索证据&lt;br/&gt;图片或图表证据&lt;br/&gt;也可随时中止生成&lt;br/&gt;&lt;br/&gt;功能：对话 &gt; 回答与证据展示"]:::user
-    C4["重要边界&lt;br/&gt;Chat 不调用 Marketplace 资产&lt;br/&gt;只做模型对话&lt;br/&gt;知识库检索&lt;br/&gt;平台原生工具调用"]:::platform
+  subgraph ModulesRow2_2[" "]
+  direction LR
+    subgraph AgentPath["模块一：使用已订阅 Agent"]
+      G1["第一步：从 Agent 详情页点击去使用&lt;br/&gt;&lt;br/&gt;功能：Marketplace &gt; 订阅者中心"]:::user
+      G2["第二步：进入该 Agent 专属对话页&lt;br/&gt;页面顶部展示当前 Agent 名称&lt;br/&gt;&lt;br/&gt;功能：对话 &gt; Agent 对话"]:::user
+      G4{"第三步：资产是否声明按人鉴权"}:::platform
+      G5["服务间鉴权分支&lt;br/&gt;平台使用该 Agent 的资产级服务凭据&lt;br/&gt;订阅者无需配置凭据"]:::platform
+      G6{"个人凭据是否可用"}:::platform
+      G7["个人凭据异常分支&lt;br/&gt;调用失败并提示前往密钥库配置&lt;br/&gt;不使用共享身份替代&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 出站个人凭据"]:::platform
+      G8["第四步：查看 Agent 回答&lt;br/&gt;能力以该 Agent 自身返回内容为准"]:::user
+      G9["重要边界：Agent 会话不能挂载知识库&lt;br/&gt;能力以该 Agent 自身返回内容为准"]:::platform
+    end
+
+    subgraph ToolPath["模块二：使用已订阅 MCP"]
+      T1["第一步：进入 MCP 详情页&lt;br/&gt;查看接入配置&lt;br/&gt;工具能力和凭据状态&lt;br/&gt;&lt;br/&gt;功能：Marketplace &gt; 订阅者中心"]:::user
+      T2{"第二步：资产是否声明按人鉴权"}:::platform
+      T3["服务间鉴权分支&lt;br/&gt;平台使用该 MCP 的资产级服务凭据&lt;br/&gt;订阅者无需配置凭据"]:::platform
+      T4["按人鉴权分支&lt;br/&gt;用户需在密钥库配置个人出站凭据&lt;br/&gt;凭据缺失或失效时调用失败&lt;br/&gt;不使用共享身份替代&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 出站个人凭据"]:::platform
+      T5["第三步：MCP 被实际调用&lt;br/&gt;平台侧：已订阅 Agent 服务端自动接入调用&lt;br/&gt;外部侧：外部系统凭 PAT 经开放接口调用"]:::platform
+      T6["外部系统集成分支&lt;br/&gt;创建入站 PAT 时&lt;br/&gt;需勾选该资产所在的&lt;br/&gt;已授权 MCP 列表&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 入站管理"]:::user
+    end
+    AgentPath ~~~ ToolPath
   end
 
-  subgraph AgentPath["路径二：使用已订阅 Agent"]
-    G1["第一步：从 Agent 详情页点击去使用&lt;br/&gt;&lt;br/&gt;功能：Marketplace &gt; Agent 详情"]:::user
-    G2["第二步：进入该 Agent 专属对话页&lt;br/&gt;页面顶部展示当前 Agent 名称&lt;br/&gt;&lt;br/&gt;功能：对话 &gt; Agent 对话"]:::user
-    G3["第三步：平台网关代理请求&lt;br/&gt;执行护栏检测&lt;br/&gt;凭据解析和调用审计"]:::platform
-    G4{"第四步：资产是否声明按人鉴权"}:::platform
-    G5["服务间鉴权分支&lt;br/&gt;平台使用资产级服务凭据&lt;br/&gt;订阅者无需配置凭据"]:::platform
-    G6{"个人凭据是否可用"}:::platform
-    G7["个人凭据异常分支&lt;br/&gt;调用失败并提示前往密钥库配置&lt;br/&gt;不使用共享身份替代&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 出站个人凭据"]:::platform
-    G8["第五步：请求透传到资产 Agent&lt;br/&gt;能力以 Agent 自身返回内容为准"]:::platform
-    G9["重要边界：Agent 会话不能挂载知识库&lt;br/&gt;能力以该 Agent 自身返回内容为准"]:::platform
-  end
-
-  subgraph ToolPath["路径三：使用 MCP"]
-    T1["第一步：进入 MCP 详情页&lt;br/&gt;查看接入配置&lt;br/&gt;工具能力和凭据状态&lt;br/&gt;&lt;br/&gt;功能：Marketplace&lt;br/&gt;MCP 详情"]:::user
-    T2{"第二步：该资产声明的鉴权主体类型"}:::platform
-    T3["服务间鉴权分支&lt;br/&gt;平台使用该 MCP 的资产级服务凭据发起调用&lt;br/&gt;订阅者通常无需配置个人凭据"]:::platform
-    T4["按人鉴权分支&lt;br/&gt;用户需要自行在密钥库&lt;br/&gt;配置该 MCP 的个人凭据并执行探测&lt;br/&gt;凭据缺失或失效时调用失败，不回落共享身份&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 出站个人凭据（手动配置）"]:::user
-    T5["第三步：MCP 被实际调用&lt;br/&gt;平台侧：已订阅 Agent 服务端自动接入调用&lt;br/&gt;外部侧：外部系统凭 PAT 经开放接口调用&lt;br/&gt;MCP 没有去使用入口"]:::platform
-    T6["外部系统集成分支&lt;br/&gt;创建入站 PAT 时&lt;br/&gt;需勾选该资产所在的&lt;br/&gt;已授权 MCP 列表&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 入站管理"]:::user
-  end
-
-  Start --&gt; C1 --&gt; C2 --&gt; C3 --&gt; C4
-  Start --&gt; G1 --&gt; G2 --&gt; G3 --&gt; G4
+  Start --&gt; G1 --&gt; G2 --&gt; G4
   G4 --&gt;|服务间鉴权| G5 --&gt; G8
   G4 --&gt;|按人鉴权| G6
   G6 --&gt;|可用| G8
@@ -558,29 +549,34 @@ flowchart TB
     </div>
   </div>
 </div>
-<div class="technical-subsection" id="sec-03-3-3"><div class="technical-subsection-head"><div class="technical-subsection-no">3.3</div><div><h3>订阅变化、通知与重新申请</h3></div></div></div>
-<div class="flow-card-container" id="sec-03-3-3-card">
+<div class="technical-subsection" id="sec-02-2-3"><div class="technical-subsection-head"><div class="technical-subsection-no">2.3</div><div><h3>资产变化通知</h3></div></div></div>
+<p class="journey-line">作为资产订阅者，我可以在通知列表和订阅者中心中查看订阅、资产下架或版本变化带来的影响，以及时了解授权状态并决定是否需要重新申请。</p>
+<div class="flow-card-container" id="sec-02-2-3-card">
   <div class="flow-card-head">
-    <div><h3>订阅变化、通知与重新申请</h3></div>
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-user">角色：资产订阅者</span>
+      <span class="role-badge role-badge-owner">角色：资产创建者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
     <div class="flow-card-tools">
-      <span class="flow-card-id">3.3</span>
-      <button class="zoom-btn" type="button" onclick="openModal('fig-3-3', '订阅变化、通知与重新申请')">&#10021; 放大全屏</button>
+      <span class="flow-card-id">2.3</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-2-3', '资产变化通知')">&#10021; 放大全屏</button>
     </div>
   </div>
   <div class="flow-card-body">
-    <div class="mermaid-diagram-wrap" id="fig-3-3">
+    <div class="mermaid-diagram-wrap" id="fig-2-3">
       <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "linear", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
 flowchart LR
   subgraph Trigger["变化来源"]
-    O3["资产发布新版或使用条款升级"]:::owner
-    O1["创建者取消订阅"]:::owner
     U1["订阅者主动退订"]:::user
+    O1["创建者取消他人订阅"]:::owner
     O2["创建者选择下架"]:::owner
+    O3["资产发布新版或使用条款升级"]:::owner
+    O0["需填写理由"]:::owner
   end
 
   subgraph Platform["平台处理"]
-    PlatformStepOne["已通过订阅转为已取消&lt;br/&gt;使用授权立即失效"]:::platform
-    PlatformStepTwo["下架的额外连带处理&lt;br/&gt;待审批申请自动取消&lt;br/&gt;审批人待办同步清除&lt;br/&gt;平台停止经平台流向该资产的调用"]:::platform
+    PlatformStepOne["取消已通过订阅&lt;br/&gt;使用权限失效"]:::platform
     PlatformStepThree["平台发送站内通知&lt;br/&gt;说明变化原因、影响范围&lt;br/&gt;与用户可采取的后续动作"]:::platform
   end
 
@@ -590,12 +586,11 @@ flowchart LR
     R3["仅版本或使用条款变化&lt;br/&gt;原订阅继续有效&lt;br/&gt;订阅者自动使用新版本&lt;br/&gt;&lt;br/&gt;功能：订阅者中心 &gt; 已通过"]:::user
   end
 
-  O1 --&gt; PlatformStepOne
+  O1 --&gt; O0
+  O2 --&gt; O0
+  O0 --&gt; PlatformStepOne
   U1 --&gt; PlatformStepOne
-  O2 --&gt; PlatformStepOne
-  O2 --&gt; PlatformStepTwo
   PlatformStepOne --&gt; PlatformStepThree
-  PlatformStepTwo --&gt; PlatformStepThree
   O3 --&gt; PlatformStepThree
   PlatformStepThree --&gt; R1
   R1 --&gt;|授权已失效| R2
@@ -609,43 +604,47 @@ flowchart LR
 </div>
 </section>
 
-<section class="section" id="sec-04" data-section>
+<section class="section" id="sec-03" data-section>
   <header class="section-head">
-    <div class="section-no">04</div>
+    <div class="section-no">03</div>
     <div class="section-title">
-      <h2>四、创建者旅程：创建、上架、维护 Agent 或 MCP</h2>
+      <h2>三、资产创建者旅程</h2>
     </div>
   </header>
-  <div class="technical-subsection" id="sec-04-ctx-0"><div class="technical-subsection-head"><div class="technical-subsection-no">4.0</div><div><h3>业务上下文（来源：用户旅程文档）</h3></div></div></div>
+  <div class="technical-subsection" id="sec-03-ctx-0"><div class="technical-subsection-head"><div class="technical-subsection-no">3.0</div><div><h3>业务上下文</h3></div></div></div>
 <p>创建者希望把自己的 Agent 或 MCP 发布到平台，让其他用户订阅使用。创建资产的用户自动成为该资产的首位创建者，也可以在创建过程中增加共同创建者和 Deputy，保证后续有人共同维护资产、审批订阅申请并处理上下架。</p>
 <ul class="bullet-list"><li><strong>创建高代码 Agent</strong>：从创作者中心点击「创建 Agent」，选择高代码方式并接入已部署的 Agent 服务。依次完成基础信息、接入配置、鉴权配置、能力声明、订阅申请表单、使用条款、审批人链、护栏策略模板和发布说明。鉴权支持静态凭据与动态凭据，可声明 API Key、Bearer Token、OAuth2 或自定义 Header；服务间鉴权资产需要配置并探测资产级服务凭据。</li><li><strong>创建低代码 Agent（二期能力）</strong>：选择有创建权限的 Dify 工作区，前往 Dify 完成应用编排。Dify 侧发布只表示应用可在 Dify 中运行，不代表已经在本平台 Marketplace 上架；平台同步元数据后，创建者仍需补齐治理字段，并继续走平台上架流程。</li><li><strong>创建 MCP</strong>：从创作者中心点击「创建 MCP」，依次完成基础信息、链接配置、鉴权配置、能力声明、订阅申请配置和发布说明。</li><li><strong>测评并上架</strong>：Agent 通过质量门控后进入发布准入测评；三类测评均达到平台阈值才算整体通过。测评通过后可直接上架；测评未通过时是否阻断上架由平台管理员的阻断开关决定，默认不阻断。开关关闭时资产仍可上架，但详情页标注「准入测评未通过」。MCP 不执行发布准入测评，质量门控全部通过后即可自助上架。</li><li><strong>资产日常管理</strong>：创建者可在资产控制台查看基本信息、订阅管理、测评结果、发布记录和使用情况；可审批或驳回订阅申请，也可取消他人订阅并填写理由；可维护共同创建者和 Deputy，保证已发布资产始终满足负责人冗余要求。</li><li><strong>热改与版本变更</strong>：负责人名单、订阅申请表单、审批人链、护栏策略绑定、基础信息、超时与重试等配置可即时生效；服务地址、鉴权声明、能力声明等版本类配置通过未发布修订提交，重走门控与测评；只修改使用条款时走轻发布。发布完成前当前版本持续对外服务，新版本替换后全体订阅者自动跟随；创建者发布时显式申报是否为强治理变更，申报时必填影响说明与迁移指引。</li><li><strong>发布互斥与中止发布</strong>：资产处于发布进行中时，下架与删除会被阻断；任一创建者或Deputy可执行「中止发布」，中止后修订保留并通知发起人。</li><li><strong>下架与修复</strong>：创建者可在资产控制台下架资产，需要二次确认并填写下架原因。下架后订阅失效、待审批申请取消、审批人待办清除、平台调用停止。创建者仍可修改未发布修订并重新上架；重新上架不恢复原订阅，订阅者需重新申请。</li><li><strong>删除资产</strong>：已发布资产须先下架才能删除，未发布或已下架资产可直接删除。删除是终态，资产对全部用户不可见且不可恢复；订阅历史等业务记录永久保留，资产级服务凭据被清理，已签发的 PAT 对该资产的访问随之失效。</li></ul>
-<div class="technical-subsection" id="sec-04-4-1"><div class="technical-subsection-head"><div class="technical-subsection-no">4.1</div><div><h3>创建高代码 Agent 并自助上架</h3></div></div></div>
-<div class="flow-card-container" id="sec-04-4-1-card">
+<div class="technical-subsection" id="sec-03-3-1"><div class="technical-subsection-head"><div class="technical-subsection-no">3.1</div><div><h3>创建高代码Agent旅程</h3></div></div></div>
+<p class="journey-line">作为资产创建者，我可以在创作者中心的创建向导中依次完成基础信息、接入配置、鉴权、能力声明、订阅配置和护栏绑定，以将已部署的 Agent 服务发布到 Marketplace 供其他用户订阅使用。</p>
+<div class="flow-card-container" id="sec-03-3-1-card">
   <div class="flow-card-head">
-    <div><h3>创建高代码 Agent 并自助上架</h3></div>
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-owner">角色：资产创建者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
     <div class="flow-card-tools">
-      <span class="flow-card-id">4.1</span>
-      <button class="zoom-btn" type="button" onclick="openModal('fig-4-1', '创建高代码 Agent 并自助上架')">&#10021; 放大全屏</button>
+      <span class="flow-card-id">3.1</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-3-1', '创建高代码Agent旅程')">&#10021; 放大全屏</button>
     </div>
   </div>
   <div class="flow-card-body">
-    <div class="mermaid-diagram-wrap" id="fig-4-1">
+    <div class="mermaid-diagram-wrap" id="fig-3-1">
       <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 66}}}%%
 flowchart LR
-  subgraph Prepare["阶段一：填写资产资料"]
+  subgraph Prepare["模块一：填写资产资料"]
     A1["第一步：从创作者中心&lt;br/&gt;创建 Agent&lt;br/&gt;&lt;br/&gt;功能：Marketplace&lt;br/&gt;创作者中心&lt;br/&gt;创建 Agent"]:::owner
     A2["第二步：填写基础信息和负责人&lt;br/&gt;创建者为首位创建者&lt;br/&gt;也可以增加 Deputy/共同创建者"]:::owner
     A3["第三步：配置服务接入&lt;br/&gt;填写服务地址、健康检查、超时和重试&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 接入配置"]:::owner
     A4["第四步：配置鉴权&lt;br/&gt;选择静态凭据或动态凭据&lt;br/&gt;声明鉴权方式与主体类型&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 鉴权配置"]:::owner
   end
 
-  subgraph Govern["阶段二：补齐治理配置"]
+  subgraph Govern["模块二：补齐治理配置"]
     A5["第五步：拉取并确认能力声明&lt;br/&gt;平台读取 Agent 能力描述&lt;br/&gt;展示协议版本、接口数量和鉴权方式&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 能力声明"]:::owner
-    A6["第六步：配置订阅申请规则&lt;br/&gt;表单定义文件支持上传并实时预览&lt;br/&gt;使用条款包含内容与版本号&lt;br/&gt;配置并行多级审批人链&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 订阅配置"]:::owner
+    A6["第六步：配置订阅申请规则&lt;br/&gt;支持上传 YAML 文件并实时预览&lt;br/&gt;支持开启订阅审批管理&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 订阅配置"]:::owner
     A7["第七步：选择护栏策略模板&lt;br/&gt;并填写发布说明&lt;br/&gt;只能选择启用中的模板&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 护栏策略与发布说明"]:::owner
   end
 
-  subgraph Release["阶段三：门控、测评与上架"]
+  subgraph Release["模块三：门控、测评与上架"]
     PlatformStepOne{"第八步：质量门控是否通过"}:::platform
     PlatformStepTwo["门控未通过&lt;br/&gt;展示失败原因&lt;br/&gt;修正配置后重新运行门控&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 质量门控"]:::platform
     PlatformStepThree["第九步：执行发布准入测评&lt;br/&gt;查看进度、样本明细和分项结果&lt;br/&gt;&lt;br/&gt;功能：测评 &gt; 发布准入测评"]:::platform
@@ -669,17 +668,21 @@ flowchart LR
     </div>
   </div>
 </div>
-<div class="technical-subsection" id="sec-04-4-2"><div class="technical-subsection-head"><div class="technical-subsection-no">4.2</div><div><h3>创建低代码 Agent 并自助上架（二期）</h3></div></div></div>
-<div class="flow-card-container" id="sec-04-4-2-card">
+<div class="technical-subsection" id="sec-03-3-2"><div class="technical-subsection-head"><div class="technical-subsection-no">3.2</div><div><h3>创建低代码Agent旅程（二期）</h3></div></div></div>
+<p class="journey-line">作为资产创建者，我可以在创作者中心选择已获权限的 Dify 实例与 Workspace，把已经搭建好的 Agent 接入平台并补齐治理字段，以更快地把低代码 Agent 上架到 Marketplace。</p>
+<div class="flow-card-container" id="sec-03-3-2-card">
   <div class="flow-card-head">
-    <div><h3>创建低代码 Agent 并自助上架（二期）</h3></div>
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-owner">角色：资产创建者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
     <div class="flow-card-tools">
-      <span class="flow-card-id">4.2</span>
-      <button class="zoom-btn" type="button" onclick="openModal('fig-4-2', '创建低代码 Agent 并自助上架（二期）')">&#10021; 放大全屏</button>
+      <span class="flow-card-id">3.2</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-3-2', '创建低代码Agent旅程（二期）')">&#10021; 放大全屏</button>
     </div>
   </div>
   <div class="flow-card-body">
-    <div class="mermaid-diagram-wrap" id="fig-4-2">
+    <div class="mermaid-diagram-wrap" id="fig-3-2">
       <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
 flowchart LR
   L0["前置条件&lt;br/&gt;平台管理员已配置好 Dify 实例与 Workspace&lt;br/&gt;创建者已在 Dify 里自建好 Agent&lt;br/&gt;本向导不提供编排能力，只接入已有 Agent"]:::platform
@@ -697,23 +700,26 @@ flowchart LR
     </div>
   </div>
 </div>
-<div class="technical-subsection" id="sec-04-4-3"><div class="technical-subsection-head"><div class="technical-subsection-no">4.3</div><div><h3>创建 MCP 并自助上架</h3></div></div></div>
-<div class="flow-card-container" id="sec-04-4-3-card">
+<div class="technical-subsection" id="sec-03-3-3"><div class="technical-subsection-head"><div class="technical-subsection-no">3.3</div><div><h3>创建MCP旅程</h3></div></div></div>
+<p class="journey-line">作为资产创建者，我可以在创作者中心完成基础信息、链接配置、鉴权、能力声明和订阅配置，以将 MCP 工具发布到 Marketplace，供已订阅 Agent 或外部系统调用。</p>
+<div class="flow-card-container" id="sec-03-3-3-card">
   <div class="flow-card-head">
-    <div><h3>创建 MCP 并自助上架</h3></div>
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-owner">角色：资产创建者</span>
+    </div>
     <div class="flow-card-tools">
-      <span class="flow-card-id">4.3</span>
-      <button class="zoom-btn" type="button" onclick="openModal('fig-4-3', '创建 MCP 并自助上架')">&#10021; 放大全屏</button>
+      <span class="flow-card-id">3.3</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-3-3', '创建MCP旅程')">&#10021; 放大全屏</button>
     </div>
   </div>
   <div class="flow-card-body">
-    <div class="mermaid-diagram-wrap" id="fig-4-3">
+    <div class="mermaid-diagram-wrap" id="fig-3-3">
       <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
 flowchart LR
   ToolStepOne["第一步：从创作者中心&lt;br/&gt;创建 MCP&lt;br/&gt;&lt;br/&gt;功能：Marketplace&lt;br/&gt;创作者中心&lt;br/&gt;创建 MCP"]:::owner
   ToolStepTwo["第二步：填写基础信息和负责人&lt;br/&gt;包括名称、分类和描述&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 基础信息"]:::owner
   ToolStepThree["第三步：配置工具服务链接&lt;br/&gt;服务地址、协议、托管方式和健康检查&lt;br/&gt;托管方式属于版本类配置&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 链接配置"]:::owner
-  ToolStepFour["第四步：配置鉴权&lt;br/&gt;仅支持静态凭据&lt;br/&gt;声明鉴权主体&lt;br/&gt;配置资产级服务凭据&lt;br/&gt;或声明按人鉴权&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 鉴权配置"]:::owner
+  ToolStepFour["第四步：配置凭据&lt;br/&gt;仅支持静态凭据&lt;br/&gt;声明鉴权主体&lt;br/&gt;配置服务凭据&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 鉴权配置"]:::owner
   ToolStepFive["第五步：填写清单链接并拉取工具清单&lt;br/&gt;确认工具名称、能力说明&lt;br/&gt;参数摘要、鉴权方式和识别状态&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 能力声明"]:::owner
   ToolStepSix["第六步：配置订阅申请和发布说明&lt;br/&gt;包括申请表单、使用条款和审批人&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 订阅配置"]:::owner
   ToolStepNine["第七步：直接上架&lt;br/&gt;MCP 不执行发布准入测评&lt;br/&gt;&lt;br/&gt;功能：Marketplace &gt; 资产列表"]:::owner
@@ -725,47 +731,55 @@ flowchart LR
     </div>
   </div>
 </div>
-<div class="technical-subsection" id="sec-04-4-4"><div class="technical-subsection-head"><div class="technical-subsection-no">4.4</div><div><h3>资产上架后的日常运营</h3></div></div></div>
-<div class="flow-card-container" id="sec-04-4-4-card">
+<div class="technical-subsection" id="sec-03-3-4"><div class="technical-subsection-head"><div class="technical-subsection-no">3.4</div><div><h3>资产上架运营</h3></div></div></div>
+<p class="journey-line">作为资产创建者，我可以在资产控制台中查看基本信息、审批订阅申请、维护共创者和 Deputy、发布新版本或下架资产，以保证已上架资产持续满足业务需求和治理要求。</p>
+<div class="flow-card-container" id="sec-03-3-4-card">
   <div class="flow-card-head">
-    <div><h3>资产上架后的日常运营</h3></div>
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-owner">角色：资产创建者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
     <div class="flow-card-tools">
-      <span class="flow-card-id">4.4</span>
-      <button class="zoom-btn" type="button" onclick="openModal('fig-4-4', '资产上架后的日常运营')">&#10021; 放大全屏</button>
+      <span class="flow-card-id">3.4</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-3-4', '资产上架运营')">&#10021; 放大全屏</button>
     </div>
   </div>
   <div class="flow-card-body">
-    <div class="mermaid-diagram-wrap" id="fig-4-4">
-      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
+    <div class="mermaid-diagram-wrap diagram-scale-sm" id="fig-3-4">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "13px", "nodeTextMargin": 10, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 160, "nodeSpacing": 36, "rankSpacing": 44, "subGraphTitleMargin": {"top": 8, "bottom": 20}}}}%%
 flowchart TB
   Console["【创作者中心】&lt;br/&gt;Provider Console 提供四个状态统计卡&lt;br/&gt;已创建、待审批、待发布、已下架&lt;br/&gt;点击统计卡查看对应资产和订阅请求&lt;br/&gt;&lt;br/&gt;功能：Marketplace &gt; 创作者中心"]:::owner
   Center["点击资产卡片&lt;br/&gt;进入资产控制台&lt;br/&gt;&lt;br/&gt;功能：Marketplace &gt; 资产控制台"]:::owner
 
-  subgraph InfoArea["【查看基本信息】"]
-    I1["查看资产基本信息&lt;br/&gt;测评结果、发布记录和用量检测&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 基本信息"]:::owner
-  end
+  subgraph ModulesRow3_4[" "]
+  direction LR
+    subgraph InfoArea["【查看基本信息】"]
+      I1["查看资产基本信息&lt;br/&gt;测评结果、发布记录和用量检测&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 基本信息"]:::owner
+    end
 
-  subgraph SubscribeArea["【管理订阅】"]
-    M1["用户管理&lt;br/&gt;审批或驳回订阅申请&lt;br/&gt;查看订阅者信息和用量&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 订阅管理"]:::owner
-    M2["取消他人订阅&lt;br/&gt;需要填写取消理由&lt;br/&gt;使用授权立即失效&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 订阅管理"]:::owner
-    M3["设置订阅申请表单&lt;br/&gt;与订阅审批人链&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 订阅设置"]:::owner
-  end
+    subgraph SubscribeArea["【管理订阅】"]
+      M1["用户管理&lt;br/&gt;审批或驳回订阅申请&lt;br/&gt;查看订阅者信息和用量&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 订阅管理"]:::owner
+      M2["取消他人订阅&lt;br/&gt;需要填写取消理由&lt;br/&gt;使用授权立即失效&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 订阅管理"]:::owner
+      M3["设置订阅申请表单&lt;br/&gt;与订阅审批人链&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 订阅设置"]:::owner
+    end
 
-  subgraph UpdateArea["【更新】"]
-    U1["点击发布新版&lt;br/&gt;进入创建该资产时使用的&lt;br/&gt;同一套配置流程&lt;br/&gt;基础信息、服务地址、鉴权配置&lt;br/&gt;能力声明、订阅配置和发布说明&lt;br/&gt;默认沿用当前资产配置&lt;br/&gt;只需修改本次更新的内容&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 发布新版"]:::owner
-    U2{"是否仅修改使用条款"}:::platform
-    U3["轻发布&lt;br/&gt;条款版本更新并通知存量订阅者与待审批申请人&lt;br/&gt;不需要重新进行质量门控&lt;br/&gt;和发布准入测评&lt;br/&gt;也不要求订阅者重新确认&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 使用条款发布"]:::platform
-    U4["重新执行质量门控&lt;br/&gt;Agent 还需要执行发布准入测评&lt;br/&gt;校验通过后新版本发布并替换当前版本&lt;br/&gt;订阅者自动使用新版本&lt;br/&gt;发布完成前当前版本继续对外服务"]:::platform
-    U5["发布进行中&lt;br/&gt;创建者或 Deputy 可点击「中止发布」&lt;br/&gt;未发布修订保留、可继续编辑&lt;br/&gt;并通知发起本次发布的人&lt;br/&gt;发布进行中会阻断下架和删除&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 中止发布"]:::owner
-  end
+    subgraph UpdateArea["【更新】"]
+      U1["需要变更资产配置&lt;br/&gt;先判断变更内容的类型&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 编辑 / 发布新版"]:::owner
+      U2{"是否为轻量变更&lt;br/&gt;（名称、简介、标签等基础信息&lt;br/&gt;使用条款、元数据）"}:::platform
+      U3["是：轻量变更&lt;br/&gt;资产控制台内直接修改&lt;br/&gt;基础信息类即时生效&lt;br/&gt;使用条款类走轻发布&lt;br/&gt;（版本号递增，通知存量订阅者与待审批申请人）&lt;br/&gt;均不重新进行质量门控和发布准入测评&lt;br/&gt;也不要求订阅者重新确认&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 基础信息 / 使用条款发布"]:::platform
+      U4["否：影响功能的变更&lt;br/&gt;（服务地址、鉴权配置、能力声明等）&lt;br/&gt;点击「发布新版」进入创建向导同款配置流程&lt;br/&gt;重新执行质量门控&lt;br/&gt;Agent 还需要执行发布准入测评&lt;br/&gt;校验通过后新版本发布并替换当前版本&lt;br/&gt;订阅者自动使用新版本&lt;br/&gt;发布完成前当前版本继续对外服务&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 发布新版"]:::platform
+      U5["发布进行中&lt;br/&gt;创建者或 Deputy 可点击「中止发布」&lt;br/&gt;未发布修订保留、可继续编辑&lt;br/&gt;并通知发起本次发布的人&lt;br/&gt;发布进行中会阻断下架和删除&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 中止发布"]:::owner
+    end
 
-  subgraph OffShelfArea["【下架与删除】"]
-    D1["点击下架&lt;br/&gt;系统弹出确认窗口&lt;br/&gt;确认后填写下架原因并提交&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 下架"]:::owner
-    D2["资产状态变为已下架&lt;br/&gt;所有已通过订阅立即失效&lt;br/&gt;待审批申请自动取消&lt;br/&gt;相关用户收到带下架原因的通知&lt;br/&gt;平台停止经平台流向该资产的调用"]:::platform
-    D3["下架后仍可点击发布新版进行修复&lt;br/&gt;系统继续沿用原有配置&lt;br/&gt;修改需要修复的内容后重新提交"]:::owner
-    D4["重新执行质量门控和发布流程&lt;br/&gt;修复发布成功后资产重新上架&lt;br/&gt;原有订阅不会自动恢复&lt;br/&gt;原订阅者需要重新申请"]:::platform
-    D5["点击删除&lt;br/&gt;已发布资产须先下架才能删除&lt;br/&gt;未发布或已下架资产可直接删除&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 删除"]:::owner
-    D6["删除为终态&lt;br/&gt;资产对全部用户不可见且不可恢复&lt;br/&gt;订阅历史等业务记录永久保留&lt;br/&gt;资产级服务凭据被清理&lt;br/&gt;已签发 PAT 对该资产的访问随之失效"]:::platform
+    subgraph OffShelfArea["【下架与删除】"]
+      D1["点击下架&lt;br/&gt;系统弹出确认窗口&lt;br/&gt;确认后填写下架原因并提交&lt;br/&gt;&lt;br/&gt;功能：资产控制台右上角操作区 &gt; 下架"]:::owner
+      D2["资产状态变为已下架&lt;br/&gt;所有已通过订阅立即失效&lt;br/&gt;待审批申请自动取消&lt;br/&gt;相关用户收到带下架原因的通知&lt;br/&gt;平台停止经平台流向该资产的调用"]:::platform
+      D3["下架后仍可点击发布新版进行修复&lt;br/&gt;系统继续沿用原有配置&lt;br/&gt;修改需要修复的内容后重新提交"]:::owner
+      D4["重新执行质量门控和发布流程&lt;br/&gt;修复发布成功后资产重新上架&lt;br/&gt;原有订阅不会自动恢复&lt;br/&gt;原订阅者需要重新申请"]:::platform
+      D5["点击删除&lt;br/&gt;已发布资产须先下架才能删除&lt;br/&gt;未发布或已下架资产可直接删除&lt;br/&gt;&lt;br/&gt;功能：资产控制台右上角操作区 &gt; 删除"]:::owner
+      D6["删除为终态&lt;br/&gt;资产对全部用户不可见且不可恢复&lt;br/&gt;订阅历史等业务记录永久保留&lt;br/&gt;资产级服务凭据被清理&lt;br/&gt;已签发 PAT 对该资产的访问随之失效"]:::platform
+    end
+    InfoArea ~~~ SubscribeArea ~~~ UpdateArea ~~~ OffShelfArea
   end
 
   Console --&gt; Center
@@ -774,9 +788,9 @@ flowchart TB
   Center --&gt; M2
   Center --&gt; M3
   Center --&gt; U1 --&gt; U2
-  U1 -.-&gt; U5
   U2 --&gt;|是| U3
   U2 --&gt;|否| U4
+  U4 -.-&gt; U5
   Center --&gt; D1 --&gt; D2
   D2 --&gt; D3 --&gt; D4
   Center --&gt; D5 --&gt; D6
@@ -788,67 +802,249 @@ flowchart TB
 </div>
 </section>
 
-<section class="section" id="sec-05" data-section>
+<section class="section" id="sec-04" data-section>
   <header class="section-head">
-    <div class="section-no">05</div>
+    <div class="section-no">04</div>
     <div class="section-title">
-      <h2>五、知识库管理员旅程：建库、导入、构建、开放使用</h2>
+      <h2>四、知识库管理与使用</h2>
     </div>
   </header>
-  <div class="technical-subsection" id="sec-05-ctx-0"><div class="technical-subsection-head"><div class="technical-subsection-no">5.0</div><div><h3>业务上下文（来源：用户旅程文档）</h3></div></div></div>
+  <div class="technical-subsection" id="sec-04-ctx-0"><div class="technical-subsection-head"><div class="technical-subsection-no">4.0</div><div><h3>业务上下文</h3></div></div></div>
 <p>知识库管理员希望把业务资料整理成可检索的企业知识库，让有权限的用户可以在 Chat 中挂载知识库并检索，也让外部系统可以通过开放接口调用知识库能力。目录和知识库的权限以 Alice 为唯一授权来源；平台提供目录与知识库入口、展示权限状态、发起权限申请，并管理文档导入、解析和向量化流程。</p>
-<ul class="bullet-list"><li><strong>进入目录</strong>：知识库管理员进入知识管理，从目录树选择公共目录或我的目录。拥有目录控制权限的用户可在授权范围内新建子目录、重命名或删除目录；目录调整即时生效并同步至 Alice；含知识库的目录不允许删除。没有权限时，页面展示 Alice 权限编号并跳转权限申请，目录权限申请由上级目录拥有目录控制权限的用户单级审批。</li><li><strong>创建知识库</strong>：在叶子目录创建知识库。公共目录建库需要知识库创建权限，建库者自动获得知识库 Owner 权限；我的目录由创建者本人直接管理，知识库仅创建者本人可见和使用。建库时填写名称、可见范围、描述和标签，并配置解析、切片、内容增强、向量模型和向量库实例；默认采用 Docling 解析、语义切片、摘要与关键词增强、BGE-M3 向量化和 Milvus 存储。可见范围只控制卡片可发现性，访问权限始终由 Alice 决定；公开知识库卡片对全员可见，无权限用户点击后可看到 Alice 权限编号和申请入口。知识库创建后不可在既有目录间移动、不可复制，唯一允许的移位方式是在同一目录控制权限的子树内下沉分层。</li><li><strong>导入文件</strong>：知识库支持四个导入入口：本地上传、Confluence、SharePoint 与 OneDrive、对象存储。执行导入需要操作者具备知识库 Contributor 及以上权限。本地上传支持单文件不超过 40 MB，也支持压缩包展开预览；只有外部通道导入才使用操作人在密钥库中配置的个人凭据。导入前提供文件预览，不支持的文件格式自动置灰。</li><li><strong>执行构建</strong>：导入后文件初始状态为「未解析」。用户可勾选文件后一键构建，也可切换手动模式按阶段执行；手动模式下前一阶段未完成时，后一阶段不能执行。平台按解析、切片、内容增强、向量化四个阶段处理文件；构建失败时展示原因，失败文件置顶，可修复后从失败阶段重新执行。</li><li><strong>知识库转为可用</strong>：库内首份文件完成向量化后，知识库自动从「草稿」转为「可用」。只有可用的知识库才会出现在 Chat 挂载列表，并可被开放接口检索。全库重建期间继续使用原有索引，不会因重建而暂时失去检索能力。</li><li><strong>知识库详情</strong>：详情页展示文档数、切片数、向量数和就绪度，并包含文档、设置、总览三个区域。知识库卡片支持查看权限、重命名和删除。设置区域用于维护库级默认参数，保存库级解析器、切片或内容增强配置会触发全库重建；向量模型和向量数据库锁定在知识库级别。总览区域用于查看知识库描述、内容摘要、构建状态和可共享能力。</li><li><strong>文件与内容维护</strong>：用户可进入文件详情页分页预览源文件，查看解析后的内容、文档摘要、关键词和解析信息；可搜索并逐条编辑切片，保存后重新执行内容增强和向量化。也可批量调整文档级参数，范围限于解析器、切片策略和内容增强。知识库 Owner 或知识库 Contributor 可删除库内文档，删除后的文档不再参与检索。</li><li><strong>停用与删除</strong>：知识库 Owner 可停用知识库，停用后新会话不再挂载或检索，进行中的会话继续使用会话级快照直至结束。知识库 Owner 可删除知识库；可用状态的知识库须先停用，删除需要二次确认。公共目录下的知识库删除后，平台调用 Alice 清理该知识库的角色。</li></ul>
-<div class="flow-card-container" id="sec-05-ctx-0-card">
+<ul class="bullet-list"><li><strong>进入目录</strong>：知识库管理员进入知识管理，从目录树选择公共目录或我的目录。目录控制角色持有人可在授权范围内新建子目录、重命名或删除目录；目录调整即时生效并同步至 Alice；含知识库的目录不允许删除。没有权限时，页面展示 Alice 权限编号并跳转权限申请，目录权限申请为上级目录控制角色持有人的单级审批。</li><li><strong>创建知识库</strong>：在叶子目录创建知识库。公共目录建库需要知识库创建角色，建库者自动获得知识库 Owner 角色；我的目录由创建者本人直接管理，知识库仅创建者本人可见和使用。建库时填写名称、可见范围、描述和标签，并配置解析、切片、内容增强、向量模型和向量库实例；默认采用 Docling 解析、语义切片、摘要与关键词增强、BGE-M3 向量化和 Milvus 存储。可见范围只控制卡片可发现性，访问权限始终由 Alice 决定；公开知识库卡片对全员可见，无权限用户点击后可看到 Alice 权限编号和申请入口。知识库创建后不可在既有目录间移动、不可复制，唯一允许的移位方式是在同一目录控制角色的子树内下沉分层。</li><li><strong>导入文件</strong>：知识库支持四个导入入口：本地上传、Confluence、SharePoint 与 OneDrive、对象存储。执行导入需要操作者具备知识库 Contributor 及以上权限。本地上传支持单文件不超过 40 MB，也支持压缩包展开预览；只有外部通道导入才使用操作人在密钥库中配置的个人凭据。导入前提供文件预览，不支持的文件格式自动置灰。</li><li><strong>执行构建</strong>：导入后文件初始状态为「未解析」。用户可勾选文件后一键构建，也可切换手动模式按阶段执行；手动模式下前一阶段未完成时，后一阶段不能执行。平台按解析、切片、内容增强、向量化四个阶段处理文件；构建失败时展示原因，失败文件置顶，可修复后从失败阶段重新执行。</li><li><strong>知识库转为可用</strong>：库内首份文件完成向量化后，知识库自动从「草稿」转为「可用」。只有可用的知识库才会出现在 Chat 挂载列表，并可被开放接口检索。全库重建期间继续使用原有索引，不会因重建而暂时失去检索能力。</li><li><strong>知识库详情</strong>：详情页展示文档数、切片数、向量数和就绪度，并包含文档、设置、总览三个区域。知识库卡片支持查看权限、重命名和删除。设置区域用于维护库级默认参数，保存库级解析器、切片或内容增强配置会触发全库重建；向量模型和向量数据库锁定在知识库级别。总览区域用于查看知识库描述、内容摘要、构建状态和可共享能力。</li><li><strong>文件与内容维护</strong>：用户可进入文件详情页分页预览源文件，查看解析后的内容、文档摘要、关键词和解析信息；可搜索并逐条编辑切片，保存后重新执行内容增强和向量化。也可批量调整文档级参数，范围限于解析器、切片策略和内容增强。知识库 Owner 或知识库 Contributor 可删除库内文档，删除后的文档不再参与检索。</li><li><strong>停用与删除</strong>：知识库 Owner 可停用知识库，停用后新会话不再挂载或检索，进行中的会话继续使用会话级快照直至结束。知识库 Owner 可删除知识库；可用状态的知识库须先停用，删除需要二次确认。公共目录下的知识库删除后，平台调用 Alice 清理该知识库的角色。</li></ul>
+<div class="callout"><p><strong>板块一：目录管理</strong>——对应目录控制权限与知识库创建权限两种持有人；目录控制角色持有人负责维护目录结构与目录下的两类权限，知识库创建角色持有人负责在叶子目录创建知识库。</p></div>
+<div class="technical-subsection" id="sec-04-4-1"><div class="technical-subsection-head"><div class="technical-subsection-no">4.1</div><div><h3>目录管理旅程</h3></div></div></div>
+<p class="journey-line">作为目录控制角色持有者，我可以在知识管理的目录树中新建、重命名或删除子目录，并为目录配置权限持有人，以维护清晰、可追溯的知识库归属结构。</p>
+<div class="flow-card-container" id="sec-04-4-1-card">
   <div class="flow-card-head">
-    <div><h3>业务上下文（来源：用户旅程文档）</h3></div>
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-knowledge">角色：目录控制角色持有者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
     <div class="flow-card-tools">
-      <span class="flow-card-id">5.0</span>
-      <button class="zoom-btn" type="button" onclick="openModal('fig-5-0', '业务上下文（来源：用户旅程文档）')">&#10021; 放大全屏</button>
+      <span class="flow-card-id">4.1</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-4-1', '目录管理旅程')">&#10021; 放大全屏</button>
     </div>
   </div>
   <div class="flow-card-body">
-    <div class="mermaid-diagram-wrap" id="fig-5-0">
+    <div class="mermaid-diagram-wrap diagram-scale-sm" id="fig-4-1">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "13px", "nodeTextMargin": 10, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 160, "nodeSpacing": 36, "rankSpacing": 44, "subGraphTitleMargin": {"top": 8, "bottom": 20}}}}%%
+flowchart TB
+  Start(["进入知识管理&lt;br/&gt;点开目标目录"]):::knowledge
+
+  subgraph ModulesRow4_1[" "]
+  direction LR
+    subgraph Mod1ViewPerm["模块一"]
+      P0["第一步：点击查看权限"]:::knowledge
+      P1["第二步：查看该目录的&lt;br/&gt;目录控制权限与知识库创建权限者&lt;br/&gt;Alice ID&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 查看权限"]:::knowledge
+      P0 --&gt; P1
+    end
+
+    subgraph Mod2CreateSub["模块二"]
+      C0["第一步：点击创建子级目录"]:::knowledge
+      C1{"第二步：当前目录是否为最子级&lt;br/&gt;且已存在知识库"}:::platform
+      C2["否：直接创建子目录&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 创建子级目录"]:::knowledge
+      C3["是：创建时弹窗提示&lt;br/&gt;是否迁移知识库&lt;br/&gt;确认后创建子目录并将知识库下沉迁入&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 创建子级目录（迁移提示）"]:::knowledge
+      C4["为新建子目录添加&lt;br/&gt;目录控制权限与知识库创建权限成员&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 目录权限配置"]:::knowledge
+      C0 --&gt; C1
+      C1 --&gt;|否| C2 --&gt; C4
+      C1 --&gt;|是| C3 --&gt; C4
+    end
+
+    subgraph Mod3ManageDir["模块三"]
+      M0["第一步：点击管理目录"]:::knowledge
+      M1["重命名目录&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 目录重命名"]:::knowledge
+      M2["删除目录&lt;br/&gt;仅允许删除该目录及其子级&lt;br/&gt;下均不存在知识库的目录&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 目录删除"]:::knowledge
+      M0 --&gt; M1
+      M0 --&gt; M2
+    end
+  end
+
+  Start --&gt; P0
+  Start --&gt; C0
+  Start --&gt; M0
+
+  classDef knowledge fill:#F1ECFF,stroke:#7B61D1,stroke-width:1.5px,color:#3B277D;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+<div class="technical-subsection" id="sec-04-4-2"><div class="technical-subsection-head"><div class="technical-subsection-no">4.2</div><div><h3>知识库创建旅程</h3></div></div></div>
+<p class="journey-line">作为知识库创建角色持有者，我可以在具备权限的叶子目录中通过建库向导填写基础信息并配置构建 Pipeline，以创建一个可供后续导入资料和检索使用的知识库。</p>
+<div class="flow-card-container" id="sec-04-4-2-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-knowledge">角色：知识库创建角色持有者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">4.2</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-4-2', '知识库创建旅程')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap" id="fig-4-2">
       <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
 flowchart LR
-  subgraph Choose["阶段一：选择目录与权限"]
-    K1["第一步：进入知识管理&lt;br/&gt;选择公共目录或我的目录&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 目录树"]:::knowledge
-    K2{"第二步：是否有目录或知识库权限"}:::platform
-    K3["无权限：查看 Alice 权限编号并跳转申请&lt;br/&gt;由上级目录控制权限拥有者单级审批&lt;br/&gt;平台只展示权限，不自行审批&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 权限查看与申请"]:::knowledge
-    K4["有权限：在叶子目录创建知识库&lt;br/&gt;公共目录建库需要知识库创建权限&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 建库向导"]:::knowledge
+  K1["第一步：进入知识管理&lt;br/&gt;找到具备创建权限的子级目录&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 目录树"]:::knowledge
+  K2["第二步：点击「新建知识库」按钮&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 建库向导"]:::knowledge
+  K5["第三步：填写基础信息&lt;br/&gt;名称、可见范围、描述、标签&lt;br/&gt;可见范围只控制卡片可发现性&lt;br/&gt;&lt;br/&gt;功能：建库向导 &gt; 基础信息"]:::knowledge
+  K6["第四步：配置构建 Pipeline&lt;br/&gt;解析、切片、内容增强&lt;br/&gt;向量模型、向量库实例&lt;br/&gt;向量模型与向量库锁定在库级&lt;br/&gt;&lt;br/&gt;功能：建库向导 &gt; 构建管线配置"]:::knowledge
+  K7["第五步：创建成功&lt;br/&gt;知识库进入草稿状态"]:::platform
+
+  K1 --&gt; K2 --&gt; K5 --&gt; K6 --&gt; K7
+
+  classDef knowledge fill:#F1ECFF,stroke:#7B61D1,stroke-width:1.5px,color:#3B277D;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+<div class="callout"><p><strong>板块二：知识库</strong>——对应知识库 Owner、知识库 Contributor 与知识库 Consumer 三种角色。Owner 负责知识库构建 Pipeline 整体修改与删除知识库；Contributor 负责文件导入、构建以及日常维护编辑；Consumer 通过 Chat 或开放接口使用知识库。</p></div>
+<div class="technical-subsection" id="sec-04-4-3"><div class="technical-subsection-head"><div class="technical-subsection-no">4.3</div><div><h3>知识库拥有者（Owner）</h3></div></div></div>
+<p class="journey-line">作为知识库 Owner，我可以进入知识库卡片修改构建 Pipeline 整体配置，或在目录中删除知识库，以确保知识库始终处于自己的治理之下。</p>
+<div class="flow-card-container" id="sec-04-4-3-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-knowledge">角色：知识库 Owner</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">4.3</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-4-3', '知识库拥有者（Owner）')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap diagram-scale-sm" id="fig-4-3">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "13px", "nodeTextMargin": 10, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 160, "nodeSpacing": 36, "rankSpacing": 44, "subGraphTitleMargin": {"top": 8, "bottom": 20}}}}%%
+flowchart TB
+  Start(["进入知识管理&lt;br/&gt;点开目标目录"]):::knowledge
+
+  subgraph ModulesRow4_3[" "]
+  direction LR
+    subgraph PipelineMod["模块一：知识库构建 Pipeline 整体修改"]
+      K_S0["第一步：进入知识库卡片内部&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 知识库详情"]:::knowledge
+      K_S1["第二步：进入 Settings&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; Settings"]:::knowledge
+      K_S2["第三步：修改构建 Pipeline&lt;br/&gt;调整解析器、切片策略、内容增强配置&lt;br/&gt;保存后触发全库重建&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; Pipeline 配置修改"]:::knowledge
+      K_S0 --&gt; K_S1 --&gt; K_S2
+    end
+
+    subgraph DeleteKB["模块二：删除知识库"]
+      K_D0["第一步：在目录中找到知识库卡片&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 目录树"]:::knowledge
+      K_D1["第二步：点击知识库卡片右上方三个点&lt;br/&gt;选择删除知识库&lt;br/&gt;需二次确认&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 删除知识库"]:::knowledge
+      K_D0 --&gt; K_D1
+    end
+    PipelineMod ~~~ DeleteKB
   end
 
-  subgraph Create["阶段二：创建知识库"]
-    K5["第三步：填写基础信息&lt;br/&gt;名称、可见范围、描述、标签&lt;br/&gt;可见范围只控制卡片可发现性&lt;br/&gt;&lt;br/&gt;功能：建库向导 &gt; 基础信息"]:::knowledge
-    K6["第四步：配置构建管线&lt;br/&gt;解析、切片、内容增强&lt;br/&gt;向量模型、向量库实例&lt;br/&gt;向量模型与向量库锁定在库级&lt;br/&gt;&lt;br/&gt;功能：建库向导 &gt; 构建管线配置"]:::knowledge
-    K7["第五步：创建成功，知识库为草稿&lt;br/&gt;公共目录下平台调用 Alice 创建角色&lt;br/&gt;并将知识库 Owner 授予创建者"]:::platform
+  Start --&gt; K_S0
+  Start --&gt; K_D0
+
+  classDef knowledge fill:#F1ECFF,stroke:#7B61D1,stroke-width:1.5px,color:#3B277D;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+<div class="technical-subsection" id="sec-04-4-4"><div class="technical-subsection-head"><div class="technical-subsection-no">4.4</div><div><h3>知识库贡献者（Contributor）</h3></div></div></div>
+<p class="journey-line">作为知识库 Contributor，我可以在知识库详情页导入文件并触发一键构建，也可以进行日常维护与编辑（包括编辑、更新文档等），但无法更改知识库整体的 Settings 或删除知识库。</p>
+<div class="flow-card-container" id="sec-04-4-4-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-knowledge">角色：知识库 Contributor</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">4.4</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-4-4', '知识库贡献者（Contributor）')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap diagram-scale-sm" id="fig-4-4">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "13px", "nodeTextMargin": 10, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 160, "nodeSpacing": 36, "rankSpacing": 44, "subGraphTitleMargin": {"top": 8, "bottom": 20}}}}%%
+flowchart TB
+  Start(["点击进入知识库卡片内部&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 知识库详情"]):::knowledge
+
+  subgraph ModulesRow4_4[" "]
+  direction LR
+    subgraph ImportBuild["模块一：文件导入、解析与构建"]
+      C8["第一步：导入资料&lt;br/&gt;本地上传&lt;br/&gt;Confluence&lt;br/&gt;SharePoint 与 OneDrive&lt;br/&gt;对象存储&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 四通道文档导入"]:::knowledge
+      C9["第二步（仅外部通道）&lt;br/&gt;使用操作人的个人凭据&lt;br/&gt;未配置时引导至密钥库&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 出站个人凭据"]:::platform
+      C10["第三步：一键构建或手动分阶段构建&lt;br/&gt;解析、切片、内容增强、向量化&lt;br/&gt;手动模式必须按阶段顺序执行&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 文档构建执行"]:::knowledge
+      C11{"第四步：构建是否成功"}:::platform
+      C12["失败：展示原因，失败文件置顶&lt;br/&gt;修复后从失败阶段重跑&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 构建失败处理"]:::platform
+      C13["成功：首份文档完成向量化&lt;br/&gt;知识库自动变为可用"]:::platform
+      C8 --&gt;|本地上传| C10
+      C8 --&gt;|外部通道| C9 --&gt; C10
+      C10 --&gt; C11
+      C11 --&gt;|失败| C12 --&gt; C10
+      C11 --&gt;|成功| C13
+    end
+
+    subgraph Maintain["模块二：知识库维护与编辑"]
+      C14["第一步：点击文档进入文件详情页&lt;br/&gt;分页预览源文件&lt;br/&gt;查看解析后的 Markdown 内容&lt;br/&gt;文档摘要、关键词与解析信息&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 文件详情页"]:::knowledge
+      C15b["第二步：在切片列表中搜索&lt;br/&gt;并逐条编辑切片&lt;br/&gt;保存后重新执行内容增强与向量化&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 切片编辑"]:::knowledge
+      C15["第三步：选择单个或多个文档&lt;br/&gt;打开批量配置修改&lt;br/&gt;调整文档级解析器、切片策略与内容增强&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 批量参数配置"]:::knowledge
+      C14 --&gt; C15b --&gt; C15
+    end
+
+    subgraph NotAllowed["不可执行的操作"]
+      C16["更改知识库整体 Settings&lt;br/&gt;以及删除知识库&lt;br/&gt;均为 Owner 专属操作&lt;br/&gt;Contributor 不可执行"]:::platform
+    end
+    ImportBuild ~~~ Maintain ~~~ NotAllowed
   end
 
-  subgraph Build["阶段三：导入与构建"]
-    K8["第六步：导入资料&lt;br/&gt;需要知识库 Contributor 及以上权限&lt;br/&gt;本地上传&lt;br/&gt;Confluence&lt;br/&gt;SharePoint 与 OneDrive&lt;br/&gt;对象存储&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 四通道文档导入"]:::knowledge
-    K9["第七步（仅外部通道）&lt;br/&gt;使用操作人的个人凭据&lt;br/&gt;未配置时引导至密钥库&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 出站个人凭据"]:::platform
-    K10["第八步：一键构建或手动分阶段构建&lt;br/&gt;解析、切片、内容增强、向量化&lt;br/&gt;手动模式必须按阶段顺序执行&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 文档构建执行"]:::knowledge
-    K11{"第九步：构建是否成功"}:::platform
-    K12["失败：展示原因，失败文件置顶&lt;br/&gt;修复后从失败阶段重跑&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 构建失败处理"]:::platform
-    K13["成功：首份文档完成向量化&lt;br/&gt;知识库自动变为可用"]:::platform
+  Start --&gt; C8
+  Start --&gt; C14
+  Start --&gt; C16
+
+  classDef knowledge fill:#F1ECFF,stroke:#7B61D1,stroke-width:1.5px,color:#3B277D;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+<div class="technical-subsection" id="sec-04-4-5"><div class="technical-subsection-head"><div class="technical-subsection-no">4.5</div><div><h3>知识库使用者（Consumer）</h3></div></div></div>
+<p class="journey-line">作为知识库 Consumer，我可以在 Chat 中挂载已获权限的知识库进行检索提问，或通过个人访问令牌让外部系统调用知识库开放接口，以在对话或系统集成中使用知识库中的内容。</p>
+<div class="flow-card-container" id="sec-04-4-5-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-knowledge">角色：知识库 Consumer（外部更新接口需 Owner / Contributor）</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">4.5</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-4-5', '知识库使用者（Consumer）')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap" id="fig-4-5">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
+flowchart LR
+  Start(["知识库已构建完成&lt;br/&gt;状态为可用"]):::platform
+
+  subgraph InternalUse["模块一：内部使用（Chat 挂载检索）"]
+    U1["第一步：进入对话工作台&lt;br/&gt;默认对话对象为 Chat agent-runtime&lt;br/&gt;&lt;br/&gt;功能：对话 &gt; Chat 会话"]:::knowledge
+    U2["第二步：选择模型并挂载知识库&lt;br/&gt;只显示本人有权限&lt;br/&gt;且状态可用的知识库&lt;br/&gt;&lt;br/&gt;功能：对话 &gt; 模型选择 / 知识库挂载"]:::knowledge
+    U3["第三步：提问并查看回答依据&lt;br/&gt;可查看思考过程、引用&lt;br/&gt;检索证据&lt;br/&gt;图片或图表证据&lt;br/&gt;也可随时中止生成&lt;br/&gt;&lt;br/&gt;功能：对话 &gt; 回答与证据展示"]:::knowledge
+    U4["重要边界&lt;br/&gt;Chat 不调用 Marketplace 资产&lt;br/&gt;只做模型对话&lt;br/&gt;知识库检索&lt;br/&gt;平台原生工具调用"]:::platform
+    U1 --&gt; U2 --&gt; U3 --&gt; U4
   end
 
-  subgraph Use["阶段四：开放检索与持续维护"]
-    K14["第十步：用户在 Chat 中挂载知识库&lt;br/&gt;只显示有权限&lt;br/&gt;且状态可用的知识库&lt;br/&gt;&lt;br/&gt;功能：对话 &gt; 知识库挂载"]:::user
-    K15["第十一步：维护文件与参数&lt;br/&gt;预览、编辑切片&lt;br/&gt;调整库级或文档级参数&lt;br/&gt;&lt;br/&gt;功能：知识管理&lt;br/&gt;文件详情 / 参数配置"]:::knowledge
-    K16["第十二步：停用、重新启用&lt;br/&gt;或删除知识库&lt;br/&gt;可用知识库删除前必须先停用&lt;br/&gt;公共目录删除后清理 Alice 角色&lt;br/&gt;&lt;br/&gt;功能：知识管理&lt;br/&gt;状态管理 / 删除"]:::knowledge
+  subgraph ExternalUse["模块二：外部使用（开放接口调用）"]
+    E1["第一步：进入密钥库 &gt; 入站管理&lt;br/&gt;点击创建 PAT&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 入站管理"]:::knowledge
+    E2["第二步：选择权限范围&lt;br/&gt;列表只展示本人已获权限的&lt;br/&gt;资产与知识库&lt;br/&gt;勾选目标知识库"]:::knowledge
+    E3["第三步：提交创建&lt;br/&gt;PAT 明文仅在创建成功时&lt;br/&gt;完整展示一次&lt;br/&gt;需立即复制并妥善保存"]:::platform
+    E4["第四步：携带该 PAT&lt;br/&gt;前往外部系统调用知识库开放接口&lt;br/&gt;读取知识库元数据、检索知识库&lt;br/&gt;更新知识库内容"]:::knowledge
+    E5{"第五步：调用接口是否&lt;br/&gt;支持更新知识库"}:::platform
+    E6["是：需要 PAT 持有人具备&lt;br/&gt;知识库 Owner / Contributor 权限"]:::platform
+    E7["否：仅获得单次 PAT&lt;br/&gt;对应的访问权限"]:::platform
+    E8["重要边界&lt;br/&gt;PAT 默认有效期 90 天&lt;br/&gt;到期或失效需重新生成"]:::platform
+    E1 --&gt; E2 --&gt; E3 --&gt; E4 --&gt; E5
+    E5 --&gt;|是| E6 --&gt; E8
+    E5 --&gt;|否| E7 --&gt; E8
   end
 
-  K1 --&gt; K2
-  K2 --&gt;|无权限| K3
-  K3 --&gt;|获得权限后| K4
-  K2 --&gt;|有权限| K4 --&gt; K5 --&gt; K6 --&gt; K7 --&gt; K8
-  K8 --&gt;|本地上传| K10
-  K8 --&gt;|外部通道| K9 --&gt; K10
-  K10 --&gt; K11
-  K11 --&gt;|失败| K12 --&gt; K10
-  K11 --&gt;|成功| K13 --&gt; K14 --&gt; K15 --&gt; K16
+  Start --&gt; U1
+  Start --&gt; E1
 
-  classDef user fill:#EAF2FF,stroke:#4C78D8,stroke-width:1.5px,color:#173B7A;
   classDef knowledge fill:#F1ECFF,stroke:#7B61D1,stroke-width:1.5px,color:#3B277D;
   classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
     </div>
@@ -856,27 +1052,32 @@ flowchart LR
 </div>
 </section>
 
-<section class="section" id="sec-06" data-section>
+<section class="section" id="sec-05" data-section>
   <header class="section-head">
-    <div class="section-no">06</div>
+    <div class="section-no">05</div>
     <div class="section-title">
-      <h2>六、平台管理员旅程：测评、护栏与管理后台治理</h2>
+      <h2>五、平台管理员旅程：测评、护栏与管理后台治理</h2>
     </div>
   </header>
-  <div class="technical-subsection" id="sec-06-ctx-0"><div class="technical-subsection-head"><div class="technical-subsection-no">6.0</div><div><h3>业务上下文（来源：用户旅程文档）</h3></div></div></div>
+  <div class="technical-subsection" id="sec-05-ctx-0"><div class="technical-subsection-head"><div class="technical-subsection-no">5.0</div><div><h3>业务上下文</h3></div></div></div>
 <p>平台管理员负责维护平台统一的测评基线和护栏基线，为创建者的 Agent 发布提供质量与安全判断依据。平台管理员不直接审批用户的资产订阅，也不代替创建者上下架资产；管理员主要维护模板、开关、平台资源和运行控制。</p>
 <ul class="bullet-list"><li><strong>测评管理</strong>：平台管理员维护发布准入测评模板，覆盖提示词注入、意图偏离和内容安全三类问题集，并为三类测评分别设置通过阈值。发布流程中的准入测评由创建者触发；独立的测评中心、数据集管理、任务中心和对比报告属于二期能力。</li><li><strong>测评模板配置</strong>：二期模板可配置裁判模型、被测 Agent、数据集、测评指标、并发度、单条样本超时、失败重试次数和失败处理策略。部分指标要求数据集提供预期输出；数据集缺少预期输出时，平台提示相关指标不可用。任务绑定模板与数据集快照，后续修改模板或数据集不影响已完成任务结果。</li><li><strong>数据集与任务（二期能力）</strong>：管理员可导入、校验、复制和编辑数据集，也可创建测评任务、查看运行状态、样本明细、重试失败样本并导出结果。</li><li><strong>护栏策略</strong>：平台管理员创建、编辑、启用或停用护栏策略模板，配置护栏组合、灵敏度和作用侧；护栏可覆盖个人信息识别、毒性内容过滤、提示注入和违禁词。管理员还需指定一个全局唯一的平台默认模板，用于平台 Chat 会话；当前默认模板不能直接停用，需要先指定另一个启用模板。</li><li><strong>运行时生效</strong>：创建者创建 Agent 时，只能从启用模板中选择一个并绑定，并可只读查看模板明细。平台网关对 Chat 和资产 Agent 会话执行护栏检测；输入侧命中时直接拒答，输出侧命中时拦截原回答并展示命中的护栏类型。模板修改对已绑定 Agent 即时生效；模板停用只影响新绑定，但资产下一次发布或重新上架时会强制校验所绑模板仍处于启用状态。</li><li><strong>运营看板（二期能力）</strong>：管理员可查看各策略的检测量、命中率、近期拦截次数和命中记录，并据此调整护栏组合、灵敏度与作用侧。</li><li><strong>管理后台治理</strong>：管理员在治理中心查看全平台资产、按资产维度停用或恢复出站调用、为孤儿资产补充新负责人；同时维护平台原生工具、平台资源、推荐位、用户视图、角色映射、公共目录冷启动和模型清单。</li></ul>
-<div class="technical-subsection" id="sec-06-6-1"><div class="technical-subsection-head"><div class="technical-subsection-no">6.1</div><div><h3>测评模板与发布准入测评</h3></div></div></div>
-<div class="flow-card-container" id="sec-06-6-1-card">
+<div class="technical-subsection" id="sec-05-5-1"><div class="technical-subsection-head"><div class="technical-subsection-no">5.1</div><div><h3>测评模板与发布准入测评</h3></div></div></div>
+<p class="journey-line">作为平台管理员，我可以维护发布准入测评模板及各类问题的通过阈值，并配置测评未通过时是否阻断上架，以为资产创建者发布 Agent 提供统一的质量与安全基线。</p>
+<div class="flow-card-container" id="sec-05-5-1-card">
   <div class="flow-card-head">
-    <div><h3>测评模板与发布准入测评</h3></div>
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-admin">角色：平台管理员</span>
+      <span class="role-badge role-badge-owner">角色：资产创建者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
     <div class="flow-card-tools">
-      <span class="flow-card-id">6.1</span>
-      <button class="zoom-btn" type="button" onclick="openModal('fig-6-1', '测评模板与发布准入测评')">&#10021; 放大全屏</button>
+      <span class="flow-card-id">5.1</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-5-1', '测评模板与发布准入测评')">&#10021; 放大全屏</button>
     </div>
   </div>
   <div class="flow-card-body">
-    <div class="mermaid-diagram-wrap" id="fig-6-1">
+    <div class="mermaid-diagram-wrap" id="fig-5-1">
       <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
 flowchart LR
   subgraph Admin["平台管理员维护规则"]
@@ -910,17 +1111,21 @@ flowchart LR
     </div>
   </div>
 </div>
-<div class="technical-subsection" id="sec-06-6-2"><div class="technical-subsection-head"><div class="technical-subsection-no">6.2</div><div><h3>二期测评中心能力</h3></div></div></div>
-<div class="flow-card-container" id="sec-06-6-2-card">
+<div class="technical-subsection" id="sec-05-5-2"><div class="technical-subsection-head"><div class="technical-subsection-no">5.2</div><div><h3>二期测评中心能力</h3></div></div></div>
+<p class="journey-line">作为平台管理员，我可以在测评中心管理数据集、维护测评模板并创建测评任务，以对已上架的 Agent 进行更灵活的质量评估和结果对比。</p>
+<div class="flow-card-container" id="sec-05-5-2-card">
   <div class="flow-card-head">
-    <div><h3>二期测评中心能力</h3></div>
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-admin">角色：平台管理员</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
     <div class="flow-card-tools">
-      <span class="flow-card-id">6.2</span>
-      <button class="zoom-btn" type="button" onclick="openModal('fig-6-2', '二期测评中心能力')">&#10021; 放大全屏</button>
+      <span class="flow-card-id">5.2</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-5-2', '二期测评中心能力')">&#10021; 放大全屏</button>
     </div>
   </div>
   <div class="flow-card-body">
-    <div class="mermaid-diagram-wrap" id="fig-6-2">
+    <div class="mermaid-diagram-wrap" id="fig-5-2">
       <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
 flowchart LR
   Center["平台管理员进入测评中心&lt;br/&gt;二期能力，首版不显示独立入口"]:::admin
@@ -954,29 +1159,35 @@ flowchart LR
     </div>
   </div>
 </div>
-<div class="technical-subsection" id="sec-06-6-3"><div class="technical-subsection-head"><div class="technical-subsection-no">6.3</div><div><h3>护栏策略与运行时拦截</h3></div></div></div>
-<div class="flow-card-container" id="sec-06-6-3-card">
+<div class="technical-subsection" id="sec-05-5-3"><div class="technical-subsection-head"><div class="technical-subsection-no">5.3</div><div><h3>护栏策略与运行时拦截</h3></div></div></div>
+<p class="journey-line">作为平台管理员，我可以创建和维护护栏策略模板并指定平台默认模板，以保证平台 Chat 和资产 Agent 的对话都受到统一的内容安全保护。</p>
+<div class="flow-card-container" id="sec-05-5-3-card">
   <div class="flow-card-head">
-    <div><h3>护栏策略与运行时拦截</h3></div>
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-admin">角色：平台管理员</span>
+      <span class="role-badge role-badge-owner">角色：资产创建者</span>
+      <span class="role-badge role-badge-user">角色：资产订阅者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
     <div class="flow-card-tools">
-      <span class="flow-card-id">6.3</span>
-      <button class="zoom-btn" type="button" onclick="openModal('fig-6-3', '护栏策略与运行时拦截')">&#10021; 放大全屏</button>
+      <span class="flow-card-id">5.3</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-5-3', '护栏策略与运行时拦截')">&#10021; 放大全屏</button>
     </div>
   </div>
   <div class="flow-card-body">
-    <div class="mermaid-diagram-wrap" id="fig-6-3">
+    <div class="mermaid-diagram-wrap" id="fig-5-3">
       <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
 flowchart LR
-  subgraph Config["阶段一：管理员配置护栏策略"]
+  subgraph Config["模块一：管理员配置护栏策略"]
     H1["第一步：创建或编辑护栏策略模板&lt;br/&gt;配置护栏组合、灵敏度和作用侧&lt;br/&gt;可启用或停用模板&lt;br/&gt;&lt;br/&gt;功能：护栏策略 &gt; 策略模板管理"]:::admin
     H2["第二步：指定平台默认护栏策略模板&lt;br/&gt;用于平台 Chat 会话&lt;br/&gt;当前默认模板不能直接停用&lt;br/&gt;需先指定另一个启用模板作为新默认&lt;br/&gt;&lt;br/&gt;功能：护栏策略 &gt; 平台默认模板"]:::admin
   end
 
-  subgraph Bind["阶段二：资产绑定策略"]
+  subgraph Bind["模块二：资产绑定策略"]
     H3["第三步：创建者创建 Agent 时&lt;br/&gt;从启用中的模板里选择一个绑定&lt;br/&gt;只能查看模板明细，不能修改规则和灵敏度&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 护栏策略绑定"]:::owner
   end
 
-  subgraph Runtime["阶段三：会话运行时命中处置"]
+  subgraph Runtime["模块三：会话运行时命中处置"]
     U1["第四步：用户发起 Chat 或 Agent 会话&lt;br/&gt;&lt;br/&gt;功能：对话 &gt; Chat / Agent 对话"]:::user
     G1["第五步：平台网关选择适用模板&lt;br/&gt;Chat 会话使用平台默认模板&lt;br/&gt;Agent 会话使用其绑定模板"]:::platform
     G2{"第六步：输入或输出是否命中护栏"}:::platform
@@ -984,8 +1195,8 @@ flowchart LR
     G4["未命中：回答通过检测后按段展示&lt;br/&gt;用户可随时中止生成&lt;br/&gt;&lt;br/&gt;功能：对话 &gt; 流式输出与中止"]:::platform
   end
 
-  subgraph Maintain["阶段四：模板维护与运营反馈"]
-    H5["模板修改对已绑定 Agent 即时生效&lt;br/&gt;模板停用只影响后续新绑定&lt;br/&gt;下次门控重跑会强制校验&lt;br/&gt;所绑模板是否仍处于启用状态"]:::admin
+  subgraph Maintain["模块四：模板维护与运营反馈"]
+    H5["模板修改对已绑定 Agent 即时生效&lt;br/&gt;模板停用只影响后续新绑定"]:::admin
     H4["运营反馈（二期）&lt;br/&gt;查看各策略检测量、命中率和拦截次数&lt;br/&gt;命中记录包含时间、条目、用户&lt;br/&gt;拦截信息及输入输出内容&lt;br/&gt;&lt;br/&gt;功能：护栏策略 &gt; 运营看板"]:::admin
   end
 
@@ -1003,37 +1214,44 @@ flowchart LR
     </div>
   </div>
 </div>
-<div class="technical-subsection" id="sec-06-6-4"><div class="technical-subsection-head"><div class="technical-subsection-no">6.4</div><div><h3>管理后台治理运营</h3></div></div></div>
-<div class="flow-card-container" id="sec-06-6-4-card">
+<div class="technical-subsection" id="sec-05-5-4"><div class="technical-subsection-head"><div class="technical-subsection-no">5.4</div><div><h3>管理后台治理运营</h3></div></div></div>
+<p class="journey-line">作为平台管理员，我可以在管理后台查看和治理全平台资产、维护平台原生工具与资源、配置角色权限和推荐位，以保障平台整体的稳定运行和合规治理。</p>
+<div class="flow-card-container" id="sec-05-5-4-card">
   <div class="flow-card-head">
-    <div><h3>管理后台治理运营</h3></div>
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-admin">角色：平台管理员</span>
+    </div>
     <div class="flow-card-tools">
-      <span class="flow-card-id">6.4</span>
-      <button class="zoom-btn" type="button" onclick="openModal('fig-6-4', '管理后台治理运营')">&#10021; 放大全屏</button>
+      <span class="flow-card-id">5.4</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-5-4', '管理后台治理运营')">&#10021; 放大全屏</button>
     </div>
   </div>
   <div class="flow-card-body">
-    <div class="mermaid-diagram-wrap" id="fig-6-4">
+    <div class="mermaid-diagram-wrap" id="fig-5-4">
       <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
 flowchart TB
   AdminHome["平台管理员进入管理后台&lt;br/&gt;功能：管理后台"]:::admin
 
-  subgraph AssetControlArea["资产治理"]
-    G1["查看全平台资产&lt;br/&gt;资产状态、负责人&lt;br/&gt;出站调用停用标记&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 治理中心"]:::admin
-    G2["停用或恢复出站调用&lt;br/&gt;按资产维度执行&lt;br/&gt;不改变上下架状态&lt;br/&gt;停用必须填写原因&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 治理中心"]:::admin
-    G3["为孤儿资产补充新负责人&lt;br/&gt;恢复订阅入口和负责人职能&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 治理中心"]:::admin
-  end
+  subgraph ModulesRow5_4[" "]
+  direction LR
+    subgraph AssetControlArea["资产治理"]
+      G1["查看全平台资产&lt;br/&gt;资产状态、负责人&lt;br/&gt;出站调用停用标记&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 治理中心"]:::admin
+      G2["停用或恢复出站调用&lt;br/&gt;按资产维度执行&lt;br/&gt;不改变上下架状态&lt;br/&gt;停用必须填写原因&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 治理中心"]:::admin
+      G3["为孤儿资产补充新负责人&lt;br/&gt;恢复订阅入口和负责人职能&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 治理中心"]:::admin
+    end
 
-  subgraph PlatformConfig["平台配置"]
-    C1["维护平台原生工具&lt;br/&gt;Confluence&lt;br/&gt;SharePoint 与 OneDrive&lt;br/&gt;对象存储通道&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 平台原生工具维护"]:::admin
-    C2["维护平台资源注册表&lt;br/&gt;登记向量数据库实例&lt;br/&gt;维护平台资源凭据与可用范围&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 平台资源"]:::admin
-    C3["维护模型清单和默认模型&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 模型设置"]:::admin
-  end
+    subgraph PlatformConfig["平台配置"]
+      C1["维护平台原生工具&lt;br/&gt;Confluence&lt;br/&gt;SharePoint 与 OneDrive&lt;br/&gt;对象存储通道&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 平台原生工具维护"]:::admin
+      C2["维护平台资源注册表&lt;br/&gt;登记向量数据库实例&lt;br/&gt;维护平台资源凭据与可用范围&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 平台资源"]:::admin
+      C3["维护模型清单和默认模型&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 模型设置"]:::admin
+    end
 
-  subgraph Operation["运营与权限配置"]
-    O1["管理 Marketplace 推荐位&lt;br/&gt;下架资产自动退出推荐位&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 推荐位管理"]:::admin
-    O2["查看 Alice 同步的用户视图&lt;br/&gt;配置角色到功能点&lt;br/&gt;配置角色到可用模型&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 身份与权限"]:::admin
-    O3["创建公共目录一级节点并指定一级角色&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 公共目录冷启动"]:::admin
+    subgraph Operation["运营与权限配置"]
+      O1["管理 Marketplace 推荐位&lt;br/&gt;下架资产自动退出推荐位&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 推荐位管理"]:::admin
+      O2["查看 Alice 同步的用户视图&lt;br/&gt;配置角色到功能点&lt;br/&gt;配置角色到可用模型&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 身份与权限"]:::admin
+      O3["创建公共目录一级节点并指定一级角色&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 公共目录冷启动"]:::admin
+    end
+    AssetControlArea ~~~ PlatformConfig ~~~ Operation
   end
 
   AdminHome --&gt; G1 --&gt; G2
@@ -1051,27 +1269,31 @@ flowchart TB
 </div>
 </section>
 
-<section class="section" id="sec-07" data-section>
+<section class="section" id="sec-06" data-section>
   <header class="section-head">
-    <div class="section-no">07</div>
+    <div class="section-no">06</div>
     <div class="section-title">
-      <h2>七、密钥库旅程：个人访问令牌与个人出站凭据</h2>
+      <h2>六、密钥库旅程：个人访问令牌与个人出站凭据</h2>
     </div>
   </header>
-  <div class="technical-subsection" id="sec-07-ctx-0"><div class="technical-subsection-head"><div class="technical-subsection-no">7.0</div><div><h3>业务上下文（来源：用户旅程文档）</h3></div></div></div>
+  <div class="technical-subsection" id="sec-06-ctx-0"><div class="technical-subsection-head"><div class="technical-subsection-no">6.0</div><div><h3>业务上下文</h3></div></div></div>
 <p>用户在调用按人鉴权资产、导入外部知识来源、通过开放接口集成外部系统，或使用个人模型能力时，需要在密钥库中管理自己的凭据。密钥库只管理用户侧凭据的两个入口：入站的个人访问令牌，以及出站的个人凭据。资产级服务凭据由创建者在资产配置中维护；平台资源凭据由平台管理员在平台资源注册表中维护。</p>
 <ul class="bullet-list"><li><strong>入站个人访问令牌</strong>：用户创建令牌时填写名称和有效期，默认有效期为自创建时刻起算 90 天。令牌权限范围只能选择用户已经订阅或已经获得权限的资产和知识库，外部系统如需调用 MCP，也需勾选对应的已授权 MCP；选择时进行权限校验。令牌明文只在创建成功时完整展示一次；用户可停用、删除或重新生成令牌，停用和删除需要二次确认，重新生成后原令牌立即失效。</li><li><strong>按人鉴权资产凭据</strong>：目标列表只展示用户已订阅且声明按人鉴权的资产。平台根据资产声明的鉴权方式生成认证表单，资产已声明字段只读，用户填写个人凭据并执行一键探测。凭据未配置或探测失败时，平台不会在资产调用中回落到共享身份。</li><li><strong>外部知识来源凭据</strong>：用户可为 Confluence、SharePoint 与 OneDrive、对象存储三个知识导入通道配置凭据。执行导入时，用户还需要具备目标知识库的知识库 Contributor 或更高权限。</li><li><strong>个人模型凭据</strong>：用户可配置多条个人模型凭据，通过启用、禁用和排序决定使用顺序。保存后平台执行一次模型可用性检测并保存结果，用户也可手动刷新。后续模型调用优先使用可用个人凭据，无可用个人凭据时使用平台默认凭据。真实调用发生鉴权或权限失败时，本次调用改用平台默认凭据，并通知用户更新凭据或申请模型权限；瞬时故障不改写检测结果，也不发送通知。</li><li><strong>凭据展示与维护</strong>：个人凭据的密文字段默认掩码展示，用户可查看明文，查看动作会被记录。用户可更新、停用、删除或重新探测凭据。</li></ul>
-<div class="technical-subsection" id="sec-07-7-1"><div class="technical-subsection-head"><div class="technical-subsection-no">7.1</div><div><h3>创建个人访问令牌供外部系统调用</h3></div></div></div>
-<div class="flow-card-container" id="sec-07-7-1-card">
+<div class="technical-subsection" id="sec-06-6-1"><div class="technical-subsection-head"><div class="technical-subsection-no">6.1</div><div><h3>配置个人入站凭据（PAT）</h3></div></div></div>
+<p class="journey-line">作为平台用户，我可以在密钥库的入站管理中创建个人访问令牌并勾选授权范围，以让外部系统凭该令牌调用我已获授权的资产或知识库能力。</p>
+<div class="flow-card-container" id="sec-06-6-1-card">
   <div class="flow-card-head">
-    <div><h3>创建个人访问令牌供外部系统调用</h3></div>
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-user">角色：全体用户</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
     <div class="flow-card-tools">
-      <span class="flow-card-id">7.1</span>
-      <button class="zoom-btn" type="button" onclick="openModal('fig-7-1', '创建个人访问令牌供外部系统调用')">&#10021; 放大全屏</button>
+      <span class="flow-card-id">6.1</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-6-1', '配置个人入站凭据（PAT）')">&#10021; 放大全屏</button>
     </div>
   </div>
   <div class="flow-card-body">
-    <div class="mermaid-diagram-wrap" id="fig-7-1">
+    <div class="mermaid-diagram-wrap" id="fig-6-1">
       <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
 flowchart LR
   PlatformStepOne["第一步：进入密钥库入站管理&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 入站管理"]:::user
@@ -1089,38 +1311,46 @@ flowchart LR
     </div>
   </div>
 </div>
-<div class="technical-subsection" id="sec-07-7-2"><div class="technical-subsection-head"><div class="technical-subsection-no">7.2</div><div><h3>配置个人出站凭据</h3></div></div></div>
-<div class="flow-card-container" id="sec-07-7-2-card">
+<div class="technical-subsection" id="sec-06-6-2"><div class="technical-subsection-head"><div class="technical-subsection-no">6.2</div><div><h3>配置个人出站凭据</h3></div></div></div>
+<p class="journey-line">作为平台用户，我可以在密钥库的出站管理中为按人鉴权资产、外部知识来源或个人模型服务配置并探测个人凭据，以用自己的身份完成这些需要个人授权的调用。</p>
+<div class="flow-card-container" id="sec-06-6-2-card">
   <div class="flow-card-head">
-    <div><h3>配置个人出站凭据</h3></div>
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-user">角色：全体用户</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
     <div class="flow-card-tools">
-      <span class="flow-card-id">7.2</span>
-      <button class="zoom-btn" type="button" onclick="openModal('fig-7-2', '配置个人出站凭据')">&#10021; 放大全屏</button>
+      <span class="flow-card-id">6.2</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-6-2', '配置个人出站凭据')">&#10021; 放大全屏</button>
     </div>
   </div>
   <div class="flow-card-body">
-    <div class="mermaid-diagram-wrap" id="fig-7-2">
+    <div class="mermaid-diagram-wrap" id="fig-6-2">
       <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
 flowchart TB
   Start["用户进入密钥库出站管理&lt;br/&gt;功能：密钥库 &gt; 出站管理"]:::user
   Choose{"选择凭据用途"}:::user
 
-  subgraph AssetCredential["用途一：调用按人鉴权资产"]
-    A1["选择已订阅资产&lt;br/&gt;且该资产要求按人鉴权&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 出站个人凭据"]:::user
-    A2["填写平台生成的认证表单并一键探测&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 凭据探测"]:::user
-    A3["调用时使用本人凭据&lt;br/&gt;缺失或失效则调用失败&lt;br/&gt;不使用共享身份替代"]:::platform
-  end
+  subgraph ModulesRow6_2[" "]
+  direction LR
+    subgraph AssetCredential["用途一：调用按人鉴权资产"]
+      A1["选择已订阅资产&lt;br/&gt;且该资产要求按人鉴权&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 出站个人凭据"]:::user
+      A2["填写平台生成的认证表单并一键探测&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 凭据探测"]:::user
+      A3["调用时使用本人凭据&lt;br/&gt;缺失或失效则调用失败&lt;br/&gt;不使用共享身份替代"]:::platform
+    end
 
-  subgraph ImportCredential["用途二：导入外部知识来源"]
-    I1["选择外部知识来源&lt;br/&gt;Confluence&lt;br/&gt;SharePoint 与 OneDrive&lt;br/&gt;对象存储通道&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 出站个人凭据"]:::user
-    I2["填写对应通道的认证信息并探测&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 凭据探测"]:::user
-    I3["导入资料时&lt;br/&gt;使用操作人个人凭据&lt;br/&gt;只能导入操作人&lt;br/&gt;在来源系统中有权阅读的内容"]:::platform
-  end
+    subgraph ImportCredential["用途二：导入外部知识来源"]
+      I1["选择外部知识来源&lt;br/&gt;Confluence&lt;br/&gt;SharePoint 与 OneDrive&lt;br/&gt;对象存储通道&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 出站个人凭据"]:::user
+      I2["填写对应通道的认证信息并探测&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 凭据探测"]:::user
+      I3["导入资料时&lt;br/&gt;使用操作人个人凭据&lt;br/&gt;只能导入操作人&lt;br/&gt;在来源系统中有权阅读的内容"]:::platform
+    end
 
-  subgraph ModelCredential["用途三：使用个人模型凭据"]
-    ModelStepOne["配置一条或多条个人模型凭据&lt;br/&gt;可排序、启用或停用&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 个人模型凭据"]:::user
-    ModelStepTwo["保存后平台检测&lt;br/&gt;各模型可用性并保存结果&lt;br/&gt;用户可手动刷新检测&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 可用性检测"]:::platform
-    ModelStepThree["模型调用优先使用&lt;br/&gt;可用个人凭据&lt;br/&gt;无可用个人凭据时使用平台默认凭据&lt;br/&gt;瞬时故障不改写检测结果"]:::platform
+    subgraph ModelCredential["用途三：使用个人模型凭据"]
+      ModelStepOne["配置一条或多条个人模型凭据&lt;br/&gt;可排序、启用或停用&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 个人模型凭据"]:::user
+      ModelStepTwo["保存后平台检测&lt;br/&gt;各模型可用性并保存结果&lt;br/&gt;用户可手动刷新检测&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 可用性检测"]:::platform
+      ModelStepThree["模型调用优先使用&lt;br/&gt;可用个人凭据&lt;br/&gt;无可用个人凭据时使用平台默认凭据&lt;br/&gt;瞬时故障不改写检测结果"]:::platform
+    end
+    AssetCredential ~~~ ImportCredential ~~~ ModelCredential
   end
 
   Start --&gt; Choose
@@ -1134,6 +1364,8 @@ flowchart TB
   </div>
 </div>
 </section>
+
+
 
 <section class="section" id="sec-08" data-section>
   <header class="section-head">
