@@ -45,3 +45,10 @@
 | 21 | 内容源权限放大合规 | 合规 | spec 005 | open |
 | 22 | 测评模板初始阈值审定 | 基线 | spec 004 | open |
 | 23 | Alice 同步周期与失败回滚 | 外部依赖 | spec 008 | open |
+| 29 | UI/UX 方案未定，阻塞前端工作——现只有 PRD §13.11 视觉与品牌基础规范（深色风格/主色/胶囊按钮/字体）与一份已过期的旧原型（`docs/prd/GRC_AI_Agent_Prototype_v1.html`），无信息架构/交互稿/组件规范；`grc-ai-portal` 的 `docs/design/` 为空 | 前端/设计 | grc-ai-portal, PRD §13.11 | open |
+
+## 文档缺口
+
+| # | 项目 | 类型 | 关联 | 状态 |
+|---|------|------|------|------|
+| 30 | API 成功响应包络（`ApiResponse`）未正式规范——`error-codes.md` 已定义错误响应格式（RFC 9457），但成功响应只在 `api-landscape.md` 提了一句"服务统一返回 `ApiResponse` 包络"，无 schema/字段定义/ADR，示例响应（如 `/auth/logout`）字段与错误格式不一致 | 文档缺口 | architecture/cross-cutting/error-codes.md, specs/000-platform/api-landscape.md | open |
