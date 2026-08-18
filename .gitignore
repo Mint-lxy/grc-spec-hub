@@ -21,3 +21,5 @@ Thumbs.db
 *.pem
 *.key
 .vscode/
+.dev
+.devin/
