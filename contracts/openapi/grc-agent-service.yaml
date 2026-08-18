@@ -1,0 +1,155 @@
+openapi: 3.1.0
+info:
+  title: GRC Agent Service API
+  version: "1.0"
+  description: >-
+    对应 specs/001-conversation/plan.md。grc-agent-service 是无状态推理执行引擎，
+    不拥有会话/知识库挂载/消息历史的权威数据（归 grc-mgt-service，见
+    contracts/openapi/grc-mgmt-service.yaml 的 chat 会话子域）。本契约只覆盖
+    "执行一次推理"相关的三个端点：发消息（SSE 流式）、重新生成、中止生成。
+servers:
+  - url: https://api.internal/api/v1
+    description: 经 grc-api-gateway 转发后的路径（网关统一加 /api/v1 前缀）
+tags:
+  - name: Chat
+paths:
+  /chat/sessions/{sessionId}/messages:
+    post:
+      tags: [Chat]
+      operationId: sendMessage
+      summary: 发送消息（SSE 流式）
+      description: >-
+        处理流程：① 同步调用 grc-mgt-service 的
+        `GET /mgt/internal/chat/sessions/{sessionId}/context` 取挂载的知识库 ID
+        与历史消息；② 按需调用 grc-knowledge-engine 检索、grc-mcp-server 调用
+        平台原生工具；③ 调用 LLM 网关生成回复并以 SSE 流式返回；④ 生成完成后调用
+        grc-mgt-service 的 `POST /mgt/internal/chat/sessions/{sessionId}/messages`
+        回写这一轮问答。
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+        - $ref: '#/components/parameters/TraceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/ChatEventStream'
+        '404':
+          $ref: '#/components/responses/SessionNotFound'
+        '502':
+          description: 下游服务（grc-mgt-service / grc-knowledge-engine / grc-mcp-server / LLM 网关）不可达
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /chat/sessions/{sessionId}/messages/{messageId}/regenerate:
+    post:
+      tags: [Chat]
+      operationId: regenerateMessage
+      summary: 重新生成回复
+      description: 取上下文与回写逻辑同 `POST .../messages`，区别在于以已有的某条助手消息为目标重新生成。
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+        - name: messageId
+          in: path
+          required: true
+          description: 要重新生成的助手消息 ID
+          schema: { type: string }
+        - $ref: '#/components/parameters/TraceId'
+      responses:
+        '200':
+          $ref: '#/components/responses/ChatEventStream'
+        '404':
+          $ref: '#/components/responses/SessionNotFound'
+
+  /chat/sessions/{sessionId}/cancel:
+    post:
+      tags: [Chat]
+      operationId: cancelGeneration
+      summary: 中止正在进行的流式生成
+      description: >-
+        客户端断开 SSE 连接不代表服务端已停止生成，需要显式调用本接口。
+        中止标记（cancel_registry）是 grc-agent-service 的技术态缓存，不经
+        grc-mgt-service（见 plan.md 待评审确认项：多实例部署下的路由方案）。
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+        - $ref: '#/components/parameters/TraceId'
+      responses:
+        '200':
+          description: 中止请求结果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelResponse'
+
+components:
+  parameters:
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      description: 会话 ID，权威数据在 grc-mgt-service（见 grc-mgmt-service.yaml 的 chat 会话子域）
+      schema: { type: string }
+    TraceId:
+      name: x-trace-id
+      in: header
+      required: false
+      description: 可选；不传时服务端生成一个 UUID 并在响应 requestId 中回传
+      schema: { type: string }
+
+  responses:
+    SessionNotFound:
+      description: sessionId 不存在，或调用 grc-mgt-service 的 context 接口返回未找到
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    ChatEventStream:
+      description: >-
+        SSE 事件流。事件类型：
+        - `delta`：一段增量文本，`data: {"delta": "..."}`
+        - `citation`：一条知识库引用证据，`data: {"knowledgeBaseId", "docId", "chunkId", "content", "score"}`
+        - `tool_call`：一次已完成的平台原生工具调用记录，`data: {"toolName", "arguments", "resultSummary"}`
+        - `thinking`：思考过程步骤（`deepAnalysis=true` 时），`data: {"step", "content"}`
+        - `done`：结束标记，恒为最后一个事件，`data: {"sessionId", "messageId", "traceId"}`
+      content:
+        text/event-stream:
+          schema:
+            type: string
+            description: 原始 SSE 文本
+
+  schemas:
+    SendMessageRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          description: 本轮用户输入
+        deepAnalysis:
+          type: boolean
+          default: false
+          description: >-
+            深度分析开关（spec 001 AC-22）：开启后模型执行更多推理步骤，思考过程默认展开；
+            具体行为（更长工具调用轮数上限 / 切换推理模型）待产品/架构明确
+
+    CancelResponse:
+      type: object
+      required: [sessionId, cancelled]
+      properties:
+        sessionId: { type: string }
+        cancelled:
+          type: boolean
+          description: true=成功请求中止；false=该 sessionId 当前不在生成中（已结束/不存在）
+        requestId: { type: string }
+
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string }
+        message: { type: string }
+        data: {}
+        requestId: { type: string }
