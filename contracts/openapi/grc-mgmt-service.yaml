@@ -3,17 +3,21 @@ info:
   title: GRC Management Service API
   version: "1.0"
   description: >-
-    grc-mgt-service 的对外契约。**本文件当前只落地 chat 会话子域**
+    grc-mgt-service 的对外契约。**本文件当前落地两块**：① chat 会话子域
     （对应 specs/001-conversation/plan.md，api-landscape.md §3.7）：会话 CRUD、
-    知识库挂载管理，以及两个供 grc-agent-service 调用的内部接口。该服务的其余模块
-    （marketplace 资产/订阅审批、RBAC、凭据库、文件服务等，见 api-landscape.md §3.1~3.6）
-    由对应 feature spec（002~008）后续以非破坏性方式追加到本文件，不在本次范围内。
+    知识库挂载管理，以及两个供 grc-agent-service 调用的内部接口；② 凭据库的模型调用解析
+    接口（对应 specs/007-credential/plan.md，ADR-003/ADR-005，api-landscape.md §3.5）：
+    `POST /mgt/vault/inbound/resolve-model`，供 grc-python-sdk 调用。该服务的其余模块
+    （marketplace 资产/订阅审批、RBAC、凭据库其余接口、文件服务等，见 api-landscape.md
+    §3.1~3.6）由对应 feature spec（002~006、008）后续以非破坏性方式追加到本文件，
+    不在本次范围内。
 servers:
   - url: https://api.internal/api/v1
     description: 经 grc-api-gateway 转发后的路径（网关统一加 /api/v1 前缀，内部路由本身以 /mgt 为前缀）
 tags:
   - name: ChatSession
   - name: ChatSessionInternal
+  - name: VaultInternal
 paths:
   /mgt/chat/sessions:
     post:
@@ -212,6 +216,33 @@ paths:
         '404':
           $ref: '#/components/responses/SessionNotFound'
 
+  /mgt/vault/inbound/resolve-model:
+    post:
+      tags: [VaultInternal]
+      operationId: resolveModelCredentialInternal
+      summary: '[内部] 模型凭据解析（供 grc-python-sdk 调用）'
+      description: >-
+        对应 ADR-003（AI SDK）与 ADR-005（凭据解析归属）：按触发人解析，个人 Nexus PAT
+        优先（取第一条已启用且快照标记可用的），无候选则用平台默认凭据兜底（spec 007
+        AC-12/AC-21）。本接口只做凭据解析，不做模型调用本身——调用方（grc-python-sdk）
+        拿到 credential 后自己去调对应 provider 的 API。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId]
+              properties:
+                userId: { type: string }
+      responses:
+        '200':
+          description: 解析结果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolveModelResponseEnvelope'
+
 components:
   parameters:
     SessionId:
@@ -404,3 +435,26 @@ components:
               properties:
                 messageId: { type: string }
                 createdAt: { type: string, format: date-time }
+
+    ResolveModelResponseEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [resolved, credential, source]
+              properties:
+                resolved: { type: boolean }
+                credential:
+                  type: object
+                  required: [type, token]
+                  properties:
+                    type: { type: string, enum: [bearer, api_key] }
+                    token: { type: string }
+                source:
+                  type: string
+                  enum: [personal, platform_default]
+                availableModels:
+                  type: array
+                  items: { type: string }
