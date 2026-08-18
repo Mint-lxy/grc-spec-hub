@@ -57,7 +57,7 @@ grc-evaluation-service / grc-knowledge-engine / grc-parser-engine 待各自 feat
 
 | 契约 | 类型 | 新增/变更/废弃 | 是否破坏性 | 消费方 |
 |------|------|----------------|-----------|--------|
-| `contracts/openapi/grc-mgmt-service.yaml` | openapi | 新增路径 `POST /mgt/vault/inbound/resolve-model`（追加到已有文件的 vault 子域，见文件内新增的 "3.5 凭据库与 PAT（内部）" 小节） | 否（新增路径，不改动已有的 chat 会话子域） | grc-python-sdk（通过消费本服务契约的方式对齐，非直接消费方声明——SDK 不在 service-map 登记为独立服务） |
+| `contracts/openapi/grc-mgmt-service.yaml` | openapi | 新增路径 `POST /mgt/vault/inbound/resolve-model`、`POST /mgt/vault/inbound/report-credential-failure`（AC-13 降级机制，追加到已有文件的 vault 子域） | 否（新增路径，不改动已有的 chat 会话子域） | grc-python-sdk（通过消费本服务契约的方式对齐，非直接消费方声明——SDK 不在 service-map 登记为独立服务） |
 
 grc-python-sdk 本身**不产出 OpenAPI 契约**（内部共享库，不对外暴露 API，
 见 `memory/now/services/grc-python-sdk.md`"提供契约：无"）。
