@@ -24,6 +24,7 @@ argument-hint: "问题，如 'refund.completed 事件有哪些消费方？' 或 
 | 为什么这么设计（决策） | `architecture/adr/`、`memory/now/decisions.md`（含被取代的看 `memory/archive/decisions-superseded.md`） |
 | 术语 | `memory/now/glossary.md` |
 | 项目现状/进行中的事 | `memory/now/state.md`、`memory/now/watchlist.md` |
+| 用户疑问/质疑待办（谁提的疑问/哪些疑问未关闭/某文档有哪些疑问） | `memory/now/watchlist.md`（用户疑问分区），并可全局 grep `疑问 #` 定位原文标记 |
 | 某服务的现状 | `memory/now/services/<svc>.md`，历史细节下钻 `memory/digests/` |
 | 流程/怎么走审批 | `sop/README.md`、`gates/GATES.md` |
 | 编码/测试/评审标准 | `standards/` |
