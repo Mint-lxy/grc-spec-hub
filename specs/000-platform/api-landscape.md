@@ -96,7 +96,7 @@
 
 ### 3.3 知识库门面（005-knowledge）
 
-知识库接口由 mgmt-service 对 knowledge-engine 提供前端门面；Stage 运行与任务查询中标 `[内部]` 的接口仅供平台服务调用。
+知识库接口由 mgmt-service 对 knowledge-engine 提供前端门面；Stage 运行与任务查询中标 `[内部]` 的接口仅供平台服务调用。**知识目录由 mgmt-service 直接实现并持有目录、目录权限及 Alice 角色映射，不再透传到 knowledge-engine；knowledge-engine 仅通过 `directoryId` 引用目录。**
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
@@ -256,18 +256,15 @@
 ## 6. grc-knowledge-engine
 
 > 本服务退为**门面之后的内部服务**，不直接面向前端。前端通过 mgmt-service `/mgt/knowledge/**`（§3.3）门面调用。
-> 直接调用方：mgmt-service（门面透传）、agent-service（检索）。
+> 直接调用方：mgmt-service（知识库、文档与构建门面）、agent-service（检索）。知识目录不属于本服务，由 mgmt-service 直接实现；本服务只保存并使用 `directoryId` 引用。
 
-### 6.1 目录树
+### 6.1 目录能力归属
 
-| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
-|------|------|------|---------|---------|------|
-| GET | `/knowledge/directories/tree` | 查询知识目录树（两棵完整树，含权限与操作按钮状态） | `?rootType?, keyword?` | `{ roots[]{dirId, name, level, isLeaf, kbCount, accessible, permissions{}, children[]} }` | 005 |
-| POST | `/knowledge/directories` | 创建子目录（含知识库下沉迁移） | `{ parentId, name, description? }` | `{ dirId, name, level, isLeaf, migratedKbCount }` | 005 |
-| POST | `/knowledge/directories/{dirId}/rename` | 重命名目录 | `{ name, description? }` | `{ dirId, name }` | 005 |
-| POST | `/knowledge/directories/{dirId}/delete` | 删除空目录 | — | `{ dirId, deleted: true, deletedSubDirCount? }` | 005 |
-| GET | `/knowledge/directories/{dirId}/permission` | 查询目录权限与 Alice 申请入口 | — | `{ roles[], applyUrl, myRoles[] }` | 005 |
-| POST | `/knowledge/directories/{dirId}/role-grants` | 授予 / 回收目录角色 | `{ action: "GRANT"\|"REVOKE", roleType, userIds[] }` | `{ results[]{userId, status, message?} }` | 005 |
+目录树、目录生命周期、目录权限和角色授予接口统一归属 mgmt-service，见 §3.3。本服务不提供 `/knowledge/directories/**` 接口，也不保存目录或目录权限真相。
+
+知识库创建、查询和数据可见性过滤涉及目录时，mgmt-service 负责校验 `directoryId`、目录层级及调用者权限；knowledge-engine 接收已校验的目录上下文并维护知识库的 `directoryId` 引用。跨服务不得共享目录表或绕过 mgmt-service 直接读写目录数据。
+
+- 需同步修改 spec 005、knowledge-engine OpenAPI、mgmt-service OpenAPI、service-map/manifest 及消费者契约测试；
 
 ### 6.2 知识库
 
