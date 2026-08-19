@@ -1,13 +1,13 @@
 openapi: 3.1.0
 info:
   title: GRC Management Service API
-  version: "1.0"
+  version: "2.0"
   description: >-
     grc-mgt-service 的对外契约。**本文件当前落地两块**：① chat 会话子域
     （对应 specs/001-conversation/plan.md，api-landscape.md §3.7）：会话 CRUD、
     知识库挂载管理，以及两个供 grc-agent-service 调用的内部接口；② 凭据库的模型调用解析
     接口（对应 specs/007-credential/plan.md，ADR-003/ADR-005，api-landscape.md §3.5）：
-    `POST /mgt/vault/inbound/resolve-model` 与 `POST /mgt/vault/inbound/
+    `POST /mgmt/vault/inbound/resolve-model` 与 `POST /mgmt/vault/inbound/
     report-credential-failure`（spec 007 AC-13 降级机制），均供 grc-python-sdk 调用。
     该服务的其余模块
     （marketplace 资产/订阅审批、RBAC、凭据库其余接口、文件服务等，见 api-landscape.md
@@ -21,7 +21,7 @@ tags:
   - name: ChatSessionInternal
   - name: VaultInternal
 paths:
-  /mgt/chat/sessions:
+  /mgmt/chat/sessions:
     post:
       tags: [ChatSession]
       operationId: createChatSession
@@ -76,7 +76,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ChatSessionListEnvelope'
 
-  /mgt/chat/sessions/{sessionId}:
+  /mgmt/chat/sessions/{sessionId}:
     parameters:
       - $ref: '#/components/parameters/SessionId'
     get:
@@ -124,7 +124,7 @@ paths:
         '404':
           $ref: '#/components/responses/SessionNotFound'
 
-  /mgt/chat/sessions/{sessionId}/knowledge-mounts:
+  /mgmt/chat/sessions/{sessionId}/knowledge-mounts:
     parameters:
       - $ref: '#/components/parameters/SessionId'
     put:
@@ -132,7 +132,7 @@ paths:
       operationId: setKnowledgeMounts
       summary: 挂载/卸载知识库
       description: >-
-        挂载前对每个 knowledgeBaseId 做 RBAC 权限校验（复用 `/mgt/internal/check`，
+        挂载前对每个 knowledgeBaseId 做 RBAC 权限校验（复用 `/mgmt/internal/check`，
         `CATALOG` 类型）；无权限的 ID 静默剔除，返回实际生效的 mounts[]，不整体报错。
       requestBody:
         required: true
@@ -168,7 +168,7 @@ paths:
         '404':
           $ref: '#/components/responses/SessionNotFound'
 
-  /mgt/internal/chat/sessions/{sessionId}/context:
+  /mgmt/internal/chat/sessions/{sessionId}/context:
     get:
       tags: [ChatSessionInternal]
       operationId: getChatSessionContextInternal
@@ -192,7 +192,7 @@ paths:
         '404':
           $ref: '#/components/responses/SessionNotFound'
 
-  /mgt/internal/chat/sessions/{sessionId}/messages:
+  /mgmt/internal/chat/sessions/{sessionId}/messages:
     post:
       tags: [ChatSessionInternal]
       operationId: appendChatMessageInternal
@@ -218,7 +218,7 @@ paths:
         '404':
           $ref: '#/components/responses/SessionNotFound'
 
-  /mgt/vault/inbound/resolve-model:
+  /mgmt/vault/inbound/resolve-model:
     post:
       tags: [VaultInternal]
       operationId: resolveModelCredentialInternal
@@ -245,7 +245,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResolveModelResponseEnvelope'
 
-  /mgt/vault/inbound/report-credential-failure:
+  /mgmt/vault/inbound/report-credential-failure:
     post:
       tags: [VaultInternal]
       operationId: reportModelCredentialFailureInternal
@@ -301,7 +301,7 @@ components:
       properties:
         code: { type: integer, description: "0=成功" }
         message: { type: string }
-        requestId: { type: string }
+        traceId: { type: string }
 
     ErrorResponse:
       type: object
@@ -310,7 +310,7 @@ components:
         code: { type: string }
         message: { type: string }
         data: {}
-        requestId: { type: string }
+        traceId: { type: string }
 
     ChatSessionSummary:
       type: object

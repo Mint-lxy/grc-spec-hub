@@ -1,0 +1,361 @@
+openapi: 3.1.0
+info:
+  title: grc-auth-service API
+  version: 1.0.0
+  description: |
+    grc-auth-service provider contract for user profile lookup, token lifecycle,
+    and OIDC authorization callback flows.
+servers:
+  - url: /auth
+    description: Gateway-routed auth service base path
+tags:
+  - name: User Profile
+  - name: Token
+  - name: OIDC
+paths:
+  /users/{userId}:
+    get:
+      tags: [User Profile]
+      summary: Get user profile by user ID
+      operationId: getUserProfile
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '401':
+          $ref: '#/components/responses/AuthError'
+        '403':
+          $ref: '#/components/responses/AuthError'
+        '404':
+          $ref: '#/components/responses/AuthError'
+  /verify:
+    post:
+      tags: [Token]
+      summary: Verify an access token
+      operationId: verifyAccessToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+      responses:
+        '200':
+          description: Token verification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenVerifyResponse'
+        '400':
+          $ref: '#/components/responses/AuthError'
+        '401':
+          $ref: '#/components/responses/AuthError'
+  /refresh:
+    post:
+      tags: [Token]
+      summary: Rotate refresh token and issue a new token pair
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+      responses:
+        '200':
+          description: New token pair
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefreshResponse'
+        '400':
+          $ref: '#/components/responses/AuthError'
+        '401':
+          $ref: '#/components/responses/AuthError'
+        '409':
+          $ref: '#/components/responses/AuthError'
+  /logout:
+    post:
+      tags: [Token]
+      summary: Revoke the current access and refresh session
+      operationId: logout
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmptySuccessResponse'
+        '401':
+          $ref: '#/components/responses/AuthError'
+  /oauth/authorize:
+    get:
+      tags: [OIDC]
+      summary: Create an OIDC authorization request
+      operationId: authorizeOidc
+      responses:
+        '200':
+          description: OIDC authorization URL and one-time state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OidcAuthorizeResponse'
+        '400':
+          $ref: '#/components/responses/AuthError'
+        '429':
+          $ref: '#/components/responses/AuthError'
+  /oauth/callback:
+    get:
+      tags: [OIDC]
+      summary: Complete OIDC callback login
+      operationId: callbackOidc
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: state
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: Local authentication session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OidcCallbackResponse'
+        '400':
+          $ref: '#/components/responses/AuthError'
+        '401':
+          $ref: '#/components/responses/AuthError'
+        '409':
+          $ref: '#/components/responses/AuthError'
+        '502':
+          $ref: '#/components/responses/AuthError'
+        '503':
+          $ref: '#/components/responses/AuthError'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    UserId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+  responses:
+    AuthError:
+      description: Standard authentication error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthErrorResponse'
+  schemas:
+    ApiResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        detail:
+          type: string
+          nullable: true
+        traceId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        path:
+          type: string
+          nullable: true
+    EmptySuccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              type: 'null'
+    UserProfile:
+      type: object
+      required: [id, username, displayName, email, accountStatus]
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+        displayName:
+          type: string
+        email:
+          type: string
+          format: email
+        accountStatus:
+          type: string
+        tenantId:
+          type: string
+          nullable: true
+    UserProfileResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/UserProfile'
+    TokenVerifyRequest:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          minLength: 1
+    TokenVerifyResult:
+      type: object
+      required: [valid, userId]
+      properties:
+        valid:
+          type: boolean
+        userId:
+          type: integer
+          format: int64
+        roles:
+          type: array
+          items:
+            type: string
+        tenantId:
+          type: string
+          nullable: true
+        exp:
+          type: integer
+          format: int64
+    TokenVerifyResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/TokenVerifyResult'
+    TokenRefreshRequest:
+      type: object
+      required: [refreshToken, clientId]
+      properties:
+        refreshToken:
+          type: string
+          minLength: 1
+        clientId:
+          type: string
+          minLength: 1
+    TokenPair:
+      type: object
+      required: [accessToken, refreshToken, expiresIn]
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          type: integer
+          format: int64
+    TokenRefreshResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/TokenPair'
+    OidcAuthorizeResult:
+      type: object
+      required: [url, state, expireIn]
+      properties:
+        url:
+          type: string
+          format: uri
+        state:
+          type: string
+        expireIn:
+          type: integer
+          format: int64
+          description: State lifetime in seconds; fixed at 180 seconds.
+          const: 180
+    OidcAuthorizeResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/OidcAuthorizeResult'
+    OidcCallbackResult:
+      type: object
+      required: [accessToken, userInfo]
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+          nullable: true
+        userInfo:
+          type: object
+          additionalProperties: true
+        roles:
+          type: array
+          items:
+            type: string
+        permissions:
+          type: array
+          items:
+            type: string
+    OidcCallbackResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/OidcCallbackResult'
+    AuthErrorResponse:
+      type: object
+      required: [code, message, traceId, timestamp]
+      properties:
+        code:
+          type: string
+          pattern: '^AUTH-(?:[1-5]|9)[0-9]{3}$'
+        message:
+          type: string
+        detail:
+          type: string
+          nullable: true
+        traceId:
+          type: string
+          minLength: 1
+        timestamp:
+          type: string
+          format: date-time
+        path:
+          type: string
+          nullable: true

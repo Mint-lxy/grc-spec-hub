@@ -63,51 +63,51 @@ user -> gateway -> external
 
 ## 3. grc-mgmt-service
 
-> 当前服务接口使用 `/mgt` 作为服务内路由前缀；经网关暴露时仍由网关统一加 `/api/v1`。
+> 当前服务接口使用 `/mgmt/{domain}` 作为服务内路由前缀；经网关暴露时仍由网关统一加 `/api/v1`。
 > 服务统一返回 `ApiResponse` 包络，具体业务字段以对应 feature contract 为准。
 
 ### 3.1 Marketplace 资产（002-marketplace / 005-marketplace-redesign）
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| POST | `/mgt/marketplace/assets` | 创建资产 | `{ type, name, description?, ... }` | `{ assetId, ... }` | 002/003 |
-| GET | `/mgt/marketplace/assets` | 查询资产列表 | `?page, pageSize, keyword?, type?, status?` | `{ records[], total }` | 002 |
-| GET | `/mgt/marketplace/assets/{assetId}` | 查询资产详情 | — | `{ assetId, name, type, owner, status, ... }` | 002 |
-| PUT | `/mgt/marketplace/assets/{assetId}` | 更新资产 | `{ name?, description?, ... }` | 更新后的资产 | 003 |
-| POST | `/mgt/marketplace/assets/{assetId}/precheck` | 执行发布前预检 | — | `{ passed, checks[], ... }` | 005 |
-| POST | `/mgt/marketplace/assets/{assetId}/publish` | 发布资产 | — | `{ assetId, status, ... }` | 004/005 |
-| POST | `/mgt/marketplace/assets/{assetId}/unpublish` | 下架资产 | — | `{ data: null }` | 004 |
-| POST | `/mgt/marketplace/assets/{assetId}/archive` | 归档资产 | — | `{ data: null }` | 004 |
-| POST | `/mgt/marketplace/assets/{assetId}/transfer-owner` | 转移资产 Owner | `{ newOwnerId }` | `{ assetId, ownerId, ... }` | 005 |
-| POST | `/mgt/marketplace/assets/yaml-preview` | 预览资产 YAML | `{ ...assetConfig }` | `{ yaml, ... }` | 003 |
-| DELETE | `/mgt/marketplace/assets/draft/{assetId}` | 删除编辑态缓存 | — | `{ data: null }` | 003 |
+| POST | `/mgmt/marketplace/assets` | 创建资产 | `{ type, name, description?, ... }` | `{ assetId, ... }` | 002/003 |
+| GET | `/mgmt/marketplace/assets` | 查询资产列表 | `?page, pageSize, keyword?, type?, status?` | `{ records[], total }` | 002 |
+| GET | `/mgmt/marketplace/assets/{assetId}` | 查询资产详情 | — | `{ assetId, name, type, owner, status, ... }` | 002 |
+| PUT | `/mgmt/marketplace/assets/{assetId}` | 更新资产 | `{ name?, description?, ... }` | 更新后的资产 | 003 |
+| POST | `/mgmt/marketplace/assets/{assetId}/precheck` | 执行发布前预检 | — | `{ passed, checks[], ... }` | 005 |
+| POST | `/mgmt/marketplace/assets/{assetId}/publish` | 发布资产 | — | `{ assetId, status, ... }` | 004/005 |
+| POST | `/mgmt/marketplace/assets/{assetId}/unpublish` | 下架资产 | — | `{ data: null }` | 004 |
+| POST | `/mgmt/marketplace/assets/{assetId}/archive` | 归档资产 | — | `{ data: null }` | 004 |
+| POST | `/mgmt/marketplace/assets/{assetId}/transfer-owner` | 转移资产 Owner | `{ newOwnerId }` | `{ assetId, ownerId, ... }` | 005 |
+| POST | `/mgmt/marketplace/assets/yaml-preview` | 预览资产 YAML | `{ ...assetConfig }` | `{ yaml, ... }` | 003 |
+| DELETE | `/mgmt/marketplace/assets/draft/{assetId}` | 删除编辑态缓存 | — | `{ data: null }` | 003 |
 
 ### 3.2 Marketplace 订阅与审批（002-marketplace / 005-marketplace-redesign）
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| GET | `/mgt/marketplace/assets/{assetId}/subscribe/page-init` | 初始化订阅提交页 | — | `{ asset, terms, approvalConfig, ... }` | 002 |
-| POST | `/mgt/marketplace/assets/{assetId}/subscribe` | 提交订阅申请 | `{ ...subscriptionRequest }` | `{ subscriptionId, status, ... }` | 002/005 |
-| GET | `/mgt/marketplace/subscriber-center/summary` | 查询订阅者中心统计 | — | `{ ...summary }` | 002 |
-| GET | `/mgt/marketplace/subscriptions` | 查询我的订阅 | `?page, pageSize, status?` | `{ records[], total }` | 002 |
-| GET | `/mgt/marketplace/subscriptions/{subscriptionId}` | 查询订阅详情 | — | `{ subscriptionId, status, approvalProgress[], ... }` | 002 |
-| POST | `/mgt/marketplace/subscriptions/{subscriptionId}/resubmit` | 驳回后重新提交订阅 | `{ ...subscriptionRequest }` | `{ subscriptionId, status, ... }` | 005 |
-| POST | `/mgt/marketplace/subscriptions/{subscriptionId}/cancel` | 取消订阅申请 | — | `{ data: null }` | 002 |
-| GET | `/mgt/marketplace/approval-flows/{flowId}` | 查询审批流详情 | — | `{ flowId, steps[], status, ... }` | 005 |
-| GET | `/mgt/marketplace/approval-flows/my-pending` | 查询我的待审批事项 | `?page, pageSize` | `{ records[], total }` | 005 |
-| POST | `/mgt/marketplace/approval-flows/{flowId}/steps/{stepId}/approve` | 审批通过当前步骤 | `{ comment? }` | `{ flowId, stepId, status, ... }` | 005 |
-| POST | `/mgt/marketplace/approval-flows/{flowId}/steps/{stepId}/reject` | 驳回当前审批步骤 | `{ reason }` | `{ flowId, stepId, status, ... }` | 005 |
-| GET | `/mgt/marketplace/creator-center/summary` | 查询创作者中心统计 | — | `{ ...summary }` | 005 |
-| GET | `/mgt/marketplace/creator-center/assets` | 查询创作者资产 | `?page, pageSize, status?` | `{ records[], total }` | 005 |
-| GET | `/mgt/marketplace/creator-center/pending-subscriptions` | 查询待处理订阅 | `?page, pageSize` | `{ records[], total }` | 005 |
-| GET | `/mgt/marketplace/creator-center/pending-publish-assets` | 查询待发布资产 | `?page, pageSize` | `{ records[], total }` | 005 |
-| GET | `/mgt/marketplace/creator-center/assets/{assetId}/console` | 查询创作者资产控制台 | — | `{ asset, subscriptions, publishState, ... }` | 005 |
-| PUT | `/mgt/marketplace/creator-center/assets/{assetId}/subscription-settings` | 保存订阅设置 | `{ ...subscriptionSettings }` | 更新后的订阅设置 | 005 |
-| POST | `/mgt/marketplace/creator-center/subscriptions/{subscriptionId}/decision` | 处理订阅审批决定 | `{ decision, reason? }` | `{ subscriptionId, status, ... }` | 005 |
-| POST | `/mgt/marketplace/creator-center/subscriptions/{subscriptionId}/revoke` | 撤回订阅处理结果 | `{ reason? }` | `{ subscriptionId, status, ... }` | 005 |
-| POST | `/mgt/marketplace/assets/{assetId}/publish-evaluations` | 创建发布测评 | `{ ...evaluationRequest }` | `{ evaluationId, status, ... }` | 005 |
-| GET | `/mgt/marketplace/assets/{assetId}/publish-evaluations/{evaluationId}` | 查询发布测评 | — | `{ evaluationId, status, checks[], ... }` | 005 |
-| GET | `/mgt/marketplace/tags` | 查询全部资产标签 | — | `{ items[] }` | 002 |
+| GET | `/mgmt/marketplace/assets/{assetId}/subscribe/page-init` | 初始化订阅提交页 | — | `{ asset, terms, approvalConfig, ... }` | 002 |
+| POST | `/mgmt/marketplace/assets/{assetId}/subscribe` | 提交订阅申请 | `{ ...subscriptionRequest }` | `{ subscriptionId, status, ... }` | 002/005 |
+| GET | `/mgmt/marketplace/subscriber-center/summary` | 查询订阅者中心统计 | — | `{ ...summary }` | 002 |
+| GET | `/mgmt/marketplace/subscriptions` | 查询我的订阅 | `?page, pageSize, status?` | `{ records[], total }` | 002 |
+| GET | `/mgmt/marketplace/subscriptions/{subscriptionId}` | 查询订阅详情 | — | `{ subscriptionId, status, approvalProgress[], ... }` | 002 |
+| POST | `/mgmt/marketplace/subscriptions/{subscriptionId}/resubmit` | 驳回后重新提交订阅 | `{ ...subscriptionRequest }` | `{ subscriptionId, status, ... }` | 005 |
+| POST | `/mgmt/marketplace/subscriptions/{subscriptionId}/cancel` | 取消订阅申请 | — | `{ data: null }` | 002 |
+| GET | `/mgmt/marketplace/approval-flows/{flowId}` | 查询审批流详情 | — | `{ flowId, steps[], status, ... }` | 005 |
+| GET | `/mgmt/marketplace/approval-flows/my-pending` | 查询我的待审批事项 | `?page, pageSize` | `{ records[], total }` | 005 |
+| POST | `/mgmt/marketplace/approval-flows/{flowId}/steps/{stepId}/approve` | 审批通过当前步骤 | `{ comment? }` | `{ flowId, stepId, status, ... }` | 005 |
+| POST | `/mgmt/marketplace/approval-flows/{flowId}/steps/{stepId}/reject` | 驳回当前审批步骤 | `{ reason }` | `{ flowId, stepId, status, ... }` | 005 |
+| GET | `/mgmt/marketplace/creator-center/summary` | 查询创作者中心统计 | — | `{ ...summary }` | 005 |
+| GET | `/mgmt/marketplace/creator-center/assets` | 查询创作者资产 | `?page, pageSize, status?` | `{ records[], total }` | 005 |
+| GET | `/mgmt/marketplace/creator-center/pending-subscriptions` | 查询待处理订阅 | `?page, pageSize` | `{ records[], total }` | 005 |
+| GET | `/mgmt/marketplace/creator-center/pending-publish-assets` | 查询待发布资产 | `?page, pageSize` | `{ records[], total }` | 005 |
+| GET | `/mgmt/marketplace/creator-center/assets/{assetId}/console` | 查询创作者资产控制台 | — | `{ asset, subscriptions, publishState, ... }` | 005 |
+| PUT | `/mgmt/marketplace/creator-center/assets/{assetId}/subscription-settings` | 保存订阅设置 | `{ ...subscriptionSettings }` | 更新后的订阅设置 | 005 |
+| POST | `/mgmt/marketplace/creator-center/subscriptions/{subscriptionId}/decision` | 处理订阅审批决定 | `{ decision, reason? }` | `{ subscriptionId, status, ... }` | 005 |
+| POST | `/mgmt/marketplace/creator-center/subscriptions/{subscriptionId}/revoke` | 撤回订阅处理结果 | `{ reason? }` | `{ subscriptionId, status, ... }` | 005 |
+| POST | `/mgmt/marketplace/assets/{assetId}/publish-evaluations` | 创建发布测评 | `{ ...evaluationRequest }` | `{ evaluationId, status, ... }` | 005 |
+| GET | `/mgmt/marketplace/assets/{assetId}/publish-evaluations/{evaluationId}` | 查询发布测评 | — | `{ evaluationId, status, checks[], ... }` | 005 |
+| GET | `/mgmt/marketplace/tags` | 查询全部资产标签 | — | `{ items[] }` | 002 |
 
 ### 3.3 知识库门面（005-knowledge）
 
@@ -115,155 +115,154 @@ user -> gateway -> external
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| GET | `/mgt/knowledge/directories/tree` | 查询知识目录树 | `?includeKbCount?, keyword?` | `{ nodes[] }` | 005 |
-| POST | `/mgt/knowledge/directories` | 创建知识目录 | `{ name, parentId?, ... }` | `{ directoryId, ... }` | 005 |
-| PATCH | `/mgt/knowledge/directories/{directoryId}/rename` | 重命名目录 | `{ name }` | `{ directoryId, name, ... }` | 005 |
-| PATCH | `/mgt/knowledge/directories/{directoryId}` | 更新目录 | `{ ...directoryConfig }` | 更新后的目录 | 005 |
-| DELETE | `/mgt/knowledge/directories/{directoryId}` | 删除目录 | — | `{ directoryId, deleted: true }` | 005 |
-| POST | `/mgt/knowledge/knowledge-bases` | 创建知识库 | `{ name, directoryId, pipelineConfig{parser, chunking, enhance, embedding, vectorStore} }` | `{ kbId, status, ... }` | 005 |
-| GET | `/mgt/knowledge/knowledge-bases` | 查询知识库列表 | `?directoryId?, keyword?, status?, retrievalReady?, page?, pageSize?` | `{ records[], total }` | 005 |
-| GET | `/mgt/knowledge/knowledge-bases/{kbId}` | 查询知识库详情 | — | `{ kbId, pipelineConfig, status, ... }` | 005 |
-| PATCH | `/mgt/knowledge/knowledge-bases/{kbId}/config` | 更新知识库默认配置 | `{ pipelineConfig }` | `{ pipelineConfig, effectScope: "future-builds-only" }` | 005 |
-| POST | `/mgt/knowledge/knowledge-bases/{kbId}/documents` | 创建知识库文档 | `{ fileId, ...documentConfig }` | `{ docId, status, ... }` | 005 |
-| GET | `/mgt/knowledge/knowledge-bases/{kbId}/documents` | 查询文档列表 | `?keyword?, sourceType?, status?, retrievalReady?, page?, pageSize?` | `{ records[], total }` | 005 |
-| GET | `/mgt/knowledge/knowledge-bases/{kbId}/stats` | 查询知识库统计 | — | `{ ...statistics }` | 005 |
-| GET | `/mgt/knowledge/knowledge-bases/{kbId}/documents/{docId}` | 查询文档详情 | — | `{ docId, status, ... }` | 005 |
-| PATCH | `/mgt/knowledge/knowledge-bases/{kbId}/documents/{docId}/stage-config` | 更新文档 Stage 配置 | `{ stageConfig }` | `{ stageConfig, ... }` | 005 |
-| GET | `/mgt/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks` | 查询文档切片 | `?jobId?, page?, pageSize?, snippetContext?` | `{ records[], total }` | 005 |
-| GET | `/mgt/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks/{chunkId}` | 查询切片详情 | `?jobId?, snippetContext?` | `{ chunkId, content, sourceSnippet, ... }` | 005 |
-| GET | `/mgt/knowledge/knowledge-bases/{kbId}/documents/{docId}/parse` | 查询文档解析产物 | `?jobId?` | `{ ...parseArtifact }` | 005 |
-| GET | `/mgt/knowledge/knowledge-bases/{kbId}/documents/{docId}/enhance/{enhanceType}` | 查询文档增强产物 | `?jobId?, page?, pageSize?` | `{ records[], total }` | 005 |
-| POST | `/mgt/knowledge/knowledge-bases/{kbId}/build-jobs` | 创建批量构建任务 | `{ documentIds?, runMode? }` | `{ jobId, status, ... }` | 005 |
-| GET | `/mgt/knowledge/jobs/{jobId}` | `[内部]` 查询构建任务 | — | `{ jobId, status, stages[], ... }` | 005 |
-| POST | `/mgt/knowledge/documents/{docId}/stages/{stageType}/run` | `[内部]` 运行文档 Stage | `{ ...stageConfig }` | `{ jobId, status, ... }` | 005 |
-| POST | `/mgt/knowledge/retrievals` | 执行知识检索 | `{ knowledgeBaseIds[], query, retrievalConfig?, topK? }` | `{ results[] }` | 005 |
-| POST | `/mgt/knowledge/knowledge-bases/{kbId}/publish` | 发布知识库 | — | `{ kbId, status: "available", ... }` | 005 |
-| POST | `/mgt/knowledge/knowledge-bases/{kbId}/offline` | 下线知识库 | — | `{ kbId, status, ... }` | 005 |
+| GET | `/mgmt/knowledge/directories/tree` | 查询知识目录树 | `?includeKbCount?, keyword?` | `{ nodes[] }` | 005 |
+| POST | `/mgmt/knowledge/directories` | 创建知识目录 | `{ name, parentId?, ... }` | `{ directoryId, ... }` | 005 |
+| PATCH | `/mgmt/knowledge/directories/{directoryId}/rename` | 重命名目录 | `{ name }` | `{ directoryId, name, ... }` | 005 |
+| PATCH | `/mgmt/knowledge/directories/{directoryId}` | 更新目录 | `{ ...directoryConfig }` | 更新后的目录 | 005 |
+| DELETE | `/mgmt/knowledge/directories/{directoryId}` | 删除目录 | — | `{ directoryId, deleted: true }` | 005 |
+| POST | `/mgmt/knowledge/knowledge-bases` | 创建知识库 | `{ name, directoryId, pipelineConfig{parser, chunking, enhance, embedding, vectorStore} }` | `{ kbId, status, ... }` | 005 |
+| GET | `/mgmt/knowledge/knowledge-bases` | 查询知识库列表 | `?directoryId?, keyword?, status?, retrievalReady?, page?, pageSize?` | `{ records[], total }` | 005 |
+| GET | `/mgmt/knowledge/knowledge-bases/{kbId}` | 查询知识库详情 | — | `{ kbId, pipelineConfig, status, ... }` | 005 |
+| PATCH | `/mgmt/knowledge/knowledge-bases/{kbId}/config` | 更新知识库默认配置 | `{ pipelineConfig }` | `{ pipelineConfig, effectScope: "future-builds-only" }` | 005 |
+| POST | `/mgmt/knowledge/knowledge-bases/{kbId}/documents` | 创建知识库文档 | `{ fileId, ...documentConfig }` | `{ docId, status, ... }` | 005 |
+| GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents` | 查询文档列表 | `?keyword?, sourceType?, status?, retrievalReady?, page?, pageSize?` | `{ records[], total }` | 005 |
+| GET | `/mgmt/knowledge/knowledge-bases/{kbId}/stats` | 查询知识库统计 | — | `{ ...statistics }` | 005 |
+| GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}` | 查询文档详情 | — | `{ docId, status, ... }` | 005 |
+| PATCH | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/stage-config` | 更新文档 Stage 配置 | `{ stageConfig }` | `{ stageConfig, ... }` | 005 |
+| GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks` | 查询文档切片 | `?jobId?, page?, pageSize?, snippetContext?` | `{ records[], total }` | 005 |
+| GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks/{chunkId}` | 查询切片详情 | `?jobId?, snippetContext?` | `{ chunkId, content, sourceSnippet, ... }` | 005 |
+| GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/parse` | 查询文档解析产物 | `?jobId?` | `{ ...parseArtifact }` | 005 |
+| GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/enhance/{enhanceType}` | 查询文档增强产物 | `?jobId?, page?, pageSize?` | `{ records[], total }` | 005 |
+| POST | `/mgmt/knowledge/knowledge-bases/{kbId}/build-jobs` | 创建批量构建任务 | `{ documentIds?, runMode? }` | `{ jobId, status, ... }` | 005 |
+| GET | `/mgmt/knowledge/jobs/{jobId}` | `[内部]` 查询构建任务 | — | `{ jobId, status, stages[], ... }` | 005 |
+| POST | `/mgmt/knowledge/documents/{docId}/stages/{stageType}/run` | `[内部]` 运行文档 Stage | `{ ...stageConfig }` | `{ jobId, status, ... }` | 005 |
+| POST | `/mgmt/knowledge/retrievals` | 执行知识检索 | `{ knowledgeBaseIds[], query, retrievalConfig?, topK? }` | `{ results[] }` | 005 |
+| POST | `/mgmt/knowledge/knowledge-bases/{kbId}/publish` | 发布知识库 | — | `{ kbId, status: "available", ... }` | 005 |
+| POST | `/mgmt/knowledge/knowledge-bases/{kbId}/offline` | 下线知识库 | — | `{ kbId, status, ... }` | 005 |
 
 ### 3.4 RBAC 与权限（001-create-mgt-service-modules / 003-rbac-permission-mgmt）
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| POST | `/mgt/users` | 创建用户 | `{ ...user }` | `{ userId, ... }` | 001/003 |
-| GET | `/mgt/users/{userId}` | 查询用户详情 | — | `{ userId, ... }` | 001/003 |
-| PUT | `/mgt/users/{userId}` | 更新用户 | `{ ...user }` | 更新后的用户 | 003 |
-| DELETE | `/mgt/users/{userId}` | 删除用户 | — | `{ data: null }` | 003 |
-| GET | `/mgt/users` | 查询用户列表 | `?keyword?, status?, pageNum?, pageSize?` | `{ records[], total }` | 001/003 |
-| POST | `/mgt/users/{userId}/enable` | 启用用户 | — | `{ data: null }` | 003 |
-| POST | `/mgt/users/{userId}/disable` | 禁用用户 | — | `{ data: null }` | 003 |
-| POST | `/mgt/users/{userId}/lock` | 锁定用户 | — | `{ data: null }` | 003 |
-| PUT | `/mgt/users/{userId}/roles` | 替换用户角色 | `{ roleIds[] }` | `{ userId, roleIds[] }` | 003 |
-| POST | `/mgt/users/{userId}/roles/{roleId}` | 为用户授予角色 | — | `{ data: null }` | 003 |
-| DELETE | `/mgt/users/{userId}/roles/{roleId}` | 移除用户角色 | — | `{ data: null }` | 003 |
-| POST | `/mgt/rbac/roles` | 创建角色 | `{ ...role }` | `{ roleId, ... }` | 003 |
-| GET | `/mgt/rbac/roles/{roleId}` | 查询角色详情 | — | `{ roleId, ... }` | 003 |
-| PUT | `/mgt/rbac/roles/{roleId}` | 更新角色 | `{ ...role }` | 更新后的角色 | 003 |
-| DELETE | `/mgt/rbac/roles/{roleId}` | 删除角色 | — | `{ data: null }` | 003 |
-| GET | `/mgt/rbac/roles` | 查询角色列表 | `?keyword?, status?, pageNum?, pageSize?` | `{ records[], total }` | 003 |
-| POST | `/mgt/rbac/roles/{roleId}/enable` | 启用角色 | — | `{ data: null }` | 003 |
-| POST | `/mgt/rbac/roles/{roleId}/disable` | 禁用角色 | — | `{ data: null }` | 003 |
-| PUT | `/mgt/roles/{roleId}/permissions` | 替换角色权限 | `{ permissionIds[] }` | `{ roleId, permissionIds[] }` | 003 |
-| POST | `/mgt/roles/{roleId}/permissions/{permissionId}` | 为角色授予权限 | — | `{ data: null }` | 003 |
-| DELETE | `/mgt/roles/{roleId}/permissions/{permissionId}` | 移除角色权限 | — | `{ data: null }` | 003 |
-| POST | `/mgt/permissions` | 创建权限 | `{ ...permission }` | `{ permissionId, ... }` | 003 |
-| GET | `/mgt/permissions/{permissionId}` | 查询权限详情 | — | `{ permissionId, ... }` | 003 |
-| PUT | `/mgt/permissions/{permissionId}` | 更新权限 | `{ ...permission }` | 更新后的权限 | 003 |
-| DELETE | `/mgt/permissions/{permissionId}` | 删除权限 | — | `{ data: null }` | 003 |
-| GET | `/mgt/permissions` | 查询权限列表 | `?resourceType?, keyword?, status?, pageNum?, pageSize?` | `{ records[], total }` | 003 |
-| POST | `/mgt/permissions/{permissionId}/enable` | 启用权限 | — | `{ data: null }` | 003 |
-| POST | `/mgt/permissions/{permissionId}/disable` | 禁用权限 | — | `{ data: null }` | 003 |
-| GET | `/mgt/permissions/effective/self` | 查询当前用户有效权限 | — | `{ permissions[], roles[] }` | 003 |
-| GET | `/mgt/permissions/effective` | 查询指定用户有效权限 | `?userId` | `{ permissions[], roles[] }` | 003 |
-| POST | `/mgt/check` | 检查当前用户权限 | `{ resource, action, ... }` | `{ allowed, reason? }` | 003 |
-| POST | `/mgt/internal/check` | `[内部]` 检查服务间调用权限 | `{ userId?, resource, action, ... }` | `{ allowed, reason? }` | 003 |
+| POST | `/mgmt/rbac/users` | 创建用户 | `{ ...user }` | `{ userId, ... }` | 001/003 |
+| GET | `/mgmt/rbac/users/{userId}` | 查询用户详情 | — | `{ userId, ... }` | 001/003 |
+| PUT | `/mgmt/rbac/users/{userId}` | 更新用户 | `{ ...user }` | 更新后的用户 | 003 |
+| DELETE | `/mgmt/rbac/users/{userId}` | 删除用户 | — | `{ data: null }` | 003 |
+| GET | `/mgmt/rbac/users` | 查询用户列表 | `?keyword?, status?, pageNum?, pageSize?` | `{ records[], total }` | 001/003 |
+| POST | `/mgmt/rbac/users/{userId}/enable` | 启用用户 | — | `{ data: null }` | 003 |
+| POST | `/mgmt/rbac/users/{userId}/disable` | 禁用用户 | — | `{ data: null }` | 003 |
+| POST | `/mgmt/rbac/users/{userId}/lock` | 锁定用户 | — | `{ data: null }` | 003 |
+| PUT | `/mgmt/rbac/users/{userId}/roles` | 替换用户角色 | `{ roleIds[] }` | `{ userId, roleIds[] }` | 003 |
+| POST | `/mgmt/rbac/users/{userId}/roles/{roleId}` | 为用户授予角色 | — | `{ data: null }` | 003 |
+| DELETE | `/mgmt/rbac/users/{userId}/roles/{roleId}` | 移除用户角色 | — | `{ data: null }` | 003 |
+| POST | `/mgmt/rbac/roles` | 创建角色 | `{ ...role }` | `{ roleId, ... }` | 003 |
+| GET | `/mgmt/rbac/roles/{roleId}` | 查询角色详情 | — | `{ roleId, ... }` | 003 |
+| PUT | `/mgmt/rbac/roles/{roleId}` | 更新角色 | `{ ...role }` | 更新后的角色 | 003 |
+| DELETE | `/mgmt/rbac/roles/{roleId}` | 删除角色 | — | `{ data: null }` | 003 |
+| GET | `/mgmt/rbac/roles` | 查询角色列表 | `?keyword?, status?, pageNum?, pageSize?` | `{ records[], total }` | 003 |
+| POST | `/mgmt/rbac/roles/{roleId}/enable` | 启用角色 | — | `{ data: null }` | 003 |
+| POST | `/mgmt/rbac/roles/{roleId}/disable` | 禁用角色 | — | `{ data: null }` | 003 |
+| PUT | `/mgmt/rbac/roles/{roleId}/permissions` | 替换角色权限 | `{ permissionIds[] }` | `{ roleId, permissionIds[] }` | 003 |
+| POST | `/mgmt/rbac/roles/{roleId}/permissions/{permissionId}` | 为角色授予权限 | — | `{ data: null }` | 003 |
+| DELETE | `/mgmt/rbac/roles/{roleId}/permissions/{permissionId}` | 移除角色权限 | — | `{ data: null }` | 003 |
+| POST | `/mgmt/rbac/permissions` | 创建权限 | `{ ...permission }` | `{ permissionId, ... }` | 003 |
+| GET | `/mgmt/rbac/permissions/{permissionId}` | 查询权限详情 | — | `{ permissionId, ... }` | 003 |
+| PUT | `/mgmt/rbac/permissions/{permissionId}` | 更新权限 | `{ ...permission }` | 更新后的权限 | 003 |
+| DELETE | `/mgmt/rbac/permissions/{permissionId}` | 删除权限 | — | `{ data: null }` | 003 |
+| GET | `/mgmt/rbac/permissions` | 查询权限列表 | `?resourceType?, keyword?, status?, pageNum?, pageSize?` | `{ records[], total }` | 003 |
+| POST | `/mgmt/rbac/permissions/{permissionId}/enable` | 启用权限 | — | `{ data: null }` | 003 |
+| POST | `/mgmt/rbac/permissions/{permissionId}/disable` | 禁用权限 | — | `{ data: null }` | 003 |
+| GET | `/mgmt/rbac/permissions/effective/self` | 查询当前用户有效权限 | — | `{ permissions[], roles[] }` | 003 |
+| GET | `/mgmt/rbac/permissions/effective` | 查询指定用户有效权限 | `?userId` | `{ permissions[], roles[] }` | 003 |
+| POST | `/mgmt/rbac/check` | 检查当前用户权限 | `{ resource, action, ... }` | `{ allowed, reason? }` | 003 |
+| POST | `/mgmt/rbac/internal/check` | `[内部]` 检查服务间调用权限 | `{ userId?, resource, action, ... }` | `{ allowed, reason? }` | 003 |
 
 ### 3.5 凭据库与 PAT（004-vault / 007-credential）
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| POST | `/mgt/vault/inbound/tokens` | 签发 PAT | `{ name, scopes[], expiresAt? }` | `{ id, token(仅返回一次), scopes[], ... }` | 007 |
-| GET | `/mgt/vault/inbound/tokens` | 查询 PAT 列表 | `?page?, pageSize?, status?` | `{ records[], total }` | 007 |
-| GET | `/mgt/vault/inbound/tokens/{id}` | 查询 PAT 详情 | — | `{ id, maskedToken, status, ... }` | 007 |
-| POST | `/mgt/vault/inbound/tokens/{id}/regenerate` | 重新生成 PAT | `{ ...regenerateRequest }` | `{ id, token(仅返回一次), ... }` | 007 |
-| PUT | `/mgt/vault/inbound/tokens/{id}/status` | 更新 PAT 状态 | `{ status }` | `{ data: null }` | 007 |
-| DELETE | `/mgt/vault/inbound/tokens/{id}` | 逻辑删除 PAT | — | `{ data: null }` | 007 |
-| GET | `/mgt/vault/inbound/tokens/stats` | 查询 PAT 统计 | — | `{ ...stats }` | 007 |
-| POST | `/mgt/vault/outbound/credentials` | 创建出站凭据 | `{ targetType, targetId, credentialType, credentials{} }` | `{ id, maskedValue, ... }` | 007 |
-| GET | `/mgt/vault/outbound/credentials` | 查询出站凭据列表 | `?page?, pageSize?, targetType?, status?` | `{ records[], total }` | 007 |
-| GET | `/mgt/vault/outbound/credentials/{id}` | 查询出站凭据详情 | — | `{ id, maskedValue, ... }` | 007 |
-| PUT | `/mgt/vault/outbound/credentials/{id}` | 更新出站凭据 | `{ credentialType?, credentials?{} }` | `{ id, maskedValue, ... }` | 007 |
-| PUT | `/mgt/vault/outbound/credentials/{id}/status` | 更新出站凭据状态 | `{ status }` | `{ data: null }` | 007 |
-| DELETE | `/mgt/vault/outbound/credentials/{id}` | 删除出站凭据 | — | `{ data: null }` | 007 |
-| GET | `/mgt/vault/outbound/credentials/presets` | 查询认证参数预设 | — | `{ targetType: [...presets] }` | 007 |
-| GET | `/mgt/vault/outbound/credentials/presets/{targetType}/{targetId}` | 查询目标资源认证预设 | — | `{ ...preset }` | 007 |
-| GET | `/mgt/vault/outbound/credentials/stats` | 查询出站凭据统计 | — | `{ ...stats }` | 007 |
-| POST | `/mgt/vault/inbound/tokens/verify` | `[内部]` 验证 PAT | `{ token }` | `{ valid, userId?, scopes[], ... }` | 007 |
-| POST | `/mgt/vault/inbound/resolve-asset` | `[内部]` 资产凭据解析（gateway 调用） | `{ assetId, userId }` | `{ resolved, credential{type, token}, source: "asset_service"\|"personal", targetEndpoint }` | 007 |
-| POST | `/mgt/vault/inbound/resolve-model` | `[内部]` 模型凭据解析（AI SDK 调用） | `{ userId }` | `{ resolved, credential{type, token}, source: "personal"\|"platform_default", availableModels[] }` | 007 |
+| POST | `/mgmt/vault/inbound/tokens` | 签发 PAT | `{ name, scopes[], expiresAt? }` | `{ id, token(仅返回一次), scopes[], ... }` | 007 |
+| GET | `/mgmt/vault/inbound/tokens` | 查询 PAT 列表 | `?page?, pageSize?, status?` | `{ records[], total }` | 007 |
+| GET | `/mgmt/vault/inbound/tokens/{id}` | 查询 PAT 详情 | — | `{ id, maskedToken, status, ... }` | 007 |
+| POST | `/mgmt/vault/inbound/tokens/{id}/regenerate` | 重新生成 PAT | `{ ...regenerateRequest }` | `{ id, token(仅返回一次), ... }` | 007 |
+| PUT | `/mgmt/vault/inbound/tokens/{id}/status` | 更新 PAT 状态 | `{ status }` | `{ data: null }` | 007 |
+| DELETE | `/mgmt/vault/inbound/tokens/{id}` | 逻辑删除 PAT | — | `{ data: null }` | 007 |
+| GET | `/mgmt/vault/inbound/tokens/stats` | 查询 PAT 统计 | — | `{ ...stats }` | 007 |
+| POST | `/mgmt/vault/outbound/credentials` | 创建出站凭据 | `{ targetType, targetId, credentialType, credentials{} }` | `{ id, maskedValue, ... }` | 007 |
+| GET | `/mgmt/vault/outbound/credentials` | 查询出站凭据列表 | `?page?, pageSize?, targetType?, status?` | `{ records[], total }` | 007 |
+| GET | `/mgmt/vault/outbound/credentials/{id}` | 查询出站凭据详情 | — | `{ id, maskedValue, ... }` | 007 |
+| PUT | `/mgmt/vault/outbound/credentials/{id}` | 更新出站凭据 | `{ credentialType?, credentials?{} }` | `{ id, maskedValue, ... }` | 007 |
+| PUT | `/mgmt/vault/outbound/credentials/{id}/status` | 更新出站凭据状态 | `{ status }` | `{ data: null }` | 007 |
+| DELETE | `/mgmt/vault/outbound/credentials/{id}` | 删除出站凭据 | — | `{ data: null }` | 007 |
+| GET | `/mgmt/vault/outbound/credentials/presets` | 查询认证参数预设 | — | `{ targetType: [...presets] }` | 007 |
+| GET | `/mgmt/vault/outbound/credentials/presets/{targetType}/{targetId}` | 查询目标资源认证预设 | — | `{ ...preset }` | 007 |
+| GET | `/mgmt/vault/outbound/credentials/stats` | 查询出站凭据统计 | — | `{ ...stats }` | 007 |
+| POST | `/mgmt/vault/inbound/tokens/verify` | `[内部]` 验证 PAT | `{ token }` | `{ valid, userId?, scopes[], ... }` | 007 |
+| GET | `/mgmt/vault/outbound/credentials/{id}/resolve` | `[内部]` 解析出站凭据明文 | — | `{ credentialId, credentialType, fields{} }` | 007 |
+| GET | `/mgmt/vault/audit` | 查询凭据审计日志 | `?credentialId?, action?, startTime?, endTime?, page?, size?` | `{ records[], total, page, size }` | 007 |
+| POST | `/mgmt/vault/inbound/resolve-asset` | `[内部]` 资产凭据解析（gateway 调用） | `{ assetId, userId }` | `{ resolved, credential{type, token}, source: "asset_service"\|"personal", targetEndpoint }` | 007 |
+| POST | `/mgmt/vault/inbound/resolve-model` | `[内部]` 模型凭据解析（AI SDK 调用） | `{ userId }` | `{ resolved, credential{type, token}, source: "personal"\|"platform_default", availableModels[] }` | 007 |
 
 ### 3.6 文件服务（横切）
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| POST | `/mgt/files/upload-sessions` | 创建上传会话 | `{ fileName, contentType, size, bizType, bizRefId? }` | `{ sessionId, uploadUrl, ... }` | 000/002 |
-| POST | `/mgt/files/upload-sessions/batch` | 批量创建上传会话 | `{ items[] }` | `{ items[] }` | 000 |
-| POST | `/mgt/files/upload-sessions/{sessionId}/complete` | 完成上传会话 | `{ parts?, checksum? }` | `{ fileId, status, ... }` | 000 |
-| POST | `/mgt/files/upload` | 直接上传文件 | `{ fileName, contentType, fileContent, bizType, bizRefId }` | `{ fileId, status, ... }` | 000 |
-| POST | `/mgt/files/upload/multipart` | Multipart 上传文件 | Form: `bizType, bizRefId, file` | `{ fileId, status, ... }` | 000 |
-| POST | `/mgt/files/upload/multipart/batch` | 批量 Multipart 上传 | Form: `bizType, bizRefId?, files[]` | `{ items[] }` | 000 |
-| GET | `/mgt/files/{fileId}` | 查询文件详情 | — | `{ fileId, fileName, size, status, ... }` | 000 |
-| POST | `/mgt/files/{fileId}/download-url` | 获取文件下载 URL | `{ ttlSeconds?, usage? }` | `{ downloadUrl, expiresAt, ... }` | 000 |
-| DELETE | `/mgt/files/{fileId}` | 删除文件 | — | `{ deleted: true }` | 000 |
-| POST | `/mgt/files/results` | 注册处理结果文件 | `{ fileName, blobPath, ... }` | `{ fileId, ... }` | 000 |
-| POST | `/mgt/internal/files/{fileId}/download-url` | `[内部]` 获取文件下载 URL | `{ usage, ttlSeconds?, requestId? }` | `{ sasUrl, expiresAt, contentType, size }` | 000/005 |
-| POST | `/mgt/internal/files/results` | `[内部]` 注册解析结果文件 | `{ ...resultFile }` | `{ fileId, ... }` | 005 |
+| POST | `/mgmt/file/files/upload-sessions` | 创建上传会话 | `{ fileName, contentType, size, bizType, bizRefId? }` | `{ sessionId, uploadUrl, ... }` | 000/002 |
+| POST | `/mgmt/file/files/upload-sessions/batch` | 批量创建上传会话 | `{ items[] }` | `{ items[] }` | 000 |
+| POST | `/mgmt/file/files/upload-sessions/{sessionId}/complete` | 完成上传会话 | `{ parts?, checksum? }` | `{ fileId, status, ... }` | 000 |
+| GET | `/mgmt/file/files/{fileId}` | 查询文件详情 | — | `{ fileId, fileName, size, status, ... }` | 000 |
+| POST | `/mgmt/file/files/{fileId}/download-url` | 获取文件下载 URL | `{ ttlSeconds?, usage? }` | `{ downloadUrl, expiresAt, ... }` | 000 |
+| DELETE | `/mgmt/file/files/{fileId}` | 删除文件 | — | `{ deleted: true }` | 000 |
+| POST | `/mgmt/file/files/results` | 注册处理结果文件 | `{ fileName, blobPath, ... }` | `{ fileId, ... }` | 000 |
+| POST | `/mgmt/file/internal/files/{fileId}/download-url` | `[内部]` 获取文件下载 URL | `{ usage, ttlSeconds?, requestId? }` | `{ sasUrl, expiresAt, contentType, size }` | 000/005 |
+| POST | `/mgmt/file/internal/files/results` | `[内部]` 注册解析结果文件 | `{ ...resultFile }` | `{ fileId, ... }` | 005 |
 
 ### 3.7 Chat 会话与知识库挂载（001-agent-service-platform-chat）
 
 > **数据归属调整**（评审结论，见下方说明）：会话（session）、知识库挂载关系、消息历史
-> 三类业务数据的权威均归 **grc-mgt-service**，不归 grc-agent-service。
+> 三类业务数据的权威均归 **grc-mgmt-service**，不归 grc-agent-service。
 > grc-agent-service 不维护业务表，只在收到一次"发消息"请求时，经内部接口向本服务取
 > 会话上下文（挂载了哪些知识库、历史消息是什么），生成完成后再经内部接口回写。
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| POST | `/mgt/chat/sessions` | 创建会话 | `{ assetId?(平台Chat为空), modelId?, title? }` | `{ id, assetId, title, createdAt }` | 001 |
-| GET | `/mgt/chat/sessions` | 会话列表 | `?page, size, keyword?, assetId?` | `{ items[]{id, assetId?, assetName?, title, lastMessageAt}, total }` | 001 |
-| GET | `/mgt/chat/sessions/{id}` | 会话详情（含历史消息） | — | `{ id, assetId, title, modelId, messages[]{id, role, content, citations[]?, toolCalls[]?, thinkingProcess?, createdAt}, knowledgeMounts[] }` | 001 |
-| PATCH | `/mgt/chat/sessions/{id}` | 重命名会话 | `{ title }` | 更新后的会话摘要 | 001 |
-| DELETE | `/mgt/chat/sessions/{id}` | 删除会话（软删除，消息记录保留审计留痕） | — | `204 No Content` | 001 |
-| PUT | `/mgt/chat/sessions/{id}/knowledge-mounts` | 挂载/卸载知识库（校验用户对目标知识库的访问权限） | `{ knowledgeBaseIds[] }` | `{ mounts[]{knowledgeBaseId, name, snapshotAt} }` | 001 |
-| GET | `/mgt/chat/sessions/{id}/knowledge-mounts` | 已挂载知识库列表 | — | `{ mounts[]{knowledgeBaseId, name, directoryPath} }` | 001 |
-| GET | `/mgt/internal/chat/sessions/{id}/context` | `[内部]` 查询会话上下文（供 grc-agent-service 调用） | `?includeHistory?` | `{ sessionId, knowledgeBaseIds[], modelId?, messages[]{role, content, citations[]?, createdAt} }` | 001 |
-| POST | `/mgt/internal/chat/sessions/{id}/messages` | `[内部]` 追加一条已生成的消息（供 grc-agent-service 在生成完成后回写） | `{ role, content, citations[]?, toolCalls[]?, thinkingProcess? }` | `{ messageId, createdAt }` | 001 |
+| POST | `/mgmt/chat/sessions` | 创建会话 | `{ assetId?(平台Chat为空), modelId?, title? }` | `{ id, assetId, title, createdAt }` | 001 |
+| GET | `/mgmt/chat/sessions` | 会话列表 | `?page, size, keyword?, assetId?` | `{ items[]{id, assetId?, assetName?, title, lastMessageAt}, total }` | 001 |
+| GET | `/mgmt/chat/sessions/{id}` | 会话详情（含历史消息） | — | `{ id, assetId, title, modelId, messages[]{id, role, content, citations[]?, toolCalls[]?, thinkingProcess?, createdAt}, knowledgeMounts[] }` | 001 |
+| PATCH | `/mgmt/chat/sessions/{id}` | 重命名会话 | `{ title }` | 更新后的会话摘要 | 001 |
+| DELETE | `/mgmt/chat/sessions/{id}` | 删除会话（软删除，消息记录保留审计留痕） | — | `204 No Content` | 001 |
+| PUT | `/mgmt/chat/sessions/{id}/knowledge-mounts` | 挂载/卸载知识库（校验用户对目标知识库的访问权限） | `{ knowledgeBaseIds[] }` | `{ mounts[]{knowledgeBaseId, name, snapshotAt} }` | 001 |
+| GET | `/mgmt/chat/sessions/{id}/knowledge-mounts` | 已挂载知识库列表 | — | `{ mounts[]{knowledgeBaseId, name, directoryPath} }` | 001 |
+| GET | `/mgmt/internal/chat/sessions/{id}/context` | `[内部]` 查询会话上下文（供 grc-agent-service 调用） | `?includeHistory?` | `{ sessionId, knowledgeBaseIds[], modelId?, messages[]{role, content, citations[]?, createdAt} }` | 001 |
+| POST | `/mgmt/internal/chat/sessions/{id}/messages` | `[内部]` 追加一条已生成的消息（供 grc-agent-service 在生成完成后回写） | `{ role, content, citations[]?, toolCalls[]?, thinkingProcess? }` | `{ messageId, createdAt }` | 001 |
 
 **补充说明**：
 
 - 本节内容来自 grc-agent-service 技术方案验证过程中的一次架构调整：原方案里会话/知识库挂载/消息历史都由
   grc-agent-service 自建 Postgres 持久化（`chat_sessions`/`chat_records` 两张表），评审后改为本节这个模型——
-  grc-agent-service 不建业务表，改成无状态的推理执行引擎，数据权威统一收敛到 grc-mgt-service。
+  grc-agent-service 不建业务表，改成无状态的推理执行引擎，数据权威统一收敛到 grc-mgmt-service。
 - `GET .../context` 与 `POST .../messages` 两个内部接口的具体调用时序：grc-agent-service 收到
   `POST /chat/sessions/{id}/messages`（见 §4）后，先同步调 `GET .../context` 取挂载的知识库与历史消息，
   推理/生成完成后再调 `POST .../messages` 回写这一轮的用户输入与最终回复；中途生成失败或被中止是否也要
   回写（写部分内容还是不写），待评审确认。
 - 知识库挂载权限校验（无权限的 `knowledgeBaseId` 建议静默剔除、返回实际生效的 `mounts[]`，而非整体报错）
-  与 grc-mgt-service 自己的 RBAC 校验（`/mgt/internal/check`，`CATALOG` 类型）复用同一套判定逻辑。
+  与 grc-mgmt-service 自己的 RBAC 校验（`/mgmt/rbac/internal/check`，`CATALOG` 类型）复用同一套判定逻辑。
 
 ### 3.8 当前未在 grc-mgmt-service 中落地的总览接口
 
-以下能力仍在平台 API 草案或上位设计中，但当前服务源码未发现对应控制器，暂不作为本节已实现端点：Agent 配置 `/mgt/agents/**`、菜单 `/mgt/menus/**`、通知 `/notifications/**`、护栏模板 `/guardrail-templates/**`、管理后台 `/admin/**` 及旧版个人出站凭据 `/credentials/personal/**`。待对应 feature 实现并形成契约后再补入本节。
+以下能力仍在平台 API 草案或上位设计中，但当前服务源码未发现对应控制器，暂不作为本节已实现端点：Agent 配置 `/mgmt/agents/**`、菜单 `/mgmt/menus/**`、通知 `/notifications/**`、护栏模板 `/guardrail-templates/**`、管理后台 `/admin/**` 及旧版个人出站凭据 `/credentials/personal/**`。待对应 feature 实现并形成契约后再补入本节。
 
 ---
 
 ## 4. grc-agent-service
 
 > **架构调整**（对应 §3.7 说明）：grc-agent-service 是**无状态的推理执行引擎**，不建业务表，
-> 不拥有 session / 知识库挂载关系 / 消息历史的权威数据——这些归 grc-mgt-service。
+> 不拥有 session / 知识库挂载关系 / 消息历史的权威数据——这些归 grc-mgmt-service。
 > 本节只保留"执行一次推理"相关的端点；会话的创建/列表/详情/重命名/删除/知识库挂载管理见 §3.7。
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| POST | `/chat/sessions/{id}/messages` | 发送消息（SSE 流式）。内部先同步调用 `grc-mgt-service` 的 `GET /mgt/internal/chat/sessions/{id}/context` 取挂载知识库与历史消息，生成完成后调用 `POST /mgt/internal/chat/sessions/{id}/messages` 回写这一轮问答 | `{ content, deepAnalysis?: bool }` | SSE stream: `event: delta\|citation\|tool_call\|thinking\|done` `data: { ... }` | 001 |
+| POST | `/chat/sessions/{id}/messages` | 发送消息（SSE 流式）。内部先同步调用 `grc-mgmt-service` 的 `GET /mgmt/internal/chat/sessions/{id}/context` 取挂载知识库与历史消息，生成完成后调用 `POST /mgmt/internal/chat/sessions/{id}/messages` 回写这一轮问答 | `{ content, deepAnalysis?: bool }` | SSE stream: `event: delta\|citation\|tool_call\|thinking\|done` `data: { ... }` | 001 |
 | POST | `/chat/sessions/{id}/messages/{msgId}/regenerate` | 重新生成回复（取上下文/回写逻辑同上） | — | SSE stream（同上） | 001 |
 | POST | `/chat/sessions/{id}/cancel` | 中止正在进行的流式生成 | — | `{ id, cancelled: bool }` | 001 |
 
@@ -278,14 +277,14 @@ user -> gateway -> external
   Confluence / SharePoint-OneDrive / 数据平台 / Web）时的记录，`toolCalls[]` 形如
   `{ toolName, arguments, resultSummary }`；流式场景对应 SSE `citation`/`tool_call`/`thinking` 事件，
   工具调用完成后一次性推送（不分片）。这些字段最终由 grc-agent-service 生成完成后经内部接口回写给
-  grc-mgt-service 持久化，grc-agent-service 自身不存。
+  grc-mgmt-service 持久化，grc-agent-service 自身不存。
 - `deepAnalysis` 字段的具体行为（更长的工具调用轮数上限？还是切换到支持推理链路输出的模型？）待产品/架构明确。
 - **待明确**：`GET .../context` 与 `POST .../messages` 两个内部接口的调用时序中，若生成过程中途失败或被
   中止，是否仍要回写已生成的部分内容（还是整轮丢弃不存）？grc-agent-service 完全无状态后，`cancel_registry`
-  这类"进行中生成"的标记只能是 grc-agent-service 自己进程内/Redis 的技术态缓存，不能指望 grc-mgt-service
+  这类"进行中生成"的标记只能是 grc-agent-service 自己进程内/Redis 的技术态缓存，不能指望 grc-mgmt-service
   代为维护（它不知道具体是哪个 grc-agent-service 实例在处理这条流）。
-- 知识库权限校验（`/mgt/internal/check`，`CATALOG` 类型）由 grc-mgt-service 在处理
-  `PUT /mgt/chat/sessions/{id}/knowledge-mounts` 时执行，grc-agent-service 不再需要自己调用校验——
+- 知识库权限校验（`/mgmt/rbac/internal/check`，`CATALOG` 类型）由 grc-mgmt-service 在处理
+  `PUT /mgmt/chat/sessions/{id}/knowledge-mounts` 时执行，grc-agent-service 不再需要自己调用校验——
   它拿到的 `knowledgeBaseIds[]`（经 `GET .../context` 返回）已经是校验过、生效的挂载结果。
 
 ---
@@ -302,7 +301,7 @@ user -> gateway -> external
 
 ## 6. grc-knowledge-engine
 
-> 本服务退为**门面之后的内部服务**，不直接面向前端。前端通过 mgmt-service `/mgt/knowledge/**`（§3.3）门面调用。
+> 本服务退为**门面之后的内部服务**，不直接面向前端。前端通过 mgmt-service `/mgmt/knowledge/**`（§3.3）门面调用。
 > 直接调用方：mgmt-service（门面透传）、agent-service（检索）。HTTP 方法只用 `GET` / `POST`。
 > 详细设计见 `KB-coding/docs/lasted/03-接口文档.md`（v2.0）。
 
@@ -365,7 +364,7 @@ user -> gateway -> external
 
 ### 6.6 开放接口（PAT）
 
-> PAT 校验委托 mgmt-service `POST /mgt/vault/inbound/tokens/verify`。
+> PAT 校验委托 mgmt-service `POST /mgmt/vault/inbound/tokens/verify`。
 > 凭据：`Authorization: Bearer <PAT>`。路径前缀独立为 `/open/knowledge/**`。
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
@@ -416,10 +415,10 @@ MCP Server 端点遵循 MCP 协议（JSON-RPC over stdio/SSE），不是标准 R
 - [ ] 通知推送方式（仅轮询 / SSE / WebSocket）
 - [ ] grc-agent-service 中止生成（`POST /chat/sessions/{id}/cancel`）是否需要 `messageId` 区分并发多轮生成
 - [x] ~~grc-agent-service 知识库挂载权限校验方式~~：已定案，权限校验与知识库挂载管理整体归
-      `grc-mgt-service`（§3.7），grc-agent-service 不再需要自己调用校验接口
-- [ ] grc-agent-service ↔ grc-mgt-service 内部接口时序：生成过程中途失败/被中止时，
-      `POST /mgt/internal/chat/sessions/{id}/messages` 是否仍要回写部分内容（见 §4 补充说明）
-- [ ] `GET /mgt/internal/chat/sessions/{id}/context` 返回的历史消息是否有长度/条数上限
+      `grc-mgmt-service`（§3.7），grc-agent-service 不再需要自己调用校验接口
+- [ ] grc-agent-service ↔ grc-mgmt-service 内部接口时序：生成过程中途失败/被中止时，
+      `POST /mgmt/internal/chat/sessions/{id}/messages` 是否仍要回写部分内容（见 §4 补充说明）
+- [ ] `GET /mgmt/internal/chat/sessions/{id}/context` 返回的历史消息是否有长度/条数上限
       （避免超长会话把整个历史都传给 grc-agent-service 撑爆单次请求体）
 - [ ] grc-agent-service 完全无状态后，`cancel_registry`（进行中生成的中止标记）只能是本地/Redis 技术态缓存，
       多实例部署下如何保证"中止请求"路由到正确处理该流的实例（网关按 sessionId 做一致性哈希？还是
