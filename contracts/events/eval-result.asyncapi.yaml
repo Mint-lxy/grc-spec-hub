@@ -1,0 +1,9 @@
+# 事件契约骨架（占位）—— 提供方：grc-evaluation-service；消费方：grc-mgmt-service。正式内容 [待确认]。
+asyncapi: 2.6.0
+info:
+  title: Eval Result Events
+  version: "0.1"
+  description: "[待确认] 测评结果回写事件。"
+channels: {}
+components:
+  messages: {}

@@ -1,0 +1,11 @@
+# 契约骨架（占位）—— 提供方：grc-parser-engine。正式内容 [待确认]，按 contracts/POLICY.md 走契约变更流程填充。
+openapi: 3.1.0
+info:
+  title: GRC Parser Engine API
+  version: "0.1"
+  description: "[待确认] 文档解析（GPU 优化）：Docling/MinerU 解析器执行，接收知识引擎调度。"
+servers:
+  - url: https://parser.grc.internal/v1
+paths: {}
+components:
+  schemas: {}

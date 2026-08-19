@@ -1,0 +1,11 @@
+# 契约骨架（占位）—— 提供方：grc-mgmt-service。正式内容 [待确认]，按 contracts/POLICY.md 走契约变更流程填充。
+openapi: 3.1.0
+info:
+  title: GRC Management Service API
+  version: "0.1"
+  description: "[待确认] 管理服务：资产目录、订阅引擎、发布链路、护栏模板、密钥库、管理后台、通知。"
+servers:
+  - url: https://mgmt.grc.internal/v1
+paths: {}
+components:
+  schemas: {}
