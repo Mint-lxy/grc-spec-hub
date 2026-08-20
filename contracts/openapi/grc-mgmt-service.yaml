@@ -27,6 +27,7 @@ tags:
   - name: Knowledge Base
   - name: Knowledge Document & Job
   - name: Knowledge Retrieval
+  - name: Knowledge Permission
   - name: Marketplace Asset
   - name: Marketplace Approval
   - name: Marketplace Creator Center
@@ -388,7 +389,8 @@ paths:
       parameters:
         - { name: includeKbCount, in: query, schema: { type: boolean, default: false } }
         - { name: keyword, in: query, required: false, schema: { type: string } }
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+        - { name: directoryType, in: query, required: false, schema: { type: string, enum: [PUBLIC, PERSONAL] } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/DirectoryTreeResponse' } } } } }
   /mgmt/knowledge/directories:
     post:
       tags: [Knowledge Directory]
@@ -950,6 +952,53 @@ components:
         - type: object
           properties:
             data: {}
+
+    DirectoryTreeResponse:
+      allOf:
+        - $ref: '#/components/schemas/GenericResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [public, personal]
+              properties:
+                public:
+                  type: array
+                  items: { $ref: '#/components/schemas/DirectoryTreeNode' }
+                personal:
+                  type: array
+                  items: { $ref: '#/components/schemas/DirectoryTreeNode' }
+
+    DirectoryTreeNode:
+      type: object
+      required: [id, name, directoryType, children, permissionItems]
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        parentId: { type: [integer, 'null'], format: int64 }
+        path: { type: string }
+        childrenCount: { type: integer }
+        kbCount: { type: integer }
+        directoryType: { type: string, enum: [PUBLIC, PERSONAL] }
+        aliceSyncStatus: { type: [string, 'null'] }
+        permissionItems:
+          type: array
+          items: { $ref: '#/components/schemas/DirectoryPermissionItem' }
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/DirectoryTreeNode' }
+
+    DirectoryPermissionItem:
+      type: object
+      required: [permissionCode, permissionName, granted, canApply]
+      properties:
+        permissionCode: { type: string, enum: [DIR_CONTROL, KB_CREATOR] }
+        permissionName: { type: string }
+        roleId: { type: [string, 'null'] }
+        entitlementId: { type: [string, 'null'] }
+        granted: { type: boolean }
+        canApply: { type: boolean }
+        applyUrl: { type: [string, 'null'] }
 
     ErrorResponse:
       type: object
