@@ -13,6 +13,31 @@ tags:
   - name: Token
   - name: OIDC
 paths:
+  /login:
+    post:
+      tags: [Token]
+      summary: Authenticate with username and password
+      operationId: loginWithPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordLoginRequest'
+      responses:
+        '200':
+          description: Password login result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/AuthError'
+        '401':
+          $ref: '#/components/responses/AuthError'
+        '403':
+          $ref: '#/components/responses/AuthError'
   /users/{userId}:
     get:
       tags: [User Profile]
@@ -171,6 +196,43 @@ components:
           schema:
             $ref: '#/components/schemas/AuthErrorResponse'
   schemas:
+    PasswordLoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+          writeOnly: true
+        clientType:
+          type: [string, 'null']
+    LoginResult:
+      type: object
+      required: [userId, username, accessToken, expiresIn]
+      properties:
+        userId:
+          type: integer
+          format: int64
+        username:
+          type: string
+        accessToken:
+          type: string
+        refreshToken:
+          type: [string, 'null']
+        expiresIn:
+          type: integer
+          format: int64
+    LoginResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/LoginResult'
     ApiResponse:
       type: object
       required: [code, message]

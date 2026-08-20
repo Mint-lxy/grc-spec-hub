@@ -1,7 +1,7 @@
 # API Landscape — 全局接口概览
 
 > **状态**：Draft — 待团队评审
-> **日期**：2026-08-17
+> **日期**：2026-08-19
 > **关联 ADR**：[ADR-004](../../architecture/adr/004-api-design-top-down.md)
 > **使用方式**：评审通过后，按 feature 拆入各 `specs/NNN/plan.md`，再沉淀为 `contracts/openapi/*.yaml`
 
@@ -47,17 +47,29 @@ user -> gateway -> external
 
 ## 2. grc-auth-service
 
+> 服务契约基址为 `/auth`；网关统一追加 `/api/v1`。成功响应使用共享 `ApiResponse` 包络，核心业务字段位于 `data`；错误响应使用根级 `code/message/detail/traceId/timestamp/path` 结构。
+
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| GET | `/auth/userinfo` | 获取当前用户信息 | Header: `Authorization` | `{ userId, name, email, avatar, roles[] }` | 007 |
-| POST | `/auth/verify` | 校验 Access Token 并返回用户上下文 | `{ token }` | `{ valid, userId, roles[], tenantId, exp }` | 001 |
-| POST | `/auth/logout` | 登出，吊销 Token | Header: `Authorization` | `{ code, message, data: null }` | 001 |
-| POST | `/auth/refresh` | 刷新 Token | `{ refreshToken, clientId }` | `{ accessToken, refreshToken, expiresIn }` | 001 |
-| GET | `/auth/oidc/authorize` | 发起 OIDC 授权并生成一次性 state | `?provider, redirectUri?` | `{ url, state, expireIn }` | 003 |
-| GET | `/auth/oidc/callback` | OIDC 回调登录，完成身份映射并颁发平台 Token | `?provider, code, state` | `{ accessToken, refreshToken?, userInfo, redirectUrl? }` | 003 |
-| GET | `/auth/oauth/authorize` | `[兼容]` 获取 OAuth 授权地址 | — | `{ url, state }` | 001 |
-| POST | `/auth/alice/users/sync` | `[内部]` 手动触发 Alice 用户同步 | — | `{ correlationId, triggerType, status, tasks[] }` | 002 |
-| GET | `/auth/alice/users/sync-jobs/{correlationId}` | `[内部]` 查询 Alice 用户同步任务 | — | `{ correlationId, triggerType, status, tasks[] }` | 002 |
+| POST | `/auth/login` | 使用账号密码登录并签发 Token | `{ username, password, clientType? }` | `{ userId, username, accessToken, refreshToken?, expiresIn }` | 001 |
+| GET | `/auth/users/{userId}` | 获取用户信息 | Header: `Authorization`; Path: `userId` | `{ id, username, displayName, email, accountStatus, tenantId? }` | 001 |
+| POST | `/auth/verify` | 校验 Access Token 并返回用户上下文 | `{ token }` | `{ valid, userId, roles[], tenantId?, exp }` | 001 |
+| POST | `/auth/logout` | 登出并吊销当前登录态 | Header: `Authorization: Bearer <token>` | `data: null` | 001 |
+| POST | `/auth/refresh` | 轮换 Refresh Token 并签发新 Token 对 | `{ refreshToken, clientId }` | `{ accessToken, refreshToken, expiresIn }` | 001 |
+| GET | `/auth/oauth/authorize` | 创建 OIDC 授权请求并生成一次性 state | — | `{ url, state, expireIn: 180 }` | 003 |
+| GET | `/auth/oauth/callback` | 完成 OIDC 回调登录、用户映射并签发平台 Token | `?code, state` | `{ accessToken, refreshToken?, expiresIn, userInfo, roles[], permissions[] }` | 003 |
+| POST | `/auth/alice/users/sync` | `[内部]` 手动触发 Alice 用户同步 | — | `{ correlationId, triggerType, status }` | 002 |
+| GET | `/auth/alice/users/sync-jobs/{correlationId}` | `[内部]` 查询 Alice 用户同步任务 | Path: `correlationId` | `{ correlationId, triggerType, status, tasks[] }` | 002 |
+
+### 2.1 设计中但当前未落地的登录日志接口
+
+登录日志设计文档定义了以下管理接口，但当前 auth-service 源码尚未提供对应 Controller；形成实现和契约后再转入上表的已落地端点清单。
+
+| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
+|------|------|------|---------|---------|------|
+| GET | `/auth/login-log/page` | `[设计]` 分页查询登录日志 | `?pageNum, pageSize, userId?, usernameCn?, usernameEn?, sceneCd?, loginStatus?, startTime?, endTime?` | `{ records[], total }` | 001 |
+| DELETE | `/auth/login-log/clean-old` | `[设计]` 清除一个月前登录日志 | — | 删除结果 | 001 |
+| DELETE | `/auth/login-log/clean-all` | `[设计]` 清除全部登录日志 | — | 删除结果 | 001 |
 
 ---
 
