@@ -19,5 +19,5 @@
 <!-- 人工区块：owner 手工维护 -->
 ## 给 agent 的特别提醒
 - 技术栈：Java / Spring Boot
-- 远程仓库名为 grc-ai-gateway，本地目录已重命名为 grc-api-gateway 以对齐 manifest
+- 远程仓库名为 grc-api-gateway，本地目录已重命名为 grc-api-gateway 以对齐 manifest
 <!-- /人工区块 -->
