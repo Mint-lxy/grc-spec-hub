@@ -8,9 +8,11 @@ AI 平台前端门户（SPA），提供管理、配置、对话、测评等全�
 - 里程碑 M1 进行中
 - 提供契约：无（纯前端）
 - 消费契约：contracts/openapi/grc-api-gateway.yaml
-- Platform Shell 已落地（仅左侧栏、无顶栏；7 个建设中空路由；已登录 `/` 与 `/platform` 落到 `/platform/chat`）
+- Platform Shell 已落地（仅左侧栏、无顶栏；7 个建设中空路由；`/` 与 `/platform` 落到 `/platform/chat`）
+- 侧栏品牌区（圆标 + grc/ AI Agent Portal + CONFIDENTIAL）与 QQ 头像 Popover 用户菜单已落地；折叠展开在侧栏/主内容交界边线；一期导航未改
 
 ## 近期重要变化（最近 4 周）
+- W34: 侧栏品牌区与用户菜单（002-sidebar-brand-user）。圆标 +「grc/」+「AI Agent Portal」+ CONFIDENTIAL；底部 QQ 头像打开占位资料/通知/退出登录；无新跨服务契约；一期导航未改。
 - W34: 落地运营平台页面底座（Platform Shell）。仅侧栏 + 主内容；对话/Marketplace/知识管理/订阅者中心/创作者中心/密钥库/管理后台为空态「建设中」。无新跨服务契约。
 - W33: 服务孵化，初始化仓库脚手架
 
