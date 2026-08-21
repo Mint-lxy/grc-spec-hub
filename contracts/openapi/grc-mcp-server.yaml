@@ -9,9 +9,15 @@ info:
 servers:
   - url: https://api.internal/api/v1
     description: 经 grc-api-gateway 转发后的生产地址
+tags:
+  - name: ConfluenceMCP
+    description: Confluence 原生工具的 MCP JSON-RPC 接口
+  - name: Health
+    description: MCP 进程存活探测
 paths:
   /mcp/confluence:
     post:
+      tags: [ConfluenceMCP]
       operationId: handleMcpRequest
       summary: 调用原生 MCP 工具
       description: >-
@@ -33,6 +39,7 @@ paths:
 
   /mcp/confluence/healthz:
     get:
+      tags: [Health]
       operationId: getMcpHealth
       summary: 原生 MCP 进程存活探测
       description: >-
@@ -53,7 +60,7 @@ components:
       properties:
         status: { type: string, const: ok }
         service: { type: string, const: mcp-conf-server }
-        version: { type: string, example: 0.7.0 }
+        version: { type: string, example: 0.8.0 }
 
     JsonRpcId:
       oneOf:
