@@ -20,6 +20,7 @@
 - 环境与账号阻塞（2 项未闭环）：Alice admin 账号待申请（最晚 2026-08-19）、Azure→SharePoint 方案进行中；GitHub 账号已开通（2026-08-17）。
 
 ## 近期重要变化
+- 2026-08-21：ADR-007（A2A 协议统一）产出——agent-service 只暴露 A2A 端点，mgmt-service 为前端提供自定义对话接口，状态 Accepted。
 - 2026-08-21：ADR-006（统一成功响应包络 ApiResponse）产出，error-codes.md 补充成功响应格式章节，watchlist #30 关闭。
 - 2026-08-20：spec 005 知识管理构建管线参数经 5 轮澄清细化（解析器缩减为 Docling/MinerU、切片/增强/向量化/重排序参数枚举）。
 - 2026-08-17：ADR-004（API 设计自顶向下）产出，状态 Accepted；全局 api-landscape.md 创建。
