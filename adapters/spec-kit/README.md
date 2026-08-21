@@ -11,6 +11,7 @@ Spec Kit 是当前 hub 的 **spec 工作流引擎**（可替换；替换时只�
 | `.specify/memory/constitution.md` | 项目宪法（**事实层**，只是物理上放在这里） | hub |
 | `.github/prompts/speckit.*.prompt.md` | Copilot 的斜杠命令 | Spec Kit 生成 |
 | `.claude/commands/speckit.*.md` | Claude Code 的斜杠命令（若已生成） | Spec Kit 生成 |
+| `capabilities/skills/speckit-*/SKILL.md` | Devin 等 Agent Skills 兼容工具的薄封装（kebab-case 命名，指向 `.github/agents/` 权威提示词，重装引擎后无需改动） | **hub 定制** |
 
 ## 安装 / 重装
 
