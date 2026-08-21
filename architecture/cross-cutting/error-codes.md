@@ -9,7 +9,7 @@
 
 ```json
 {
-  "code": 0,
+  "code": "0",
   "message": "success",
   "data": { ... },
   "traceId": "abc123-def456",
@@ -19,7 +19,7 @@
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| code | integer | ✅ | 成功固定为 `0`；非零值保留给未来业务警告码 |
+| code | string | ✅ | 成功固定为 `"0"`；错误时为 `{SERVICE}-{NNNN}` 格式，类型统一为字符串 |
 | message | string | ✅ | 成功固定为 `"success"`；可附带业务提示文案 |
 | data | object / array / null | ✅ | 业务数据载荷；无返回值时为 `null` |
 | traceId | string | ✅ | OpenTelemetry trace ID，与错误响应一致 |
@@ -29,7 +29,7 @@
 
 ```json
 {
-  "code": 0,
+  "code": "0",
   "message": "success",
   "data": {
     "records": [ ... ],

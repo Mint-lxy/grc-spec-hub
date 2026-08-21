@@ -16,7 +16,7 @@ ADR-002 与 `cross-cutting/error-codes.md` 已规范了错误响应格式（RFC 
 
 ```json
 {
-  "code": 0,
+  "code": "0",
   "message": "success",
   "data": { ... },
   "traceId": "abc123-def456",
@@ -26,7 +26,7 @@ ADR-002 与 `cross-cutting/error-codes.md` 已规范了错误响应格式（RFC 
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| code | integer | ✅ | 成功固定为 `0`；非零值保留给未来业务警告码 |
+| code | string | ✅ | 成功固定为 `"0"`；错误时为 `{SERVICE}-{NNNN}` 格式，类型统一为字符串 |
 | message | string | ✅ | 成功固定为 `"success"`；可附带业务提示文案 |
 | data | object / array / null | ✅ | 业务数据载荷；无返回值时为 `null` |
 | traceId | string | ✅ | OpenTelemetry trace ID，与错误响应一致 |
@@ -36,7 +36,7 @@ ADR-002 与 `cross-cutting/error-codes.md` 已规范了错误响应格式（RFC 
 
 ```json
 {
-  "code": 0,
+  "code": "0",
   "message": "success",
   "data": {
     "records": [ ... ],
@@ -63,7 +63,7 @@ SSE 流式端点不套 `ApiResponse`，仅限 JSON 响应使用。
 | 方案 | 优点 | 缺点 | 为何不选 |
 |------|------|------|----------|
 | 裸资源体（RESTful 纯粹派） | 语义更 REST、HTTP 状态码自解释 | 前端需按 HTTP 状态码区分成功/失败，分页元数据无统一位置 | 已有多个端点使用包络模式，且前端团队倾向统一解析器 |
-| 共用错误格式字段（code 为字符串错误码 / "SUCCESS"） | 成功与错误结构完全对称 | code 字段类型不一致（错误为字符串如 "GW-2001"，成功需用不同语义）；破坏 RFC 9457 语义 | 错误码已固定为 `{SERVICE}-{NNNN}` 字符串格式，成功场景强行复用会导致前端解析逻辑复杂化 |
+| 共用错误格式字段（code 为字符串错误码 / "0"） | 成功与错误结构完全对称 | 错误码已固定为 `{SERVICE}-{NNNN}` 字符串格式，成功场景强行复用会导致前端解析逻辑复杂化 | 成功 code 固定为 `"0"` 已足够区分，无需强制业务前缀 |
 
 ## 影响
 
