@@ -936,11 +936,12 @@ components:
   schemas:
     ApiResponseBase:
       type: object
-      required: [code, message]
+      required: [code, message, traceId, timestamp]
       properties:
-        code: { type: integer, description: "0=成功" }
-        message: { type: string }
+        code: { type: string, const: '0', description: '0=成功；失败时使用已注册的服务前缀错误码' }
+        message: { type: string, const: success }
         traceId: { type: string }
+        timestamp: { type: string, format: date-time }
 
     GenericRequest:
       type: object
@@ -950,6 +951,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/ApiResponseBase'
         - type: object
+          required: [data]
           properties:
             data: {}
 
