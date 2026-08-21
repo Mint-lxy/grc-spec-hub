@@ -47,7 +47,7 @@
 | 22 | 测评模板初始阈值审定 | 基线 | spec 004 | open |
 | 23 | Alice 同步周期与失败回滚——随 PRD §13.10 #16 确认关闭（2026-08-21） | 外部依赖 | spec 008 | closed |
 | 29 | UI/UX 方案未定，阻塞前端工作——现只有 PRD §13.11 视觉与品牌基础规范（深色风格/主色/胶囊按钮/字体）与一份已过期的旧原型（`docs/prd/GRC_AI_Agent_Prototype_v1.html`），无信息架构/交互稿/组件规范；`grc-ai-portal` 的 `docs/design/` 为空 | 前端/设计 | grc-ai-portal, PRD §13.11 | open |
-| 32 | 005 FR-013 与 PRD §9.7 冲突：公共目录建库不再自动授予创建者维护角色（知识库创建角色仅有建库能力）——以 PRD 为准，待与开发团队/架构师确认后改写 FR-013 | spec 冲突 | spec 005, PRD §7 M4-5/§9.7 | open |
+| 32 | 005 FR-013 与 PRD §9.7 冲突——已解决（用户裁定 2026-08-21）：新建库角色模型——建库时指定知识库 Owner+Deputy、平台据此调 Alice 建角色并授予、后续授予由知识库 Owner/Deputy 单级审批；PRD/CONTEXT/旅程/ADR-0013/005 已全链路修订 | spec 冲突 | spec 005, PRD §7 M4-5/§9.7, ADR-0013 | closed |
 | 33 | 管理后台「准入测评模板维护」页面（PRD §5.2）的 spec 归属：004-publish 或 008-admin——待与开发团队/架构师讨论后补入对应 spec | spec 归属 | spec 004/008, PRD §5.2 | open |
 | 34 | 005 User Story 优先级标注（P1/P2/P3，spec-kit 约定）与 PRD 的 P0/P1 批次同名不同义——建议改写为「高/中/低」避免工单拆分时误读 | 格式 | spec 005 | open |
 | 35 | PRD §13.10 #3：知识目录与知识库权限细化规则（同级多人控制、角色交接、撤权流程） | 权限模型 | spec 005, PRD §9.7, ADR-0006 | open |
