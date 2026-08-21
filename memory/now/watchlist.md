@@ -51,4 +51,4 @@
 
 | # | 项目 | 类型 | 关联 | 状态 |
 |---|------|------|------|------|
-| 30 | API 成功响应包络（`ApiResponse`）未正式规范——`error-codes.md` 已定义错误响应格式（RFC 9457），但成功响应只在 `api-landscape.md` 提了一句"服务统一返回 `ApiResponse` 包络"，无 schema/字段定义/ADR；**全平台成功 `code` 取值未定义**（仅 `contracts/openapi/grc-mgmt-service.yaml` `ApiResponseBase` 写了 `0=成功`，auth 等契约 `code` 为 string 且无成功值）；示例响应（如 `/auth/logout`）字段与错误格式不一致（来源：用户指令 2026-08-21 / hub-qa） | 文档缺口 | architecture/cross-cutting/error-codes.md, specs/000-platform/api-landscape.md, contracts/openapi/grc-mgmt-service.yaml | open |
+| 30 | API 成功响应包络（`ApiResponse`）已规范——ADR-006 定义统一包络（`code:0` 为成功），`error-codes.md` §1 补充成功响应格式与分页结构（2026-08-21） | 文档缺口 | architecture/adr/006-api-response-envelope.md, architecture/cross-cutting/error-codes.md | closed |

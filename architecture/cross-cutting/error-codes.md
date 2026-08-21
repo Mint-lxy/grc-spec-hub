@@ -1,9 +1,55 @@
-# 横切规范：错误码与幂等
+# 横切规范：响应格式、错误码与幂等
 
 > 状态：Proposed。所有服务共同遵守。
-> 关联 ADR：001-service-split
+> 关联 ADR：001-service-split, 006-api-response-envelope
 
-## 1. 错误响应格式（RFC 9457 Problem Details）
+## 1. 成功响应格式（ApiResponse 包络）
+
+所有 REST 接口的成功响应**必须**使用以下统一 `ApiResponse` 包络（SSE 流式端点除外）：
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": { ... },
+  "traceId": "abc123-def456",
+  "timestamp": "2026-08-21T10:00:00Z"
+}
+```
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| code | integer | ✅ | 成功固定为 `0`；非零值保留给未来业务警告码 |
+| message | string | ✅ | 成功固定为 `"success"`；可附带业务提示文案 |
+| data | object / array / null | ✅ | 业务数据载荷；无返回值时为 `null` |
+| traceId | string | ✅ | OpenTelemetry trace ID，与错误响应一致 |
+| timestamp | string | ✅ | 响应时间（ISO 8601 UTC），与错误响应一致 |
+
+分页场景 `data` 内嵌标准分页结构：
+
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "records": [ ... ],
+    "total": 128,
+    "page": 1,
+    "pageSize": 20
+  },
+  "traceId": "...",
+  "timestamp": "..."
+}
+```
+
+| 分页字段 | 类型 | 说明 |
+|----------|------|------|
+| records | array | 当前页数据列表 |
+| total | integer | 总记录数 |
+| page | integer | 当前页码（1-based） |
+| pageSize | integer | 每页条数 |
+
+## 2. 错误响应格式（RFC 9457 Problem Details）
 
 所有 REST 接口的错误响应**必须**使用以下 JSON 结构（基于 RFC 9457）：
 
@@ -29,7 +75,7 @@
 
 HTTP 状态码与 code 的映射：code 的第一位数字对应 HTTP 状态码类别（4xxx→4xx, 5xxx→5xx）。
 
-## 2. 错误码编码规则
+## 3. 错误码编码规则
 
 ### 格式
 
@@ -114,13 +160,13 @@ HTTP 状态码与 code 的映射：code 的第一位数字对应 HTTP 状态码�
 | AUTH-2002 | 401 | PAT 已过期 |
 | AUTH-2003 | 403 | 账号已被 Alice 停用 |
 
-## 3. 网关层错误包装规则
+## 4. 网关层错误包装规则
 
 - 网关代理后端时，若后端返回标准错误格式，**原样透传**给前端（保留 code/message/detail）。
 - 若后端返回非标准格式（裸 500/无 body），网关包装为 `GW-9002`（上游服务异常）并附 traceId。
 - 护栏拦截产生的错误由网关自己生成（`GW-4001`/`GW-4002`），不透传后端。
 
-## 4. 前端错误展示规则
+## 5. 前端错误展示规则
 
 | code 类别 | 前端行为 |
 |-----------|----------|
@@ -131,13 +177,13 @@ HTTP 状态码与 code 的映射：code 的第一位数字对应 HTTP 状态码�
 | *-5xxx | 展示限流提示，建议稍后重试 |
 | *-9xxx | 展示"系统繁忙"通用提示 + traceId（便于报障） |
 
-## 5. 幂等约定
+## 6. 幂等约定
 
 - 写操作的幂等键放 **HTTP Header**：`X-Idempotency-Key: {UUID}`。
 - 服务端以 `(user_id, idempotency_key, endpoint)` 为唯一约束，24 小时内重复提交返回首次结果。
 - 事件消费者必须幂等（Azure Service Bus 至少一次投递假设）——以 `message_id` 做去重。
 
-## 6. 重试与超时
+## 7. 重试与超时
 
 | 场景 | 默认超时 | 默认重试 | 说明 |
 |------|----------|----------|------|
