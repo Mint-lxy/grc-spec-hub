@@ -119,7 +119,7 @@ graph LR
 ### grc-mcp-server
 - repo: mercedes-benz.china/grc-mcp-server
 - owner: @todo-owner
-- provides:
+- provides: contracts/openapi/grc-mcp-server.yaml
 - consumes:
 - depends-on: grc-auth-service
 - 职责：`[待确认]` 示例服务，用于验证脚手架与管线。边界见 000-platform。
