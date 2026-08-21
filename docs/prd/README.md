@@ -13,7 +13,7 @@
 
 ```
 # 在 hub 工作区对 agent 说：
-读 docs/prd/GRC-AI-Foundation-Platform-PRD-v1.0.md 的 §X 章节，
+读 docs/prd/GRC-AI-Foundation-Platform-PRD-v1.2.md 的 §X 章节，
 基于其中的功能 Y 起草 specs/NNN-<slug>/spec.md
 ```
 
@@ -21,5 +21,9 @@
 
 | 文件 | 版本 | 说明 |
 |------|------|------|
-| GRC-AI-Foundation-Platform-PRD-v1.0.md | v1.0 | 平台总体 PRD（设计基线版），154 条用户故事，覆盖 P0+P1 |
+| GRC-AI-Foundation-Platform-PRD-v1.2.md | v1.2 | 平台总体 PRD（当前基线，与用户旅程 v1.2 差异收敛版 + 用户故事补遗 5 条 + §13.10 澄清 + 业务规则补遗），157 条用户故事，通知 12 类，覆盖 P0+P1 |
+| GRC-AI-Foundation-Platform-PRD-v1.0-v1.2-Diff.md | — | v1.0 → v1.2 详细差异对比与决策理由（R1–R9 主线 + 按章节明细 + 专项汇总 + spec 影响映射） |
+| GRC-AI-Foundation-Platform-PRD-v1.0.md | v1.0 | 历史版本，已被 v1.2 取代；specs/000–009 的拆解基线 |
 | GRC-AI-Foundation-Platform-PRD-v0.9.md | v0.9 | 历史版本，已被 v1.0 取代 |
+
+用户旅程源文件见 [`../user_journey/`](../user_journey/)（当前基线 v1.2）。

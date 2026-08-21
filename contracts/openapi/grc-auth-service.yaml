@@ -239,6 +239,8 @@ components:
       properties:
         code:
           type: string
+          const: '0'
+          description: Successful response code
         message:
           type: string
         detail:
