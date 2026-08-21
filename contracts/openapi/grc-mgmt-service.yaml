@@ -66,7 +66,7 @@ paths:
                 title:
                   type: [string, "null"]
       responses:
-        '200':
+        '0':
           description: 创建成功
           content:
             application/json:
@@ -94,7 +94,7 @@ paths:
           required: false
           schema: { type: string }
       responses:
-        '200':
+        '0':
           description: 会话列表
           content:
             application/json:
@@ -109,7 +109,7 @@ paths:
       operationId: getChatSessionDetail
       summary: 会话详情（含历史消息）
       responses:
-        '200':
+        '0':
           description: 会话详情
           content:
             application/json:
@@ -131,7 +131,7 @@ paths:
               properties:
                 title: { type: string, maxLength: 128 }
       responses:
-        '200':
+        '0':
           description: 更新后的会话摘要
           content:
             application/json:
@@ -171,7 +171,7 @@ paths:
                   type: array
                   items: { type: string }
       responses:
-        '200':
+        '0':
           description: 实际生效的挂载结果
           content:
             application/json:
@@ -184,7 +184,7 @@ paths:
       operationId: getKnowledgeMounts
       summary: 已挂载知识库列表
       responses:
-        '200':
+        '0':
           description: 已挂载知识库列表
           content:
             application/json:
@@ -208,7 +208,7 @@ paths:
           required: false
           schema: { type: boolean, default: true }
       responses:
-        '200':
+        '0':
           description: 会话上下文
           content:
             application/json:
@@ -234,7 +234,7 @@ paths:
             schema:
               $ref: '#/components/schemas/AppendMessageRequest'
       responses:
-        '200':
+        '0':
           description: 追加成功
           content:
             application/json:
@@ -263,7 +263,7 @@ paths:
               properties:
                 userId: { type: string }
       responses:
-        '200':
+        '0':
           description: 解析结果
           content:
             application/json:
@@ -297,7 +297,7 @@ paths:
                   enum: [auth_failed]
                   description: 目前只定义了一种上报原因；瞬时故障不应上报到本接口
       responses:
-        '200':
+        '0':
           description: 已记录
           content:
             application/json:
@@ -312,7 +312,7 @@ paths:
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/file/files/upload-sessions/batch:
     post:
       tags: [File Management]
@@ -321,7 +321,7 @@ paths:
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/file/files/upload-sessions/{sessionId}/complete:
     parameters: [{ $ref: '#/components/parameters/SessionId' }]
     post:
@@ -331,19 +331,19 @@ paths:
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 完成成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 完成成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/file/files/{fileId}:
     parameters: [{ $ref: '#/components/parameters/FileId' }]
     get:
       tags: [File Management]
       operationId: getFileDetail
       summary: 查询文件详情
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
     delete:
       tags: [File Management]
       operationId: deleteFile
       summary: 删除文件
-      responses: { '200': { description: 删除成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 删除成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/file/files/{fileId}/download-url:
     parameters: [{ $ref: '#/components/parameters/FileId' }]
     post:
@@ -352,7 +352,7 @@ paths:
       summary: 创建文件下载地址
       requestBody:
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/file/files/results:
     post:
       tags: [File Management]
@@ -361,7 +361,7 @@ paths:
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 登记成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 登记成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/file/internal/files/{fileId}/download-url:
     parameters: [{ $ref: '#/components/parameters/FileId' }]
     post:
@@ -370,7 +370,7 @@ paths:
       summary: '[内部] 创建文件下载地址'
       requestBody:
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/file/internal/files/results:
     post:
       tags: [Internal File]
@@ -379,7 +379,7 @@ paths:
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 登记成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 登记成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
 
   /mgmt/knowledge/directories/tree:
     get:
@@ -390,7 +390,7 @@ paths:
         - { name: includeKbCount, in: query, schema: { type: boolean, default: false } }
         - { name: keyword, in: query, required: false, schema: { type: string } }
         - { name: directoryType, in: query, required: false, schema: { type: string, enum: [PUBLIC, PERSONAL] } }
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/DirectoryTreeResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/DirectoryTreeResponse' } } } } }
   /mgmt/knowledge/directories:
     post:
       tags: [Knowledge Directory]
@@ -399,7 +399,7 @@ paths:
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/directories/{directoryId}/rename:
     parameters: [{ $ref: '#/components/parameters/DirectoryId' }]
     patch:
@@ -409,7 +409,7 @@ paths:
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/directories/{directoryId}:
     parameters: [{ $ref: '#/components/parameters/DirectoryId' }]
     patch:
@@ -419,12 +419,12 @@ paths:
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
     delete:
       tags: [Knowledge Directory]
       operationId: deleteDirectory
       summary: 删除知识目录
-      responses: { '200': { description: 删除成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 删除成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
 
   /mgmt/knowledge/knowledge-bases:
     post:
@@ -434,7 +434,7 @@ paths:
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
     get:
       tags: [Knowledge Base]
       operationId: listKnowledgeBases
@@ -446,19 +446,19 @@ paths:
         - { name: retrievalReady, in: query, required: false, schema: { type: boolean } }
         - { name: page, in: query, required: false, schema: { type: integer, minimum: 1 } }
         - { name: pageSize, in: query, required: false, schema: { type: integer, minimum: 1 } }
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     get:
       tags: [Knowledge Base]
       operationId: getKnowledgeBaseDetail
       summary: 查询知识库详情
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
     delete:
       tags: [Knowledge Base]
       operationId: deleteKnowledgeBase
       summary: 删除知识库
-      responses: { '200': { description: 删除成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 删除成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/config:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     patch:
@@ -468,7 +468,7 @@ paths:
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/documents:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     post:
@@ -478,12 +478,12 @@ paths:
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
     get:
       tags: [Knowledge Base]
       operationId: listKnowledgeBaseDocuments
       summary: 查询知识库文档列表
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/build-jobs:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     post:
@@ -493,28 +493,28 @@ paths:
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/stats:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     get:
       tags: [Knowledge Base]
       operationId: getKnowledgeBaseStatistics
       summary: 查询知识库统计
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/publish:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     post:
       tags: [Knowledge Base]
       operationId: publishKnowledgeBase
       summary: 发布知识库
-      responses: { '200': { description: 发布成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 发布成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/offline:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     post:
       tags: [Knowledge Base]
       operationId: offlineKnowledgeBase
       summary: 下线知识库
-      responses: { '200': { description: 下线成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 下线成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/stage-config:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
     patch:
@@ -524,14 +524,14 @@ paths:
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/{kbId}/documents/{docId}:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
     get:
       tags: [Knowledge Document & Job]
       operationId: getKnowledgeDocumentDetail
       summary: 查询文档详情
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/documents/{docId}/stages/{stageType}/run:
     parameters: [{ $ref: '#/components/parameters/DocumentId' }, { $ref: '#/components/parameters/StageType' }]
     post:
@@ -540,14 +540,14 @@ paths:
       summary: 执行文档阶段
       requestBody:
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 执行成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 执行成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/jobs/{jobId}:
     parameters: [{ $ref: '#/components/parameters/JobId' }]
     get:
       tags: [Knowledge Document & Job]
       operationId: getKnowledgeJobStatus
       summary: 查询构建任务状态
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/retrievals:
     post:
       tags: [Knowledge Retrieval]
@@ -556,7 +556,7 @@ paths:
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 检索成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 检索成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
 
   /mgmt/marketplace/assets:
     post:
@@ -564,46 +564,46 @@ paths:
       operationId: createMarketplaceAsset
       summary: 创建资产
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
     get:
       tags: [Marketplace Asset]
       operationId: listMarketplaceAssets
       summary: 查询资产列表
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/assets/{assetId}:
     parameters: [{ $ref: '#/components/parameters/AssetId' }]
     get:
       tags: [Marketplace Asset]
       operationId: getMarketplaceAsset
       summary: 查询资产详情
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
     put:
       tags: [Marketplace Asset]
       operationId: updateMarketplaceAsset
       summary: 更新资产
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }
-      responses: { '200': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/assets/{assetId}/publish:
     parameters: [{ $ref: '#/components/parameters/AssetId' }]
     post:
       tags: [Marketplace Asset]
       operationId: publishMarketplaceAsset
       summary: 发布资产
-      responses: { '200': { description: 发布成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 发布成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/assets/{assetId}/unpublish:
     parameters: [{ $ref: '#/components/parameters/AssetId' }]
     post:
       tags: [Marketplace Asset]
       operationId: unpublishMarketplaceAsset
       summary: 下架资产
-      responses: { '200': { description: 下架成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 下架成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/assets/{assetId}/archive:
     parameters: [{ $ref: '#/components/parameters/AssetId' }]
     post:
       tags: [Marketplace Asset]
       operationId: archiveMarketplaceAsset
       summary: 归档资产
-      responses: { '200': { description: 归档成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 归档成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/assets/{assetId}/transfer-owner:
     parameters: [{ $ref: '#/components/parameters/AssetId' }]
     post:
@@ -611,41 +611,41 @@ paths:
       operationId: transferMarketplaceAssetOwner
       summary: 转移资产 Owner
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }
-      responses: { '200': { description: 转移成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 转移成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/assets/{assetId}/precheck:
     parameters: [{ $ref: '#/components/parameters/AssetId' }]
     post:
       tags: [Marketplace Asset]
       operationId: precheckMarketplaceAsset
       summary: 执行资产预检
-      responses: { '200': { description: 预检完成, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 预检完成, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/assets/yaml-preview:
     post:
       tags: [Marketplace Asset]
       operationId: previewMarketplaceAssetYaml
       summary: 预览资产 YAML
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }
-      responses: { '200': { description: 预览成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 预览成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/assets/draft/{assetId}:
     parameters: [{ $ref: '#/components/parameters/AssetId' }]
     delete:
       tags: [Marketplace Asset]
       operationId: deleteMarketplaceDraft
       summary: 删除资产草稿
-      responses: { '200': { description: 删除成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 删除成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/approval-flows/{flowId}:
     parameters: [{ $ref: '#/components/parameters/FlowId' }]
     get:
       tags: [Marketplace Approval]
       operationId: getApprovalFlow
       summary: 查询审批流详情
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/approval-flows/my-pending:
     get:
       tags: [Marketplace Approval]
       operationId: listMyPendingApprovals
       summary: 查询我的待审批
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/approval-flows/{flowId}/steps/{stepId}/approve:
     parameters: [{ $ref: '#/components/parameters/FlowId' }, { $ref: '#/components/parameters/StepId' }]
     post:
@@ -653,7 +653,7 @@ paths:
       operationId: approveApprovalStep
       summary: 审批通过
       requestBody: { content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }
-      responses: { '200': { description: 审批成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 审批成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/approval-flows/{flowId}/steps/{stepId}/reject:
     parameters: [{ $ref: '#/components/parameters/FlowId' }, { $ref: '#/components/parameters/StepId' }]
     post:
@@ -661,20 +661,20 @@ paths:
       operationId: rejectApprovalStep
       summary: 审批驳回
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }
-      responses: { '200': { description: 驳回成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 驳回成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/tags:
     get:
       tags: [Marketplace Tags]
       operationId: listMarketplaceTags
       summary: 查询全部标签
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/assets/{assetId}/subscribe/page-init:
     parameters: [{ $ref: '#/components/parameters/AssetId' }]
     get:
       tags: [Marketplace Subscription]
       operationId: getSubscriptionPageInit
       summary: 订阅提交页初始化
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/assets/{assetId}/subscribe:
     parameters: [{ $ref: '#/components/parameters/AssetId' }]
     post:
@@ -682,26 +682,26 @@ paths:
       operationId: submitSubscription
       summary: 提交订阅
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }
-      responses: { '200': { description: 提交成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 提交成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/subscriber-center/summary:
     get:
       tags: [Marketplace Subscription]
       operationId: getSubscriberCenterSummary
       summary: 订阅者中心统计
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/subscriptions:
     get:
       tags: [Marketplace Subscription]
       operationId: listSubscriptions
       summary: 查询订阅列表
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/subscriptions/{subscriptionId}:
     parameters: [{ $ref: '#/components/parameters/SubscriptionId' }]
     get:
       tags: [Marketplace Subscription]
       operationId: getSubscription
       summary: 查询订阅详情
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/subscriptions/{subscriptionId}/resubmit:
     parameters: [{ $ref: '#/components/parameters/SubscriptionId' }]
     post:
@@ -709,45 +709,45 @@ paths:
       operationId: resubmitSubscription
       summary: 重新申请订阅
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }
-      responses: { '200': { description: 提交成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 提交成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/subscriptions/{subscriptionId}/cancel:
     parameters: [{ $ref: '#/components/parameters/SubscriptionId' }]
     post:
       tags: [Marketplace Subscription]
       operationId: cancelSubscription
       summary: 取消订阅
-      responses: { '200': { description: 取消成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 取消成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/creator-center/summary:
     get:
       tags: [Marketplace Creator Center]
       operationId: getCreatorCenterSummary
       summary: 创作者中心统计
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/creator-center/assets:
     get:
       tags: [Marketplace Creator Center]
       operationId: listCreatorAssets
       summary: 创作者资产列表
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/creator-center/pending-subscriptions:
     get:
       tags: [Marketplace Creator Center]
       operationId: listCreatorPendingSubscriptions
       summary: 待审批订阅列表
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/creator-center/pending-publish-assets:
     get:
       tags: [Marketplace Creator Center]
       operationId: listPendingPublishAssets
       summary: 待发布资产列表
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/creator-center/assets/{assetId}/console:
     parameters: [{ $ref: '#/components/parameters/AssetId' }]
     get:
       tags: [Marketplace Creator Center]
       operationId: getCreatorAssetConsole
       summary: 创作者资产控制台
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/creator-center/assets/{assetId}/subscription-settings:
     parameters: [{ $ref: '#/components/parameters/AssetId' }]
     put:
@@ -755,7 +755,7 @@ paths:
       operationId: updateSubscriptionSettings
       summary: 保存订阅设置
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }
-      responses: { '200': { description: 保存成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 保存成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/creator-center/subscriptions/{subscriptionId}/decision:
     parameters: [{ $ref: '#/components/parameters/SubscriptionId' }]
     post:
@@ -763,14 +763,14 @@ paths:
       operationId: decideCreatorSubscription
       summary: 创作者处理订阅审批
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }
-      responses: { '200': { description: 处理成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 处理成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/creator-center/subscriptions/{subscriptionId}/revoke:
     parameters: [{ $ref: '#/components/parameters/SubscriptionId' }]
     post:
       tags: [Marketplace Creator Center]
       operationId: revokeCreatorSubscription
       summary: 创作者取消已通过订阅
-      responses: { '200': { description: 处理成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 处理成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/assets/{assetId}/publish-evaluations:
     parameters: [{ $ref: '#/components/parameters/AssetId' }]
     post:
@@ -778,123 +778,123 @@ paths:
       operationId: createPublishEvaluation
       summary: 发起发布前测评
       requestBody: { content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }
-      responses: { '200': { description: 发起成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 发起成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/marketplace/assets/{assetId}/publish-evaluations/{evaluationId}:
     parameters: [{ $ref: '#/components/parameters/AssetId' }, { $ref: '#/components/parameters/EvaluationId' }]
     get:
       tags: [Marketplace Creator Center]
       operationId: getPublishEvaluation
       summary: 查询发布前测评结果
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '0': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
 
   /mgmt/rbac/users:
-    post: { tags: [User Management], operationId: createUser, summary: 创建用户, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    get: { tags: [User Management], operationId: listUsers, summary: 查询用户列表, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [User Management], operationId: createUser, summary: 创建用户, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [User Management], operationId: listUsers, summary: 查询用户列表, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/users/{userId}:
     parameters: [{ $ref: '#/components/parameters/UserId' }]
-    get: { tags: [User Management], operationId: getUser, summary: 查询用户, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    put: { tags: [User Management], operationId: updateUser, summary: 更新用户, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    delete: { tags: [User Management], operationId: deleteUser, summary: 删除用户, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [User Management], operationId: getUser, summary: 查询用户, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    put: { tags: [User Management], operationId: updateUser, summary: 更新用户, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    delete: { tags: [User Management], operationId: deleteUser, summary: 删除用户, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/users/{userId}/enable:
     parameters: [{ $ref: '#/components/parameters/UserId' }]
-    post: { tags: [User Management], operationId: enableUser, summary: 启用用户, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [User Management], operationId: enableUser, summary: 启用用户, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/users/{userId}/disable:
     parameters: [{ $ref: '#/components/parameters/UserId' }]
-    post: { tags: [User Management], operationId: disableUser, summary: 禁用用户, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [User Management], operationId: disableUser, summary: 禁用用户, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/users/{userId}/lock:
     parameters: [{ $ref: '#/components/parameters/UserId' }]
-    post: { tags: [User Management], operationId: lockUser, summary: 锁定用户, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [User Management], operationId: lockUser, summary: 锁定用户, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/roles:
-    post: { tags: [Role Management], operationId: createRole, summary: 创建角色, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    get: { tags: [Role Management], operationId: listRoles, summary: 查询角色列表, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Role Management], operationId: createRole, summary: 创建角色, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Role Management], operationId: listRoles, summary: 查询角色列表, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/roles/{roleId}:
     parameters: [{ $ref: '#/components/parameters/RoleId' }]
-    get: { tags: [Role Management], operationId: getRole, summary: 查询角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    put: { tags: [Role Management], operationId: updateRole, summary: 更新角色, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    delete: { tags: [Role Management], operationId: deleteRole, summary: 删除角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Role Management], operationId: getRole, summary: 查询角色, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    put: { tags: [Role Management], operationId: updateRole, summary: 更新角色, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    delete: { tags: [Role Management], operationId: deleteRole, summary: 删除角色, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/roles/{roleId}/enable:
     parameters: [{ $ref: '#/components/parameters/RoleId' }]
-    post: { tags: [Role Management], operationId: enableRole, summary: 启用角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Role Management], operationId: enableRole, summary: 启用角色, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/roles/{roleId}/disable:
     parameters: [{ $ref: '#/components/parameters/RoleId' }]
-    post: { tags: [Role Management], operationId: disableRole, summary: 禁用角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Role Management], operationId: disableRole, summary: 禁用角色, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/roles/{roleId}/permissions:
     parameters: [{ $ref: '#/components/parameters/RoleId' }]
-    put: { tags: [Role-Permission Binding], operationId: replaceRolePermissions, summary: 替换角色权限, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    put: { tags: [Role-Permission Binding], operationId: replaceRolePermissions, summary: 替换角色权限, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/roles/{roleId}/permissions/{permissionId}:
     parameters: [{ $ref: '#/components/parameters/RoleId' }, { $ref: '#/components/parameters/PermissionId' }]
-    post: { tags: [Role-Permission Binding], operationId: addPermissionToRole, summary: 为角色授予权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    delete: { tags: [Role-Permission Binding], operationId: removePermissionFromRole, summary: 移除角色权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Role-Permission Binding], operationId: addPermissionToRole, summary: 为角色授予权限, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    delete: { tags: [Role-Permission Binding], operationId: removePermissionFromRole, summary: 移除角色权限, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/users/{userId}/roles:
     parameters: [{ $ref: '#/components/parameters/UserId' }]
-    put: { tags: [User-Role Binding], operationId: replaceUserRoles, summary: 替换用户角色, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    put: { tags: [User-Role Binding], operationId: replaceUserRoles, summary: 替换用户角色, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/users/{userId}/roles/{roleId}:
     parameters: [{ $ref: '#/components/parameters/UserId' }, { $ref: '#/components/parameters/RoleId' }]
-    post: { tags: [User-Role Binding], operationId: addRoleToUser, summary: 为用户授予角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    delete: { tags: [User-Role Binding], operationId: removeRoleFromUser, summary: 移除用户角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [User-Role Binding], operationId: addRoleToUser, summary: 为用户授予角色, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    delete: { tags: [User-Role Binding], operationId: removeRoleFromUser, summary: 移除用户角色, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/permissions:
-    post: { tags: [Permission Management], operationId: createPermission, summary: 创建权限, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    get: { tags: [Permission Management], operationId: listPermissions, summary: 查询权限列表, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Permission Management], operationId: createPermission, summary: 创建权限, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Permission Management], operationId: listPermissions, summary: 查询权限列表, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/permissions/{permissionId}:
     parameters: [{ $ref: '#/components/parameters/PermissionId' }]
-    get: { tags: [Permission Management], operationId: getPermission, summary: 查询权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    put: { tags: [Permission Management], operationId: updatePermission, summary: 更新权限, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    delete: { tags: [Permission Management], operationId: deletePermission, summary: 删除权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Permission Management], operationId: getPermission, summary: 查询权限, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    put: { tags: [Permission Management], operationId: updatePermission, summary: 更新权限, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    delete: { tags: [Permission Management], operationId: deletePermission, summary: 删除权限, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/permissions/{permissionId}/enable:
     parameters: [{ $ref: '#/components/parameters/PermissionId' }]
-    post: { tags: [Permission Management], operationId: enablePermission, summary: 启用权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Permission Management], operationId: enablePermission, summary: 启用权限, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/permissions/{permissionId}/disable:
     parameters: [{ $ref: '#/components/parameters/PermissionId' }]
-    post: { tags: [Permission Management], operationId: disablePermission, summary: 禁用权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Permission Management], operationId: disablePermission, summary: 禁用权限, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/permissions/effective/self:
-    get: { tags: [Effective Permission], operationId: getMyEffectivePermissions, summary: 查询我的有效权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Effective Permission], operationId: getMyEffectivePermissions, summary: 查询我的有效权限, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/permissions/effective:
-    get: { tags: [Effective Permission], operationId: getUserEffectivePermissions, summary: 查询指定用户有效权限, parameters: [{ name: userId, in: query, schema: { type: integer, format: int64 } }], responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Effective Permission], operationId: getUserEffectivePermissions, summary: 查询指定用户有效权限, parameters: [{ name: userId, in: query, schema: { type: integer, format: int64 } }], responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/check:
-    post: { tags: [Permission Check], operationId: checkPermissions, summary: 检查权限, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Permission Check], operationId: checkPermissions, summary: 检查权限, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/rbac/internal/check:
-    post: { tags: [Internal Permission Check], operationId: checkInternalPermissions, summary: '[内部] 检查服务间权限', requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Internal Permission Check], operationId: checkInternalPermissions, summary: '[内部] 检查服务间权限', requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
 
   /mgmt/vault/inbound/tokens:
-    post: { tags: [Inbound PAT Management], operationId: createPat, summary: 创建 PAT, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    get: { tags: [Inbound PAT Management], operationId: listPats, summary: 查询 PAT 列表, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Inbound PAT Management], operationId: createPat, summary: 创建 PAT, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Inbound PAT Management], operationId: listPats, summary: 查询 PAT 列表, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/vault/inbound/tokens/{id}:
     parameters: [{ $ref: '#/components/parameters/CredentialId' }]
-    get: { tags: [Inbound PAT Management], operationId: getPat, summary: 查询 PAT 详情, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    delete: { tags: [Inbound PAT Management], operationId: deletePat, summary: 删除 PAT, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Inbound PAT Management], operationId: getPat, summary: 查询 PAT 详情, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    delete: { tags: [Inbound PAT Management], operationId: deletePat, summary: 删除 PAT, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/vault/inbound/tokens/{id}/regenerate:
     parameters: [{ $ref: '#/components/parameters/CredentialId' }]
-    post: { tags: [Inbound PAT Management], operationId: regeneratePat, summary: 重生成 PAT, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Inbound PAT Management], operationId: regeneratePat, summary: 重生成 PAT, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/vault/inbound/tokens/{id}/status:
     parameters: [{ $ref: '#/components/parameters/CredentialId' }]
-    put: { tags: [Inbound PAT Management], operationId: updatePatStatus, summary: 更新 PAT 状态, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    put: { tags: [Inbound PAT Management], operationId: updatePatStatus, summary: 更新 PAT 状态, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/vault/inbound/tokens/stats:
-    get: { tags: [Inbound PAT Management], operationId: getPatStats, summary: 获取 PAT 统计, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Inbound PAT Management], operationId: getPatStats, summary: 获取 PAT 统计, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/vault/inbound/tokens/verify:
-    post: { tags: [Internal Vault API], operationId: verifyPat, summary: '[内部] 验证 PAT', requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Internal Vault API], operationId: verifyPat, summary: '[内部] 验证 PAT', requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/vault/outbound/credentials:
-    post: { tags: [Outbound Credential Management], operationId: createOutboundCredential, summary: 创建出站凭据, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    get: { tags: [Outbound Credential Management], operationId: listOutboundCredentials, summary: 查询出站凭据列表, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Outbound Credential Management], operationId: createOutboundCredential, summary: 创建出站凭据, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Outbound Credential Management], operationId: listOutboundCredentials, summary: 查询出站凭据列表, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/vault/outbound/credentials/{id}:
     parameters: [{ $ref: '#/components/parameters/CredentialId' }]
-    get: { tags: [Outbound Credential Management], operationId: getOutboundCredential, summary: 查询出站凭据详情, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    put: { tags: [Outbound Credential Management], operationId: updateOutboundCredential, summary: 更新出站凭据, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    delete: { tags: [Outbound Credential Management], operationId: deleteOutboundCredential, summary: 删除出站凭据, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Outbound Credential Management], operationId: getOutboundCredential, summary: 查询出站凭据详情, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    put: { tags: [Outbound Credential Management], operationId: updateOutboundCredential, summary: 更新出站凭据, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    delete: { tags: [Outbound Credential Management], operationId: deleteOutboundCredential, summary: 删除出站凭据, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/vault/outbound/credentials/{id}/status:
     parameters: [{ $ref: '#/components/parameters/CredentialId' }]
-    put: { tags: [Outbound Credential Management], operationId: updateOutboundCredentialStatus, summary: 更新出站凭据状态, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    put: { tags: [Outbound Credential Management], operationId: updateOutboundCredentialStatus, summary: 更新出站凭据状态, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/vault/outbound/credentials/{id}/resolve:
     parameters: [{ $ref: '#/components/parameters/CredentialId' }]
-    get: { tags: [Internal Vault API], operationId: resolveOutboundCredential, summary: '[内部] 解析出站凭据', responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Internal Vault API], operationId: resolveOutboundCredential, summary: '[内部] 解析出站凭据', responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/vault/outbound/credentials/presets:
-    get: { tags: [Outbound Credential Management], operationId: listCredentialPresets, summary: 获取认证参数预设列表, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Outbound Credential Management], operationId: listCredentialPresets, summary: 获取认证参数预设列表, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/vault/outbound/credentials/presets/{targetType}/{targetId}:
     parameters: [{ $ref: '#/components/parameters/TargetType' }, { $ref: '#/components/parameters/TargetId' }]
-    get: { tags: [Outbound Credential Management], operationId: getCredentialPreset, summary: 获取目标资源认证参数预设, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Outbound Credential Management], operationId: getCredentialPreset, summary: 获取目标资源认证参数预设, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/vault/outbound/credentials/stats:
-    get: { tags: [Outbound Credential Management], operationId: getOutboundCredentialStats, summary: 获取出站凭据统计, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Outbound Credential Management], operationId: getOutboundCredentialStats, summary: 获取出站凭据统计, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
   /mgmt/vault/audit:
-    get: { tags: [Vault Audit], operationId: queryVaultAudit, summary: 查询凭据审计日志, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Vault Audit], operationId: queryVaultAudit, summary: 查询凭据审计日志, responses: { '0': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
 
 components:
   securitySchemes:
