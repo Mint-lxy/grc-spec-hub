@@ -66,3 +66,4 @@
 | # | 项目 | 类型 | 关联 | 状态 |
 |---|------|------|------|------|
 | 30 | API 成功响应包络（`ApiResponse`）未正式规范——`error-codes.md` 已定义错误响应格式（RFC 9457），但成功响应只在 `api-landscape.md` 提了一句"服务统一返回 `ApiResponse` 包络"，无 schema/字段定义/ADR，示例响应（如 `/auth/logout`）字段与错误格式不一致 | 文档缺口 | architecture/cross-cutting/error-codes.md, specs/000-platform/api-landscape.md | open |
+| 45 | PRD v1.2 §7 M1-16「历史会话中的知识库快照」仍描述会话级快照语义，与同文档 §9.6「知识库检索不设会话级快照」（第 772 行）及 §13.10 #13 设计变更（2026-08-21 取消快照）矛盾——spec 001 AC-10 暂维持与 §9.6/§13.10 #13 一致（2026-08-21 用户裁定：升级 PRD 维护方裁决，本流程不回写 PRD、不反向改 spec），待 PRD 订正 M1-16 后复核 | 文档缺口 | PRD §7 M1-16 / §9.6 / §13.10 #13, spec 001 AC-10 | open |
