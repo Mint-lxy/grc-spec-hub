@@ -36,6 +36,10 @@ specify init --here --force --ai claude --script ps    # Claude Code 用户（�
 | implement | `/speckit.implement`（或直接在服务仓库工作区实现） |
 | （可选）任务分发为 GitHub issue | `/speckit.taskstoissues`——依赖 `gh` CLI，纯本地触发，非必经步骤 |
 
+> **Devin CLI 接入**：同一批命令经 `.devin/skills/speckit-<cmd>/SKILL.md` 符号链接
+> （指向 `.github/agents/speckit.<cmd>.agent.md`）接入，调用形式为 `/speckit-specify`
+> 等**连字符**形式（Devin 技能名不支持点号）。
+
 ## 卸载 / 更换引擎
 
 删除 `.specify/`、`.github/prompts/speckit.*`、`.claude/commands/speckit.*`，
