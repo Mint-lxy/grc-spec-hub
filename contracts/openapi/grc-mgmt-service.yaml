@@ -1178,6 +1178,9 @@ components:
       required: [sessionId, knowledgeBaseIds]
       properties:
         sessionId: { type: string }
+        userId:
+          type: [string, "null"]
+          description: 触发本次请求的用户 ID（供 grc-agent-service 走 grc-python-sdk 的 for_user 凭据解析路径；为 null 时 agent-service 降级为静态凭据）
         knowledgeBaseIds:
           type: array
           items: { type: string }
