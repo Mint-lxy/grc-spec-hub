@@ -140,8 +140,9 @@ grc-mgmt-service），新增 `mgt_client.py` 承担"取上下文 + 回写结果"
 - [ ] `GET /mgmt/internal/chat/sessions/{id}/context` 返回的历史消息是否需要长度/条数上限
 - [ ] grc-agent-service 完全无状态、多实例部署下，`cancel` 请求如何路由到正确处理该 SSE 流的实例
       （网关按 sessionId 一致性哈希 / grc-agent-service 间共享 Redis 广播中止信号，两个方向待架构确认）
-- [ ] AI 模型调用是否统一经 `grc-ai-sdk`（ADR-003 提到但状态为 Proposed）；若是，`services/llm_client.py`
-      需要基于 `grc-ai-sdk` 实现，而不是本地 PoC 里直连 OpenAI 兼容网关的方式
+- [x] AI 模型调用是否统一经 `grc-ai-sdk`（ADR-003 提到但状态为 Proposed）——**已确认（2026-08-19）**：
+      是，`llm_client.py` 已改为委托 `grc-python-sdk`（commit `1ace60d`），凭据解析经 SDK 的
+      `build_chat_adapter_for_user` 路径，不再直连 OpenAI 兼容网关。
 - [ ] 输出侧护栏"全文缓冲检测后按段回放"（AC-18/19）具体由 grc-agent-service 自己实现，还是网关统一处理
       （spec.md 背景提到"经平台网关的护栏检测"，倾向网关侧，但 grc-agent-service 是否需要感知护栏结果
       以决定是否回写"已拦截"占位文本，待确认）

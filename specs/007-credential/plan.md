@@ -98,9 +98,14 @@ ADR-003 改造：`factory.py` 默认使用 `credential_resolver.py`，调用方�
 
 ## 待评审确认项
 
-- [ ] SDK 侧凭据缓存 TTL 具体取值（对齐 ADR-005 的 mgt-service 侧 5min，还是更短）
-- [ ] Provider 路由的"网关 → 上游 provider → 模型"层级关系（ADR-003："具体 API 设计在实现
-      阶段定义"）：本次 P0 先只支持单层（`ModelConfig.provider` 直接对应一个 Adapter 类），
-      多层路由留给后续
-- [ ] `resolve-model` 返回的 `availableModels[]` 具体怎么影响 SDK 的 Provider 选择（当前
-      `ModelConfig` 是调用方显式传入，还是应该由 SDK 根据 `availableModels[]` 自动选第一个可用的）
+- [x] SDK 侧凭据缓存 TTL 具体取值——**已确认（2026-08-19）**：60 秒。理由：凭据变更频率极低，
+      60s 对正常使用无感知延迟；mgt-service 短暂不可用时也能兜住窗口。比 ADR-005 mgt-service
+      侧 5min 更短（保守策略），调用方可通过 `cache_ttl_seconds` 构造参数覆盖。
+- [x] Provider 路由的"网关 → 上游 provider → 模型"层级关系——**已确认关闭（2026-08-19）**：
+      通过实际拿到的 Nexus 网关凭据验证，所有模型走同一个域名
+      `genai-nexus.int.api.corpinter.net`，多上游路由由 Nexus 网关内部透明处理，SDK 不需要
+      实现。P0 保持单层模型（`ModelConfig.provider` → 单一 Adapter 类 + 单一 base_url）即可。
+      详见 `docs/local/风险项-Nexus多上游Provider路由.md`。
+- [x] `resolve-model` 返回的 `availableModels[]` 如何影响模型选择——**已确认（2026-08-19）**：
+      取 `availableModels[0]`（resolve-model 接口按管理员配置的优先级排序后返回，SDK 取第一个
+      即为管理员设定的默认模型）。调用方也可显式传 `model` 参数覆盖。

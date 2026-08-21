@@ -60,6 +60,7 @@
 | 42 | PRD §13.10 #15：审批停滞兜底（催办或超时回落；死锁回落仅覆盖账号失效） | 产品决策 | spec 002, PRD §9.2 | open |
 | 43 | `spec-sync-prd-v1.2` 分支待人审合并（守门点，AI 不自行合并）：PRD v1.2 同步 + §13.10 五项澄清 + 002/005 grill 细化，共 5 笔 commit，全部改动附 rationale | 评审合并 | specs/001–009, docs/prd, memory/now | open |
 | 44 | spec 自有技术待定 11 项随 plan 阶段解答：001 模型兜底 UX/输出缓冲首段延迟、003 动态凭据校验深度/Agent Card 重试、004 裁判模型算力并发、005 构建失败枚举完整性、006 护栏性能基准/违禁词上限、008 平台资源监控告警、009 通知去重/抑制间隔 | 技术待定 | specs/001–009 各「未决问题」节 | open |
+| 45 | ADR-007（A2A 协议统一，状态 Proposed）若 Accept，grc-agent-service 现有 3 个自定义 REST+SSE 端点将替换为 A2A handler（`/.well-known/agent.json` + `POST /a2a`），orchestrator 核心逻辑保留但 API 层需重写；mgmt-service chat-agent domain 需新增 A2A 客户端；契约 `grc-agent-service.yaml` 需整体替换。评估结论（2026-08-19）：orchestrator/llm_client/knowledge_client/mcp_client 可复用，mgt_client 将不再需要（上下文组装和消息回写改由 mgmt-service 在 A2A 调用前后处理）。当前不动代码，等 ADR Accept 后再改。 | 架构影响评估 | ADR-007, spec 001, grc-agent-service, grc-mgmt-service | open |
 
 ## 文档缺口
 
