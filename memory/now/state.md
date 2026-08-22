@@ -16,11 +16,12 @@
 - 记忆腐化是本体系最大单点风险 → 依赖每周 digest 审核纪律。
 - 架构待确认项已收窄至 **1 项**（护栏检测服务实现，待 PoC），其余 11 项均已确认关闭。
 - 各 feature spec 未决问题散布在「未决问题」或 plan 待确认章节；PRD §13.10 共 16 项已全部确认或关闭（第 2、10、11、12、16 项于 2026-08-21 确认，第 13 项经设计变更关闭，第 1、3、4、5、6、7、8、9、14、15 项于 2026-08-22 BA 裁定）；开工前必裁项已全部关闭；002/005 Open Questions 已清零，spec 侧遗留待确认以非 002/005 条目与准入测评模板维护归属（004/008）为主。
-- 契约门禁当前仍未通过，失败项已登记 watchlist #48（_example、mcp-server、agent-service、knowledge-engine、auth-service；mgmt-service 仅 warnings）；本轮 PRD/spec 微调已避免破坏性契约字段删除或重命名。
+- 契约门禁已于 2026-08-22 修复并通过（watchlist #48 closed）；遗留一项回溯确认：main 上 "update api" 提交删除 `DELETE /mgmt/knowledge/knowledge-bases/{kbId}` 未经消费方确认（watchlist #49，责任人 Zhang Hao）。
 - 里程碑日期（M1/M2/M3）仍为 `[待确认]`。
 - 环境与账号阻塞（2 项未闭环）：Alice admin 账号待申请（最晚 2026-08-19）、Azure→SharePoint 方案进行中；GitHub 账号已开通（2026-08-17）。
 
 ## 近期重要变化
+- 2026-08-22：`chore/ba-open-items-sync` 合入 main（cb1c992）——PRD §13.10 全部关闭、002/005 待确认清零；Chat 边界收敛为 P0 不调用平台原生 MCP/已上架资产、P1 预留 Chat 调用已订阅 MCP 资产工具；契约兼容字段（tool_call/toolCalls/snapshotAt）保留；契约门禁修复并转绿（含门禁脚本 oasdiff 误报修复）；chunkId 补齐声明的 oasdiff flag 经人工豁免（理由见合并提交）。
 - 2026-08-21：ADR-007（A2A 协议统一）产出——agent-service 只暴露 A2A 端点，mgmt-service 为前端提供自定义对话接口，状态 Proposed。
 - 2026-08-21：ADR-006（统一成功响应包络 ApiResponse）产出，error-codes.md 补充成功响应格式章节，watchlist #30 关闭。
 - 2026-08-21：spec 002/005 经 grill-with-docs 细化评审——002 新增订阅治理闭环（重复申请入口置灰、禁止自审、Owner 免订阅自用、热门榜口径、收藏上限、审批进展粒度等），005 新增 7 组 FR（停用维护面、重跑起点、分享授权约束、重命名唯一、更新接口语义、向量数口径等），全部改动附决策 rationale；新业务规则已回写 PRD v1.2（§9.2/§9.6/§9.7/§9.10/M2/M4/M7）与 CONTEXT.md，§9.10 参数基线已收敛为 28 行。
