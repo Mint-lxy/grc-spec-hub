@@ -52,7 +52,7 @@ if (Has-Cmd "oasdiff") {
     git show "${BaseRef}:$rel" 2>$null | Set-Content $old -Encoding UTF8
     if ((Get-Item $old).Length -gt 0) {
       $breaking = oasdiff breaking $old $rel
-      if ($breaking) {
+      if ($breaking | Where-Object { $_ -match '^(error|warning)\s' }) {
         Write-Host "✗ 破坏性变更: $rel" -ForegroundColor Red
         Write-Host $breaking
         Write-Host "  → 按 contracts/POLICY.md 处理：列出 service-map 中全部消费方并取得逐一确认。" -ForegroundColor Yellow
