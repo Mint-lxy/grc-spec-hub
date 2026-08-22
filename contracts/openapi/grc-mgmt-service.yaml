@@ -610,6 +610,8 @@ paths:
       tags: [Knowledge Base]
       operationId: saveDocumentChunk
       summary: 保存文档切片
+      parameters:
+        - { name: chunkId, in: path, required: true, schema: { type: string } }
       requestBody:
         required: true
         content:
