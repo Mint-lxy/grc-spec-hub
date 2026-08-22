@@ -71,6 +71,43 @@ paths:
           $ref: '#/components/responses/InvalidPipelineConfig'
         '500':
           $ref: '#/components/responses/InternalError'
+  /api/v1/knowledge/tags:
+    get:
+      tags: [tags]
+      summary: 获取知识库标签列表
+      operationId: listKnowledgeTags
+      responses:
+        '200':
+          description: 标签列表查询成功。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListKnowledgeTagsResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags: [tags]
+      summary: 创建知识库标签
+      operationId: createKnowledgeTag
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateKnowledgeTagRequest'
+      responses:
+        '200':
+          description: 标签创建成功。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateKnowledgeTagResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '409':
+          $ref: '#/components/responses/DuplicateKnowledgeTagName'
+        '500':
+          $ref: '#/components/responses/InternalError'
   /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}:
     get:
       tags:
@@ -106,7 +143,7 @@ components:
             $ref: '#/components/schemas/ProblemDetails'
           example:
             code: KB-1003
-            message: query.page: Input should be greater than or equal to 1
+            message: 'query.page: Input should be greater than or equal to 1'
             traceId: 5c1f4e1b5e554d4dbe7a2e5ed1ff90ab
             timestamp: '2026-08-21T00:00:00Z'
             path: /api/v1/knowledge/knowledge-bases
@@ -134,6 +171,18 @@ components:
             traceId: 5c1f4e1b5e554d4dbe7a2e5ed1ff90ab
             timestamp: '2026-08-21T00:00:00Z'
             path: /api/v1/knowledge/knowledge-bases
+    DuplicateKnowledgeTagName:
+      description: 知识库标签名称已存在。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            code: KB-3004
+            message: '知识库标签名称已存在: finance'
+            traceId: 5c1f4e1b5e554d4dbe7a2e5ed1ff90ab
+            timestamp: '2026-08-21T00:00:00Z'
+            path: /api/v1/knowledge/tags
     InvalidPipelineConfig:
       description: 知识库管线配置无效。
       content:
@@ -193,6 +242,16 @@ components:
           type: object
           additionalProperties: true
           default: {}
+    ParserOptions:
+      type: object
+      properties:
+        ocr:
+          type: boolean
+          description: 是否启用 OCR。
+        tableStructure:
+          type: boolean
+          description: 是否保留表格结构。
+      additionalProperties: true
     PipelineConfig:
       type: object
       additionalProperties: false
@@ -204,7 +263,12 @@ components:
         - vectorStore
       properties:
         parser:
-          $ref: '#/components/schemas/AdapterConfig'
+          allOf:
+            - $ref: '#/components/schemas/AdapterConfig'
+            - type: object
+              properties:
+                options:
+                  $ref: '#/components/schemas/ParserOptions'
         chunking:
           $ref: '#/components/schemas/AdapterConfig'
         enhance:
@@ -233,6 +297,15 @@ components:
             - 'null'
         pipelineConfig:
           $ref: '#/components/schemas/PipelineConfig'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/KnowledgeTag'
+          default: []
+        recommendedConfig:
+          type: boolean
+          default: true
+          description: 是否采用推荐的知识库构建管线配置。
         metadata:
           type: object
           additionalProperties: true
@@ -258,6 +331,14 @@ components:
           type:
             - string
             - 'null'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/KnowledgeTag'
+        recommendedConfig:
+          type: boolean
+          default: true
+          description: 是否采用推荐的知识库构建管线配置。
         visibility:
           type: string
         status:
@@ -277,6 +358,83 @@ components:
             updatedAt:
               type: string
               format: date-time
+            contentSummary:
+              type: array
+              items: { type: string }
+            stats:
+              $ref: '#/components/schemas/KnowledgeBaseDetailStats'
+            build:
+              $ref: '#/components/schemas/KnowledgeBaseBuildDetail'
+            capabilities:
+              type: array
+              items: { $ref: '#/components/schemas/KnowledgeBaseCapability' }
+    KnowledgeBaseDetailStats:
+      type: object
+      properties:
+        documentCount: { type: integer, minimum: 0 }
+        chunkCount: { type: string }
+        vectorCount: { type: string }
+        readiness: { type: string }
+        liveDocumentCount: { type: integer, minimum: 0 }
+        buildingDocumentCount: { type: integer, minimum: 0 }
+        retrievalReady: { type: boolean }
+    KnowledgeBaseBuildDetail:
+      type: object
+      properties:
+        progress: { type: integer, minimum: 0, maximum: 100 }
+        stages:
+          type: array
+          items: { $ref: '#/components/schemas/KnowledgeBaseBuildStage' }
+    KnowledgeBaseBuildStage:
+      type: object
+      properties:
+        stage: { type: string, enum: [PARSE, CHUNK, ENHANCE, EMBEDDING] }
+        status: { type: string }
+        summary: { type: string }
+    KnowledgeBaseCapability:
+      type: object
+      properties:
+        method: { type: string, enum: [GET, POST, PATCH] }
+        name: { type: string }
+        path: { type: string }
+        description: { type: string }
+    KnowledgeTag:
+      type: object
+      required: [tagId, name]
+      properties:
+        tagId:
+          type: string
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+    CreateKnowledgeTagRequest:
+      type: object
+      required: [name]
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+    CreateKnowledgeTagResponse:
+      type: object
+      required: [code, message, data, requestId]
+      properties:
+        code: { type: integer, const: 0 }
+        message: { type: string, const: success }
+        data: { $ref: '#/components/schemas/KnowledgeTag' }
+        requestId: { type: string }
+    ListKnowledgeTagsResponse:
+      type: object
+      required: [code, message, data, requestId]
+      properties:
+        code: { type: integer, const: 0 }
+        message: { type: string, const: success }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/KnowledgeTag' }
+        requestId: { type: string }
     CreateKnowledgeBaseResponse:
       type: object
       required:
