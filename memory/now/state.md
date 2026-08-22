@@ -21,6 +21,7 @@
 - 环境与账号阻塞（2 项未闭环）：Alice admin 账号待申请（最晚 2026-08-19）、Azure→SharePoint 方案进行中；GitHub 账号已开通（2026-08-17）。
 
 ## 近期重要变化
+- 2026-08-22：spec 001 的 spec-kit 风格重写（Zeng Ziyang）经 BA Lead 逐项复核（17 项）后整合：15 项澄清裁定采纳（透传上下文归资产、生成期禁发、三类失效只读回看、免流式接入、会话软删除等），3 处修正（去重粒度改按切片对齐 §9.10、软删除留存改脱敏口径、M1-16 过期条目不回植），P0/P1 边界与契约兼容口径按 main 回植；新增 watchlist #50（透传缓冲链路护栏机制待 Zhang Hao 确认）。
 - 2026-08-22：`chore/ba-open-items-sync` 合入 main（cb1c992）——PRD §13.10 全部关闭、002/005 待确认清零；Chat 边界收敛为 P0 不调用平台原生 MCP/已上架资产、P1 预留 Chat 调用已订阅 MCP 资产工具；契约兼容字段（tool_call/toolCalls/snapshotAt）保留；契约门禁修复并转绿（含门禁脚本 oasdiff 误报修复）；chunkId 补齐声明的 oasdiff flag 经人工豁免（理由见合并提交）。
 - 2026-08-21：ADR-007（A2A 协议统一）产出——agent-service 只暴露 A2A 端点，mgmt-service 为前端提供自定义对话接口，状态 Proposed。
 - 2026-08-21：ADR-006（统一成功响应包络 ApiResponse）产出，error-codes.md 补充成功响应格式章节，watchlist #30 关闭。
