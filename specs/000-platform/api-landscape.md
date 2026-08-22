@@ -1,7 +1,7 @@
 # API Landscape — 全局接口概览
 
 > **状态**：Draft — 待团队评审
-> **日期**：2026-08-19
+> **日期**：2026-08-22
 > **关联 ADR**：[ADR-004](../../architecture/adr/004-api-design-top-down.md)
 > **使用方式**：评审通过后，按 feature 拆入各 `specs/NNN/plan.md`，再沉淀为 `contracts/openapi/*.yaml`
 
@@ -112,11 +112,13 @@
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| GET | `/mgmt/knowledge/directories/tree` | 查询知识目录树 | `?includeKbCount?, keyword?` | `{ nodes[] }` | 005 |
+| GET | `/mgmt/knowledge/directories/tree` | 查询知识目录树 | `?includeKbCount?, keyword?, directoryType?` | `{ publicDirectories[], personalDirectories[] }` | 005 |
 | POST | `/mgmt/knowledge/directories` | 创建知识目录 | `{ name, parentId?, ... }` | `{ directoryId, ... }` | 005 |
 | PATCH | `/mgmt/knowledge/directories/{directoryId}/rename` | 重命名目录 | `{ name }` | `{ directoryId, name, ... }` | 005 |
 | PATCH | `/mgmt/knowledge/directories/{directoryId}` | 更新目录 | `{ ...directoryConfig }` | 更新后的目录 | 005 |
 | DELETE | `/mgmt/knowledge/directories/{directoryId}` | 删除目录 | — | `{ directoryId, deleted: true }` | 005 |
+| POST | `/mgmt/knowledge/tags` | 创建知识库标签 | `{ name }` | `{ tagId, name }` | 005 |
+| GET | `/mgmt/knowledge/tags` | 查询知识库标签 | — | `{ items[] }` | 005 |
 | POST | `/mgmt/knowledge/knowledge-bases` | 创建知识库 | `{ name, directoryId, pipelineConfig{parser, chunking, enhance, embedding, vectorStore} }` | `{ kbId, status, ... }` | 005 |
 | GET | `/mgmt/knowledge/knowledge-bases` | 查询知识库列表 | `?directoryId?, keyword?, status?, retrievalReady?, page?, pageSize?` | `{ records[], total }` | 005 |
 | GET | `/mgmt/knowledge/knowledge-bases/{kbId}` | 查询知识库详情 | — | `{ kbId, pipelineConfig, status, ... }` | 005 |
@@ -124,10 +126,12 @@
 | POST | `/mgmt/knowledge/knowledge-bases/{kbId}/documents` | 创建知识库文档 | `{ fileId, ...documentConfig }` | `{ docId, status, ... }` | 005 |
 | GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents` | 查询文档列表 | `?keyword?, sourceType?, status?, retrievalReady?, page?, pageSize?` | `{ records[], total }` | 005 |
 | GET | `/mgmt/knowledge/knowledge-bases/{kbId}/stats` | 查询知识库统计 | — | `{ ...statistics }` | 005 |
-| GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}` | 查询文档详情 | — | `{ docId, status, ... }` | 005 |
+| GET | `/mgmt/knowledge/{kbId}/documents/{docId}` | 查询文档详情 | — | `{ documentId, status, ... }` | 005 |
 | PATCH | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/stage-config` | 更新文档 Stage 配置 | `{ stageConfig }` | `{ stageConfig, ... }` | 005 |
 | GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks` | 查询文档切片 | `?jobId?, page?, pageSize?, snippetContext?` | `{ records[], total }` | 005 |
 | GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks/{chunkId}` | 查询切片详情 | `?jobId?, snippetContext?` | `{ chunkId, content, sourceSnippet, ... }` | 005 |
+| PUT | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks/{chunkId}` | 保存文档切片 | `{ content, metadata? }` | `{ chunkId, content, ... }` | 005 |
+| GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/pages/{page}` | 查询文档页面工作台 | `page>=1` | `{ page, parseContent, chunks, summaryAndTags, parseInfo }` | 005 |
 | GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/parse` | 查询文档解析产物 | `?jobId?` | `{ ...parseArtifact }` | 005 |
 | GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/enhance/{enhanceType}` | 查询文档增强产物 | `?jobId?, page?, pageSize?` | `{ records[], total }` | 005 |
 | POST | `/mgmt/knowledge/knowledge-bases/{kbId}/build-jobs` | 创建批量构建任务 | `{ documentIds?, runMode? }` | `{ jobId, status, ... }` | 005 |
@@ -136,6 +140,9 @@
 | POST | `/mgmt/knowledge/retrievals` | 执行知识检索 | `{ knowledgeBaseIds[], query, retrievalConfig?, topK? }` | `{ results[] }` | 005 |
 | POST | `/mgmt/knowledge/knowledge-bases/{kbId}/publish` | 发布知识库 | — | `{ kbId, status: "available", ... }` | 005 |
 | POST | `/mgmt/knowledge/knowledge-bases/{kbId}/offline` | 下线知识库 | — | `{ kbId, status, ... }` | 005 |
+| GET | `/mgmt/knowledge/platform-resources/vector-store-instances` | 查询可用向量库实例 | `?type?` | `{ data[] }` | 005 |
+| GET | `/mgmt/knowledge/directories/{directoryId}/permissions` | 查询目录权限 | — | `{ ...permissionSnapshot }` | 007 |
+| GET | `/mgmt/knowledge/knowledge-bases/{kbId}/permissions` | 查询知识库权限 | — | `{ ...permissionSnapshot }` | 007 |
 
 ### 3.4 RBAC 与权限（001-create-mgt-service-modules / 003-rbac-permission-mgmt）
 

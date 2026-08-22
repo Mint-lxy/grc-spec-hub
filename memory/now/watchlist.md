@@ -70,3 +70,4 @@
 | # | 项目 | 类型 | 关联 | 状态 |
 |---|------|------|------|------|
 | 30 | API 成功响应包络（`ApiResponse`）已规范——ADR-006 定义统一包络（`code:0` 为成功），`error-codes.md` §1 补充成功响应格式与分页结构（2026-08-21） | 文档缺口 | architecture/adr/006-api-response-envelope.md, architecture/cross-cutting/error-codes.md | closed |
+| 46 | 需单独 skill/手段保障后端接口**请求参数正确性、返回体正确性、参数字段说明完整**——现有 `/contract-change` + `gates/scripts/check-contracts` 仅覆盖 OpenAPI/AsyncAPI 语法与破坏性变更（oasdiff），`contract-review` 偏消费方影响；**无**对照 spec 验收字段语义、required/类型/枚举、description 完备性、成功/错误体与 ADR-006/`error-codes.md` 对齐的专项流程或门禁（来源：用户指令 2026-08-21） | 能力缺口 | capabilities/skills/contract-change, gates/scripts/check-contracts, capabilities/prompts/contract-review.prompt.md, ADR-006 | open |
