@@ -5,6 +5,8 @@ info:
   description: 知识引擎 API。
 servers:
   - url: https://knowledge.grc.internal
+security:
+  - bearerAuth: []
 paths:
   /api/v1/knowledge/knowledge-bases:
     get:
@@ -97,6 +99,11 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   responses:
     InvalidRequest:
       description: 请求参数不符合要求。
@@ -106,7 +113,7 @@ components:
             $ref: '#/components/schemas/ProblemDetails'
           example:
             code: KB-1003
-            message: query.page: Input should be greater than or equal to 1
+            message: "query.page: Input should be greater than or equal to 1"
             traceId: 5c1f4e1b5e554d4dbe7a2e5ed1ff90ab
             timestamp: '2026-08-21T00:00:00Z'
             path: /api/v1/knowledge/knowledge-bases

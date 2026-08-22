@@ -1,6 +1,6 @@
 # ADR-006: 统一成功响应包络（ApiResponse）规范
 
-> 状态：Proposed
+> 状态：Accepted
 > 日期：2026-08-21 · 决策者：@nzhang · 关联 spec：`specs/000-platform`
 
 ## 背景
