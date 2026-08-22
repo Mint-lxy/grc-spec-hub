@@ -25,6 +25,7 @@ tags:
   - name: Internal File
   - name: Knowledge Directory
   - name: Knowledge Base
+  - name: Knowledge Platform Resource
   - name: Knowledge Document & Job
   - name: Knowledge Retrieval
   - name: Knowledge Permission
@@ -426,6 +427,23 @@ paths:
       summary: 删除知识目录
       responses: { '200': { description: 删除成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
 
+  /mgmt/knowledge/tags:
+    post:
+      tags: [Knowledge Base]
+      operationId: createKnowledgeTag
+      summary: 创建知识库标签
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GenericRequest' }
+      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+    get:
+      tags: [Knowledge Base]
+      operationId: listKnowledgeTags
+      summary: 查询知识库标签
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+
   /mgmt/knowledge/knowledge-bases:
     post:
       tags: [Knowledge Base]
@@ -447,6 +465,30 @@ paths:
         - { name: page, in: query, required: false, schema: { type: integer, minimum: 1 } }
         - { name: pageSize, in: query, required: false, schema: { type: integer, minimum: 1 } }
       responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+  /mgmt/knowledge/platform-resources/vector-store-instances:
+    get:
+      tags: [Knowledge Platform Resource]
+      operationId: listVectorStoreInstances
+      summary: 查询可用向量库实例
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema: { type: string, enum: [Milvus, PGVector] }
+          description: 按向量库类型筛选。
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/GenericResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/VectorStoreInstance' }
   /mgmt/knowledge/knowledge-bases/{kbId}:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     get:
@@ -454,11 +496,6 @@ paths:
       operationId: getKnowledgeBaseDetail
       summary: 查询知识库详情
       responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
-    delete:
-      tags: [Knowledge Base]
-      operationId: deleteKnowledgeBase
-      summary: 删除知识库
-      responses: { '200': { description: 删除成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/config:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     patch:
@@ -525,6 +562,71 @@ paths:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
       responses: { '200': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+  /mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/parse:
+    parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
+    get:
+      tags: [Knowledge Base]
+      operationId: getDocumentParse
+      summary: 查询文档解析结果
+      parameters:
+        - { name: jobId, in: query, required: false, schema: { type: integer, format: int64 } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+  /mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/enhance/{enhanceType}:
+    parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
+    get:
+      tags: [Knowledge Base]
+      operationId: listDocumentEnhanceArtifacts
+      summary: 查询文档增强产物
+      parameters:
+        - { name: enhanceType, in: path, required: true, schema: { type: string } }
+        - { name: jobId, in: query, required: false, schema: { type: integer, format: int64 } }
+        - { name: page, in: query, required: false, schema: { type: integer, minimum: 1 } }
+        - { name: pageSize, in: query, required: false, schema: { type: integer, minimum: 1 } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+  /mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks:
+    parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
+    get:
+      tags: [Knowledge Base]
+      operationId: listDocumentChunks
+      summary: 查询文档切片列表
+      parameters:
+        - { name: jobId, in: query, required: false, schema: { type: integer, format: int64 } }
+        - { name: page, in: query, required: false, schema: { type: integer, minimum: 1 } }
+        - { name: pageSize, in: query, required: false, schema: { type: integer, minimum: 1 } }
+        - { name: snippetContext, in: query, required: false, schema: { type: integer, minimum: 0 } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+  /mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks/{chunkId}:
+    parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
+    get:
+      tags: [Knowledge Base]
+      operationId: getDocumentChunk
+      summary: 查询文档切片详情
+      parameters:
+        - { name: chunkId, in: path, required: true, schema: { type: string } }
+        - { name: jobId, in: query, required: false, schema: { type: integer, format: int64 } }
+        - { name: snippetContext, in: query, required: false, schema: { type: integer, minimum: 0 } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+    put:
+      tags: [Knowledge Base]
+      operationId: saveDocumentChunk
+      summary: 保存文档切片
+      parameters:
+        - { name: chunkId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SaveKnowledgeDocumentChunkRequest' }
+      responses: { '200': { description: 保存成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+  /mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/pages/{page}:
+    parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
+    get:
+      tags: [Knowledge Base]
+      operationId: getDocumentPageWorkspace
+      summary: 查询文档指定页面工作台数据
+      parameters:
+        - { name: page, in: path, required: true, schema: { type: integer, minimum: 1 } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/{kbId}/documents/{docId}:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
     get:
@@ -557,6 +659,20 @@ paths:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
       responses: { '200': { description: 检索成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+  /mgmt/knowledge/directories/{directoryId}/permissions:
+    parameters: [{ $ref: '#/components/parameters/DirectoryId' }]
+    get:
+      tags: [Knowledge Permission]
+      operationId: getDirectoryPermissions
+      summary: 查询目录权限
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+  /mgmt/knowledge/knowledge-bases/{kbId}/permissions:
+    parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
+    get:
+      tags: [Knowledge Permission]
+      operationId: getKnowledgeBasePermissions
+      summary: 查询知识库权限
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
 
   /mgmt/marketplace/assets:
     post:
@@ -936,11 +1052,12 @@ components:
   schemas:
     ApiResponseBase:
       type: object
-      required: [code, message]
+      required: [code, message, traceId, timestamp]
       properties:
-        code: { type: integer, description: "0=成功" }
-        message: { type: string }
+        code: { type: string, const: '0', description: '0=成功；失败时使用已注册的服务前缀错误码' }
+        message: { type: string, const: success }
         traceId: { type: string }
+        timestamp: { type: string, format: date-time }
 
     GenericRequest:
       type: object
@@ -950,8 +1067,31 @@ components:
       allOf:
         - $ref: '#/components/schemas/ApiResponseBase'
         - type: object
+          required: [data]
           properties:
             data: {}
+
+    SaveKnowledgeDocumentChunkRequest:
+      type: object
+      additionalProperties: false
+      required: [content]
+      properties:
+        content: { type: string, minLength: 1 }
+        metadata: { type: object, additionalProperties: true }
+
+    VectorStoreInstance:
+      type: object
+      required: [resourceId, instance, displayName, type, region, capacity, load, available, defaultAvailable]
+      properties:
+        resourceId: { type: string }
+        instance: { type: string }
+        displayName: { type: string }
+        type: { type: string, enum: [Milvus, PGVector] }
+        region: { type: string }
+        capacity: { type: string }
+        load: { type: integer, minimum: 0, maximum: 100 }
+        available: { type: boolean }
+        defaultAvailable: { type: boolean }
 
     DirectoryTreeResponse:
       allOf:
@@ -1118,6 +1258,9 @@ components:
       required: [sessionId, knowledgeBaseIds]
       properties:
         sessionId: { type: string }
+        userId:
+          type: [string, "null"]
+          description: 触发本次请求的用户 ID（供 grc-agent-service 走 grc-python-sdk 的 for_user 凭据解析路径；为 null 时 agent-service 降级为静态凭据）
         knowledgeBaseIds:
           type: array
           items: { type: string }

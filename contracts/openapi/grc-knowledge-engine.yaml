@@ -1,11 +1,520 @@
-# 契约骨架（占位）—— 提供方：grc-knowledge-engine。正式内容 [待确认]，按 contracts/POLICY.md 走契约变更流程填充。
 openapi: 3.1.0
 info:
   title: GRC Knowledge Engine API
-  version: "0.1"
-  description: "[待确认] 知识引擎：目录树管理、知识库 CRUD 与状态机、文档导入、构建管线、向量检索、开放接口（PAT 认证）。"
+  version: "0.4"
+  description: 知识引擎 API。
 servers:
-  - url: https://knowledge.grc.internal/v1
-paths: {}
+  - url: https://knowledge.grc.internal
+security:
+  - bearerAuth: []
+paths:
+  /api/v1/knowledge/knowledge-bases:
+    get:
+      tags:
+        - knowledge-bases
+      summary: 获取知识库列表
+      operationId: listKnowledgeBases
+      parameters:
+        - name: directoryId
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: 按目录 ID 筛选。
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: 知识库列表查询成功。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListKnowledgeBasesResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags:
+        - knowledge-bases
+      summary: 创建知识库
+      operationId: createKnowledgeBase
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateKnowledgeBaseRequest'
+      responses:
+        '200':
+          description: 知识库创建成功。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateKnowledgeBaseResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '409':
+          $ref: '#/components/responses/DuplicateKnowledgeBaseName'
+        '422':
+          $ref: '#/components/responses/InvalidPipelineConfig'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/v1/knowledge/tags:
+    get:
+      tags: [tags]
+      summary: 获取知识库标签列表
+      operationId: listKnowledgeTags
+      responses:
+        '200':
+          description: 标签列表查询成功。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListKnowledgeTagsResponse'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags: [tags]
+      summary: 创建知识库标签
+      operationId: createKnowledgeTag
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateKnowledgeTagRequest'
+      responses:
+        '200':
+          description: 标签创建成功。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateKnowledgeTagResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '409':
+          $ref: '#/components/responses/DuplicateKnowledgeTagName'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}:
+    get:
+      tags:
+        - knowledge-bases
+      summary: 获取知识库详情
+      operationId: getKnowledgeBase
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 知识库详情查询成功。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetKnowledgeBaseResponse'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '404':
+          $ref: '#/components/responses/KnowledgeBaseNotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
 components:
-  schemas: {}
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    InvalidRequest:
+      description: 请求参数不符合要求。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            code: KB-1003
+            message: "query.page: Input should be greater than or equal to 1"
+            traceId: 5c1f4e1b5e554d4dbe7a2e5ed1ff90ab
+            timestamp: '2026-08-21T00:00:00Z'
+            path: /api/v1/knowledge/knowledge-bases
+    KnowledgeBaseNotFound:
+      description: 知识库不存在。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            code: KB-3001
+            message: '知识库不存在: 101'
+            traceId: 5c1f4e1b5e554d4dbe7a2e5ed1ff90ab
+            timestamp: '2026-08-21T00:00:00Z'
+            path: /api/v1/knowledge/knowledge-bases/101
+    DuplicateKnowledgeBaseName:
+      description: 同一目录下知识库名称已存在。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            code: KB-3003
+            message: '知识库名称已存在: Product policies'
+            traceId: 5c1f4e1b5e554d4dbe7a2e5ed1ff90ab
+            timestamp: '2026-08-21T00:00:00Z'
+            path: /api/v1/knowledge/knowledge-bases
+    DuplicateKnowledgeTagName:
+      description: 知识库标签名称已存在。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            code: KB-3004
+            message: '知识库标签名称已存在: finance'
+            traceId: 5c1f4e1b5e554d4dbe7a2e5ed1ff90ab
+            timestamp: '2026-08-21T00:00:00Z'
+            path: /api/v1/knowledge/tags
+    InvalidPipelineConfig:
+      description: 知识库管线配置无效。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            code: KB-4003
+            message: 'embedding.type 不支持: unsupported'
+            traceId: 5c1f4e1b5e554d4dbe7a2e5ed1ff90ab
+            timestamp: '2026-08-21T00:00:00Z'
+            path: /api/v1/knowledge/knowledge-bases
+    InternalError:
+      description: 知识引擎内部错误。
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+          example:
+            code: KB-9001
+            message: 系统异常，请稍后重试
+            traceId: 5c1f4e1b5e554d4dbe7a2e5ed1ff90ab
+            timestamp: '2026-08-21T00:00:00Z'
+            path: /api/v1/knowledge/knowledge-bases
+  schemas:
+    ProblemDetails:
+      type: object
+      required:
+        - code
+        - message
+        - traceId
+        - timestamp
+      properties:
+        code:
+          type: string
+          pattern: '^KB-[1-9][0-9]{3}$'
+        message:
+          type: string
+        detail:
+          type: string
+        traceId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        path:
+          type: string
+    AdapterConfig:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+      properties:
+        type:
+          type: string
+        options:
+          type: object
+          additionalProperties: true
+          default: {}
+    ParserOptions:
+      type: object
+      properties:
+        ocr:
+          type: boolean
+          description: 是否启用 OCR。
+        tableStructure:
+          type: boolean
+          description: 是否保留表格结构。
+      additionalProperties: true
+    PipelineConfig:
+      type: object
+      additionalProperties: false
+      required:
+        - parser
+        - chunking
+        - enhance
+        - embedding
+        - vectorStore
+      properties:
+        parser:
+          allOf:
+            - $ref: '#/components/schemas/AdapterConfig'
+            - type: object
+              properties:
+                options:
+                  $ref: '#/components/schemas/ParserOptions'
+        chunking:
+          $ref: '#/components/schemas/AdapterConfig'
+        enhance:
+          $ref: '#/components/schemas/AdapterConfig'
+        embedding:
+          $ref: '#/components/schemas/AdapterConfig'
+        vectorStore:
+          $ref: '#/components/schemas/AdapterConfig'
+    CreateKnowledgeBaseRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - directoryId
+        - name
+        - pipelineConfig
+      properties:
+        directoryId:
+          type: integer
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type:
+            - string
+            - 'null'
+        pipelineConfig:
+          $ref: '#/components/schemas/PipelineConfig'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/KnowledgeTag'
+          default: []
+        recommendedConfig:
+          type: boolean
+          default: true
+          description: 是否采用推荐的知识库构建管线配置。
+        metadata:
+          type: object
+          additionalProperties: true
+          default: {}
+    KnowledgeBase:
+      type: object
+      required:
+        - knowledgeBaseId
+        - directoryId
+        - name
+        - visibility
+        - status
+        - pipelineConfig
+        - createdAt
+      properties:
+        knowledgeBaseId:
+          type: integer
+        directoryId:
+          type: integer
+        name:
+          type: string
+        description:
+          type:
+            - string
+            - 'null'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/KnowledgeTag'
+        recommendedConfig:
+          type: boolean
+          default: true
+          description: 是否采用推荐的知识库构建管线配置。
+        visibility:
+          type: string
+        status:
+          type: string
+        pipelineConfig:
+          $ref: '#/components/schemas/PipelineConfig'
+        createdAt:
+          type: string
+          format: date-time
+    KnowledgeBaseDetail:
+      allOf:
+        - $ref: '#/components/schemas/KnowledgeBase'
+        - type: object
+          required:
+            - updatedAt
+          properties:
+            updatedAt:
+              type: string
+              format: date-time
+            contentSummary:
+              type: array
+              items: { type: string }
+            stats:
+              $ref: '#/components/schemas/KnowledgeBaseDetailStats'
+            build:
+              $ref: '#/components/schemas/KnowledgeBaseBuildDetail'
+            capabilities:
+              type: array
+              items: { $ref: '#/components/schemas/KnowledgeBaseCapability' }
+    KnowledgeBaseDetailStats:
+      type: object
+      properties:
+        documentCount: { type: integer, minimum: 0 }
+        chunkCount: { type: string }
+        vectorCount: { type: string }
+        readiness: { type: string }
+        liveDocumentCount: { type: integer, minimum: 0 }
+        buildingDocumentCount: { type: integer, minimum: 0 }
+        retrievalReady: { type: boolean }
+    KnowledgeBaseBuildDetail:
+      type: object
+      properties:
+        progress: { type: integer, minimum: 0, maximum: 100 }
+        stages:
+          type: array
+          items: { $ref: '#/components/schemas/KnowledgeBaseBuildStage' }
+    KnowledgeBaseBuildStage:
+      type: object
+      properties:
+        stage: { type: string, enum: [PARSE, CHUNK, ENHANCE, EMBEDDING] }
+        status: { type: string }
+        summary: { type: string }
+    KnowledgeBaseCapability:
+      type: object
+      properties:
+        method: { type: string, enum: [GET, POST, PATCH] }
+        name: { type: string }
+        path: { type: string }
+        description: { type: string }
+    KnowledgeTag:
+      type: object
+      required: [tagId, name]
+      properties:
+        tagId:
+          type: string
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+    CreateKnowledgeTagRequest:
+      type: object
+      required: [name]
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 64
+    CreateKnowledgeTagResponse:
+      type: object
+      required: [code, message, data, requestId]
+      properties:
+        code: { type: integer, const: 0 }
+        message: { type: string, const: success }
+        data: { $ref: '#/components/schemas/KnowledgeTag' }
+        requestId: { type: string }
+    ListKnowledgeTagsResponse:
+      type: object
+      required: [code, message, data, requestId]
+      properties:
+        code: { type: integer, const: 0 }
+        message: { type: string, const: success }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/KnowledgeTag' }
+        requestId: { type: string }
+    CreateKnowledgeBaseResponse:
+      type: object
+      required:
+        - code
+        - message
+        - data
+        - requestId
+      properties:
+        code:
+          type: integer
+          const: 0
+        message:
+          type: string
+          const: success
+        data:
+          $ref: '#/components/schemas/KnowledgeBase'
+        requestId:
+          type: string
+    GetKnowledgeBaseResponse:
+      type: object
+      required:
+        - code
+        - message
+        - data
+        - requestId
+      properties:
+        code:
+          type: integer
+          const: 0
+        message:
+          type: string
+          const: success
+        data:
+          $ref: '#/components/schemas/KnowledgeBaseDetail'
+        requestId:
+          type: string
+    KnowledgeBasePage:
+      type: object
+      required:
+        - items
+        - page
+        - pageSize
+        - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/KnowledgeBaseDetail'
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+          minimum: 0
+    ListKnowledgeBasesResponse:
+      type: object
+      required:
+        - code
+        - message
+        - data
+        - requestId
+      properties:
+        code:
+          type: integer
+          const: 0
+        message:
+          type: string
+          const: success
+        data:
+          $ref: '#/components/schemas/KnowledgeBasePage'
+        requestId:
+          type: string

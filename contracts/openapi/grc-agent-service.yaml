@@ -10,6 +10,8 @@ info:
 servers:
   - url: https://api.internal/api/v1
     description: 经 grc-api-gateway 转发后的路径（网关统一加 /api/v1 前缀）
+security:
+  - bearerAuth: []
 tags:
   - name: Chat
 paths:
@@ -86,6 +88,11 @@ paths:
                 $ref: '#/components/schemas/CancelResponse'
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   parameters:
     SessionId:
       name: sessionId

@@ -1,7 +1,7 @@
 # API Landscape — 全局接口概览
 
 > **状态**：Draft — 待团队评审
-> **日期**：2026-08-19
+> **日期**：2026-08-22
 > **关联 ADR**：[ADR-004](../../architecture/adr/004-api-design-top-down.md)
 > **使用方式**：评审通过后，按 feature 拆入各 `specs/NNN/plan.md`，再沉淀为 `contracts/openapi/*.yaml`
 
@@ -112,11 +112,13 @@
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| GET | `/mgmt/knowledge/directories/tree` | 查询知识目录树 | `?includeKbCount?, keyword?` | `{ nodes[] }` | 005 |
+| GET | `/mgmt/knowledge/directories/tree` | 查询知识目录树 | `?includeKbCount?, keyword?, directoryType?` | `{ publicDirectories[], personalDirectories[] }` | 005 |
 | POST | `/mgmt/knowledge/directories` | 创建知识目录 | `{ name, parentId?, ... }` | `{ directoryId, ... }` | 005 |
 | PATCH | `/mgmt/knowledge/directories/{directoryId}/rename` | 重命名目录 | `{ name }` | `{ directoryId, name, ... }` | 005 |
 | PATCH | `/mgmt/knowledge/directories/{directoryId}` | 更新目录 | `{ ...directoryConfig }` | 更新后的目录 | 005 |
 | DELETE | `/mgmt/knowledge/directories/{directoryId}` | 删除目录 | — | `{ directoryId, deleted: true }` | 005 |
+| POST | `/mgmt/knowledge/tags` | 创建知识库标签 | `{ name }` | `{ tagId, name }` | 005 |
+| GET | `/mgmt/knowledge/tags` | 查询知识库标签 | — | `{ items[] }` | 005 |
 | POST | `/mgmt/knowledge/knowledge-bases` | 创建知识库 | `{ name, directoryId, pipelineConfig{parser, chunking, enhance, embedding, vectorStore} }` | `{ kbId, status, ... }` | 005 |
 | GET | `/mgmt/knowledge/knowledge-bases` | 查询知识库列表 | `?directoryId?, keyword?, status?, retrievalReady?, page?, pageSize?` | `{ records[], total }` | 005 |
 | GET | `/mgmt/knowledge/knowledge-bases/{kbId}` | 查询知识库详情 | — | `{ kbId, pipelineConfig, status, ... }` | 005 |
@@ -124,10 +126,12 @@
 | POST | `/mgmt/knowledge/knowledge-bases/{kbId}/documents` | 创建知识库文档 | `{ fileId, ...documentConfig }` | `{ docId, status, ... }` | 005 |
 | GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents` | 查询文档列表 | `?keyword?, sourceType?, status?, retrievalReady?, page?, pageSize?` | `{ records[], total }` | 005 |
 | GET | `/mgmt/knowledge/knowledge-bases/{kbId}/stats` | 查询知识库统计 | — | `{ ...statistics }` | 005 |
-| GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}` | 查询文档详情 | — | `{ docId, status, ... }` | 005 |
+| GET | `/mgmt/knowledge/{kbId}/documents/{docId}` | 查询文档详情 | — | `{ documentId, status, ... }` | 005 |
 | PATCH | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/stage-config` | 更新文档 Stage 配置 | `{ stageConfig }` | `{ stageConfig, ... }` | 005 |
 | GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks` | 查询文档切片 | `?jobId?, page?, pageSize?, snippetContext?` | `{ records[], total }` | 005 |
 | GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks/{chunkId}` | 查询切片详情 | `?jobId?, snippetContext?` | `{ chunkId, content, sourceSnippet, ... }` | 005 |
+| PUT | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks/{chunkId}` | 保存文档切片 | `{ content, metadata? }` | `{ chunkId, content, ... }` | 005 |
+| GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/pages/{page}` | 查询文档页面工作台 | `page>=1` | `{ page, parseContent, chunks, summaryAndTags, parseInfo }` | 005 |
 | GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/parse` | 查询文档解析产物 | `?jobId?` | `{ ...parseArtifact }` | 005 |
 | GET | `/mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/enhance/{enhanceType}` | 查询文档增强产物 | `?jobId?, page?, pageSize?` | `{ records[], total }` | 005 |
 | POST | `/mgmt/knowledge/knowledge-bases/{kbId}/build-jobs` | 创建批量构建任务 | `{ documentIds?, runMode? }` | `{ jobId, status, ... }` | 005 |
@@ -136,6 +140,9 @@
 | POST | `/mgmt/knowledge/retrievals` | 执行知识检索 | `{ knowledgeBaseIds[], query, retrievalConfig?, topK? }` | `{ results[] }` | 005 |
 | POST | `/mgmt/knowledge/knowledge-bases/{kbId}/publish` | 发布知识库 | — | `{ kbId, status: "available", ... }` | 005 |
 | POST | `/mgmt/knowledge/knowledge-bases/{kbId}/offline` | 下线知识库 | — | `{ kbId, status, ... }` | 005 |
+| GET | `/mgmt/knowledge/platform-resources/vector-store-instances` | 查询可用向量库实例 | `?type?` | `{ data[] }` | 005 |
+| GET | `/mgmt/knowledge/directories/{directoryId}/permissions` | 查询目录权限 | — | `{ ...permissionSnapshot }` | 007 |
+| GET | `/mgmt/knowledge/knowledge-bases/{kbId}/permissions` | 查询知识库权限 | — | `{ ...permissionSnapshot }` | 007 |
 
 ### 3.4 RBAC 与权限（001-create-mgt-service-modules / 003-rbac-permission-mgmt）
 
@@ -225,13 +232,13 @@
 |------|------|------|---------|---------|------|
 | POST | `/mgmt/chat/sessions` | 创建会话 | `{ assetId?(平台Chat为空), modelId?, title? }` | `{ id, assetId, title, createdAt }` | 001 |
 | GET | `/mgmt/chat/sessions` | 会话列表 | `?page, size, keyword?, assetId?` | `{ items[]{id, assetId?, assetName?, title, lastMessageAt}, total }` | 001 |
-| GET | `/mgmt/chat/sessions/{id}` | 会话详情（含历史消息） | — | `{ id, assetId, title, modelId, messages[]{id, role, content, citations[]?, toolCalls[]?, thinkingProcess?, createdAt}, knowledgeMounts[] }` | 001 |
+| GET | `/mgmt/chat/sessions/{id}` | 会话详情（含历史消息） | — | `{ id, assetId, title, modelId, messages[]{id, role, content, citations[]?, thinkingProcess?, createdAt}, knowledgeMounts[] }` | 001 |
 | PATCH | `/mgmt/chat/sessions/{id}` | 重命名会话 | `{ title }` | 更新后的会话摘要 | 001 |
 | DELETE | `/mgmt/chat/sessions/{id}` | 删除会话（软删除，消息记录保留审计留痕） | — | `204 No Content` | 001 |
 | PUT | `/mgmt/chat/sessions/{id}/knowledge-mounts` | 挂载/卸载知识库（校验用户对目标知识库的访问权限） | `{ knowledgeBaseIds[] }` | `{ mounts[]{knowledgeBaseId, name, snapshotAt} }` | 001 |
 | GET | `/mgmt/chat/sessions/{id}/knowledge-mounts` | 已挂载知识库列表 | — | `{ mounts[]{knowledgeBaseId, name, directoryPath} }` | 001 |
 | GET | `/mgmt/internal/chat/sessions/{id}/context` | `[内部]` 查询会话上下文（供 grc-agent-service 调用） | `?includeHistory?` | `{ sessionId, knowledgeBaseIds[], modelId?, messages[]{role, content, citations[]?, createdAt} }` | 001 |
-| POST | `/mgmt/internal/chat/sessions/{id}/messages` | `[内部]` 追加一条已生成的消息（供 grc-agent-service 在生成完成后回写） | `{ role, content, citations[]?, toolCalls[]?, thinkingProcess? }` | `{ messageId, createdAt }` | 001 |
+| POST | `/mgmt/internal/chat/sessions/{id}/messages` | `[内部]` 追加一条已生成的消息（供 grc-agent-service 在生成完成后回写） | `{ role, content, citations[]?, thinkingProcess? }` | `{ messageId, createdAt }` | 001 |
 
 **补充说明**：
 
@@ -244,6 +251,8 @@
   回写（写部分内容还是不写），待评审确认。
 - 知识库挂载权限校验（无权限的 `knowledgeBaseId` 建议静默剔除、返回实际生效的 `mounts[]`，而非整体报错）
   与 grc-mgmt-service 自己的 RBAC 校验（`/mgmt/rbac/internal/check`，`CATALOG` 类型）复用同一套判定逻辑。
+- `KnowledgeMount.snapshotAt` 是既有契约字段名，P0 不赋予会话级检索快照语义；检索授权、知识库状态与可检索范围均按检索时刻实时判断。字段可返回 `null` 或挂载记录时间，未来如需改名另走契约版本迁移。
+- `ChatMessage.toolCalls` 与追加消息请求中的 `toolCalls` 为既有契约兼容字段；P0 平台 Chat 不产生、不展示平台原生工具（平台原生 MCP）调用记录，该字段仅为 P1 Chat 调用已订阅 MCP 资产工具能力预留。
 
 ### 3.8 当前未在 grc-mgmt-service 中落地的总览接口
 
@@ -259,21 +268,20 @@
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| POST | `/chat/sessions/{id}/messages` | 发送消息（SSE 流式）。内部先同步调用 `grc-mgmt-service` 的 `GET /mgmt/internal/chat/sessions/{id}/context` 取挂载知识库与历史消息，生成完成后调用 `POST /mgmt/internal/chat/sessions/{id}/messages` 回写这一轮问答 | `{ content, deepAnalysis?: bool }` | SSE stream: `event: delta\|citation\|tool_call\|thinking\|done` `data: { ... }` | 001 |
+| POST | `/chat/sessions/{id}/messages` | 发送消息（SSE 流式）。内部先同步调用 `grc-mgmt-service` 的 `GET /mgmt/internal/chat/sessions/{id}/context` 取挂载知识库与历史消息，生成完成后调用 `POST /mgmt/internal/chat/sessions/{id}/messages` 回写这一轮问答 | `{ content, deepAnalysis?: bool }` | SSE stream: `event: delta\|citation\|thinking\|done`；既有 `tool_call` 事件兼容保留，P0 平台 Chat 不产生 | 001 |
 | POST | `/chat/sessions/{id}/messages/{msgId}/regenerate` | 重新生成回复（取上下文/回写逻辑同上） | — | SSE stream（同上） | 001 |
 | POST | `/chat/sessions/{id}/cancel` | 中止正在进行的流式生成 | — | `{ id, cancelled: bool }` | 001 |
 
 **补充说明（来自 grc-agent-service 技术方案验证，供本节评审参考）**：
 
+- `tool_call` SSE 事件属于既有契约兼容保留：P0 平台 Chat 不调用平台原生工具（平台原生 MCP）、不产生该事件；该事件只为 P1 Chat 调用已订阅 MCP 资产工具能力预留，不能作为 P0 对话链路接入 grc-mcp-server 的依据。
 - `POST /chat/sessions/{id}/cancel` 是 SSE 流式场景下的硬需求：客户端断开连接不代表服务端已停止生成，
   需要显式信号；已用真实 LLM 网关验证过中止时序（并发触发 cancel 与流式读取的竞态需要客户端边读流边中止，
   单纯断连不保证及时停止）。中止生成端点未列请求体是因为语义上不需要额外参数，仅路径 `{id}` 标识要中止的
   会话；如果同一会话允许并发多轮生成，可能需要额外的 `messageId` 参数区分中止哪一轮，待评审确认是否存在
   这种并发场景。
-- `citations[]`/`toolCalls[]`/`thinkingProcess`：会话消息触发知识库检索、平台原生工具（`grc-mcp-server`：
-  Confluence / SharePoint-OneDrive / 数据平台 / Web）时的记录，`toolCalls[]` 形如
-  `{ toolName, arguments, resultSummary }`；流式场景对应 SSE `citation`/`tool_call`/`thinking` 事件，
-  工具调用完成后一次性推送（不分片）。这些字段最终由 grc-agent-service 生成完成后经内部接口回写给
+- `citations[]`/`thinkingProcess`：会话消息触发知识库检索与深度分析时的记录；流式场景对应 SSE
+  `citation`/`thinking` 事件。这些字段最终由 grc-agent-service 生成完成后经内部接口回写给
   grc-mgmt-service 持久化，grc-agent-service 自身不存。
 - `deepAnalysis` 字段的具体行为（更长的工具调用轮数上限？还是切换到支持推理链路输出的模型？）待产品/架构明确。
 - **待明确**：`GET .../context` 与 `POST .../messages` 两个内部接口的调用时序中，若生成过程中途失败或被

@@ -9,9 +9,17 @@ info:
 servers:
   - url: https://api.internal/api/v1
     description: 经 grc-api-gateway 转发后的生产地址
+security:
+  - bearerAuth: []
+tags:
+  - name: ConfluenceMCP
+    description: Confluence 原生工具的 MCP JSON-RPC 接口
+  - name: Health
+    description: MCP 进程存活探测
 paths:
   /mcp/confluence:
     post:
+      tags: [ConfluenceMCP]
       operationId: handleMcpRequest
       summary: 调用原生 MCP 工具
       description: >-
@@ -33,7 +41,9 @@ paths:
 
   /mcp/confluence/healthz:
     get:
+      tags: [Health]
       operationId: getMcpHealth
+      security: []
       summary: 原生 MCP 进程存活探测
       description: >-
         生产调用地址为 `GET /api/v1/mcp/confluence/healthz`。本接口不探测下游 Confluence 可达性。
@@ -46,6 +56,11 @@ paths:
                 $ref: '#/components/schemas/HealthResponse'
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     HealthResponse:
       type: object
@@ -53,7 +68,7 @@ components:
       properties:
         status: { type: string, const: ok }
         service: { type: string, const: mcp-conf-server }
-        version: { type: string, example: 0.7.0 }
+        version: { type: string, example: 0.8.0 }
 
     JsonRpcId:
       oneOf:
@@ -303,7 +318,7 @@ components:
       properties:
         title: { type: string }
         url: { type: string }
-        content: { type: string, description: 单段约 4000 字；图片表示为 [图片：alt]，不含附件 }
+        content: { type: string, description: "单段约 4000 字；图片表示为 [图片：alt]，不含附件" }
         has_more: { type: boolean }
         next_cursor: { type: string }
 
@@ -384,4 +399,4 @@ components:
         page_id: { type: string }
         landing: { type: string, const: local_temp }
         source: { type: string, const: confluence }
-        staging_root: { type: string, description: confluence/{page_id} }
+        staging_root: { type: string, description: "confluence/{page_id}" }
