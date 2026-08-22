@@ -17,31 +17,28 @@
 - [ ] T103 [P] `mgt_client.py` 行为测试（`get_context`/`append_message` 正常与异常路径，
       用 `httpx.MockTransport` 隔离），`tests/test_mgt_client.py`
 - [ ] T104 [P] `knowledge_client.py` 行为测试（多知识库检索调用），`tests/test_knowledge_client.py`
-- [ ] T105 [P] `mcp_client.py` 行为测试（平台原生工具调用），`tests/test_mcp_client.py`
-- [ ] T106 编排器测试：纯对话、知识库引用、工具调用循环、步数超限、中止生成五类场景，
+- [ ] T106 编排器测试：纯对话、知识库引用、步数超限、中止生成四类场景，
       `tests/test_orchestrator.py`（内存 fake 隔离外部依赖，不依赖真实网络）
 
 ### 实现
 
-- [ ] T107 `app/config.py`：新增 `grc-mgmt-service`/`grc-knowledge-engine`/`grc-mcp-server`/LLM 网关
+- [ ] T107 `app/config.py`：新增 `grc-mgmt-service`/`grc-knowledge-engine`/LLM 网关
       的地址配置
 - [ ] T108 `app/services/mgt_client.py`：调用 `GET /mgmt/internal/chat/sessions/{id}/context`、
       `POST /mgmt/internal/chat/sessions/{id}/messages`（依赖 T103 先红）
 - [ ] T109 [P] `app/services/knowledge_client.py`：调用 `grc-knowledge-engine`
       `POST /knowledge/retrievals`（依赖 T104 先红）
-- [ ] T110 [P] `app/services/mcp_client.py`：对接 `grc-mcp-server`（MCP 协议，Confluence /
-      SharePoint-OneDrive / 数据平台 / Web 四个工具，依赖 T105 先红）
 - [ ] T111 [P] `app/services/llm_client.py`：LLM 推理调用（是否经 `grc-ai-sdk` 见 plan.md
       待评审确认项，先按 OpenAI 兼容协议实现，接口留可替换）
 - [ ] T112 `app/services/cancel_registry.py`：技术态缓存，记录进行中生成的中止标记
       （单实例先用进程内 set，多实例路由方案见 plan.md 待评审确认项，本任务不解决多实例问题）
-- [ ] T113 `app/orchestrator.py`：function-calling 循环 + 流式生成 + 中止信号检查，串联
-      T108~T112（依赖 T106 先红）
+- [ ] T113 `app/orchestrator.py`：检索增强编排 + 流式生成 + 中止信号检查，串联
+      T108、T109、T111、T112（依赖 T106 先红）
 - [ ] T114 `app/api/chat.py`：三个端点的路由与请求/响应装配（依赖 T101/T102 先红、T113）
 - [ ] T115 `app/guardrails/hooks.py`：输出侧护栏钩子占位（全文缓冲检测后按段回放，
       具体是否由本服务实现待 plan.md 待评审确认项定论，先留可替换的钩子接口）
-- [ ] T116 端到端本地联调：mock `grc-mgmt-service`/`grc-knowledge-engine`/`grc-mcp-server` 与真实
-      LLM 网关联调，验证四类能力组合（知识库引用、工具调用、流式、中止）
+- [ ] T116 端到端本地联调：mock `grc-mgmt-service`/`grc-knowledge-engine` 与真实
+      LLM 网关联调，验证三类能力组合（知识库引用、流式、中止）
 
 ---
 

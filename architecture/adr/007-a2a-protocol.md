@@ -14,7 +14,7 @@ grc-agent-service 当前 api-landscape 设计中直接对前端暴露自定义 R
 ## 决策
 
 - **grc-agent-service 只暴露 A2A 协议端点**（`/.well-known/agent.json` + `POST /a2a`），不再提供自定义 REST 路由。支持流式（`tasks/sendSubscribe`，SSE）和非流式（`tasks/send`，同步 JSON）两种模式。
-- **grc-mgmt-service（chat-agent domain）为前端提供自定义接口**（`POST /mgmt/chat/sessions/{id}/messages` 等），内部通过 A2A 协议调用 agent-service，负责会话上下文组装、消息持久化、知识库挂载快照管理。
+- **grc-mgmt-service（chat-agent domain）为前端提供自定义接口**（`POST /mgmt/chat/sessions/{id}/messages` 等），内部通过 A2A 协议调用 agent-service，负责会话上下文组装、消息持久化、知识库挂载列表管理；检索时按当前知识库状态与权限即时校验，不保留会话级快照。
 - 外部系统与 Agent 间集成同样通过 A2A 端点，由 gateway 路由。
 
 ## 备选方案

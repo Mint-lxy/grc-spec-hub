@@ -280,7 +280,7 @@ knowledge-engine / parser-engine / eval-service
 - [x] **Gateway 运行时状态投影**：gateway 拉取 mgmt 资产清单 API，Redis + 本地双层缓存，~30s TTL（2026-08-14 确认）
 - [x] **Knowledge-engine → MCP-server 依赖**：mcp-server 自行经 grc-ai-sdk 解析凭据，knowledge-engine 只传 user context（2026-08-14 确认）
 - [x] **Knowledge-engine → mgmt-service 依赖**：正式声明；knowledge-engine 通过 mgmt-service 文件接口获取/下载文件（2026-08-14 确认）
-- [x] **会话级知识库快照语义**：agent-service 会话创建时缓存 KB ID 列表，检索时传列表；knowledge-engine 无需特殊模式（2026-08-14 确认）
+- [x] **知识库检索时效语义**：原「会话创建时缓存 KB ID 列表」结论已被 2026-08-21 设计变更取代；取消会话级快照，检索必须基于检索时刻的知识库状态与权限，停用、软删除、回草稿与权限回收对进行中会话和新会话一视同仁立即生效（PRD §13.10 #13）
 - [x] **Agent-service 事件消费**：不主动感知资产生命周期；下游调用失败时按统一错误码（ADR-002）降级提示，agent-service 无需订阅事件（2026-08-14 确认）
 - [x] **Eval-service → mgmt-service 结果回写**：改为事件驱动——eval-service 发布 eval-completed 事件到 Service Bus，mgmt-service 消费并写入结果（2026-08-14 确认）
 - [ ] **多模态/OCR 模型自部署**：Nexus 不提供多模态/OCR 模型，parser-engine（Docling/MinerU）与 knowledge-engine 的图片理解需自行部署——待确认模型选型、托管方式与 API 暴露方案（2026-08-14 登记）
