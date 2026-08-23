@@ -1,5 +1,5 @@
 <!-- 自动区块：由 memory-digest 管线维护，人工修改会被覆盖 -->
-# grc-mcp-server 状态卡（更新于 2026-W33）
+# grc-mcp-server 状态卡（更新于 2026-W34）
 
 ## 职责与边界
 平台原生 MCP 工具集：mcp-m365-server（SharePoint/OneDrive）、mcp-conf-server（Confluence）、mcp-dp-server（数据平台 ADF/Databricks）、mcp-web-server（Web 抓取）。不做对话编排（→ grc-agent-service）。
@@ -10,6 +10,7 @@
 - 消费契约：无
 
 ## 近期重要变化（最近 4 周）
+- W34: Confluence MCP（mcp-conf-server）的 design 与 plan 文档上传（commit `21ffb1c`，08-21）
 - W33: 服务孵化，初始化仓库脚手架
 
 ## 已知问题
