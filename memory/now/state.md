@@ -10,17 +10,19 @@
 - M1：P0 核心交付——平台全链路跑通（目标日期待确认）
 
 ## 进行中的 specs
-- specs/001-conversation ~ specs/009-notification：均为 Draft 状态，待产出 plan.md
+- 已 Reviewed（需求面冻结）：001-conversation、002-marketplace、003-asset-creation、004-publish、005-knowledge——002/003/004/005 可直接进 plan；001 进 plan 前置为 watchlist #45/#50（紧急，Zhang Hao）
+- 仍 Draft：006-guardrail、007-credential、008-admin、009-notification（待 spec-kit 重写与澄清，参照 001~005 流程）
 
 ## 当前风险
 - 记忆腐化是本体系最大单点风险 → 依赖每周 digest 审核纪律。
 - 架构待确认项已收窄至 **1 项**（护栏检测服务实现，待 PoC），其余 11 项均已确认关闭。
-- 各 feature spec 未决问题散布在「未决问题」或 plan 待确认章节；PRD §13.10 共 16 项已全部确认或关闭（第 2、10、11、12、16 项于 2026-08-21 确认，第 13 项经设计变更关闭，第 1、3、4、5、6、7、8、9、14、15 项于 2026-08-22 BA 裁定）；开工前必裁项已全部关闭；002/005 Open Questions 已清零，spec 侧遗留待确认以非 002/005 条目与准入测评模板维护归属（004/008）为主。
+- 各 feature spec 未决问题散布在「未决问题」或 plan 待确认章节；PRD §13.10 共 16 项已全部确认或关闭；002/005 Open Questions 已清零，003/004 经三轮澄清+终审后仅剩有归属的 watchlist 项；spec 侧遗留待确认：#22 测评阈值、#33 模板维护归属（004/008）、#44 裁判模型算力与 Agent Card 重试、#52 测评超时 30 分钟审定、#53 MCP 协议审核（Zhang Hao）、#54 通知事件一揽子归类（随 009 重写）。
 - 契约门禁已于 2026-08-22 修复并通过（watchlist #48 closed）；遗留一项回溯确认：main 上 "update api" 提交删除 `DELETE /mgmt/knowledge/knowledge-bases/{kbId}` 未经消费方确认（watchlist #49，责任人 Zhang Hao）。
 - 里程碑日期（M1/M2/M3）仍为 `[待确认]`。
 - 环境与账号阻塞（2 项未闭环）：Alice admin 账号待申请（最晚 2026-08-19）、Azure→SharePoint 方案进行中；GitHub 账号已开通（2026-08-17）。
 
 ## 近期重要变化
+- 2026-08-23：**spec 003/004 完成 spec-kit 重写 + 三轮澄清 + Zeng Ziyang grill 复核 + 用户终审（13 项），Status 升 Reviewed**（PR #2 合入 main @ 7a3c2cc）：004 新增发布任务语义/失败落点+失败通知/放弃修订/删除不通知/执行主体统一（FR-041~045），密钥值自热改移入轻发布第三通道（部分调整 v0.9，ADR-0014 第十轮补注），发布全互斥与配置冻结、中止即取消测评、模板发起时快照；003 裁定协作式草稿、HC 强制必选（终审驳回暂缓，#56 关闭）、能力声明只读镜像、MCP 托管/协议单值与接入字段集同构、名称占用时点＝提交门控时。002 增补 Agent 详情页「凭据状态」页签（v1.2 升版遗漏修复，终审追认）。PRD v1.2 版本说明新增 2026-08-23 补遗并全文回写，hub 归档副本与 BA 原件（af17d40）逐字节一致；CONTEXT.md 与 ADR-0014 同步。联合工作区规则增补「基础文档回写流程：AI 起草+人确认提交」。
 - 2026-08-23：**spec 001/002/005 需求面冻结（BA Lead）**：三个 spec 的 Status 由 Draft 升为 Reviewed，FR 集合不再增减、后续变更须经 BA Lead 复核；002/005 可直接进 plan，001 进 plan 前置为 watchlist #45/#50（紧急，Zhang Hao）。001 兜底 UX 裁定：一次性横幅提示、不新增站内通知。
 - 2026-08-23：BA 工作区（ba-init-toolkit，本地 master 无远端）完成整理提交——设计文档主线 b73d9a8（PRD v0.7–v1.2 全版本归档、用户旅程 v1.0–v1.2、ADR 0014–0016、CONTEXT 47 词条；PRD v1.2 与 spec-hub 版逐字节一致）；Implementation-Snapshot 归档内容经用户确认无实际作用已从磁盘删除并落账（c6c1a6d；git 历史副本在 020f6cd，嵌套仓库 gitlink 已于 263ff7e 从索引移除）；`.devin/` 本地配置不入库。
 - 2026-08-23：spec 005 经 BA Lead 逐项复核（19 组）：全部采纳 + 4 处修正——解析器收敛 Docling/MinerU（不使用 DeepDoc，PRD §1.3/M4-12 同步）、语言提示改中文/英文/德语、更新接口显式不支持 ZIP 直接更新、建库角色统一全称表述；补齐 spec-kit 头部与质量检查单；新增 watchlist #51（Li Zhonghao 跟进实现侧 deepdoc 移除与参数矩阵审阅）。
