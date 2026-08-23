@@ -66,6 +66,7 @@
 | 48 | `check-contracts.sh` 未通过——已修复（2026-08-22，合入 main @ cb1c992）：mcp-server/knowledge-engine YAML 引号 ×3、auth-service 7 处 nullable 迁移 3.1 union type、8 处 security 声明补齐（内部服务根级 bearerAuth 对齐 mgmt，healthz/login/verify/refresh/oauth 显式 `security: []`）、saveDocumentChunk 补 chunkId 路径参数、npx 缓存清理、门禁脚本 oasdiff 误报修复（仅 error/warning 级判失败，.sh/.ps1 同步）。人工豁免：chunkId 补齐声明的 `new-request-path-parameter` flag 属无效契约修复，理由记录于合并提交 cb1c992 | 契约门禁 | contracts/, gates/scripts/check-contracts.sh, contracts/POLICY.md | closed |
 | 49 | 【责任人：Zhang Hao】远端 main 的 "update api" 提交（eea6cec）删除了 `DELETE /mgmt/knowledge/knowledge-bases/{kbId}` 端点，oasdiff 报 `api-removed-without-deprecation`——真实破坏性变更，未见 service-map 消费方逐一确认记录；需回溯确认删除是否有意、消费方是否知情，必要时补确认或恢复 | 契约治理 | contracts/openapi/grc-mgmt-service.yaml, contracts/POLICY.md, architecture/service-map.md | open |
 | 50 | 【责任人：Zhang Hao】【紧急——spec 001 进 plan 的前置】透传缓冲链路的护栏处理机制待确认：spec 001 已裁定透传会话免流式接入（平台缓冲资产完整响应 → 输出侧护栏检测 → 按段回放，2026-08-22 BA Lead 复核采纳），需确认护栏在该链路的处理机制可行——检测位置（网关/护栏服务）、检测超时、长响应缓冲上限；同链路输出缓冲首段延迟需压测输入（spec 001 Open Questions） | 架构决策 | spec 001 FR-022/FR-023, ADR-007, watchlist #1/#45 | open |
+| 51 | 【责任人：Li Zhonghao】spec 005 构建管线改动需开发侧跟进（2026-08-23 BA Lead 复核裁定）：① 解析器收敛为 Docling/MinerU，不使用 DeepDoc——实现快照 `Implementation-Snapshot/KB-coding/knowledge-engine` 的 `pipeline_config_validator.py` 合法解析器集合与两份 Api 清单中的 deepdoc 参数需移除；② 切片/增强/解析器/向量化/重排序参数矩阵（FR-038）请审阅可行性；③ 语言提示为中文/英文/德语/自动检测 | 开发跟进 | spec 005 FR-038, Implementation-Snapshot/KB-coding | open |
 
 ## 文档缺口
 

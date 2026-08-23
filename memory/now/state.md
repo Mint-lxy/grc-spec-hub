@@ -21,6 +21,7 @@
 - 环境与账号阻塞（2 项未闭环）：Alice admin 账号待申请（最晚 2026-08-19）、Azure→SharePoint 方案进行中；GitHub 账号已开通（2026-08-17）。
 
 ## 近期重要变化
+- 2026-08-23：spec 005 经 BA Lead 逐项复核（19 组）：全部采纳 + 4 处修正——解析器收敛 Docling/MinerU（不使用 DeepDoc，PRD §1.3/M4-12 同步）、语言提示改中文/英文/德语、更新接口显式不支持 ZIP 直接更新、建库角色统一全称表述；补齐 spec-kit 头部与质量检查单；新增 watchlist #51（Li Zhonghao 跟进实现侧 deepdoc 移除与参数矩阵审阅）。
 - 2026-08-22：spec 002 经 BA Lead 逐项复核（14 组差异全部确认采纳、零修改），BA 终审通过，可交架构写 plan；002 无 Zeng Ziyang 提交（其提交仅涉 001，注意其使用本人 SSH key + BA 账号、user name 为 Zeng Ziyang）。
 - 2026-08-22：spec 001 的 spec-kit 风格重写（Zeng Ziyang）经 BA Lead 逐项复核（17 项）后整合：15 项澄清裁定采纳（透传上下文归资产、生成期禁发、三类失效只读回看、免流式接入、会话软删除等），3 处修正（去重粒度改按切片对齐 §9.10、软删除留存改脱敏口径、M1-16 过期条目不回植），P0/P1 边界与契约兼容口径按 main 回植；新增 watchlist #50（透传缓冲链路护栏机制待 Zhang Hao 确认）。
 - 2026-08-22：`chore/ba-open-items-sync` 合入 main（cb1c992）——PRD §13.10 全部关闭、002/005 待确认清零；Chat 边界收敛为 P0 不调用平台原生 MCP/已上架资产、P1 预留 Chat 调用已订阅 MCP 资产工具；契约兼容字段（tool_call/toolCalls/snapshotAt）保留；契约门禁修复并转绿（含门禁脚本 oasdiff 误报修复）；chunkId 补齐声明的 oasdiff flag 经人工豁免（理由见合并提交）。
