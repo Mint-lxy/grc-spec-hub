@@ -21,6 +21,10 @@
 - 环境与账号阻塞（2 项未闭环）：Alice admin 账号待申请（最晚 2026-08-19）、Azure→SharePoint 方案进行中；GitHub 账号已开通（2026-08-17）。
 
 ## 近期重要变化
+- 2026-08-23：**spec 001/002/005 需求面冻结（BA Lead）**：三个 spec 的 Status 由 Draft 升为 Reviewed，FR 集合不再增减、后续变更须经 BA Lead 复核；002/005 可直接进 plan，001 进 plan 前置为 watchlist #45/#50（紧急，Zhang Hao）。001 兜底 UX 裁定：一次性横幅提示、不新增站内通知。
+- 2026-08-23：BA 工作区（ba-init-toolkit，本地 master 无远端）完成整理提交——设计文档主线 b73d9a8（PRD v0.7–v1.2 全版本归档、用户旅程 v1.0–v1.2、ADR 0014–0016、CONTEXT 47 词条；PRD v1.2 与 spec-hub 版逐字节一致）；Implementation-Snapshot 归档内容经用户确认无实际作用已从磁盘删除并落账（c6c1a6d；git 历史副本在 020f6cd，嵌套仓库 gitlink 已于 263ff7e 从索引移除）；`.devin/` 本地配置不入库。
+- 2026-08-23：spec 005 经 BA Lead 逐项复核（19 组）：全部采纳 + 4 处修正——解析器收敛 Docling/MinerU（不使用 DeepDoc，PRD §1.3/M4-12 同步）、语言提示改中文/英文/德语、更新接口显式不支持 ZIP 直接更新、建库角色统一全称表述；补齐 spec-kit 头部与质量检查单；新增 watchlist #51（Li Zhonghao 跟进实现侧 deepdoc 移除与参数矩阵审阅）。
+- 2026-08-22：spec 002 经 BA Lead 逐项复核（14 组差异全部确认采纳、零修改），BA 终审通过，可交架构写 plan；002 无 Zeng Ziyang 提交（其提交仅涉 001，注意其使用本人 SSH key + BA 账号、user name 为 Zeng Ziyang）。
 - 2026-08-22：spec 001 的 spec-kit 风格重写（Zeng Ziyang）经 BA Lead 逐项复核（17 项）后整合：15 项澄清裁定采纳（透传上下文归资产、生成期禁发、三类失效只读回看、免流式接入、会话软删除等），3 处修正（去重粒度改按切片对齐 §9.10、软删除留存改脱敏口径、M1-16 过期条目不回植），P0/P1 边界与契约兼容口径按 main 回植；新增 watchlist #50（透传缓冲链路护栏机制待 Zhang Hao 确认）。
 - 2026-08-22：`chore/ba-open-items-sync` 合入 main（cb1c992）——PRD §13.10 全部关闭、002/005 待确认清零；Chat 边界收敛为 P0 不调用平台原生 MCP/已上架资产、P1 预留 Chat 调用已订阅 MCP 资产工具；契约兼容字段（tool_call/toolCalls/snapshotAt）保留；契约门禁修复并转绿（含门禁脚本 oasdiff 误报修复）；chunkId 补齐声明的 oasdiff flag 经人工豁免（理由见合并提交）。
 - 2026-08-21：ADR-007（A2A 协议统一）产出——agent-service 只暴露 A2A 端点，mgmt-service 为前端提供自定义对话接口，状态 Proposed。
