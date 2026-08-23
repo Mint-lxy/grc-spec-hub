@@ -13,12 +13,12 @@
 
 ## Requirement Completeness
 
-- [x] No [NEEDS CLARIFICATION] markers remain — 未决项以 Open Questions 四条承载（watchlist #22/#33/#44/#52），均有责任方与处置路径；2026-08-23 澄清会话 5 问 + grill 复核 Round 2 六问全部裁定并回写
+- [x] No [NEEDS CLARIFICATION] markers remain — 未决项以 Open Questions 五条承载（watchlist #22/#33/#44/#52 + 密钥值通知归类），均有责任方与处置路径；2026-08-23 澄清会话 + BA Lead peer review（grill 三轮）全部裁定并回写
 - [x] Requirements are testable and unambiguous — 45 条 FR 均带可验证行为与 PRD 出处
-- [x] Success criteria are measurable — SC-001~011 均含量化口径（100%/0/零中断/1 条）
+- [x] Success criteria are measurable — SC-001~016 均含量化口径（100%/0/零中断/1 条）
 - [x] Success criteria are technology-agnostic (no implementation details) — 无框架/语言/存储表述
-- [x] All acceptance scenarios are defined — 五个用户故事共 32 条 Given/When/Then
-- [x] Edge cases are identified — 15 条（回退边、开关切换时机、中止取消测评、模板快照、并发发布、下架瞬间调用、空载荷、发布失败落点、放弃修订、原样重测禁止、删除不通知、轻发布互斥、申报必填、负责人收缩、名称唯一）
+- [x] All acceptance scenarios are defined — 五个用户故事共 34 条 Given/When/Then
+- [x] Edge cases are identified — 15 条（回退边、开关切换时机、中止取消测评、模板快照、并发发布、配置冻结、下架瞬间调用、空载荷、发布失败落点、放弃修订、删除不通知、轻发布互斥、申报必填、负责人收缩、名称唯一）
 - [x] Scope is clearly bounded — Non-Goals 8 项 + 邻接 spec 边界 6 项
 - [x] Dependencies and assumptions identified — Assumptions 8 条（含 2 条实现侧合理默认待 plan 确认）
 

@@ -71,6 +71,7 @@
 | 53 | 【责任人：Zhang Hao 审核】MCP 协议枚举 P0 单值「Streamable HTTP」的技术口径确认——2026-08-23 spec 003 澄清裁定（用户裁定附审核备注）；审核通过后关闭 spec 003 对应 Open Question | 技术审核 | spec 003 FR-013, contracts/openapi/grc-mgmt-service.yaml | open |
 | 54 | 密钥值轻发布的通知事件归类（2026-08-23 密钥值通道裁定的连带项）：新增第十三类通知事件，或归入既有「资产发布新版本」轻量通知——随 spec 009 重写时由 BA 裁定并回写 PRD M9-1（若事件数变化需版本说明补遗）；spec 004 Open Questions 有对应条目 | spec 对齐 | spec 004 FR-018/Open Questions, spec 009, PRD M9-1 | open |
 | 55 | 【责任人：Zeng Ziyang peer review】spec 002 增补（Agent 详情页第五页签「凭据状态」，冻结后首个变更）、spec 003/004 spec-kit 重写与三轮澄清——复核通过后 Status 升 Reviewed（参照 001/002/005 流程）；评审入口：各 spec Clarifications 2026-08-23 sessions + 附录 AC→FR 对照表 | 评审 | specs/002/003/004, PRD v1.2 版本说明 2026-08-23 补遗 | open |
+| 56 | 【BA 裁定待定】Health Check 开关存废分歧——spec 003 FR-007 与 PRD 版本说明 2026-08-23 补遗均为「HC 强制必选、消除开关」（Lin 版裁定）；BA Lead（Zeng Ziyang）2026-08-23 peer review **暂缓确认、裁定再议**。注意：PRD 补遗已含强制必选表述，若最终推翻需同步回滚 PRD 补遗与 spec 003 FR-007/FR-013、并恢复 §9.1.1 相关表述 | spec 分歧 | spec 003 FR-007/FR-013, PRD v1.2 版本说明 2026-08-23 补遗, spec 004 FR-016 | open |
 
 ## 文档缺口
 
