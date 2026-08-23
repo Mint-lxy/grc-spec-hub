@@ -68,6 +68,7 @@
 | 50 | 【责任人：Zhang Hao】【紧急——spec 001 进 plan 的前置】透传缓冲链路的护栏处理机制待确认：spec 001 已裁定透传会话免流式接入（平台缓冲资产完整响应 → 输出侧护栏检测 → 按段回放，2026-08-22 BA Lead 复核采纳），需确认护栏在该链路的处理机制可行——检测位置（网关/护栏服务）、检测超时、长响应缓冲上限；同链路输出缓冲首段延迟需压测输入（spec 001 Open Questions） | 架构决策 | spec 001 FR-022/FR-023, ADR-007, watchlist #1/#45 | open |
 | 51 | 【责任人：Li Zhonghao】spec 005 构建管线改动需开发侧跟进（2026-08-23 BA Lead 复核裁定）：① 解析器收敛为 Docling/MinerU，不使用 DeepDoc——实现快照 `Implementation-Snapshot/KB-coding/knowledge-engine` 的 `pipeline_config_validator.py` 合法解析器集合与两份 Api 清单中的 deepdoc 参数需移除；② 切片/增强/解析器/向量化/重排序参数矩阵（FR-038）请审阅可行性；③ 语言提示为中文/英文/德语/自动检测 | 开发跟进 | spec 005 FR-038, Implementation-Snapshot/KB-coding | open |
 | 52 | 【架构/开发待确认】准入测评任务整体超时上限——2026-08-23 spec 004 澄清建议值 30 分钟（超时视同执行失败、可重测）；需架构/开发确认可行性后补入 PRD §9.10 参数基线审定，审定前不作为工单基线 | 基线 | spec 004 FR-010, PRD §9.4/§9.10 | open |
+| 53 | 【责任人：BA/用户】资产名称规则回写 PRD——①名称全平台唯一已裁定成立（2026-08-23 BA Lead grill 复核）：创建与改名（热改）时校验、软删除后名称释放，spec 004 FR-040 + spec 003 AC-19 已落；该规则超出 PRD 现表述（PRD 仅知识库名称同目录唯一，M4-5b），需由人回写 PRD §9.1.1/§9.10 与 CONTEXT.md（禁止 AI 反写基础文档）。②资产名称长度/字符集基线 PRD §9.10 未定义（仅知识库有 1–100/禁控制字符）——2026-08-23 BA 裁定**暂不定义**，留后续审定 | PRD 回写 | spec 004 FR-040, spec 003 AC-19, PRD §9.1.1/§9.10, CONTEXT.md | open |
 
 ## 文档缺口
 
