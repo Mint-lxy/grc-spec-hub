@@ -69,9 +69,9 @@
 | 51 | 【责任人：Li Zhonghao】spec 005 构建管线改动需开发侧跟进（2026-08-23 BA Lead 复核裁定）：① 解析器收敛为 Docling/MinerU，不使用 DeepDoc——实现快照 `Implementation-Snapshot/KB-coding/knowledge-engine` 的 `pipeline_config_validator.py` 合法解析器集合与两份 Api 清单中的 deepdoc 参数需移除；② 切片/增强/解析器/向量化/重排序参数矩阵（FR-038）请审阅可行性；③ 语言提示为中文/英文/德语/自动检测 | 开发跟进 | spec 005 FR-038, Implementation-Snapshot/KB-coding | open |
 | 52 | 【架构/开发待确认】准入测评任务整体超时上限——2026-08-23 spec 004 澄清建议值 30 分钟（超时视同执行失败、可重测）；需架构/开发确认可行性后补入 PRD §9.10 参数基线审定，审定前不作为工单基线 | 基线 | spec 004 FR-010, PRD §9.4/§9.10 | open |
 | 53 | 【责任人：Zhang Hao 审核】MCP 协议枚举 P0 单值「Streamable HTTP」的技术口径确认——2026-08-23 spec 003 澄清裁定（用户裁定附审核备注）；审核通过后关闭 spec 003 对应 Open Question | 技术审核 | spec 003 FR-013, contracts/openapi/grc-mgmt-service.yaml | open |
-| 54 | 密钥值轻发布的通知事件归类（2026-08-23 密钥值通道裁定的连带项）：新增第十三类通知事件，或归入既有「资产发布新版本」轻量通知——随 spec 009 重写时由 BA 裁定并回写 PRD M9-1（若事件数变化需版本说明补遗）；spec 004 Open Questions 有对应条目 | spec 对齐 | spec 004 FR-018/Open Questions, spec 009, PRD M9-1 | open |
-| 55 | 【责任人：Zeng Ziyang peer review】spec 002 增补（Agent 详情页第五页签「凭据状态」，冻结后首个变更）、spec 003/004 spec-kit 重写与三轮澄清——复核通过后 Status 升 Reviewed（参照 001/002/005 流程）；评审入口：各 spec Clarifications 2026-08-23 sessions + 附录 AC→FR 对照表 | 评审 | specs/002/003/004, PRD v1.2 版本说明 2026-08-23 补遗 | open |
-| 56 | 【BA 裁定待定】Health Check 开关存废分歧——spec 003 FR-007 与 PRD 版本说明 2026-08-23 补遗均为「HC 强制必选、消除开关」（Lin 版裁定）；BA Lead（Zeng Ziyang）2026-08-23 peer review **暂缓确认、裁定再议**。注意：PRD 补遗已含强制必选表述，若最终推翻需同步回滚 PRD 补遗与 spec 003 FR-007/FR-013、并恢复 §9.1.1 相关表述 | spec 分歧 | spec 003 FR-007/FR-013, PRD v1.2 版本说明 2026-08-23 补遗, spec 004 FR-016 | open |
+| 54 | 通知事件归类一揽子裁定（随 spec 009 重写，回写 PRD M9-1，事件数变化需版本说明补遗）：①密钥值轻发布通知（2026-08-23 密钥值通道裁定连带）——新增第十三类或归入「资产发布新版本」轻量通知；②发布失败通知（2026-08-23 用户终审补充，FR-042）——通知全体负责人、附失败阶段与原因，独立成类或并入既有事件；spec 004 Open Questions 有两条对应条目 | spec 对齐 | spec 004 FR-018/FR-042/Open Questions, spec 009, PRD M9-1 | open |
+| 55 | spec 002/003/004 peer review 与终审——**已关闭（2026-08-23）**：Zeng Ziyang grill 复核 003/004（提交 4b1c90f/57f3008，补入 FR-041~045 等）；用户终审 13 项逐项裁定——采纳 FR-041/042/043/044/045 与版本号/说明口径转正，确认两项自我推翻项（中止不留痕、重测不收紧），驳回 HC 暂缓（#56 关闭），002 增补由用户终审追认；002 维持 Reviewed，003/004 升 Reviewed | 评审 | specs/002/003/004 | closed |
+| 56 | Health Check 开关存废分歧——**已关闭（2026-08-23 用户终审）**：维持「HC 强制必选、消除开关」，驳回 peer review 暂缓；补充理由：HC 可关闭则资产失效无法触达时订阅者与平台无从知晓实际服务健康状态；spec 003 FR-007/FR-013 与 PRD 强制表述维持，无回滚 | spec 分歧 | spec 003 FR-007/FR-013, PRD v1.2 版本说明 2026-08-23 补遗 | closed |
 
 ## 文档缺口
 
