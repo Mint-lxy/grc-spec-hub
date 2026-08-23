@@ -28,6 +28,9 @@
 
 `specs/**` · `contracts/**` · `memory/now/**` · 宪法。
 
+**分支规则**：一律不在 `main` 上直接改动；所有工作在功能分支进行。
+任何合并或推送到 `main` 的操作必须先向用户确认，得到明确同意后方可执行。
+
 ## 能力资产
 
 - skills：[capabilities/skills/](capabilities/README.md)（Agent Skills 约定，`/名称` 调用）
