@@ -436,7 +436,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/GenericRequest' }
+            schema: { $ref: '#/components/schemas/CreateKnowledgeTagRequest' }
       responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
     get:
       tags: [Knowledge Base]
@@ -451,7 +451,7 @@ paths:
       summary: 创建知识库
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/CreateKnowledgeBaseRequest' } } }
       responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
     get:
       tags: [Knowledge Base]
@@ -504,7 +504,7 @@ paths:
       summary: 更新知识库配置
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/UpdateKnowledgeBaseConfigRequest' } } }
       responses: { '200': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/documents:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
@@ -529,7 +529,7 @@ paths:
       summary: 创建知识库构建任务
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/CreateKnowledgeBuildJobRequest' } } }
       responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/stats:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
@@ -560,7 +560,7 @@ paths:
       summary: 更新文档阶段配置
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/UpdateKnowledgeDocumentStageConfigRequest' } } }
       responses: { '200': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/parse:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
@@ -610,6 +610,8 @@ paths:
       tags: [Knowledge Base]
       operationId: saveDocumentChunk
       summary: 保存文档切片
+      parameters:
+        - { name: chunkId, in: path, required: true, schema: { type: string } }
       requestBody:
         required: true
         content:
@@ -1076,6 +1078,183 @@ components:
       properties:
         content: { type: string, minLength: 1 }
         metadata: { type: object, additionalProperties: true }
+
+    PipelineStageConfig:
+      type: object
+      required: [type, options]
+      properties:
+        type: { type: string }
+        options: { type: object, additionalProperties: true }
+
+    ParserConfig:
+      oneOf:
+        - $ref: '#/components/schemas/DoclingParserConfig'
+        - $ref: '#/components/schemas/AzureDocumentIntelligenceParserConfig'
+        - $ref: '#/components/schemas/MinerUParserConfig'
+        - $ref: '#/components/schemas/DeepDocParserConfig'
+      discriminator:
+        propertyName: type
+        mapping:
+          docling: '#/components/schemas/DoclingParserConfig'
+          azureDocumentIntelligence: '#/components/schemas/AzureDocumentIntelligenceParserConfig'
+          minerU: '#/components/schemas/MinerUParserConfig'
+          deepDoc: '#/components/schemas/DeepDocParserConfig'
+
+    ChunkingConfig:
+      oneOf:
+        - $ref: '#/components/schemas/SemanticChunkingConfig'
+        - $ref: '#/components/schemas/FixedChunkingConfig'
+        - $ref: '#/components/schemas/ParentChunkingConfig'
+        - $ref: '#/components/schemas/HierarchicalChunkingConfig'
+      discriminator:
+        propertyName: type
+        mapping:
+          Semantic: '#/components/schemas/SemanticChunkingConfig'
+          Fixed: '#/components/schemas/FixedChunkingConfig'
+          Parent: '#/components/schemas/ParentChunkingConfig'
+          Hierarchical: '#/components/schemas/HierarchicalChunkingConfig'
+
+    EnhanceConfig:
+      oneOf:
+        - $ref: '#/components/schemas/FaqEnhanceConfig'
+        - $ref: '#/components/schemas/SummaryEnhanceConfig'
+        - $ref: '#/components/schemas/KeywordEnhanceConfig'
+      discriminator:
+        propertyName: type
+        mapping:
+          FAQ: '#/components/schemas/FaqEnhanceConfig'
+          Summary: '#/components/schemas/SummaryEnhanceConfig'
+          Keyword: '#/components/schemas/KeywordEnhanceConfig'
+
+    EmbeddingConfig:
+      oneOf:
+        - $ref: '#/components/schemas/BgeM3EmbeddingConfig'
+        - $ref: '#/components/schemas/TextEmbedding3LargeConfig'
+        - $ref: '#/components/schemas/VoyageEmbeddingConfig'
+        - $ref: '#/components/schemas/QwenEmbeddingConfig'
+      discriminator:
+        propertyName: type
+        mapping:
+          BGE-M3: '#/components/schemas/BgeM3EmbeddingConfig'
+          text-embedding-3-large: '#/components/schemas/TextEmbedding3LargeConfig'
+          Voyage: '#/components/schemas/VoyageEmbeddingConfig'
+          Qwen: '#/components/schemas/QwenEmbeddingConfig'
+
+    VectorStoreConfig:
+      oneOf:
+        - $ref: '#/components/schemas/MilvusVectorStoreConfig'
+        - $ref: '#/components/schemas/QdrantVectorStoreConfig'
+        - $ref: '#/components/schemas/PgVectorStoreConfig'
+        - $ref: '#/components/schemas/AzureAiSearchVectorStoreConfig'
+      discriminator:
+        propertyName: type
+        mapping:
+          Milvus: '#/components/schemas/MilvusVectorStoreConfig'
+          Qdrant: '#/components/schemas/QdrantVectorStoreConfig'
+          PGVector: '#/components/schemas/PgVectorStoreConfig'
+          Azure AI Search: '#/components/schemas/AzureAiSearchVectorStoreConfig'
+
+    DoclingParserConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: docling } } }] }
+    AzureDocumentIntelligenceParserConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: azureDocumentIntelligence } } }] }
+    MinerUParserConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: minerU } } }] }
+    DeepDocParserConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: deepDoc } } }] }
+    SemanticChunkingConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: Semantic } } }] }
+    FixedChunkingConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: Fixed } } }] }
+    ParentChunkingConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: Parent } } }] }
+    HierarchicalChunkingConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: Hierarchical } } }] }
+    FaqEnhanceConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: FAQ } } }] }
+    SummaryEnhanceConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: Summary } } }] }
+    KeywordEnhanceConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: Keyword } } }] }
+    BgeM3EmbeddingConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: BGE-M3 } } }] }
+    TextEmbedding3LargeConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: text-embedding-3-large } } }] }
+    VoyageEmbeddingConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: Voyage } } }] }
+    QwenEmbeddingConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: Qwen } } }] }
+    MilvusVectorStoreConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: Milvus } } }] }
+    QdrantVectorStoreConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: Qdrant } } }] }
+    PgVectorStoreConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: PGVector } } }] }
+    AzureAiSearchVectorStoreConfig: { allOf: [{ $ref: '#/components/schemas/PipelineStageConfig' }, { type: object, properties: { type: { const: Azure AI Search } } }] }
+
+    KnowledgePipelineConfigRequest:
+      type: object
+      description: 完整知识库构建 pipeline 配置，对应 KnowledgePipelineConfigRequest。
+      required: [parser, chunking, enhance, embedding, vectorStore]
+      properties:
+        parser: { $ref: '#/components/schemas/ParserConfig' }
+        chunking: { $ref: '#/components/schemas/ChunkingConfig' }
+        enhance:
+          type: array
+          items: { $ref: '#/components/schemas/EnhanceConfig' }
+        embedding: { $ref: '#/components/schemas/EmbeddingConfig' }
+        vectorStore: { $ref: '#/components/schemas/VectorStoreConfig' }
+
+    KnowledgeTagRequest:
+      type: object
+      required: [name]
+      properties:
+        tagId: { type: string, maxLength: 64 }
+        name: { type: string, minLength: 1, maxLength: 64 }
+
+    CreateKnowledgeTagRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 64 }
+
+    CreateKnowledgeBaseRequest:
+      type: object
+      required: [directoryId, name, visibility, pipelineConfig]
+      properties:
+        directoryId: { type: integer, format: int64, minimum: 1 }
+        name: { type: string, minLength: 1, maxLength: 255 }
+        description: { type: string, maxLength: 512 }
+        visibility: { type: string, minLength: 1 }
+        recommendedConfig: { type: boolean, default: true }
+        tags:
+          type: array
+          maxItems: 20
+          items: { $ref: '#/components/schemas/KnowledgeTagRequest' }
+        pipelineConfig: { $ref: '#/components/schemas/KnowledgePipelineConfigRequest' }
+        metadata: { type: object, maxProperties: 50, additionalProperties: true }
+
+    UpdateKnowledgeBaseConfigRequest:
+      type: object
+      properties:
+        parser: { $ref: '#/components/schemas/ParserConfig' }
+        chunking: { $ref: '#/components/schemas/ChunkingConfig' }
+        enhance:
+          type: array
+          items: { $ref: '#/components/schemas/EnhanceConfig' }
+        embedding: { $ref: '#/components/schemas/EmbeddingConfig' }
+        vectorStore: { $ref: '#/components/schemas/VectorStoreConfig' }
+
+    UpdateKnowledgeDocumentStageConfigRequest:
+      type: object
+      required: [stageConfig]
+      properties:
+        stageConfig: { $ref: '#/components/schemas/KnowledgePipelineConfigRequest' }
+
+    KnowledgeBuildSourceRequest:
+      type: object
+      required: [type]
+      properties:
+        type: { type: string, minLength: 1 }
+        fileId: { type: string }
+        fileType: { type: string }
+        url: { type: string, format: uri }
+        pageId: { type: string }
+        repoUrl: { type: string, format: uri }
+        stageConfig: { $ref: '#/components/schemas/KnowledgePipelineConfigRequest' }
+        metadata: { type: object, additionalProperties: true }
+
+    CreateKnowledgeBuildJobRequest:
+      type: object
+      required: [sources]
+      properties:
+        stageConfig: { $ref: '#/components/schemas/KnowledgePipelineConfigRequest' }
+        sources:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/KnowledgeBuildSourceRequest' }
 
     VectorStoreInstance:
       type: object
