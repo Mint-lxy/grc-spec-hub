@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: GRC Knowledge Engine API
-  version: "1.0"
+  version: "2.0"
   license: {name: Proprietary, identifier: LicenseRef-Proprietary}
   description: |
     知识库、构建、检索和证据访问契约。目标接口使用 /api/v2/knowledge 与
@@ -921,52 +921,51 @@ components:
         configFingerprint: {type: string, minLength: 16, maxLength: 128}
     KnowledgeBaseSummary:
       type: object
-      required: [knowledgeBaseId, directoryId, name, tags, visibility, status, retrievalReady, hasFailedDocuments, documentCount, vectorizedDocumentCount, createdAt, updatedAt]
+      required: [knowledgeBaseId, directoryId, name, visibility, status, recommendedConfig, tags, pipelineConfig, createdAt]
       properties:
-        knowledgeBaseId: {type: integer, format: int64, minimum: 1}
-        directoryId: {type: integer, format: int64, minimum: 1}
+        knowledgeBaseId: {type: string, minLength: 1}
+        directoryId: {type: string, minLength: 1}
         name: {type: string}
         description: {type: [string, 'null']}
-        tags: {type: array, items: {type: string}}
         visibility: {type: string, enum: [PRIVATE, PUBLIC]}
         status: {$ref: '#/components/schemas/KnowledgeBaseStatus'}
-        retrievalReady: {type: boolean}
-        hasFailedDocuments: {type: boolean}
+        recommendedConfig: {type: boolean}
+        tags: {type: array, items: {$ref: '#/components/schemas/KnowledgeTag'}}
+        pipelineConfig: {type: object, additionalProperties: true}
+        version: {type: integer, minimum: 1}
         documentCount: {type: integer, minimum: 0}
-        vectorizedDocumentCount: {type: integer, minimum: 0}
+        liveDocumentCount: {type: integer, minimum: 0}
+        buildingDocumentCount: {type: integer, minimum: 0}
+        retrievalReady: {type: boolean}
+        vectorCollection: {type: [string, 'null']}
+        vectorDimension: {type: [integer, 'null'], minimum: 1}
+        lastBuildAt: {type: [string, 'null'], format: date-time}
         createdAt: {type: string, format: date-time}
-        updatedAt: {type: string, format: date-time}
+        updatedAt: {type: [string, 'null'], format: date-time}
     KnowledgeBaseStats:
       type: object
-      additionalProperties: false
-      required: [documentCount, vectorizedDocumentCount, failedDocumentCount, activeLeafCount, vectorCount, projectionReadyCount, readinessPercent, purgeStatus]
+      required: [knowledgeBaseId, documentCount, chunkCount, vectorCount, retrievalReady, scopeStatus, documentStatusBreakdown, chunkEmbedStatusBreakdown]
       properties:
+        knowledgeBaseId: {type: string, minLength: 1}
         documentCount: {type: integer, minimum: 0}
-        vectorizedDocumentCount: {type: integer, minimum: 0}
-        failedDocumentCount: {type: integer, minimum: 0}
-        activeLeafCount: {type: integer, minimum: 0}
-        vectorCount: {type: integer, minimum: 0, description: 仅 Leaf 的 LEAF_TEXT 向量数。}
-        projectionReadyCount: {type: integer, minimum: 0}
-        readinessPercent: {type: number, minimum: 0, maximum: 100}
-        latestBuildAt: {type: [string, 'null'], format: date-time}
-        purgeStatus: {$ref: '#/components/schemas/PurgeStatus'}
+        liveDocumentCount: {type: integer, minimum: 0}
+        chunkCount: {type: integer, minimum: 0}
+        vectorCount: {type: integer, minimum: 0}
+        retrievalReady: {type: boolean}
+        scopeStatus: {type: string}
+        documentStatusBreakdown: {type: object, additionalProperties: {type: integer, minimum: 0}}
+        chunkEmbedStatusBreakdown: {type: object, additionalProperties: {type: integer, minimum: 0}}
+        activeGeneration: {}
     KnowledgeBaseDetail:
-      unevaluatedProperties: false
       allOf:
         - {$ref: '#/components/schemas/KnowledgeBaseSummary'}
         - type: object
-          required: [effectiveConfig, stats, activeDocumentCount, activeLeafCount, vectorCount, projectionReadyCount, purgeStatus]
+          required: [stats, contentSummary, build, capabilities]
           properties:
-            effectiveConfig: {$ref: '#/components/schemas/EffectiveConfigSummary'}
-            stats: {$ref: '#/components/schemas/KnowledgeBaseStats'}
-            activeGenerationId: {type: [string, 'null'], format: uuid}
-            activeDocumentCount: {type: integer, minimum: 0}
-            activeLeafCount: {type: integer, minimum: 0}
-            vectorCount: {type: integer, minimum: 0}
-            projectionReadyCount: {type: integer, minimum: 0}
-            latestBuildStatus: {type: [string, 'null']}
-            rebuildLock: {type: [string, 'null']}
-            purgeStatus: {$ref: '#/components/schemas/PurgeStatus'}
+            stats: {type: object, additionalProperties: true}
+            contentSummary: {type: array, items: {type: string}}
+            build: {type: object, additionalProperties: true}
+            capabilities: {type: array, items: {type: object, additionalProperties: true}}
     PipelineCapability:
       type: object
       additionalProperties: false
@@ -1076,22 +1075,30 @@ components:
         errorCode: {type: [string, 'null']}
     DocumentSummary:
       type: object
-      required: [documentId, knowledgeBaseId, fileName, mediaType, byteSize, sourceType, status, retrievalReady, createdAt, updatedAt]
+      required: [documentId, fileName, sourceType, status, retrievalReady]
       properties:
-        documentId: {type: integer, format: int64, minimum: 1}
-        knowledgeBaseId: {type: integer, format: int64, minimum: 1}
+        documentId: {type: string, minLength: 1}
+        knowledgeBaseId: {type: string, minLength: 1}
+        kbId: {type: string, minLength: 1}
         fileName: {type: string}
-        mediaType: {type: string}
-        byteSize: {type: integer, minimum: 0}
+        docType: {type: [string, 'null']}
+        parseStatus: {type: [string, 'null']}
+        parseState: {type: [string, 'null']}
+        chunkStatus: {type: [string, 'null']}
+        embeddingStatus: {type: [string, 'null']}
+        update: {type: object, additionalProperties: true}
+        meta: {type: object, additionalProperties: true}
         sourceType: {type: string}
-        status: {$ref: '#/components/schemas/DocumentStatus'}
-        failedStage: {oneOf: [{$ref: '#/components/schemas/BuildStage'}, {type: 'null'}]}
-        errorCode: {type: [string, 'null']}
+        sourcePath: {type: [string, 'null']}
+        sourceUrl: {type: [string, 'null'], format: uri}
+        status: {type: string}
+        currentJobId: {type: [string, 'null']}
+        liveJobId: {type: [string, 'null']}
+        currentJobStatus: {type: [string, 'null']}
+        liveJobStatus: {type: [string, 'null']}
         retrievalReady: {type: boolean}
-        chunkCount: {type: integer, minimum: 0}
-        activeDocumentVersionId: {type: [string, 'null'], format: uuid}
-        createdAt: {type: string, format: date-time}
-        updatedAt: {type: string, format: date-time}
+        createdAt: {type: [string, 'null'], format: date-time}
+        updatedAt: {type: [string, 'null'], format: date-time}
     DocumentProjection:
       type: object
       additionalProperties: false
@@ -1105,18 +1112,12 @@ components:
         inputSetHash: {type: string}
         createdAt: {type: string, format: date-time}
     DocumentDetail:
-      unevaluatedProperties: false
       allOf:
         - {$ref: '#/components/schemas/DocumentSummary'}
         - type: object
-          required: [documentVersionId, stages, effectiveConfig]
+          required: [kbId]
           properties:
-            documentVersionId: {type: string, format: uuid}
-            stages: {type: array, maxItems: 4, items: {$ref: '#/components/schemas/BuildStageStatus'}}
-            effectiveConfig: {$ref: '#/components/schemas/EffectiveConfigSummary'}
-            projection: {oneOf: [{$ref: '#/components/schemas/DocumentProjection'}, {type: 'null'}]}
-            latestBuild: {oneOf: [{$ref: '#/components/schemas/BuildJobSummary'}, {type: 'null'}]}
-            sourcePreviewAction: {type: [string, 'null']}
+            kbId: {type: string, minLength: 1}
     BoundingBox:
       type: object
       additionalProperties: false
@@ -1145,18 +1146,19 @@ components:
         accessStatus: {type: string, enum: [AVAILABLE, GONE, FORBIDDEN]}
     DocumentParseView:
       type: object
-      additionalProperties: false
-      required: [documentId, documentVersionId, parserFingerprint, content, outline, pageCount, hasPageLayout, assets, warnings]
+      required: [knowledgeBaseId, documentId, pageCount, charCount, metadata, content, stats]
       properties:
-        documentId: {type: integer, format: int64}
-        documentVersionId: {type: string, format: uuid}
-        parserFingerprint: {type: string}
-        content: {$ref: '#/components/schemas/ContentAction'}
-        outline: {type: array, items: {$ref: '#/components/schemas/OutlineItem'}}
+        knowledgeBaseId: {type: string, minLength: 1}
+        documentId: {type: string, minLength: 1}
+        jobId: {type: [string, 'null']}
+        parseId: {type: [string, 'null']}
+        contentFormat: {type: [string, 'null']}
         pageCount: {type: integer, minimum: 0}
-        hasPageLayout: {type: boolean}
-        assets: {type: array, items: {$ref: '#/components/schemas/AssetSummary'}}
-        warnings: {type: array, maxItems: 1000, items: {type: string}}
+        charCount: {type: integer, minimum: 0}
+        metadata: {type: object, additionalProperties: true}
+        content: {}
+        stats: {type: object, additionalProperties: true}
+        createdAt: {type: [string, 'null'], format: date-time}
     PageParseElement:
       type: object
       additionalProperties: false
@@ -1238,25 +1240,25 @@ components:
         content: {type: string}
     ChunkDetail:
       type: object
-      additionalProperties: false
-      required: [chunkId, documentVersionId, type, sequence, content, tokenCount, charCount, contentHash, sectionPath, bboxes, neighbors, assets, version]
+      required: [chunkId, seq, content, tokenCount, charCount, positionMeta, metadata]
       properties:
         chunkId: {type: string, format: uuid}
-        documentVersionId: {type: string, format: uuid}
-        type: {type: string, const: LEAF}
-        sequence: {type: integer, minimum: 0}
+        knowledgeBaseId: {type: string}
+        documentId: {type: string}
+        jobId: {type: [string, 'null']}
+        seq: {type: integer, minimum: 0}
         content: {type: string, minLength: 1, maxLength: 1000000}
-        tokenCount: {type: integer, minimum: 1}
-        charCount: {type: integer, minimum: 1}
-        contentHash: {type: string}
-        sectionPath: {type: array, maxItems: 32, items: {type: string, maxLength: 512}}
-        pageRange: {oneOf: [{$ref: '#/components/schemas/PageRange'}, {type: 'null'}]}
-        bboxes: {type: array, items: {$ref: '#/components/schemas/BoundingBox'}}
-        parentContext: {oneOf: [{$ref: '#/components/schemas/ParentContext'}, {type: 'null'}]}
-        neighbors: {type: array, maxItems: 10, items: {$ref: '#/components/schemas/NeighborChunk'}}
-        assets: {type: array, items: {$ref: '#/components/schemas/AssetSummary'}}
-        enhancement: {type: [object, 'null']}
-        version: {type: integer, minimum: 1}
+        tokenCount: {type: integer, minimum: 0}
+        charCount: {type: integer, minimum: 0}
+        embedStatus: {type: [string, 'null']}
+        parentId: {type: [string, 'null'], format: uuid}
+        positionMeta: {type: [object, 'null'], additionalProperties: true}
+        sourceSnippet: {type: [string, 'null']}
+        snippetStart: {type: [integer, 'null'], minimum: 0}
+        snippetEnd: {type: [integer, 'null'], minimum: 0}
+        metadata: {type: object, additionalProperties: true}
+        createdAt: {type: [string, 'null'], format: date-time}
+        updatedAt: {type: [string, 'null'], format: date-time}
     UpdateChunkRequest:
       type: object
       additionalProperties: false
@@ -1281,14 +1283,17 @@ components:
         droppedAssetRelations: {type: array, items: {type: string, format: uuid}}
     EnhancementItem:
       type: object
-      additionalProperties: false
-      required: [enhancementId, sourceChunkId, type, ordinal, content]
+      required: [artifactId, chunkId, chunkSeq, artifactType, content, metadata]
       properties:
-        enhancementId: {type: string, format: uuid}
-        sourceChunkId: {type: string, format: uuid}
-        type: {type: string, enum: [SUMMARY, KEYWORDS, FAQ]}
-        ordinal: {type: integer, minimum: 0}
-        content: {description: "SUMMARY 为 string，KEYWORDS 为 string[]，FAQ 为 question/answer object。"}
+        artifactId: {type: string, format: uuid}
+        chunkId: {type: string, format: uuid}
+        chunkSeq: {type: integer, minimum: 0}
+        chunkContent: {type: [string, 'null']}
+        artifactType: {type: string}
+        content: {}
+        embedStatus: {type: [string, 'null']}
+        metadata: {type: object, additionalProperties: true}
+        createdAt: {type: [string, 'null'], format: date-time}
     CreateBuildJobRequest:
       type: object
       additionalProperties: false
@@ -1459,12 +1464,13 @@ components:
         openOriginalAction: {type: [string, 'null']}
     RetrievalResult:
       type: object
-      additionalProperties: false
-      required: [partial, degradedChannels, results]
+      required: [results, retrievalMeta]
       properties:
-        partial: {type: boolean}
-        degradedChannels: {type: array, items: {type: string}}
-        results: {type: array, maxItems: 100, items: {$ref: '#/components/schemas/Evidence'}}
+        results:
+          type: array
+          maxItems: 100
+          items: {type: object, additionalProperties: true}
+        retrievalMeta: {type: object, additionalProperties: true}
     PurgeOperation:
       type: object
       additionalProperties: false
@@ -1569,33 +1575,43 @@ components:
         checks: {type: array, items: {$ref: '#/components/schemas/DependencyCheck'}}
     PageKnowledgeBase:
       type: object
-      required: [records, total, page, pageSize]
+      required: [items, total, page, pageSize]
       properties:
-        records: {type: array, items: {$ref: '#/components/schemas/KnowledgeBaseSummary'}}
+        items: {type: array, items: {$ref: '#/components/schemas/KnowledgeBaseSummary'}}
         total: {type: integer, minimum: 0}
         page: {type: integer, minimum: 1}
         pageSize: {type: integer, minimum: 1, maximum: 100}
     PageDocument:
       type: object
-      required: [records, total, page, pageSize]
+      required: [knowledgeBaseId, items, total, page, pageSize]
       properties:
-        records: {type: array, items: {$ref: '#/components/schemas/DocumentSummary'}}
+        knowledgeBaseId: {type: string, minLength: 1}
+        items: {type: array, items: {$ref: '#/components/schemas/DocumentSummary'}}
         total: {type: integer, minimum: 0}
         page: {type: integer, minimum: 1}
         pageSize: {type: integer, minimum: 1, maximum: 100}
     PageChunk:
       type: object
-      required: [records, total, page, pageSize]
+      required: [knowledgeBaseId, documentId, stats, items, total, page, pageSize]
       properties:
-        records: {type: array, items: {$ref: '#/components/schemas/ChunkDetail'}}
+        knowledgeBaseId: {type: string, minLength: 1}
+        documentId: {type: string, minLength: 1}
+        jobId: {type: [string, 'null']}
+        stats: {type: object, additionalProperties: true}
+        items: {type: array, items: {$ref: '#/components/schemas/ChunkDetail'}}
         total: {type: integer, minimum: 0}
         page: {type: integer, minimum: 1}
         pageSize: {type: integer, minimum: 1, maximum: 100}
     PageEnhancement:
       type: object
-      required: [records, total, page, pageSize]
+      required: [knowledgeBaseId, documentId, enhanceType, items, stats, total, page, pageSize]
       properties:
-        records: {type: array, items: {$ref: '#/components/schemas/EnhancementItem'}}
+        knowledgeBaseId: {type: string, minLength: 1}
+        documentId: {type: string, minLength: 1}
+        jobId: {type: [string, 'null']}
+        enhanceType: {type: string}
+        items: {type: array, items: {$ref: '#/components/schemas/EnhancementItem'}}
+        stats: {type: object, additionalProperties: true}
         total: {type: integer, minimum: 0}
         page: {type: integer, minimum: 1}
         pageSize: {type: integer, minimum: 1, maximum: 100}
@@ -1688,67 +1704,64 @@ components:
         metadata: {type: object, additionalProperties: true}
     LegacyKnowledgeBase:
       type: object
-      required: [knowledgeBaseId, directoryId, name, visibility, status, pipelineConfig, createdAt]
+      required: [knowledgeBaseId, directoryId, name, visibility, status, recommendedConfig, tags, pipelineConfig, createdAt]
       properties:
-        knowledgeBaseId: {type: integer}
-        directoryId: {type: integer}
+        knowledgeBaseId: {type: string}
+        directoryId: {type: string}
         name: {type: string}
+        description: {type: [string, 'null']}
         visibility: {type: string}
         status: {type: string}
+        recommendedConfig: {type: boolean}
+        tags: {type: array, items: {$ref: '#/components/schemas/KnowledgeTag'}}
         pipelineConfig: {$ref: '#/components/schemas/LegacyPipelineConfig'}
         createdAt: {type: string, format: date-time}
     LegacyResponse:
-      type: object
-      required: [code, message, data, requestId]
-      properties:
-        code: {type: integer, const: 0}
-        message: {type: string, const: success}
-        data: {$ref: '#/components/schemas/LegacyKnowledgeBase'}
-        requestId: {type: string}
+      allOf:
+        - {$ref: '#/components/schemas/SuccessBase'}
+        - type: object
+          required: [data]
+          properties: {data: {$ref: '#/components/schemas/LegacyKnowledgeBase'}}
     LegacyKnowledgeBaseDetail:
       allOf:
         - {$ref: '#/components/schemas/LegacyKnowledgeBase'}
         - type: object
-          required: [updatedAt]
-          properties: {updatedAt: {type: string, format: date-time}}
-    LegacyDetailResponse:
-      type: object
-      required: [code, message, data, requestId]
-      properties:
-        code: {type: integer, const: 0}
-        message: {type: string, const: success}
-        data: {$ref: '#/components/schemas/LegacyKnowledgeBaseDetail'}
-        requestId: {type: string}
-    LegacyListResponse:
-      type: object
-      required: [code, message, data, requestId]
-      properties:
-        code: {type: integer, const: 0}
-        message: {type: string, const: success}
-        data:
-          type: object
-          required: [items, page, pageSize, total]
+          required: [updatedAt, stats, contentSummary, build, capabilities]
           properties:
-            items: {type: array, items: {$ref: '#/components/schemas/LegacyKnowledgeBaseDetail'}}
-            page: {type: integer}
-            pageSize: {type: integer}
-            total: {type: integer}
-        requestId: {type: string}
+            updatedAt: {type: string, format: date-time}
+            stats: {type: object, additionalProperties: true}
+            contentSummary: {type: array, items: {type: string}}
+            build: {type: object, additionalProperties: true}
+            capabilities: {type: array, items: {type: object, additionalProperties: true}}
+    LegacyDetailResponse:
+      allOf:
+        - {$ref: '#/components/schemas/SuccessBase'}
+        - type: object
+          required: [data]
+          properties: {data: {$ref: '#/components/schemas/LegacyKnowledgeBaseDetail'}}
+    LegacyListResponse:
+      allOf:
+        - {$ref: '#/components/schemas/SuccessBase'}
+        - type: object
+          required: [data]
+          properties:
+            data:
+              type: object
+              required: [items, page, pageSize, total]
+              properties:
+                items: {type: array, items: {$ref: '#/components/schemas/LegacyKnowledgeBaseDetail'}}
+                page: {type: integer}
+                pageSize: {type: integer}
+                total: {type: integer}
     LegacyKnowledgeTagResponse:
-      type: object
-      additionalProperties: false
-      required: [code, message, data, requestId]
-      properties:
-        code: {type: integer, const: 0}
-        message: {type: string, const: success}
-        data: {$ref: '#/components/schemas/KnowledgeTag'}
-        requestId: {type: string}
+      allOf:
+        - {$ref: '#/components/schemas/SuccessBase'}
+        - type: object
+          required: [data]
+          properties: {data: {$ref: '#/components/schemas/KnowledgeTag'}}
     LegacyKnowledgeTagListResponse:
-      type: object
-      additionalProperties: false
-      required: [code, message, data, requestId]
-      properties:
-        code: {type: integer, const: 0}
-        message: {type: string, const: success}
-        data: {type: array, items: {$ref: '#/components/schemas/KnowledgeTag'}}
-        requestId: {type: string}
+      allOf:
+        - {$ref: '#/components/schemas/SuccessBase'}
+        - type: object
+          required: [data]
+          properties: {data: {type: array, items: {$ref: '#/components/schemas/KnowledgeTag'}}}
