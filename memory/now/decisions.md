@@ -13,4 +13,4 @@
 | 统一成功响应包络 | ApiResponse 统一包络（code:0 成功、data 载荷、分页结构），SSE 流式端点豁免 | [ADR-006](../../architecture/adr/006-api-response-envelope.md) | 2026-08-21 |
 | A2A 协议统一（**Proposed，待 Accept**——watchlist #45，spec 001 plan 前置） | agent-service 只暴露 A2A 端点（`/.well-known/agent.json` + `POST /a2a`），mgmt-service 为前端提供自定义对话接口 | [ADR-007](../../architecture/adr/007-a2a-protocol.md) | 2026-08-21 |
 | 平台资源与模型凭据解析 | 平台资源不是资产；实例类资源进注册表并按资源逐人授权；模型类调用经 Nexus，按触发人解析个人模型凭据优先、平台默认兜底；2026-08-24 008 clarify 补充：P0 模型清单/启用态/默认模型部署内置只读，模型默认凭据仅引用注册表中的平台内部 Nexus 凭据对象 | [hub ADR-005](../../architecture/adr/005-credential-resolution.md) | 2026-08-21 / 2026-08-24 |
-| 资产调用凭据模型反转 | 资产级平台服务凭据概念取消；一切资产调用使用订阅者个人凭据；创建者只声明凭据元数据且全程不接触密钥值；静态凭据由订阅者填入绑定，动态凭据由订阅成功后平台代颁发入库；不回落任何共享身份 | [hub ADR-005](../../architecture/adr/005-credential-resolution.md) | 2026-08-24 |
+| 资产调用凭据模型反转 | 旧资产凭据模型取消；一切资产调用使用订阅者个人凭据；创建者只声明凭据元数据且全程不接触密钥值；静态凭据由订阅者填入绑定，动态凭据由订阅成功后平台代颁发入库；不回落任何共享身份 | [hub ADR-005](../../architecture/adr/005-credential-resolution.md) | 2026-08-24 |
