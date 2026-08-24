@@ -1,7 +1,7 @@
-# Specification Quality Checklist: Marketplace 与订阅（002）
+# Specification Quality Checklist: 对话工作台（Spec 001）
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-08-21
+**Created**: 2026-08-22
 **Feature**: [spec.md](../spec.md)
 
 ## Content Quality
@@ -31,7 +31,8 @@
 
 ## Notes
 
-- 本文件为既有 AC 格式 spec 的 spec-kit 风格重写（内容等价迁移 + 既有 rationale 保留），非新功能。
-- 「YAML 表单定义」「PAT」「Health Check」为本项目 PRD 层既有领域术语（CONTEXT.md/PRD §1 收录），不属于实现细节泄漏。
-- 数值类参数（收藏上限等）已按 PRD §9.10 参数基线落入 spec；收藏上限为 50 个。
-- 遗留 Open Question 已清零：审批停滞兜底已于 2026-08-22 BA 裁定为 P0 不补系统催办或超时回落。
+- 本文件为 2026-08-22 spec-kit 风格重写（等价迁移 + 两轮澄清裁定纳入）后补建；原 AC 编号与 FR 对照见 spec 文末附录，watchlist 中的 AC 引用可追溯。
+- Open Questions 三项均为外部依赖（性能测试/架构确认），不阻塞进入 `/speckit.plan`，已挂 watchlist #44/#50。
+- 契约影响已在 FR-021 标注（`grc-agent-service.yaml` 需含会话 ID 字段），plan 的「契约影响」章节须承接。
+- specs/** 属守门点，本次重写需人审后方可合并。
+- 2026-08-22 BA Lead 逐项复核（17 项）：15 项裁定采纳，去重粒度改「按切片」对齐 PRD §9.10、软删除留存改「脱敏/遮蔽后内容」、M1-16 过期条目不回植；P0/P1 边界与契约兼容口径按 main 已合入版本回植（FR-002/FR-016/Non-Goals）。

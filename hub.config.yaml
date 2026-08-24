@@ -28,6 +28,7 @@ sources:
   service_manifest: architecture/services.manifest.yaml   # 已拆解服务的“声明清单”（批量孵化输入）
   service_map:      architecture/service-map.md           # 由清单生成/校验的“世界观”
   memory_now:       memory/now/state.md
+  glossary:         memory/now/glossary.md                # 语义基线（镜像 BA 工作区 CONTEXT.md）
   contracts_policy: contracts/POLICY.md
 
 # 需要人审的守门点（落实宪法第六条；与分支保护规则对应）

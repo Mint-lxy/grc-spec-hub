@@ -1,6 +1,6 @@
 # 横切规范：响应格式、错误码与幂等
 
-> 状态：Proposed。所有服务共同遵守。
+> 状态：成功响应包络（§1）Accepted（ADR-006）；错误响应与错误码规范 Proposed（ADR-002）。所有服务共同遵守。
 > 关联 ADR：001-service-split, 006-api-response-envelope
 
 ## 1. 成功响应格式（ApiResponse 包络）

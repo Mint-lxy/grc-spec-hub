@@ -9,7 +9,8 @@
 
 1. 读项目宪法 [.specify/memory/constitution.md](.specify/memory/constitution.md)（不可协商原则，冲突时以它为准）。
 2. 读当前态记忆 [memory/now/state.md](memory/now/state.md)。
-3. 流程问题查 [sop/README.md](sop/README.md)；你所用框架的接入方式查 [adapters/](adapters/README.md)。
+3. 术语歧义查语义基线 [memory/now/glossary.md](memory/now/glossary.md)（业务术语镜像自 BA 工作区 `CONTEXT.md`——单一权威；冲突以 CONTEXT.md 原文为准并回同步镜像）。
+4. 流程问题查 [sop/README.md](sop/README.md)；你所用框架的接入方式查 [adapters/](adapters/README.md)。
 
 ## 在本仓库工作的规则
 
@@ -23,10 +24,16 @@
 4. **改架构**（`architecture/**`）→ 跨服务决策写 ADR；依赖变化同步 service-map.md。
 5. **改流程**（`sop/**`）→ 保持框架无关；框架专属内容只能进 `adapters/`。
 6. **保持 memory/now/ 精简**：state ≤ 2 页、服务卡 ≤ 1 页，超限降温到 digests/。
+7. **术语基线**：`memory/now/glossary.md` 是本仓库的语义基线——写作与评审引用业务术语
+   以其为准；它镜像 BA 工作区 `CONTEXT.md`（单一权威），术语变更先改 CONTEXT.md
+   再同步本表，禁止在本表单独新增/修改业务术语。
 
 ## 守门点（必须人审，你不可自行合并）
 
 `specs/**` · `contracts/**` · `memory/now/**` · 宪法。
+
+**分支规则**：一律不在 `main` 上直接改动；所有工作在功能分支进行。
+任何合并或推送到 `main` 的操作必须先向用户确认，得到明确同意后方可执行。
 
 ## 能力资产
 

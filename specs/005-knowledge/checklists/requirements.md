@@ -1,7 +1,7 @@
-# Specification Quality Checklist: Marketplace 与订阅（002）
+# Specification Quality Checklist: 知识管理（Spec 005）
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-08-21
+**Created**: 2026-08-23
 **Feature**: [spec.md](../spec.md)
 
 ## Content Quality
@@ -31,7 +31,6 @@
 
 ## Notes
 
-- 本文件为既有 AC 格式 spec 的 spec-kit 风格重写（内容等价迁移 + 既有 rationale 保留），非新功能。
-- 「YAML 表单定义」「PAT」「Health Check」为本项目 PRD 层既有领域术语（CONTEXT.md/PRD §1 收录），不属于实现细节泄漏。
-- 数值类参数（收藏上限等）已按 PRD §9.10 参数基线落入 spec；收藏上限为 50 个。
-- 遗留 Open Question 已清零：审批停滞兜底已于 2026-08-22 BA 裁定为 P0 不补系统催办或超时回落。
+- 本文件为 2026-08-23 BA Lead 逐项复核（19 组）后补建；复核修正与补充见 spec.md Clarifications「Session 2026-08-23」记录块。
+- 解析器收敛为 Docling / MinerU（不使用 DeepDoc）；语言提示为中文/英文/德语/自动检测；构建参数矩阵提醒 Li Zhonghao 审阅（watchlist #51）。
+- specs/** 属守门点，本 spec 任何后续改动需人审后方可合并。

@@ -39,7 +39,7 @@ if command -v oasdiff >/dev/null; then
   for rel in $CHANGED; do
     OLD=$(mktemp)
     if git show "$BASE_REF:$rel" > "$OLD" 2>/dev/null && [ -s "$OLD" ]; then
-      if BREAKING=$(oasdiff breaking "$OLD" "$rel") && [ -n "$BREAKING" ]; then
+      if BREAKING=$(oasdiff breaking "$OLD" "$rel") && printf '%s\n' "$BREAKING" | grep -qE '^(error|warning)[[:space:]]'; then
         echo "✗ 破坏性变更: $rel"
         echo "$BREAKING"
         echo "  → 按 contracts/POLICY.md 处理：列出 service-map 中全部消费方并取得逐一确认。"

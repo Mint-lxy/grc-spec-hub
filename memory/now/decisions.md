@@ -11,4 +11,4 @@
 | API 设计自顶向下 | 三阶段流程：全局概览（api-landscape.md）→ 评审确认 → 逐 feature 契约化，先对齐服务边界再写 contract | [ADR-004](../../architecture/adr/004-api-design-top-down.md) | 2026-08-17 |
 | 凭据解析归属 | 凭据解析归 mgmt-service，双接口分离（平台凭据解析 + 个人凭据解析） | [ADR-005](../../architecture/adr/005-credential-resolution.md) | 2026-08-17 |
 | 统一成功响应包络 | ApiResponse 统一包络（code:0 成功、data 载荷、分页结构），SSE 流式端点豁免 | [ADR-006](../../architecture/adr/006-api-response-envelope.md) | 2026-08-21 |
-| A2A 协议统一 | agent-service 只暴露 A2A 端点（流式/非流式），mgmt-service chat-agent domain 为前端提供自定义接口并内部经 A2A 调用 agent-service | [ADR-007](../../architecture/adr/007-a2a-protocol.md) | 2026-08-21 |
+| A2A 协议统一（**Proposed，待 Accept**——watchlist #45，spec 001 plan 前置） | agent-service 只暴露 A2A 端点（`/.well-known/agent.json` + `POST /a2a`），mgmt-service 为前端提供自定义对话接口 | [ADR-007](../../architecture/adr/007-a2a-protocol.md) | 2026-08-21 |

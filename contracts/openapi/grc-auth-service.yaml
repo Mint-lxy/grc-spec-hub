@@ -65,6 +65,7 @@ paths:
       tags: [Token]
       summary: Verify an access token
       operationId: verifyAccessToken
+      security: []
       requestBody:
         required: true
         content:
@@ -87,6 +88,7 @@ paths:
       tags: [Token]
       summary: Rotate refresh token and issue a new token pair
       operationId: refreshToken
+      security: []
       requestBody:
         required: true
         content:
@@ -127,6 +129,7 @@ paths:
       tags: [OIDC]
       summary: Create an OIDC authorization request
       operationId: authorizeOidc
+      security: []
       responses:
         '200':
           description: OIDC authorization URL and one-time state
@@ -143,6 +146,7 @@ paths:
       tags: [OIDC]
       summary: Complete OIDC callback login
       operationId: callbackOidc
+      security: []
       parameters:
         - name: code
           in: query
@@ -244,16 +248,14 @@ components:
         message:
           type: string
         detail:
-          type: string
-          nullable: true
+          type: [string, "null"]
         traceId:
           type: string
         timestamp:
           type: string
           format: date-time
         path:
-          type: string
-          nullable: true
+          type: [string, "null"]
     EmptySuccessResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
@@ -279,8 +281,7 @@ components:
         accountStatus:
           type: string
         tenantId:
-          type: string
-          nullable: true
+          type: [string, "null"]
     UserProfileResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
@@ -310,8 +311,7 @@ components:
           items:
             type: string
         tenantId:
-          type: string
-          nullable: true
+          type: [string, "null"]
         exp:
           type: integer
           format: int64
@@ -381,8 +381,7 @@ components:
         accessToken:
           type: string
         refreshToken:
-          type: string
-          nullable: true
+          type: [string, "null"]
         userInfo:
           type: object
           additionalProperties: true
@@ -412,8 +411,7 @@ components:
         message:
           type: string
         detail:
-          type: string
-          nullable: true
+          type: [string, "null"]
         traceId:
           type: string
           minLength: 1
@@ -421,5 +419,4 @@ components:
           type: string
           format: date-time
         path:
-          type: string
-          nullable: true
+          type: [string, "null"]
