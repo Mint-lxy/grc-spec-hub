@@ -312,8 +312,8 @@ paths:
       summary: 创建上传会话
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/CreateUploadSessionRequest' } } }
+      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/CreateUploadSessionResponseEnvelope' } } } } }
   /mgmt/file/files/upload-sessions/batch:
     post:
       tags: [File Management]
@@ -321,8 +321,8 @@ paths:
       summary: 批量创建上传会话
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/BatchCreateUploadSessionRequest' } } }
+      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/BatchCreateUploadSessionResponseEnvelope' } } } } }
   /mgmt/file/files/upload-sessions/{sessionId}/complete:
     parameters: [{ $ref: '#/components/parameters/SessionId' }]
     post:
@@ -331,20 +331,20 @@ paths:
       summary: 完成上传会话
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 完成成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/CompleteUploadRequest' } } }
+      responses: { '200': { description: 完成成功, content: { application/json: { schema: { $ref: '#/components/schemas/CompleteUploadResponseEnvelope' } } } } }
   /mgmt/file/files/{fileId}:
     parameters: [{ $ref: '#/components/parameters/FileId' }]
     get:
       tags: [File Management]
       operationId: getFileDetail
       summary: 查询文件详情
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/FileDetailResponseEnvelope' } } } } }
     delete:
       tags: [File Management]
       operationId: deleteFile
       summary: 删除文件
-      responses: { '200': { description: 删除成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 删除成功, content: { application/json: { schema: { $ref: '#/components/schemas/DeleteFileResponseEnvelope' } } } } }
   /mgmt/file/files/{fileId}/download-url:
     parameters: [{ $ref: '#/components/parameters/FileId' }]
     post:
@@ -352,8 +352,8 @@ paths:
       operationId: createDownloadUrl
       summary: 创建文件下载地址
       requestBody:
-        content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/CreateDownloadUrlRequest' } } }
+      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/CreateDownloadUrlResponseEnvelope' } } } } }
   /mgmt/file/files/results:
     post:
       tags: [File Management]
@@ -361,8 +361,8 @@ paths:
       summary: 登记结果文件
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 登记成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/RegisterResultFileRequest' } } }
+      responses: { '200': { description: 登记成功, content: { application/json: { schema: { $ref: '#/components/schemas/RegisterResultFileResponseEnvelope' } } } } }
   /mgmt/file/internal/files/{fileId}/download-url:
     parameters: [{ $ref: '#/components/parameters/FileId' }]
     post:
@@ -370,8 +370,8 @@ paths:
       operationId: createInternalDownloadUrl
       summary: '[内部] 创建文件下载地址'
       requestBody:
-        content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/CreateDownloadUrlRequest' } } }
+      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/CreateDownloadUrlResponseEnvelope' } } } } }
   /mgmt/file/internal/files/results:
     post:
       tags: [Internal File]
@@ -379,8 +379,8 @@ paths:
       summary: '[内部] 登记结果文件'
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 登记成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/RegisterResultFileRequest' } } }
+      responses: { '200': { description: 登记成功, content: { application/json: { schema: { $ref: '#/components/schemas/RegisterResultFileResponseEnvelope' } } } } }
 
   /mgmt/knowledge/directories/tree:
     get:
@@ -399,8 +399,8 @@ paths:
       summary: 创建知识目录
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/CreateDirectoryRequest' } } }
+      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/DirectoryDetailEnvelope' } } } } }
   /mgmt/knowledge/directories/{directoryId}/rename:
     parameters: [{ $ref: '#/components/parameters/DirectoryId' }]
     patch:
@@ -409,8 +409,8 @@ paths:
       summary: 重命名知识目录
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/RenameDirectoryRequest' } } }
+      responses: { '200': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/DirectoryDetailEnvelope' } } } } }
   /mgmt/knowledge/directories/{directoryId}:
     parameters: [{ $ref: '#/components/parameters/DirectoryId' }]
     patch:
@@ -419,13 +419,13 @@ paths:
       summary: 更新知识目录
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/UpdateDirectoryRequest' } } }
+      responses: { '200': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/DirectoryDetailEnvelope' } } } } }
     delete:
       tags: [Knowledge Directory]
       operationId: deleteDirectory
       summary: 删除知识目录
-      responses: { '200': { description: 删除成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 删除成功, content: { application/json: { schema: { $ref: '#/components/schemas/DeleteDirectoryEnvelope' } } } } }
 
   /mgmt/knowledge/tags:
     post:
@@ -437,12 +437,12 @@ paths:
         content:
           application/json:
             schema: { $ref: '#/components/schemas/CreateKnowledgeTagRequest' }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeTagEnvelope' } } } } }
     get:
       tags: [Knowledge Base]
       operationId: listKnowledgeTags
       summary: 查询知识库标签
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeTagListEnvelope' } } } } }
 
   /mgmt/knowledge/knowledge-bases:
     post:
@@ -452,7 +452,7 @@ paths:
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/CreateKnowledgeBaseRequest' } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBaseCreateEnvelope' } } } } }
     get:
       tags: [Knowledge Base]
       operationId: listKnowledgeBases
@@ -464,7 +464,7 @@ paths:
         - { name: retrievalReady, in: query, required: false, schema: { type: boolean } }
         - { name: page, in: query, required: false, schema: { type: integer, minimum: 1 } }
         - { name: pageSize, in: query, required: false, schema: { type: integer, minimum: 1 } }
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBasePageEnvelope' } } } } }
   /mgmt/knowledge/platform-resources/vector-store-instances:
     get:
       tags: [Knowledge Platform Resource]
@@ -495,7 +495,7 @@ paths:
       tags: [Knowledge Base]
       operationId: getKnowledgeBaseDetail
       summary: 查询知识库详情
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBaseDetailEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/config:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     patch:
@@ -505,7 +505,7 @@ paths:
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/UpdateKnowledgeBaseConfigRequest' } } }
-      responses: { '200': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBaseConfigUpdateEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/documents:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     post:
@@ -514,13 +514,13 @@ paths:
       summary: 创建知识库文档
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/CreateKnowledgeDocumentRequest' } } }
+      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeDocumentCreateEnvelope' } } } } }
     get:
       tags: [Knowledge Base]
       operationId: listKnowledgeBaseDocuments
       summary: 查询知识库文档列表
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBaseDocumentPageEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/build-jobs:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     post:
@@ -530,28 +530,28 @@ paths:
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/CreateKnowledgeBuildJobRequest' } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBuildJobEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/stats:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     get:
       tags: [Knowledge Base]
       operationId: getKnowledgeBaseStatistics
       summary: 查询知识库统计
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBaseStatisticsEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/publish:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     post:
       tags: [Knowledge Base]
       operationId: publishKnowledgeBase
       summary: 发布知识库
-      responses: { '200': { description: 发布成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 发布成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBaseDetailEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/offline:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     post:
       tags: [Knowledge Base]
       operationId: offlineKnowledgeBase
       summary: 下线知识库
-      responses: { '200': { description: 下线成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 下线成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBaseDetailEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/stage-config:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
     patch:
@@ -561,7 +561,7 @@ paths:
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/UpdateKnowledgeDocumentStageConfigRequest' } } }
-      responses: { '200': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeDocumentStageConfigUpdateEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/parse:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
     get:
@@ -570,7 +570,7 @@ paths:
       summary: 查询文档解析结果
       parameters:
         - { name: jobId, in: query, required: false, schema: { type: integer, format: int64 } }
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeDocumentParseEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/enhance/{enhanceType}:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
     get:
@@ -582,7 +582,7 @@ paths:
         - { name: jobId, in: query, required: false, schema: { type: integer, format: int64 } }
         - { name: page, in: query, required: false, schema: { type: integer, minimum: 1 } }
         - { name: pageSize, in: query, required: false, schema: { type: integer, minimum: 1 } }
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeDocumentEnhancePageEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
     get:
@@ -594,7 +594,7 @@ paths:
         - { name: page, in: query, required: false, schema: { type: integer, minimum: 1 } }
         - { name: pageSize, in: query, required: false, schema: { type: integer, minimum: 1 } }
         - { name: snippetContext, in: query, required: false, schema: { type: integer, minimum: 0 } }
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeDocumentChunkPageEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/chunks/{chunkId}:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
     get:
@@ -605,7 +605,7 @@ paths:
         - { name: chunkId, in: path, required: true, schema: { type: string } }
         - { name: jobId, in: query, required: false, schema: { type: integer, format: int64 } }
         - { name: snippetContext, in: query, required: false, schema: { type: integer, minimum: 0 } }
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeDocumentChunkDetailEnvelope' } } } } }
     put:
       tags: [Knowledge Base]
       operationId: saveDocumentChunk
@@ -617,7 +617,7 @@ paths:
         content:
           application/json:
             schema: { $ref: '#/components/schemas/SaveKnowledgeDocumentChunkRequest' }
-      responses: { '200': { description: 保存成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 保存成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeDocumentChunkDetailEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/pages/{page}:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
     get:
@@ -626,14 +626,14 @@ paths:
       summary: 查询文档指定页面工作台数据
       parameters:
         - { name: page, in: path, required: true, schema: { type: integer, minimum: 1 } }
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeDocumentPageWorkspaceEnvelope' } } } } }
   /mgmt/knowledge/{kbId}/documents/{docId}:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
     get:
       tags: [Knowledge Document & Job]
       operationId: getKnowledgeDocumentDetail
       summary: 查询文档详情
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeDocumentDetailEnvelope' } } } } }
   /mgmt/knowledge/documents/{docId}/stages/{stageType}/run:
     parameters: [{ $ref: '#/components/parameters/DocumentId' }, { $ref: '#/components/parameters/StageType' }]
     post:
@@ -641,15 +641,15 @@ paths:
       operationId: runKnowledgeDocumentStage
       summary: 执行文档阶段
       requestBody:
-        content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 执行成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/StageRunRequest' } } }
+      responses: { '200': { description: 执行成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeStageRunEnvelope' } } } } }
   /mgmt/knowledge/jobs/{jobId}:
     parameters: [{ $ref: '#/components/parameters/JobId' }]
     get:
       tags: [Knowledge Document & Job]
       operationId: getKnowledgeJobStatus
       summary: 查询构建任务状态
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeJobStatusEnvelope' } } } } }
   /mgmt/knowledge/retrievals:
     post:
       tags: [Knowledge Retrieval]
@@ -657,22 +657,22 @@ paths:
       summary: 执行知识检索
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } }
-      responses: { '200': { description: 检索成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/RetrievalRequest' } } }
+      responses: { '200': { description: 检索成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeRetrievalEnvelope' } } } } }
   /mgmt/knowledge/directories/{directoryId}/permissions:
     parameters: [{ $ref: '#/components/parameters/DirectoryId' }]
     get:
       tags: [Knowledge Permission]
       operationId: getDirectoryPermissions
       summary: 查询目录权限
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/DirectoryPermissionEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/permissions:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     get:
       tags: [Knowledge Permission]
       operationId: getKnowledgeBasePermissions
       summary: 查询知识库权限
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBasePermissionEnvelope' } } } } }
 
   /mgmt/marketplace/assets:
     post:
@@ -904,101 +904,101 @@ paths:
       responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } }
 
   /mgmt/rbac/users:
-    post: { tags: [User Management], operationId: createUser, summary: 创建用户, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    get: { tags: [User Management], operationId: listUsers, summary: 查询用户列表, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [User Management], operationId: createUser, summary: 创建用户, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreateUserRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/UserEnvelope' } } } } } }
+    get: { tags: [User Management], operationId: listUsers, summary: 查询用户列表, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/UserPageEnvelope' } } } } } }
   /mgmt/rbac/users/{userId}:
     parameters: [{ $ref: '#/components/parameters/UserId' }]
-    get: { tags: [User Management], operationId: getUser, summary: 查询用户, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    put: { tags: [User Management], operationId: updateUser, summary: 更新用户, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    delete: { tags: [User Management], operationId: deleteUser, summary: 删除用户, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [User Management], operationId: getUser, summary: 查询用户, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/UserEnvelope' } } } } } }
+    put: { tags: [User Management], operationId: updateUser, summary: 更新用户, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateUserRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/UserEnvelope' } } } } } }
+    delete: { tags: [User Management], operationId: deleteUser, summary: 删除用户, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/rbac/users/{userId}/enable:
     parameters: [{ $ref: '#/components/parameters/UserId' }]
-    post: { tags: [User Management], operationId: enableUser, summary: 启用用户, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [User Management], operationId: enableUser, summary: 启用用户, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/rbac/users/{userId}/disable:
     parameters: [{ $ref: '#/components/parameters/UserId' }]
-    post: { tags: [User Management], operationId: disableUser, summary: 禁用用户, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [User Management], operationId: disableUser, summary: 禁用用户, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/rbac/users/{userId}/lock:
     parameters: [{ $ref: '#/components/parameters/UserId' }]
-    post: { tags: [User Management], operationId: lockUser, summary: 锁定用户, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [User Management], operationId: lockUser, summary: 锁定用户, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/rbac/roles:
-    post: { tags: [Role Management], operationId: createRole, summary: 创建角色, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    get: { tags: [Role Management], operationId: listRoles, summary: 查询角色列表, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Role Management], operationId: createRole, summary: 创建角色, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreateRoleRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/RoleEnvelope' } } } } } }
+    get: { tags: [Role Management], operationId: listRoles, summary: 查询角色列表, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/RolePageEnvelope' } } } } } }
   /mgmt/rbac/roles/{roleId}:
     parameters: [{ $ref: '#/components/parameters/RoleId' }]
-    get: { tags: [Role Management], operationId: getRole, summary: 查询角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    put: { tags: [Role Management], operationId: updateRole, summary: 更新角色, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    delete: { tags: [Role Management], operationId: deleteRole, summary: 删除角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Role Management], operationId: getRole, summary: 查询角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/RoleEnvelope' } } } } } }
+    put: { tags: [Role Management], operationId: updateRole, summary: 更新角色, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateRoleRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/RoleEnvelope' } } } } } }
+    delete: { tags: [Role Management], operationId: deleteRole, summary: 删除角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/rbac/roles/{roleId}/enable:
     parameters: [{ $ref: '#/components/parameters/RoleId' }]
-    post: { tags: [Role Management], operationId: enableRole, summary: 启用角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Role Management], operationId: enableRole, summary: 启用角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/rbac/roles/{roleId}/disable:
     parameters: [{ $ref: '#/components/parameters/RoleId' }]
-    post: { tags: [Role Management], operationId: disableRole, summary: 禁用角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Role Management], operationId: disableRole, summary: 禁用角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/rbac/roles/{roleId}/permissions:
     parameters: [{ $ref: '#/components/parameters/RoleId' }]
-    put: { tags: [Role-Permission Binding], operationId: replaceRolePermissions, summary: 替换角色权限, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    put: { tags: [Role-Permission Binding], operationId: replaceRolePermissions, summary: 替换角色权限, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/RolePermissionBindRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/rbac/roles/{roleId}/permissions/{permissionId}:
     parameters: [{ $ref: '#/components/parameters/RoleId' }, { $ref: '#/components/parameters/PermissionId' }]
-    post: { tags: [Role-Permission Binding], operationId: addPermissionToRole, summary: 为角色授予权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    delete: { tags: [Role-Permission Binding], operationId: removePermissionFromRole, summary: 移除角色权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Role-Permission Binding], operationId: addPermissionToRole, summary: 为角色授予权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
+    delete: { tags: [Role-Permission Binding], operationId: removePermissionFromRole, summary: 移除角色权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/rbac/users/{userId}/roles:
     parameters: [{ $ref: '#/components/parameters/UserId' }]
-    put: { tags: [User-Role Binding], operationId: replaceUserRoles, summary: 替换用户角色, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    put: { tags: [User-Role Binding], operationId: replaceUserRoles, summary: 替换用户角色, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UserRoleGrantRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/rbac/users/{userId}/roles/{roleId}:
     parameters: [{ $ref: '#/components/parameters/UserId' }, { $ref: '#/components/parameters/RoleId' }]
-    post: { tags: [User-Role Binding], operationId: addRoleToUser, summary: 为用户授予角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    delete: { tags: [User-Role Binding], operationId: removeRoleFromUser, summary: 移除用户角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [User-Role Binding], operationId: addRoleToUser, summary: 为用户授予角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
+    delete: { tags: [User-Role Binding], operationId: removeRoleFromUser, summary: 移除用户角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/rbac/permissions:
-    post: { tags: [Permission Management], operationId: createPermission, summary: 创建权限, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    get: { tags: [Permission Management], operationId: listPermissions, summary: 查询权限列表, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Permission Management], operationId: createPermission, summary: 创建权限, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreatePermissionRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/PermissionEnvelope' } } } } } }
+    get: { tags: [Permission Management], operationId: listPermissions, summary: 查询权限列表, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/PermissionPageEnvelope' } } } } } }
   /mgmt/rbac/permissions/{permissionId}:
     parameters: [{ $ref: '#/components/parameters/PermissionId' }]
-    get: { tags: [Permission Management], operationId: getPermission, summary: 查询权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    put: { tags: [Permission Management], operationId: updatePermission, summary: 更新权限, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    delete: { tags: [Permission Management], operationId: deletePermission, summary: 删除权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Permission Management], operationId: getPermission, summary: 查询权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/PermissionEnvelope' } } } } } }
+    put: { tags: [Permission Management], operationId: updatePermission, summary: 更新权限, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdatePermissionRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/PermissionEnvelope' } } } } } }
+    delete: { tags: [Permission Management], operationId: deletePermission, summary: 删除权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/rbac/permissions/{permissionId}/enable:
     parameters: [{ $ref: '#/components/parameters/PermissionId' }]
-    post: { tags: [Permission Management], operationId: enablePermission, summary: 启用权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Permission Management], operationId: enablePermission, summary: 启用权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/rbac/permissions/{permissionId}/disable:
     parameters: [{ $ref: '#/components/parameters/PermissionId' }]
-    post: { tags: [Permission Management], operationId: disablePermission, summary: 禁用权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Permission Management], operationId: disablePermission, summary: 禁用权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/rbac/permissions/effective/self:
-    get: { tags: [Effective Permission], operationId: getMyEffectivePermissions, summary: 查询我的有效权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Effective Permission], operationId: getMyEffectivePermissions, summary: 查询我的有效权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/EffectivePermissionSetEnvelope' } } } } } }
   /mgmt/rbac/permissions/effective:
-    get: { tags: [Effective Permission], operationId: getUserEffectivePermissions, summary: 查询指定用户有效权限, parameters: [{ name: userId, in: query, schema: { type: integer, format: int64 } }], responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Effective Permission], operationId: getUserEffectivePermissions, summary: 查询指定用户有效权限, parameters: [{ name: userId, in: query, schema: { type: integer, format: int64 } }], responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/EffectivePermissionSetEnvelope' } } } } } }
   /mgmt/rbac/check:
-    post: { tags: [Permission Check], operationId: checkPermissions, summary: 检查权限, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Permission Check], operationId: checkPermissions, summary: 检查权限, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/PermissionCheckRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/PermissionCheckEnvelope' } } } } } }
   /mgmt/rbac/internal/check:
-    post: { tags: [Internal Permission Check], operationId: checkInternalPermissions, summary: '[内部] 检查服务间权限', requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Internal Permission Check], operationId: checkInternalPermissions, summary: '[内部] 检查服务间权限', requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/PermissionCheckRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/PermissionCheckEnvelope' } } } } } }
 
   /mgmt/vault/inbound/tokens:
-    post: { tags: [Inbound PAT Management], operationId: createPat, summary: 创建 PAT, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    get: { tags: [Inbound PAT Management], operationId: listPats, summary: 查询 PAT 列表, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Inbound PAT Management], operationId: createPat, summary: 创建 PAT, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreatePatRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/PatEnvelope' } } } } } }
+    get: { tags: [Inbound PAT Management], operationId: listPats, summary: 查询 PAT 列表, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/PatPageEnvelope' } } } } } }
   /mgmt/vault/inbound/tokens/{id}:
     parameters: [{ $ref: '#/components/parameters/CredentialId' }]
-    get: { tags: [Inbound PAT Management], operationId: getPat, summary: 查询 PAT 详情, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    delete: { tags: [Inbound PAT Management], operationId: deletePat, summary: 删除 PAT, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Inbound PAT Management], operationId: getPat, summary: 查询 PAT 详情, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/PatEnvelope' } } } } } }
+    delete: { tags: [Inbound PAT Management], operationId: deletePat, summary: 删除 PAT, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/vault/inbound/tokens/{id}/regenerate:
     parameters: [{ $ref: '#/components/parameters/CredentialId' }]
-    post: { tags: [Inbound PAT Management], operationId: regeneratePat, summary: 重生成 PAT, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Inbound PAT Management], operationId: regeneratePat, summary: 重生成 PAT, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/RegeneratePatRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/PatEnvelope' } } } } } }
   /mgmt/vault/inbound/tokens/{id}/status:
     parameters: [{ $ref: '#/components/parameters/CredentialId' }]
-    put: { tags: [Inbound PAT Management], operationId: updatePatStatus, summary: 更新 PAT 状态, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    put: { tags: [Inbound PAT Management], operationId: updatePatStatus, summary: 更新 PAT 状态, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdatePatStatusRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/vault/inbound/tokens/stats:
-    get: { tags: [Inbound PAT Management], operationId: getPatStats, summary: 获取 PAT 统计, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Inbound PAT Management], operationId: getPatStats, summary: 获取 PAT 统计, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/ObjectEnvelope' } } } } } }
   /mgmt/vault/inbound/tokens/verify:
-    post: { tags: [Internal Vault API], operationId: verifyPat, summary: '[内部] 验证 PAT', requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Internal Vault API], operationId: verifyPat, summary: '[内部] 验证 PAT', requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/VerifyTokenRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VerifyTokenEnvelope' } } } } } }
   /mgmt/vault/outbound/credentials:
-    post: { tags: [Outbound Credential Management], operationId: createOutboundCredential, summary: 创建出站凭据, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    get: { tags: [Outbound Credential Management], operationId: listOutboundCredentials, summary: 查询出站凭据列表, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    post: { tags: [Outbound Credential Management], operationId: createOutboundCredential, summary: 创建出站凭据, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreateOutboundCredentialRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/OutboundCredentialEnvelope' } } } } } }
+    get: { tags: [Outbound Credential Management], operationId: listOutboundCredentials, summary: 查询出站凭据列表, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/OutboundCredentialPageEnvelope' } } } } } }
   /mgmt/vault/outbound/credentials/{id}:
     parameters: [{ $ref: '#/components/parameters/CredentialId' }]
-    get: { tags: [Outbound Credential Management], operationId: getOutboundCredential, summary: 查询出站凭据详情, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    put: { tags: [Outbound Credential Management], operationId: updateOutboundCredential, summary: 更新出站凭据, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
-    delete: { tags: [Outbound Credential Management], operationId: deleteOutboundCredential, summary: 删除出站凭据, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    get: { tags: [Outbound Credential Management], operationId: getOutboundCredential, summary: 查询出站凭据详情, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/OutboundCredentialEnvelope' } } } } } }
+    put: { tags: [Outbound Credential Management], operationId: updateOutboundCredential, summary: 更新出站凭据, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateOutboundCredentialRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/OutboundCredentialEnvelope' } } } } } }
+    delete: { tags: [Outbound Credential Management], operationId: deleteOutboundCredential, summary: 删除出站凭据, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/vault/outbound/credentials/{id}/status:
     parameters: [{ $ref: '#/components/parameters/CredentialId' }]
-    put: { tags: [Outbound Credential Management], operationId: updateOutboundCredentialStatus, summary: 更新出站凭据状态, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/GenericRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
+    put: { tags: [Outbound Credential Management], operationId: updateOutboundCredentialStatus, summary: 更新出站凭据状态, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateOutboundCredentialStatusRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/vault/outbound/credentials/{id}/resolve:
     parameters: [{ $ref: '#/components/parameters/CredentialId' }]
     get: { tags: [Internal Vault API], operationId: resolveOutboundCredential, summary: '[内部] 解析出站凭据', responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/GenericResponse' } } } } } }
@@ -1070,6 +1070,120 @@ components:
           required: [data]
           properties:
             data: {}
+
+    CreateUploadSessionRequest:
+      type: object
+      required: [bizType, fileName, contentType, size]
+      properties:
+        bizType: { type: string, minLength: 1 }
+        bizRefId: { type: string }
+        fileName: { type: string, minLength: 1 }
+        contentType: { type: string, minLength: 1 }
+        size: { type: integer, format: int64, minimum: 1 }
+
+    BatchCreateUploadSessionRequest:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/CreateUploadSessionRequest' }
+
+    UploadAuthResponse:
+      type: object
+      properties:
+        method: { type: string }
+        url: { type: string, format: uri }
+        headers: { type: object, additionalProperties: { type: string } }
+        formFields: { type: object, additionalProperties: { type: string } }
+        expireAt: { type: string, format: date-time }
+
+    CreateUploadSessionResponse:
+      type: object
+      properties:
+        fileId: { type: string }
+        sessionId: { type: string }
+        storageProvider: { type: string }
+        uploadAuth: { $ref: '#/components/schemas/UploadAuthResponse' }
+
+    BatchCreateUploadSessionResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/CreateUploadSessionResponse' }
+
+    CompleteUploadRequest:
+      type: object
+      required: [etag, size]
+      properties:
+        etag: { type: string, minLength: 1 }
+        size: { type: integer, format: int64, minimum: 1 }
+
+    CompleteUploadResponse:
+      type: object
+      properties:
+        fileId: { type: string }
+        status: { type: string }
+        updatedAt: { type: string, format: date-time }
+
+    CreateDownloadUrlRequest:
+      type: object
+      properties:
+        expireSeconds: { type: integer, minimum: 1 }
+
+    CreateDownloadUrlResponse:
+      type: object
+      properties:
+        fileId: { type: string }
+        downloadUrl: { type: string, format: uri }
+        expireAt: { type: string, format: date-time }
+
+    RegisterResultFileRequest:
+      type: object
+      required: [sourceFileId, bizType, fileName, contentType, size]
+      properties:
+        sourceFileId: { type: string }
+        bizType: { type: string }
+        bizRefId: { type: string }
+        fileName: { type: string }
+        contentType: { type: string }
+        size: { type: integer, format: int64, minimum: 1 }
+
+    RegisterResultFileResponse:
+      type: object
+      properties:
+        fileId: { type: string }
+        sourceFileId: { type: string }
+        status: { type: string }
+
+    FileDetailResponse:
+      type: object
+      properties:
+        fileId: { type: string }
+        fileName: { type: string }
+        contentType: { type: string }
+        size: { type: integer, format: int64 }
+        status: { type: string }
+        bizType: { type: string }
+        bizRefId: { type: string }
+        storageProvider: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    DeleteFileResponse:
+      type: object
+      properties:
+        fileId: { type: string }
+        deleted: { type: boolean }
+
+    CreateUploadSessionResponseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/CreateUploadSessionResponse' } } }] }
+    BatchCreateUploadSessionResponseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/BatchCreateUploadSessionResponse' } } }] }
+    CompleteUploadResponseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/CompleteUploadResponse' } } }] }
+    CreateDownloadUrlResponseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/CreateDownloadUrlResponse' } } }] }
+    RegisterResultFileResponseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/RegisterResultFileResponse' } } }] }
+    FileDetailResponseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/FileDetailResponse' } } }] }
+    DeleteFileResponseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/DeleteFileResponse' } } }] }
 
     SaveKnowledgeDocumentChunkRequest:
       type: object
@@ -1255,6 +1369,738 @@ components:
           type: array
           minItems: 1
           items: { $ref: '#/components/schemas/KnowledgeBuildSourceRequest' }
+
+    CreateDirectoryRequest:
+      type: object
+      required: [name]
+      properties:
+        parentId: { type: integer, format: int64 }
+        name: { type: string, minLength: 1 }
+        approverIds:
+          type: array
+          items: { type: string }
+
+    RenameDirectoryRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1 }
+
+    UpdateDirectoryRequest:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        sortNo: { type: integer }
+
+    DirectoryDetail:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        parentId: { type: integer, format: int64 }
+        name: { type: string }
+        path: { type: string }
+        sortNo: { type: integer }
+        directoryType: { type: string, enum: [PUBLIC, PERSONAL] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    DeleteDirectoryResponse:
+      type: object
+      required: [directoryId, deleted]
+      properties:
+        directoryId: { type: integer, format: int64 }
+        deleted: { type: boolean }
+
+    KnowledgeTagResponse:
+      type: object
+      properties:
+        tagId: { type: string }
+        name: { type: string }
+
+    KnowledgeBaseCreateResponse:
+      type: object
+      properties:
+        knowledgeBaseId: { type: string }
+        directoryId: { type: string }
+        name: { type: string }
+        description: { type: string }
+        visibility: { type: string }
+        status: { type: string }
+        recommendedConfig: { type: boolean }
+        tags:
+          type: array
+          items: { $ref: '#/components/schemas/KnowledgeTagResponse' }
+        pipelineConfig: { $ref: '#/components/schemas/KnowledgePipelineConfigRequest' }
+        createdAt: { type: string, format: date-time }
+
+    KnowledgeBaseListItemResponse:
+      type: object
+      properties:
+        knowledgeBaseId: { type: string }
+        directoryId: { type: string }
+        name: { type: string }
+        description: { type: string }
+        visibility: { type: string }
+        status: { type: string }
+        recommendedConfig: { type: boolean }
+        tags: { type: array, items: { $ref: '#/components/schemas/KnowledgeTagResponse' } }
+        documentCount: { type: integer }
+        liveDocumentCount: { type: integer }
+        buildingDocumentCount: { type: integer }
+        retrievalReady: { type: boolean }
+        pipelineConfig: { $ref: '#/components/schemas/KnowledgePipelineConfigRequest' }
+        vectorCollection: { type: string }
+        vectorDimension: { type: integer }
+        lastBuildAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    KnowledgeBasePageResponse:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/KnowledgeBaseListItemResponse' } }
+        page: { type: integer, minimum: 1 }
+        pageSize: { type: integer, minimum: 1 }
+        total: { type: integer, format: int64, minimum: 0 }
+
+    KnowledgeBaseStatsResponse:
+      type: object
+      properties:
+        documentCount: { type: integer }
+        chunkCount: { type: integer }
+        vectorCount: { type: integer }
+        readiness: { type: string }
+        liveDocumentCount: { type: integer }
+        buildingDocumentCount: { type: integer }
+        retrievalReady: { type: boolean }
+
+    KnowledgeBaseDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/KnowledgeBaseCreateResponse'
+        - type: object
+          properties:
+            stats: { $ref: '#/components/schemas/KnowledgeBaseStatsResponse' }
+            contentSummary: { type: array, items: { type: string } }
+            build: { type: object, additionalProperties: true }
+            capabilities: { type: array, items: { type: object, additionalProperties: true } }
+            updatedAt: { type: string, format: date-time }
+
+    KnowledgeBaseConfigUpdateResponse:
+      type: object
+      properties:
+        knowledgeBaseId: { type: string }
+        pipelineConfig: { $ref: '#/components/schemas/KnowledgePipelineConfigRequest' }
+        updatedAt: { type: string, format: date-time }
+
+    KnowledgeBaseStatisticsResponse:
+      type: object
+      properties:
+        knowledgeBaseId: { type: string }
+        documentCount: { type: integer }
+        chunkCount: { type: integer }
+        vectorCount: { type: integer }
+        retrievalReady: { type: boolean }
+        scopeStatus: { type: string }
+        documentStatusBreakdown: { type: object, additionalProperties: { type: integer } }
+        chunkEmbedStatusBreakdown: { type: object, additionalProperties: { type: integer } }
+
+    KnowledgeStageComponentConfig:
+      type: object
+      required: [type]
+      properties:
+        type: { type: string, minLength: 1 }
+        options: { type: object, additionalProperties: true }
+
+    KnowledgeStageConfigRequest:
+      type: object
+      properties:
+        parser: { $ref: '#/components/schemas/KnowledgeStageComponentConfig' }
+        chunking: { $ref: '#/components/schemas/KnowledgeStageComponentConfig' }
+        enhance:
+          type: array
+          items: { $ref: '#/components/schemas/KnowledgeStageComponentConfig' }
+
+    CreateKnowledgeDocumentRequest:
+      type: object
+      required: [fileName, sourceType, fileId, docType]
+      properties:
+        fileName: { type: string, minLength: 1 }
+        sourceType: { type: string, minLength: 1 }
+        fileId: { type: integer, format: int64 }
+        docType: { type: string, minLength: 1 }
+        sourceMeta: { type: object, additionalProperties: true }
+        stageOverrides: { $ref: '#/components/schemas/KnowledgeStageConfigRequest' }
+
+    KnowledgeDocumentCreateResponse:
+      type: object
+      properties:
+        documentId: { type: string }
+        jobId: { type: string }
+        status: { type: string }
+
+    KnowledgeBaseDocumentListItemResponse:
+      type: object
+      properties:
+        documentId: { type: string }
+        fileName: { type: string }
+        docType: { type: string }
+        parseStatus: { type: string }
+        parseState: { type: string }
+        chunkStatus: { type: string }
+        embeddingStatus: { type: string }
+        update: { type: object, additionalProperties: true }
+        meta: { type: object, additionalProperties: true }
+        sourceType: { type: string }
+        sourcePath: { type: string }
+        sourceUrl: { type: string, format: uri }
+        status: { type: string }
+        currentJobId: { type: string }
+        liveJobId: { type: string }
+        currentJobStatus: { type: string }
+        liveJobStatus: { type: string }
+        retrievalReady: { type: boolean }
+        updatedAt: { type: string, format: date-time }
+
+    KnowledgeBaseDocumentPageResponse:
+      type: object
+      properties:
+        knowledgeBaseId: { type: string }
+        items: { type: array, items: { $ref: '#/components/schemas/KnowledgeBaseDocumentListItemResponse' } }
+        page: { type: integer, minimum: 1 }
+        pageSize: { type: integer, minimum: 1 }
+        total: { type: integer, format: int64, minimum: 0 }
+
+    KnowledgePipelineJobResponse:
+      type: object
+      properties:
+        pipelineJobId: { type: string }
+        documentId: { type: string }
+        status: { type: string }
+        sourceType: { type: string }
+
+    KnowledgeBuildJobResponse:
+      type: object
+      properties:
+        batchJobId: { type: string }
+        knowledgeBaseId: { type: string }
+        type: { type: string }
+        status: { type: string }
+        totalDocs: { type: integer }
+        pipelineJobs: { type: array, items: { $ref: '#/components/schemas/KnowledgePipelineJobResponse' } }
+
+    KnowledgeDocumentStageConfigUpdateResponse:
+      type: object
+      properties:
+        pipelineConfig: { $ref: '#/components/schemas/KnowledgePipelineConfigRequest' }
+        updatedAt: { type: string, format: date-time }
+
+    KnowledgeDocumentChunkItemResponse:
+      type: object
+      properties:
+        chunkId: { type: string }
+        seq: { type: integer }
+        content: { type: string }
+        tokenCount: { type: integer }
+        charCount: { type: integer }
+        embedStatus: { type: string }
+        parentId: { type: string }
+        positionMeta: { type: object, additionalProperties: true }
+        sourceSnippet: { type: string }
+        snippetStart: { type: integer }
+        snippetEnd: { type: integer }
+        metadata: { type: object, additionalProperties: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    KnowledgeDocumentChunkDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/KnowledgeDocumentChunkItemResponse'
+        - type: object
+          properties:
+            knowledgeBaseId: { type: string }
+            documentId: { type: string }
+            jobId: { type: string }
+
+    KnowledgeDocumentChunkPageResponse:
+      type: object
+      properties:
+        knowledgeBaseId: { type: string }
+        documentId: { type: string }
+        jobId: { type: string }
+        stats: { type: object, additionalProperties: true }
+        items: { type: array, items: { $ref: '#/components/schemas/KnowledgeDocumentChunkItemResponse' } }
+        page: { type: integer, minimum: 1 }
+        pageSize: { type: integer, minimum: 1 }
+        total: { type: integer, format: int64 }
+
+    KnowledgeDocumentParseResponse:
+      type: object
+      properties:
+        knowledgeBaseId: { type: string }
+        documentId: { type: string }
+        jobId: { type: string }
+        parseId: { type: string }
+        contentFormat: { type: string }
+        pageCount: { type: integer }
+        charCount: { type: integer }
+        metadata: { type: object, additionalProperties: true }
+        content: {}
+        stats: { type: object, additionalProperties: true }
+        createdAt: { type: string, format: date-time }
+
+    KnowledgeDocumentEnhanceItemResponse:
+      type: object
+      properties:
+        artifactId: { type: string }
+        chunkId: { type: string }
+        chunkSeq: { type: integer }
+        chunkContent: { type: string }
+        artifactType: { type: string }
+        content: {}
+        embedStatus: { type: string }
+        metadata: { type: object, additionalProperties: true }
+        createdAt: { type: string, format: date-time }
+
+    KnowledgeDocumentEnhancePageResponse:
+      type: object
+      properties:
+        knowledgeBaseId: { type: string }
+        documentId: { type: string }
+        jobId: { type: string }
+        enhanceType: { type: string }
+        items: { type: array, items: { $ref: '#/components/schemas/KnowledgeDocumentEnhanceItemResponse' } }
+        stats: { type: object, additionalProperties: true }
+        page: { type: integer, minimum: 1 }
+        pageSize: { type: integer, minimum: 1 }
+        total: { type: integer, format: int64 }
+
+    KnowledgeDocumentParseInfoResponse:
+      type: object
+      properties:
+        parseId: { type: string }
+        contentFormat: { type: string }
+        pageCount: { type: integer }
+        charCount: { type: integer }
+        metadata: { type: object, additionalProperties: true }
+        stats: { type: object, additionalProperties: true }
+        createdAt: { type: string, format: date-time }
+
+    KnowledgeDocumentSummaryAndTagsResponse:
+      type: object
+      properties:
+        summary: { $ref: '#/components/schemas/KnowledgeDocumentEnhancePageResponse' }
+        tags: { $ref: '#/components/schemas/KnowledgeDocumentEnhancePageResponse' }
+
+    KnowledgeDocumentPageWorkspaceResponse:
+      type: object
+      properties:
+        page: { type: integer, minimum: 1 }
+        parseContent: {}
+        chunks: { $ref: '#/components/schemas/KnowledgeDocumentChunkPageResponse' }
+        summaryAndTags: { $ref: '#/components/schemas/KnowledgeDocumentSummaryAndTagsResponse' }
+        parseInfo: { $ref: '#/components/schemas/KnowledgeDocumentParseInfoResponse' }
+
+    KnowledgeDocumentDetailResponse:
+      type: object
+      properties:
+        documentId: { type: string }
+        kbId: { type: string }
+        fileName: { type: string }
+        docType: { type: string }
+        sourceType: { type: string }
+        currentJobId: { type: string }
+        liveJobId: { type: string }
+        status: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    StageRunRequest:
+      type: object
+      properties:
+        stageConfig: { $ref: '#/components/schemas/KnowledgeStageConfigRequest' }
+
+    KnowledgeStageRunResponse:
+      type: object
+      properties:
+        pipelineJobId: { type: string }
+        previousJobId: { type: string }
+        isNewJob: { type: boolean }
+        stageStatus: { type: string }
+        runMode: { type: string }
+
+    KnowledgeJobStatusResponse:
+      type: object
+      properties:
+        jobId: { type: string }
+        status: { type: string }
+        progress: { type: number }
+        stages: { type: array, items: { type: object, additionalProperties: true } }
+
+    RetrievalRequest:
+      type: object
+      required: [query, knowledgeBaseIds]
+      properties:
+        query: { type: string, minLength: 1 }
+        knowledgeBaseIds: { type: array, minItems: 1, items: { type: string } }
+        retrieval: { type: object, additionalProperties: true }
+        filters: { type: object, additionalProperties: true }
+        rerank: { type: object, additionalProperties: true }
+
+    KnowledgeRetrievalResponse:
+      type: object
+      properties:
+        results: { type: array, items: { type: object, additionalProperties: true } }
+        retrievalMeta: { type: object, additionalProperties: true }
+
+    DirectoryPermissionResponse:
+      type: object
+      properties:
+        directoryId: { type: integer, format: int64 }
+        directoryName: { type: string }
+        directoryType: { type: string }
+        parentId: { type: integer, format: int64 }
+        aliceSyncStatus: { type: string }
+        permissionItems: { type: array, items: { $ref: '#/components/schemas/DirectoryPermissionItem' } }
+
+    KnowledgeBasePermissionResponse:
+      type: object
+      properties:
+        knowledgeBaseId: { type: string }
+        knowledgeBaseName: { type: string }
+        directoryId: { type: string }
+        directoryCodeChain: { type: array, items: { type: string } }
+        permissionSequence: { type: integer }
+        aliceSyncStatus: { type: string }
+        permissionItems: { type: array, items: { $ref: '#/components/schemas/DirectoryPermissionItem' } }
+
+    DirectoryDetailEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/DirectoryDetail' } } }] }
+    DeleteDirectoryEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/DeleteDirectoryResponse' } } }] }
+    KnowledgeTagEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeTagResponse' } } }] }
+    KnowledgeTagListEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/KnowledgeTagResponse' } } } }] }
+    KnowledgeBaseCreateEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseCreateResponse' } } }] }
+    KnowledgeBasePageEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBasePageResponse' } } }] }
+    KnowledgeBaseDetailEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseDetailResponse' } } }] }
+    KnowledgeBaseConfigUpdateEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseConfigUpdateResponse' } } }] }
+    KnowledgeBaseStatisticsEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseStatisticsResponse' } } }] }
+    KnowledgeDocumentCreateEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentCreateResponse' } } }] }
+    KnowledgeBaseDocumentPageEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseDocumentPageResponse' } } }] }
+    KnowledgeBuildJobEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBuildJobResponse' } } }] }
+    KnowledgeDocumentStageConfigUpdateEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentStageConfigUpdateResponse' } } }] }
+    KnowledgeDocumentParseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentParseResponse' } } }] }
+    KnowledgeDocumentEnhancePageEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentEnhancePageResponse' } } }] }
+    KnowledgeDocumentChunkPageEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentChunkPageResponse' } } }] }
+    KnowledgeDocumentChunkDetailEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentChunkDetailResponse' } } }] }
+    KnowledgeDocumentPageWorkspaceEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentPageWorkspaceResponse' } } }] }
+    KnowledgeDocumentDetailEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentDetailResponse' } } }] }
+    KnowledgeStageRunEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeStageRunResponse' } } }] }
+    KnowledgeJobStatusEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeJobStatusResponse' } } }] }
+    KnowledgeRetrievalEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeRetrievalResponse' } } }] }
+    DirectoryPermissionEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/DirectoryPermissionResponse' } } }] }
+    KnowledgeBasePermissionEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBasePermissionResponse' } } }] }
+
+    CreateUserRequest:
+      type: object
+      required: [usernameCn, usernameEn, password, email]
+      properties:
+        usernameCn: { type: string, minLength: 1 }
+        usernameEn: { type: string, minLength: 1 }
+        password: { type: string, minLength: 1, writeOnly: true }
+        email: { type: string, format: email }
+        remark: { type: string }
+        tenantId: { type: string }
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        usernameCn: { type: string }
+        usernameEn: { type: string }
+        remark: { type: string }
+        accountStatusCd: { type: string }
+
+    UserResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        usernameCn: { type: string }
+        usernameEn: { type: string }
+        email: { type: string, format: email }
+        remark: { type: string }
+        accountStatusCd: { type: string }
+        tenantId: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    CreateRoleRequest:
+      type: object
+      required: [roleCode, roleName]
+      properties:
+        roleCode: { type: string, minLength: 1 }
+        roleName: { type: string, minLength: 1 }
+        remark: { type: string }
+
+    UpdateRoleRequest:
+      type: object
+      properties:
+        roleName: { type: string }
+        remark: { type: string }
+
+    PermissionResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        permissionCode: { type: string }
+        permissionName: { type: string }
+        resourceType: { type: string }
+        resourcePath: { type: string }
+        httpMethod: { type: string }
+        permissionStatusCd: { type: string }
+        remark: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    RoleResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        roleCode: { type: string }
+        roleName: { type: string }
+        roleStatusCd: { type: string }
+        remark: { type: string }
+        permissions: { type: array, items: { $ref: '#/components/schemas/PermissionResponse' } }
+        createdAt: { type: string, format: date-time }
+
+    UserPageResponse:
+      type: object
+      properties:
+        records: { type: array, items: { $ref: '#/components/schemas/UserResponse' } }
+        total: { type: integer, format: int64 }
+        page: { type: integer }
+        size: { type: integer }
+
+    RolePageResponse:
+      type: object
+      properties:
+        records: { type: array, items: { $ref: '#/components/schemas/RoleResponse' } }
+        total: { type: integer, format: int64 }
+        page: { type: integer }
+        size: { type: integer }
+
+    CreatePermissionRequest:
+      type: object
+      required: [permissionCode, permissionName, resourceType]
+      properties:
+        permissionCode: { type: string, minLength: 1 }
+        permissionName: { type: string, minLength: 1 }
+        resourceType: { type: string, minLength: 1 }
+        resourcePath: { type: string }
+        httpMethod: { type: string }
+        remark: { type: string }
+
+    UpdatePermissionRequest:
+      type: object
+      properties:
+        permissionName: { type: string }
+        remark: { type: string }
+
+    PermissionPageResponse:
+      type: object
+      properties:
+        records: { type: array, items: { $ref: '#/components/schemas/PermissionResponse' } }
+        total: { type: integer, format: int64 }
+        page: { type: integer }
+        size: { type: integer }
+
+    RolePermissionBindRequest:
+      type: object
+      required: [permissionIds]
+      properties:
+        permissionIds: { type: array, items: { type: integer, format: int64 } }
+
+    UserRoleGrantRequest:
+      type: object
+      required: [roleIds]
+      properties:
+        roleIds: { type: array, items: { type: integer, format: int64 } }
+
+    CreatePatRequest:
+      type: object
+      required: [name, expiresIn, scopes]
+      properties:
+        name: { type: string, minLength: 1 }
+        description: { type: string }
+        expiresIn: { type: integer, minimum: 1 }
+        scopes: { type: array, minItems: 1, items: { type: string } }
+
+    RegeneratePatRequest:
+      type: object
+      properties:
+        expiresIn: { type: integer, minimum: 1 }
+        expectedUpdateTime: { type: string, format: date-time }
+
+    UpdatePatStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, minLength: 1 }
+
+    PatResponse:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        name: { type: string }
+        fullToken: { type: string, writeOnly: true }
+        tokenMasked: { type: string }
+        scopes: { type: array, items: { type: string } }
+        status: { type: string }
+        ownerEmail: { type: string, format: email }
+        description: { type: string }
+        createTime: { type: string, format: date-time }
+        updateTime: { type: string, format: date-time }
+        lastUsedAt: { type: string, format: date-time }
+        expiresAt: { type: string, format: date-time }
+        isExpiringSoon: { type: boolean }
+        warning: { type: string }
+
+    PatPageResponse:
+      type: object
+      properties:
+        records: { type: array, items: { $ref: '#/components/schemas/PatResponse' } }
+        total: { type: integer, format: int64 }
+        page: { type: integer }
+        size: { type: integer }
+
+    CreateOutboundCredentialRequest:
+      type: object
+      required: [name, targetType, targetId, fields]
+      properties:
+        name: { type: string, minLength: 1 }
+        targetType: { type: string, minLength: 1 }
+        targetId: { type: string, minLength: 1 }
+        fields: { type: object, additionalProperties: { type: string } }
+
+    UpdateOutboundCredentialRequest:
+      type: object
+      required: [fields]
+      properties:
+        fields: { type: object, additionalProperties: { type: string } }
+
+    AuthFieldInfo:
+      type: object
+      properties:
+        key: { type: string }
+        label: { type: string }
+        placeholder: { type: string }
+        required: { type: boolean }
+        secret: { type: boolean }
+        readOnly: { type: boolean }
+        configured: { type: boolean }
+        maskedValue: { type: string }
+        note: { type: string }
+
+    OutboundCredentialResponse:
+      type: object
+      properties:
+        credentialId: { type: string }
+        credentialName: { type: string }
+        targetType: { type: string }
+        targetId: { type: string }
+        targetName: { type: string }
+        authType: { type: string }
+        endpoint: { type: string }
+        protocol: { type: string }
+        status: { type: string }
+        syncStatus: { type: string }
+        refCount: { type: integer }
+        description: { type: string }
+        fields: { type: array, items: { $ref: '#/components/schemas/AuthFieldInfo' } }
+        createTime: { type: string, format: date-time }
+        lastUsedAt: { type: string, format: date-time }
+
+    OutboundCredentialPageResponse:
+      type: object
+      properties:
+        records: { type: array, items: { $ref: '#/components/schemas/OutboundCredentialResponse' } }
+        total: { type: integer, format: int64 }
+        page: { type: integer }
+        size: { type: integer }
+
+    PermissionCheckRequest:
+      type: object
+      required: [checks]
+      properties:
+        userId: { type: integer, format: int64 }
+        checks:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [type, target]
+            properties:
+              type: { type: string }
+              target: { type: object, additionalProperties: true }
+
+    PermissionCheckResponse:
+      type: object
+      properties:
+        userId: { type: integer, format: int64 }
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              type: { type: string }
+              target: { type: object, additionalProperties: true }
+              allowed: { type: boolean }
+              matched: { type: boolean }
+              scopes: { type: array, items: { type: string } }
+              reason: { type: string }
+
+    EffectivePermissionSetResponse:
+      type: object
+      properties:
+        userId: { type: integer, format: int64 }
+        menuActions: { type: array, items: { type: object, properties: { code: { type: string }, path: { type: string }, method: { type: string } } } }
+        dataScopes: { type: array, items: { type: object, properties: { code: { type: string }, scope: { type: string } } } }
+        models: { type: array, items: { type: object, properties: { code: { type: string }, modelId: { type: string } } } }
+        catalogs: { type: array, items: { type: object, properties: { code: { type: string }, catalogId: { type: string } } } }
+        version: { type: string }
+        expireAt: { type: string, format: date-time }
+
+    VerifyTokenRequest:
+      type: object
+      required: [token]
+      properties:
+        token: { type: string, minLength: 1 }
+
+    VerifyTokenResponse:
+      type: object
+      properties:
+        valid: { type: boolean }
+        credentialId: { type: string }
+        ownerId: { type: string }
+        tenantId: { type: string }
+        scopes: { type: array, items: { type: string } }
+        failReason: { type: string }
+
+    UpdateOutboundCredentialStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, minLength: 1 }
+
+    VoidEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { type: 'null' } } }] }
+    UserEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/UserResponse' } } }] }
+    UserPageEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/UserPageResponse' } } }] }
+    RoleEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/RoleResponse' } } }] }
+    RolePageEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/RolePageResponse' } } }] }
+    PermissionEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/PermissionResponse' } } }] }
+    PermissionPageEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/PermissionPageResponse' } } }] }
+    ObjectEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { type: object, additionalProperties: true } } }] }
+    PatEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/PatResponse' } } }] }
+    PatPageEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/PatPageResponse' } } }] }
+    OutboundCredentialEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/OutboundCredentialResponse' } } }] }
+    OutboundCredentialPageEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/OutboundCredentialPageResponse' } } }] }
+    PermissionCheckEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/PermissionCheckResponse' } } }] }
+    EffectivePermissionSetEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/EffectivePermissionSetResponse' } } }] }
+    VerifyTokenEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/VerifyTokenResponse' } } }] }
 
     VectorStoreInstance:
       type: object
