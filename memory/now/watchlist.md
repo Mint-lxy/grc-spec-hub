@@ -26,18 +26,18 @@
 | # | 项目 | 类型 | 关联 | 责任方 | 状态 |
 |---|------|------|------|--------|------|
 | 24 | 开发人员 GitHub 账号开通——已完成（用户确认 2026-08-17） | 账号 | 全服务 | `[待确认]` | closed |
-| 25 | Alice 应用 admin 账号申请（阻塞 SSO 集成调研验证）——最晚下周二 (2026-08-19) | 账号+集成 | spec 000/007, auth-service | `[待确认]` | open |
-| 26 | Azure 账号→SharePoint 方案落地（进行中） | 基础设施 | spec 005 AC-10, mcp-m365-server | `[待确认]` | in-progress |
+| 25 | Alice 应用 admin 账号申请（阻塞 SSO 集成调研验证）——原目标最晚 2026-08-19，2026-08-24 watchlist 质量复核未见最新状态；下一步需补申请状态、新目标日期与责任人 | 账号+集成 | spec 000/007, auth-service | `[待确认]` | open |
+| 26 | Azure 账号→SharePoint 方案落地（进行中）——2026-08-24 watchlist 质量复核未见最新检查点；下一步需补落地负责人、当前阶段与下一检查点 | 基础设施 | spec 005 AC-10, mcp-m365-server | `[待确认]` | in-progress |
 | 27 | Nexus Teams 创建 + 模型订阅 + 支持模型列表对齐 | 外部依赖 | spec 001/004, agent-service, eval-service | `[待确认]` | closed |
-| 28 | Nexus 缺少多模态/OCR 模型，需自行部署（用户指令 2026-08-14） | 外部依赖 | parser-engine, knowledge-engine | `[待确认]` | open |
+| 28 | Nexus 缺少多模态/OCR 模型，需自行部署（用户指令 2026-08-14）——下一步需确认自部署模型方案、责任人、目标日期与是否影响 P0 交付 | 外部依赖 | parser-engine, knowledge-engine | `[待确认]` | open |
 
 ## Spec 高优未决（来源：各 spec §4）
 
 | # | 项目 | 类型 | 关联 | 状态 |
 |---|------|------|------|------|
-| 13 | M1/M2/M3 里程碑日期 | 计划 | spec 000 | open |
+| 13 | 【责任人待确认】M1/M2/M3 里程碑日期——下一步由项目计划负责人补齐目标日期、起算点与评审节奏 | 计划 | spec 000 | open |
 | 14 | Key Vault 集成方式与可行性——已确认（用户确认 2026-08-21，PRD §13.10 #2） | 外部依赖 | spec 000/007 | closed |
-| 15 | 旧资产凭据模型可行性（委派授权）——已确认（用户确认 2026-08-21，PRD §13.10 #10）；**2026-08-24 被凭据模型修订取代**（项目组对齐：旧资产凭据模型整体取消，一切资产调用使用订阅者个人凭据；待产出替代 ADR-0014 的正式 ADR） | 外部依赖 | spec 003/007, PRD §9.3 | closed |
+| 15 | 旧资产凭据模型可行性（委派授权）——已确认（用户确认 2026-08-21，PRD §13.10 #10）；**2026-08-24 被凭据模型修订取代**（项目组对齐：旧资产凭据模型整体取消，一切资产调用使用订阅者个人凭据；替代口径由 `architecture/adr/005-credential-resolution.md` 承载，不新增单独 ADR） | 外部依赖 | spec 003/007, PRD §9.3, ADR-005 | closed |
 | 16 | 外部依赖契约与降级策略（Alice/Nexus/KV/A2A/MCP）——已确认（用户确认 2026-08-21，PRD §13.10 #16；模型类资源全部经 Nexus 供给） | 外部依赖 | spec 000 | closed |
 | 17 | §9.10 参数基线逐项审定——已完成（2026-08-21 interview，28 行全部确认为工单基线；6 处调整：HC 周期 10min、检索按切片去重、会话删除按钮、PAT 永不过期、审批 3 级、目录分公共 5 层/我的 3 层；4 个待审定值落实：分享 20 人、名称 1–100/禁控制字符、收藏 50 个、构建并发 5 条） | 基线 | spec 000, PRD §13.10 #11 | closed |
 | 18 | 分层留存与对话原文隐私合规——已确认（2026-08-22 BA 裁定）：审计与调用日志 3 年、对话内容与命中原文经脱敏/敏感字段遮蔽后保留 90 天、业务记录永久 | 合规 | spec 000, PRD §9.8/§13.10 #1 | closed |
@@ -48,7 +48,7 @@
 | 23 | Alice 同步周期与失败回滚——随 PRD §13.10 #16 确认关闭（2026-08-21） | 外部依赖 | spec 008 | closed |
 | 29 | UI/UX 方案未定，阻塞前端工作——现只有 PRD §13.11 视觉与品牌基础规范（深色风格/主色/胶囊按钮/字体）与一份已过期的旧原型（`docs/prd/GRC_AI_Agent_Prototype_v1.html`），无信息架构/交互稿/组件规范；`grc-ai-portal` 的 `docs/design/` 为空 | 前端/设计 | grc-ai-portal, PRD §13.11 | open |
 | 32 | 005 FR-013 与 PRD §9.7 冲突——已解决（用户裁定 2026-08-21）：新建库角色模型——建库时指定知识库 Owner+Deputy、平台据此调 Alice 建角色并授予、后续授予由知识库 Owner/Deputy 单级审批；PRD/CONTEXT/旅程/ADR-0013/005 已全链路修订 | spec 冲突 | spec 005, PRD §7 M4-5/§9.7, ADR-0013 | closed |
-| 33 | 管理后台「准入测评模板维护」页面归 008-admin；004 仅承载发布链路中的模板消费语义（2026-08-23 Zhang Hao 登记，2026-08-24 用户对账确认）；003 的对应 Open Question 随 008 重写时关闭 | spec 归属 | spec 004/008, PRD §5.2 | closed |
+| 33 | 管理后台「准入测评模板维护」页面归 008-admin；004 仅承载发布链路中的模板消费语义（2026-08-23 Zhang Hao 登记，2026-08-24 用户对账确认）；004 的对应 Open Question 已关闭 | spec 归属 | spec 004/008, PRD §5.2 | closed |
 | 34 | 005 User Story 优先级标注（P1/P2/P3，spec-kit 约定）与 PRD 的 P0/P1 批次同名不同义——建议改写为「高/中/低」避免工单拆分时误读 | 格式 | spec 005 | open |
 | 35 | PRD §13.10 #3：知识目录与知识库权限细化规则——已确认（2026-08-22 BA 裁定）：目录级角色以 Alice 流程为主，平台仅展示权限 ID、申请入口与同步状态；知识库级维护角色保留 Owner/Deputy 单级审批 | 权限模型 | spec 005, PRD §9.7, ADR-0006 | closed |
 | 36 | PRD §13.10 #4：平台事件响应手段边界——已确认（2026-08-22 BA 裁定）：维持现边界，管理员可停用出站调用但不改变资产状态、不承诺阻断直连调用；孤儿资产补员恢复治理 | 合规 | spec 004/008, PRD §9.1, ADR-0009 | closed |
@@ -59,13 +59,13 @@
 | 41 | PRD §13.10 #14：申请人撤回订阅申请是否纳入——已确认（2026-08-22 BA 裁定）：P0 不纳入，待审批申请无申请人出边 | 产品决策 | spec 002, PRD §9.2 | closed |
 | 42 | PRD §13.10 #15：审批停滞兜底——已确认（2026-08-22 BA 裁定）：P0 不补系统催办或超时回落；在职但长期不处理由人工沟通解决，死锁回落仅覆盖账号失效 | 产品决策 | spec 002, PRD §9.2 | closed |
 | 43 | `spec-sync-prd-v1.2` 分支已并入 main：PRD v1.2 同步 + §13.10 五项澄清 + 002/005 grill 细化已成为主分支基线；合并等待项关闭 | 评审合并 | specs/001–009, docs/prd, memory/now | closed |
-| 44 | 【BA 跟进】非 002/005 spec 未决项继续跟踪：001 模型兜底 UX/输出缓冲首段延迟；003 ~~动态凭据校验深度~~（2026-08-23 已裁定：真实鉴权换取令牌）/Agent Card 重试；004 裁判模型算力并发；006 护栏性能基准/违禁词上限；007 SDK 凭据缓存 TTL（2026-08-23 口径：参照值 60 秒＝当前实现，实现先行不构成既定标准，待架构确认后入 §9.10 审定）；008 平台资源监控告警已随 008 clarify 边界化为 P1 Non-Goal。003 的 Agent Card 重试已由 Zhang Hao 于 2026-08-23 裁定（拉取失败不自动重试）；009 的去重与抑制已于 2026-08-23 裁定关闭（不去重 + 失败链抑制）——均已核销。001 两项已随 spec-kit 重写保留为 spec Open Questions：输出缓冲首段延迟需 Zhang Hao 压测输入（紧急，见 #50 同链路）；模型兜底 UX 提示由 BA 先拟文案草稿 | BA 跟进 | specs/001/003/004/006/007/008/009 各「未决问题」或 plan 待确认节 | open |
+| 44 | 【BA 跟进】spec plan 参数子项跟踪（2026-08-24 watchlist 质量复核拆分）：① 004 裁判模型算力与并发配置（plan 阶段）；② 006 护栏性能基准（全文缓冲延迟、窗口检测延迟）；③ 006 违禁词表单表条目上限与单文件大小上限（审定后补 PRD §9.10）；④ 007 SDK 凭据解析缓存 TTL（参照值 60 秒＝当前实现，实现先行不构成既定标准，需架构/开发确认后才入 §9.10）。已核销项不再跟踪：003 动态凭据校验深度、003 Agent Card/工具清单拉取失败自动重试（不自动重试）、009 通知去重/抑制；001 滑动窗口/首段延迟参数统一由 #50 跟踪 | BA 跟进 | specs/004/006/007；watchlist #50 | open |
 | 45 | 【责任人：Zhang Hao】【紧急——spec 001 进 plan 的前置】ADR-007（A2A 协议统一，状态 Proposed）需决策是否 Accept：若 Accept，grc-agent-service 自定义 REST+SSE 端点将替换为 A2A handler（`/.well-known/agent.json` + `POST /a2a`），mgmt-service chat-agent domain 需新增 A2A 客户端，gateway 路由与 `grc-agent-service.yaml` 契约需整体调整；001 已裁定透传上下文归资产（FR-021，需透传接口含会话 ID 字段），该契约影响必须与 ADR-007 的 Accept 决策联动落地；当前不动代码，等 ADR Accept 后再改 | 架构决策 | ADR-007, spec 001 FR-021, grc-agent-service, grc-mgmt-service, grc-api-gateway | open |
 | 46 | 【责任人：Zhang Hao】服务 owner 仍为 `@todo-owner`，需填实 `architecture/services.manifest.yaml` 与 `architecture/service-map.md` 的 9 个服务负责人；否则工单认领、契约消费方确认与人审守门点缺少责任闭环 | 责任归属 | architecture/services.manifest.yaml, architecture/service-map.md | open |
 | 47 | 【责任人：Zhang Hao】架构/API/横切规范未决项需统一收敛：api-landscape 待评审 11 项、认证授权横切规范、可观测性状态、000-platform plan 中护栏执行与 CI/CD、契约骨架填充优先级；需形成 plan 阶段输入或拆分工单 | 架构/API/横切 | specs/000-platform/api-landscape.md, architecture/cross-cutting/auth.md, architecture/cross-cutting/observability.md, specs/000-platform/plan.md, contracts/ | open |
 | 48 | `check-contracts.sh` 未通过——已修复（2026-08-22，合入 main @ cb1c992）：mcp-server/knowledge-engine YAML 引号 ×3、auth-service 7 处 nullable 迁移 3.1 union type、8 处 security 声明补齐（内部服务根级 bearerAuth 对齐 mgmt，healthz/login/verify/refresh/oauth 显式 `security: []`）、saveDocumentChunk 补 chunkId 路径参数、npx 缓存清理、门禁脚本 oasdiff 误报修复（仅 error/warning 级判失败，.sh/.ps1 同步）。人工豁免：chunkId 补齐声明的 `new-request-path-parameter` flag 属无效契约修复，理由记录于合并提交 cb1c992 | 契约门禁 | contracts/, gates/scripts/check-contracts.sh, contracts/POLICY.md | closed |
-| 49 | 【责任人：Zhang Hao】远端 main 的 "update api" 提交（eea6cec）删除了 `DELETE /mgmt/knowledge/knowledge-bases/{kbId}` 端点，oasdiff 报 `api-removed-without-deprecation`——真实破坏性变更，未见 service-map 消费方逐一确认记录；需回溯确认删除是否有意、消费方是否知情，必要时补确认或恢复 | 契约治理 | contracts/openapi/grc-mgmt-service.yaml, contracts/POLICY.md, architecture/service-map.md | open |
-| 50 | 【责任人：Zhang Hao】【plan 阶段输入/待确认】输出侧护栏机制基线已采纳（2026-08-24 用户裁定）：流式响应＝重叠滑动窗口检测、非流式＝全文缓冲；**命中坚持全文零字留存**——命中时终止上游并瞬时撤回全部已下发内容（含已通过窗口的前缀）、展示安全护栏命中提醒。待 plan/压测确认提醒形态与文案、窗口大小、重叠长度、检测位置、检测超时、首段延迟、长响应上限与实现可行性；引擎 SaaS/自建见 #1；main 上 Zhang 版含前缀保留口径已被本裁定取代 | 架构/性能 | spec 001 FR-022/FR-023, spec 006 FR-042/FR-043, watchlist #1 | open |
+| 49 | 【责任人：Zhang Hao】【合并守门风险】远端 main 的 "update api" 提交（eea6cec）删除了 `DELETE /mgmt/knowledge/knowledge-bases/{kbId}` 端点，oasdiff 报 `api-removed-without-deprecation`——真实破坏性契约变更，未见 service-map 消费方逐一确认记录；需回溯确认删除是否有意、消费方是否知情，并在后续涉及该契约的合并前补齐消费方确认或恢复端点 | 契约治理 | contracts/openapi/grc-mgmt-service.yaml, contracts/POLICY.md, architecture/service-map.md | open |
+| 50 | 【责任人：Zhang Hao】【plan 阶段输入/待确认】输出侧护栏机制基线已采纳（2026-08-24 用户裁定）：流式响应＝重叠滑动窗口检测、非流式＝全文缓冲；**命中坚持全文零字留存**——命中时终止上游并瞬时撤回全部已下发内容（含已通过窗口的前缀）、展示安全护栏命中提醒。命中提醒形态已裁定为占位替换＋护栏类型，不再由本项跟踪；待 plan/压测确认窗口大小、重叠长度、检测位置、检测超时、首段延迟、长响应上限与实现可行性；引擎 SaaS/自建见 #1；main 上 Zhang 版含前缀保留口径已被本裁定取代 | 架构/性能 | spec 001 FR-022/FR-023, spec 006 FR-042/FR-043, watchlist #1 | open |
 | 51 | 【责任人：Li Zhonghao】spec 005 构建管线改动需开发侧跟进（2026-08-23 BA Lead 复核裁定）：① 解析器收敛为 Docling/MinerU，不使用 DeepDoc——实现快照 `Implementation-Snapshot/KB-coding/knowledge-engine` 的 `pipeline_config_validator.py` 合法解析器集合与两份 Api 清单中的 deepdoc 参数需移除；② 切片/增强/解析器/向量化/重排序参数矩阵（FR-038）请审阅可行性；③ 语言提示为中文/英文/德语/自动检测 | 开发跟进 | spec 005 FR-038, Implementation-Snapshot/KB-coding | open |
 | 52 | 【架构/开发待确认】准入测评任务整体超时上限——2026-08-23 spec 004 澄清建议值 30 分钟（超时视同执行失败、可重测）；需架构/开发确认可行性后补入 PRD §9.10 参数基线审定，审定前不作为工单基线 | 基线 | spec 004 FR-010, PRD §9.4/§9.10 | open |
 | 53 | MCP 协议枚举 P0 单值「Streamable HTTP」——已确认（Zhang Hao 2026-08-23 审核通过：不兼容旧版 SSE，字段保留枚举结构供未来扩展）；003 对应 Open Question 随之关闭（2026-08-24 对账） | 技术审核 | spec 003 FR-013 | closed |
@@ -75,7 +75,7 @@
 | 57 | 原催办已拆分（2026-08-23/24）：#50 的护栏处理机制已裁定（流式滑动窗口/非流式全文；命中零字留存+撤回前缀为用户终审口径），剩余参数转为 plan 阶段输入；spec 001 进 plan 的架构前置仅剩 #45（ADR-007 是否 Accept） | 催办 | watchlist #45/#50, spec 001, ADR-007 | closed |
 | 58 | 【架构/开发待确认】个人出站凭据一键探测的真实认证调用设计——2026-08-23 spec 007 澄清裁定口径为真实鉴权（与 003 同构，全平台探测强度统一），但对三类目标（平台外资产/平台原生工具/Nexus）的认证调用形态与副作用约束需架构/开发设计确认 | 架构决策 | spec 007 FR-015, spec 003 FR-008 | open |
 | 59 | 【责任人：Zhang Hao 决定】**个人模型凭据调用失败的「失效 vs 抖动」判定基线**。背景：个人模型凭据调用失败时平台按失败类型走两个分支——凭据失效类（令牌过期、无权限）＝本次调用改用平台默认凭据 + 可用性快照对应模型置不可用 + 通知本人处理；瞬时故障类（网络抖动、对方超时/临时宕机）＝不改快照、不通知、下次照常再试。判错方向的代价：误判为失效→凭据被冤枉标记不可用且用户收到骚扰通知；误判为抖动→每次调用先失败再兜底且用户不知凭据已坏。需要决定的：以什么信号区分两类——建议基线为 HTTP 401/403＝失效类、网络错误/超时/5xx＝抖动类（Nexus 为 HTTP 网关），混合与非标响应的归类一并裁定。该基线是 spec 007 验收标准「失效类 100% 触发回落与通知、抖动类 0 触发」可测的前提。2026-08-23 BA 明确：非 BA 裁定事项，由 Zhang Hao 处理并决定，spec 007 按待澄清依赖项挂起 | 架构决策 | spec 007 FR-021/SC-003, contracts/openapi/grc-mgmt-service.yaml（vault 子域 report-credential-failure） | open |
-| 60 | 【高优——责任人：Zhang Hao 查看确认，2026-08-23 用户指示，2026-08-24 按新凭据模型重写】新凭据模型与编辑范围矩阵复核：PAT 创建后锁定；资产调用使用订阅者个人凭据——静态凭据由订阅者填入并绑定，凭据值可编辑且保存后重检，动态凭据由平台代颁发入库、不支持用户编辑密钥值、仅支持手动重新颁发；导入通道与 Nexus 模型凭据仅凭据值可编辑且保存后自动重检/探测；平台资源凭据由管理后台维护；审计记录凭据 ID + 凭据类型 + 持有人账号三元组。请确认与 grc-python-sdk、mgmt vault 子域、契约无冲突 | 架构复核 | spec 007, PRD §9.3, grc-python-sdk, grc-mgmt-service | open |
+| 60 | 【高优——责任人：Zhang Hao 查看确认，2026-08-23 用户指示，2026-08-24 按新凭据模型重写】新凭据模型与编辑范围矩阵复核：PAT 创建后锁定；资产调用使用订阅者个人凭据——静态凭据由订阅者填入并绑定，凭据值可编辑且保存后重检，动态凭据由平台代颁发入库、不支持用户编辑密钥值、仅支持手动重新颁发；导入通道与 Nexus 模型凭据仅凭据值可编辑且保存后自动重检/探测；平台资源凭据由管理后台维护；审计记录凭据 ID + 凭据类型 + 持有人账号三元组。请确认与 ADR-005、OpenAPI 契约、grc-python-sdk、mgmt vault 子域、grc-mgmt-service 实现边界无冲突 | 架构复核 | ADR-005, spec 007, PRD §9.3, contracts/openapi/grc-mgmt-service.yaml, grc-python-sdk, grc-mgmt-service | open |
 | 61 | 【待客户确认】P0 护栏类型枚举暂定为四类（提示词注入/有害内容/意图偏离/违禁词），**不含个人身份信息（PII）检测**——2026-08-24 用户暂定，需客户确认是否接受 P0 不覆盖 PII（PRD §1.1 PII 词条与 CONTEXT.md「护栏」词条已同步标注；spec 006 FR-002） | 客户确认 | spec 006 FR-002, PRD §1.1, CONTEXT.md | open |
 
 ## 文档缺口
