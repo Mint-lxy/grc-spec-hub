@@ -1,11 +1,11 @@
 openapi: 3.1.0
 info:
   title: GRC Knowledge Engine API
-  version: "1.0"
+  version: "2.0"
   license: {name: Proprietary, identifier: LicenseRef-Proprietary}
   description: |
-    知识库、构建、检索和证据访问契约。目标接口使用 /api/v2/knowledge 与
-    /open/v2/knowledge。/api/v1 下已发布的三个 v0.4 端点仅用于兼容窗口。
+    知识库、构建、检索和证据访问契约。内部正式接口使用 /api/v1/knowledge，
+    PAT 开放接口继续使用 /open/v1/knowledge。旧版非正式 v1 接口已在迁移完成后下线。
     jobId 只表示执行状态，不能选择正文、Chunk、Asset 或 Evidence 版本。
 servers:
   - url: https://knowledge.grc.internal
@@ -20,65 +20,7 @@ tags:
   - {name: open-api, description: PAT 认证的三个开放能力。}
   - {name: operations, description: 存活与就绪探针。}
 paths:
-  /api/v1/knowledge/knowledge-bases:
-    get:
-      deprecated: true
-      tags: [knowledge-bases]
-      summary: 兼容 v0.4 的知识库列表
-      operationId: listKnowledgeBasesV1
-      parameters:
-        - {name: directoryId, in: query, schema: {type: integer}}
-        - {$ref: '#/components/parameters/Page'}
-        - {$ref: '#/components/parameters/PageSize'}
-      responses:
-        '200': {description: v0.4 兼容响应, content: {application/json: {schema: {$ref: '#/components/schemas/LegacyListResponse'}}}}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '500': {$ref: '#/components/responses/InternalError'}
-    post:
-      deprecated: true
-      tags: [knowledge-bases]
-      summary: 兼容 v0.4 的创建知识库
-      operationId: createKnowledgeBaseV1
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/LegacyCreateRequest'}}}}
-      responses:
-        '200': {description: v0.4 兼容响应, content: {application/json: {schema: {$ref: '#/components/schemas/LegacyResponse'}}}}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '422': {$ref: '#/components/responses/Unprocessable'}
-        '500': {$ref: '#/components/responses/InternalError'}
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}:
-    get:
-      deprecated: true
-      tags: [knowledge-bases]
-      summary: 兼容 v0.4 的知识库详情
-      operationId: getKnowledgeBaseV1
-      parameters: [{$ref: '#/components/parameters/KnowledgeBaseId'}]
-      responses:
-        '200': {description: v0.4 兼容响应, content: {application/json: {schema: {$ref: '#/components/schemas/LegacyDetailResponse'}}}}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '500': {$ref: '#/components/responses/InternalError'}
   /api/v1/knowledge/tags:
-    get:
-      deprecated: true
-      tags: [knowledge-bases]
-      summary: 兼容 v0.4 的知识库标签列表
-      operationId: listKnowledgeTagsV1
-      responses:
-        '200': {description: v0.4 兼容响应, content: {application/json: {schema: {$ref: '#/components/schemas/LegacyKnowledgeTagListResponse'}}}}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '500': {$ref: '#/components/responses/InternalError'}
-    post:
-      deprecated: true
-      tags: [knowledge-bases]
-      summary: 兼容 v0.4 的创建知识库标签
-      operationId: createKnowledgeTagV1
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/CreateKnowledgeTagRequest'}}}}
-      responses:
-        '200': {description: v0.4 兼容响应, content: {application/json: {schema: {$ref: '#/components/schemas/LegacyKnowledgeTagResponse'}}}}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '409': {$ref: '#/components/responses/Conflict'}
-
-  /api/v2/knowledge/tags:
     get:
       tags: [knowledge-bases]
       summary: 查询知识库标签
@@ -98,7 +40,7 @@ paths:
         '403': {$ref: '#/components/responses/Forbidden'}
         '409': {$ref: '#/components/responses/Conflict'}
 
-  /api/v2/knowledge/knowledge-bases/pipeline-options:
+  /api/v1/knowledge/knowledge-bases/pipeline-options:
     get:
       tags: [knowledge-bases]
       summary: 查询业务参数选项和运行能力
@@ -107,7 +49,7 @@ paths:
         '200': {$ref: '#/components/responses/PipelineOptionsResponse'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '503': {$ref: '#/components/responses/DependencyUnavailable'}
-  /api/v2/knowledge/knowledge-bases:
+  /api/v1/knowledge/knowledge-bases:
     get:
       tags: [knowledge-bases]
       summary: 查询调用者可见的知识库
@@ -135,7 +77,7 @@ paths:
         '403': {$ref: '#/components/responses/Forbidden'}
         '409': {$ref: '#/components/responses/Conflict'}
         '422': {$ref: '#/components/responses/Unprocessable'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}:
     get:
       tags: [knowledge-bases]
       summary: 获取知识库详情
@@ -146,7 +88,7 @@ paths:
         '304': {description: ETag 未变化}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/update:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/update:
     post:
       tags: [knowledge-bases]
       summary: 更新知识库基础信息
@@ -164,7 +106,7 @@ paths:
         '409': {$ref: '#/components/responses/Conflict'}
         '412': {$ref: '#/components/responses/PreconditionFailed'}
         '428': {$ref: '#/components/responses/PreconditionRequired'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/pipeline-config:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/pipeline-config:
     post:
       tags: [knowledge-bases]
       summary: 更新业务可调管线配置并触发重建
@@ -183,7 +125,7 @@ paths:
         '412': {$ref: '#/components/responses/PreconditionFailed'}
         '422': {$ref: '#/components/responses/Unprocessable'}
         '428': {$ref: '#/components/responses/PreconditionRequired'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/enable:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/enable:
     post:
       tags: [knowledge-bases]
       summary: 重新启用已停用知识库
@@ -201,7 +143,7 @@ paths:
         '412': {$ref: '#/components/responses/PreconditionFailed'}
         '422': {$ref: '#/components/responses/Unprocessable'}
         '428': {$ref: '#/components/responses/PreconditionRequired'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/publish:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/publish:
     post:
       tags: [knowledge-bases]
       summary: 发布已具备可检索内容的草稿知识库
@@ -219,7 +161,7 @@ paths:
         '412': {$ref: '#/components/responses/PreconditionFailed'}
         '422': {$ref: '#/components/responses/Unprocessable'}
         '428': {$ref: '#/components/responses/PreconditionRequired'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/offline:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/offline:
     post:
       tags: [knowledge-bases]
       summary: 立即停用知识库消费面
@@ -235,7 +177,7 @@ paths:
         '409': {$ref: '#/components/responses/Conflict'}
         '412': {$ref: '#/components/responses/PreconditionFailed'}
         '428': {$ref: '#/components/responses/PreconditionRequired'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/delete:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/delete:
     post:
       tags: [knowledge-bases]
       summary: 删除知识库并开始不可恢复清理
@@ -252,7 +194,7 @@ paths:
         '412': {$ref: '#/components/responses/PreconditionFailed'}
         '422': {$ref: '#/components/responses/Unprocessable'}
         '428': {$ref: '#/components/responses/PreconditionRequired'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/stats:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/stats:
     get:
       tags: [knowledge-bases]
       summary: 获取构建和清理统计
@@ -263,7 +205,7 @@ paths:
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
 
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/documents/imports:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/imports:
     post:
       tags: [documents]
       summary: 批量导入文档并可自动构建
@@ -280,7 +222,7 @@ paths:
         '409': {$ref: '#/components/responses/Conflict'}
         '422': {$ref: '#/components/responses/Unprocessable'}
         '503': {$ref: '#/components/responses/DependencyUnavailable'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/documents:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents:
     get:
       tags: [documents]
       summary: 查询 active manifest 下的逻辑文档
@@ -298,7 +240,7 @@ paths:
         '400': {$ref: '#/components/responses/BadRequest'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/document-stage-config-batches:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/document-stage-config-batches:
     post:
       tags: [documents]
       summary: 批量更新所选文档的 parser/chunking/enhance 覆盖
@@ -314,7 +256,7 @@ paths:
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '422': {$ref: '#/components/responses/Unprocessable'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}:
     get:
       tags: [documents]
       summary: 获取 active 文档版本详情
@@ -326,7 +268,7 @@ paths:
         '200': {$ref: '#/components/responses/DocumentResponse'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/stage-config:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/stage-config:
     post:
       tags: [documents]
       summary: 更新文档 parser/chunking/enhance 覆盖
@@ -346,7 +288,7 @@ paths:
         '412': {$ref: '#/components/responses/PreconditionFailed'}
         '422': {$ref: '#/components/responses/Unprocessable'}
         '428': {$ref: '#/components/responses/PreconditionRequired'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/parse:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/parse:
     get:
       tags: [documents]
       summary: 获取 active 文档解析视图
@@ -358,7 +300,7 @@ paths:
         '200': {$ref: '#/components/responses/ParseViewResponse'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/pages/{page}:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/pages/{page}:
     get:
       tags: [documents]
       summary: 获取文档指定页的前端工作台聚合数据
@@ -373,7 +315,7 @@ paths:
         '400': {$ref: '#/components/responses/BadRequest'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/chunks:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/chunks:
     get:
       tags: [documents]
       summary: 查询 active 文档的 Leaf Chunk
@@ -390,7 +332,7 @@ paths:
         '400': {$ref: '#/components/responses/BadRequest'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/chunks/{chunkId}:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/chunks/{chunkId}:
     get:
       tags: [documents]
       summary: 获取 active Leaf Chunk 详情
@@ -404,7 +346,7 @@ paths:
         '200': {$ref: '#/components/responses/ChunkResponse'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/chunks/{chunkId}/update:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/chunks/{chunkId}/update:
     post:
       tags: [documents]
       summary: 写时复制编辑 Leaf 并从增强阶段重建
@@ -424,7 +366,7 @@ paths:
         '409': {$ref: '#/components/responses/Conflict'}
         '412': {$ref: '#/components/responses/PreconditionFailed'}
         '428': {$ref: '#/components/responses/PreconditionRequired'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/chunks/{chunkId}/delete:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/chunks/{chunkId}/delete:
     post:
       tags: [documents]
       summary: 删除 Leaf 并立即退出检索
@@ -442,7 +384,7 @@ paths:
         '409': {$ref: '#/components/responses/Conflict'}
         '412': {$ref: '#/components/responses/PreconditionFailed'}
         '428': {$ref: '#/components/responses/PreconditionRequired'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/enhance/{enhanceType}:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/enhance/{enhanceType}:
     get:
       tags: [documents]
       summary: 查询 active Leaf 增强产物
@@ -458,7 +400,7 @@ paths:
         '400': {$ref: '#/components/responses/BadRequest'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/original-url:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/original-url:
     post:
       tags: [documents]
       summary: 签发原文短期 URL
@@ -472,7 +414,7 @@ paths:
         '200': {$ref: '#/components/responses/AccessUrlResponse'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/delete:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/delete:
     post:
       tags: [documents]
       summary: 删除文档并开始不可恢复清理
@@ -490,7 +432,7 @@ paths:
         '412': {$ref: '#/components/responses/PreconditionFailed'}
         '428': {$ref: '#/components/responses/PreconditionRequired'}
 
-  /api/v2/knowledge/knowledge-bases/{knowledgeBaseId}/build-jobs:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/build-jobs:
     get:
       tags: [build-jobs]
       summary: 查询知识库构建历史
@@ -518,7 +460,7 @@ paths:
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '422': {$ref: '#/components/responses/Unprocessable'}
-  /api/v2/knowledge/jobs/{jobId}:
+  /api/v1/knowledge/jobs/{jobId}:
     get:
       tags: [build-jobs]
       summary: 获取构建任务运维状态
@@ -528,7 +470,7 @@ paths:
         '200': {$ref: '#/components/responses/BuildJobResponse'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
-  /api/v2/knowledge/jobs/{jobId}/retry:
+  /api/v1/knowledge/jobs/{jobId}/retry:
     post:
       tags: [build-jobs]
       summary: 从失败阶段重试构建任务
@@ -541,7 +483,7 @@ paths:
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
-  /api/v2/knowledge/jobs/{jobId}/cancel:
+  /api/v1/knowledge/jobs/{jobId}/cancel:
     post:
       tags: [build-jobs]
       summary: 取消尚未提交的 candidate
@@ -555,7 +497,7 @@ paths:
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
 
-  /api/v2/knowledge/retrievals:
+  /api/v1/knowledge/retrievals:
     post:
       tags: [retrieval]
       summary: 在授权范围内执行多知识库检索
@@ -568,7 +510,7 @@ paths:
         '422': {$ref: '#/components/responses/Unprocessable'}
         '429': {$ref: '#/components/responses/RateLimited'}
         '503': {$ref: '#/components/responses/DependencyUnavailable'}
-  /api/v2/knowledge/artifacts/access-urls:
+  /api/v1/knowledge/artifacts/access-urls:
     post:
       tags: [retrieval]
       summary: 批量签发或刷新证据媒体短期 URL
@@ -580,7 +522,7 @@ paths:
         '400': {$ref: '#/components/responses/BadRequest'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
-  /api/v2/knowledge/operations/{operationId}:
+  /api/v1/knowledge/operations/{operationId}:
     get:
       tags: [operations]
       summary: 查询不可恢复清理操作状态
@@ -591,7 +533,7 @@ paths:
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
 
-  /open/v2/knowledge/knowledge-bases/{knowledgeBaseId}:
+  /open/v1/knowledge/knowledge-bases/{knowledgeBaseId}:
     get:
       tags: [open-api]
       summary: 通过 PAT 查询知识库元数据
@@ -603,7 +545,7 @@ paths:
         '401': {$ref: '#/components/responses/Unauthorized'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
-  /open/v2/knowledge/retrievals:
+  /open/v1/knowledge/retrievals:
     post:
       tags: [open-api]
       summary: 通过 PAT scope 执行检索
@@ -618,7 +560,7 @@ paths:
         '403': {$ref: '#/components/responses/Forbidden'}
         '429': {$ref: '#/components/responses/RateLimited'}
         '503': {$ref: '#/components/responses/DependencyUnavailable'}
-  /open/v2/knowledge/knowledge-bases/{knowledgeBaseId}/documents:
+  /open/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents:
     post:
       tags: [open-api]
       summary: 通过 PAT 更新单份文档并自动构建
@@ -921,52 +863,51 @@ components:
         configFingerprint: {type: string, minLength: 16, maxLength: 128}
     KnowledgeBaseSummary:
       type: object
-      required: [knowledgeBaseId, directoryId, name, tags, visibility, status, retrievalReady, hasFailedDocuments, documentCount, vectorizedDocumentCount, createdAt, updatedAt]
+      required: [knowledgeBaseId, directoryId, name, visibility, status, recommendedConfig, tags, pipelineConfig, createdAt]
       properties:
-        knowledgeBaseId: {type: integer, format: int64, minimum: 1}
-        directoryId: {type: integer, format: int64, minimum: 1}
+        knowledgeBaseId: {type: string, minLength: 1}
+        directoryId: {type: string, minLength: 1}
         name: {type: string}
         description: {type: [string, 'null']}
-        tags: {type: array, items: {type: string}}
         visibility: {type: string, enum: [PRIVATE, PUBLIC]}
         status: {$ref: '#/components/schemas/KnowledgeBaseStatus'}
-        retrievalReady: {type: boolean}
-        hasFailedDocuments: {type: boolean}
+        recommendedConfig: {type: boolean}
+        tags: {type: array, items: {$ref: '#/components/schemas/KnowledgeTag'}}
+        pipelineConfig: {type: object, additionalProperties: true}
+        version: {type: integer, minimum: 1}
         documentCount: {type: integer, minimum: 0}
-        vectorizedDocumentCount: {type: integer, minimum: 0}
+        liveDocumentCount: {type: integer, minimum: 0}
+        buildingDocumentCount: {type: integer, minimum: 0}
+        retrievalReady: {type: boolean}
+        vectorCollection: {type: [string, 'null']}
+        vectorDimension: {type: [integer, 'null'], minimum: 1}
+        lastBuildAt: {type: [string, 'null'], format: date-time}
         createdAt: {type: string, format: date-time}
-        updatedAt: {type: string, format: date-time}
+        updatedAt: {type: [string, 'null'], format: date-time}
     KnowledgeBaseStats:
       type: object
-      additionalProperties: false
-      required: [documentCount, vectorizedDocumentCount, failedDocumentCount, activeLeafCount, vectorCount, projectionReadyCount, readinessPercent, purgeStatus]
+      required: [knowledgeBaseId, documentCount, chunkCount, vectorCount, retrievalReady, scopeStatus, documentStatusBreakdown, chunkEmbedStatusBreakdown]
       properties:
+        knowledgeBaseId: {type: string, minLength: 1}
         documentCount: {type: integer, minimum: 0}
-        vectorizedDocumentCount: {type: integer, minimum: 0}
-        failedDocumentCount: {type: integer, minimum: 0}
-        activeLeafCount: {type: integer, minimum: 0}
-        vectorCount: {type: integer, minimum: 0, description: 仅 Leaf 的 LEAF_TEXT 向量数。}
-        projectionReadyCount: {type: integer, minimum: 0}
-        readinessPercent: {type: number, minimum: 0, maximum: 100}
-        latestBuildAt: {type: [string, 'null'], format: date-time}
-        purgeStatus: {$ref: '#/components/schemas/PurgeStatus'}
+        liveDocumentCount: {type: integer, minimum: 0}
+        chunkCount: {type: integer, minimum: 0}
+        vectorCount: {type: integer, minimum: 0}
+        retrievalReady: {type: boolean}
+        scopeStatus: {type: string}
+        documentStatusBreakdown: {type: object, additionalProperties: {type: integer, minimum: 0}}
+        chunkEmbedStatusBreakdown: {type: object, additionalProperties: {type: integer, minimum: 0}}
+        activeGeneration: {}
     KnowledgeBaseDetail:
-      unevaluatedProperties: false
       allOf:
         - {$ref: '#/components/schemas/KnowledgeBaseSummary'}
         - type: object
-          required: [effectiveConfig, stats, activeDocumentCount, activeLeafCount, vectorCount, projectionReadyCount, purgeStatus]
+          required: [stats, contentSummary, build, capabilities]
           properties:
-            effectiveConfig: {$ref: '#/components/schemas/EffectiveConfigSummary'}
-            stats: {$ref: '#/components/schemas/KnowledgeBaseStats'}
-            activeGenerationId: {type: [string, 'null'], format: uuid}
-            activeDocumentCount: {type: integer, minimum: 0}
-            activeLeafCount: {type: integer, minimum: 0}
-            vectorCount: {type: integer, minimum: 0}
-            projectionReadyCount: {type: integer, minimum: 0}
-            latestBuildStatus: {type: [string, 'null']}
-            rebuildLock: {type: [string, 'null']}
-            purgeStatus: {$ref: '#/components/schemas/PurgeStatus'}
+            stats: {type: object, additionalProperties: true}
+            contentSummary: {type: array, items: {type: string}}
+            build: {type: object, additionalProperties: true}
+            capabilities: {type: array, items: {type: object, additionalProperties: true}}
     PipelineCapability:
       type: object
       additionalProperties: false
@@ -1076,22 +1017,30 @@ components:
         errorCode: {type: [string, 'null']}
     DocumentSummary:
       type: object
-      required: [documentId, knowledgeBaseId, fileName, mediaType, byteSize, sourceType, status, retrievalReady, createdAt, updatedAt]
+      required: [documentId, fileName, sourceType, status, retrievalReady]
       properties:
-        documentId: {type: integer, format: int64, minimum: 1}
-        knowledgeBaseId: {type: integer, format: int64, minimum: 1}
+        documentId: {type: string, minLength: 1}
+        knowledgeBaseId: {type: string, minLength: 1}
+        kbId: {type: string, minLength: 1}
         fileName: {type: string}
-        mediaType: {type: string}
-        byteSize: {type: integer, minimum: 0}
+        docType: {type: [string, 'null']}
+        parseStatus: {type: [string, 'null']}
+        parseState: {type: [string, 'null']}
+        chunkStatus: {type: [string, 'null']}
+        embeddingStatus: {type: [string, 'null']}
+        update: {type: object, additionalProperties: true}
+        meta: {type: object, additionalProperties: true}
         sourceType: {type: string}
-        status: {$ref: '#/components/schemas/DocumentStatus'}
-        failedStage: {oneOf: [{$ref: '#/components/schemas/BuildStage'}, {type: 'null'}]}
-        errorCode: {type: [string, 'null']}
+        sourcePath: {type: [string, 'null']}
+        sourceUrl: {type: [string, 'null'], format: uri}
+        status: {type: string}
+        currentJobId: {type: [string, 'null']}
+        liveJobId: {type: [string, 'null']}
+        currentJobStatus: {type: [string, 'null']}
+        liveJobStatus: {type: [string, 'null']}
         retrievalReady: {type: boolean}
-        chunkCount: {type: integer, minimum: 0}
-        activeDocumentVersionId: {type: [string, 'null'], format: uuid}
-        createdAt: {type: string, format: date-time}
-        updatedAt: {type: string, format: date-time}
+        createdAt: {type: [string, 'null'], format: date-time}
+        updatedAt: {type: [string, 'null'], format: date-time}
     DocumentProjection:
       type: object
       additionalProperties: false
@@ -1105,18 +1054,12 @@ components:
         inputSetHash: {type: string}
         createdAt: {type: string, format: date-time}
     DocumentDetail:
-      unevaluatedProperties: false
       allOf:
         - {$ref: '#/components/schemas/DocumentSummary'}
         - type: object
-          required: [documentVersionId, stages, effectiveConfig]
+          required: [kbId]
           properties:
-            documentVersionId: {type: string, format: uuid}
-            stages: {type: array, maxItems: 4, items: {$ref: '#/components/schemas/BuildStageStatus'}}
-            effectiveConfig: {$ref: '#/components/schemas/EffectiveConfigSummary'}
-            projection: {oneOf: [{$ref: '#/components/schemas/DocumentProjection'}, {type: 'null'}]}
-            latestBuild: {oneOf: [{$ref: '#/components/schemas/BuildJobSummary'}, {type: 'null'}]}
-            sourcePreviewAction: {type: [string, 'null']}
+            kbId: {type: string, minLength: 1}
     BoundingBox:
       type: object
       additionalProperties: false
@@ -1145,18 +1088,19 @@ components:
         accessStatus: {type: string, enum: [AVAILABLE, GONE, FORBIDDEN]}
     DocumentParseView:
       type: object
-      additionalProperties: false
-      required: [documentId, documentVersionId, parserFingerprint, content, outline, pageCount, hasPageLayout, assets, warnings]
+      required: [knowledgeBaseId, documentId, pageCount, charCount, metadata, content, stats]
       properties:
-        documentId: {type: integer, format: int64}
-        documentVersionId: {type: string, format: uuid}
-        parserFingerprint: {type: string}
-        content: {$ref: '#/components/schemas/ContentAction'}
-        outline: {type: array, items: {$ref: '#/components/schemas/OutlineItem'}}
+        knowledgeBaseId: {type: string, minLength: 1}
+        documentId: {type: string, minLength: 1}
+        jobId: {type: [string, 'null']}
+        parseId: {type: [string, 'null']}
+        contentFormat: {type: [string, 'null']}
         pageCount: {type: integer, minimum: 0}
-        hasPageLayout: {type: boolean}
-        assets: {type: array, items: {$ref: '#/components/schemas/AssetSummary'}}
-        warnings: {type: array, maxItems: 1000, items: {type: string}}
+        charCount: {type: integer, minimum: 0}
+        metadata: {type: object, additionalProperties: true}
+        content: {}
+        stats: {type: object, additionalProperties: true}
+        createdAt: {type: [string, 'null'], format: date-time}
     PageParseElement:
       type: object
       additionalProperties: false
@@ -1238,25 +1182,25 @@ components:
         content: {type: string}
     ChunkDetail:
       type: object
-      additionalProperties: false
-      required: [chunkId, documentVersionId, type, sequence, content, tokenCount, charCount, contentHash, sectionPath, bboxes, neighbors, assets, version]
+      required: [chunkId, seq, content, tokenCount, charCount, positionMeta, metadata]
       properties:
         chunkId: {type: string, format: uuid}
-        documentVersionId: {type: string, format: uuid}
-        type: {type: string, const: LEAF}
-        sequence: {type: integer, minimum: 0}
+        knowledgeBaseId: {type: string}
+        documentId: {type: string}
+        jobId: {type: [string, 'null']}
+        seq: {type: integer, minimum: 0}
         content: {type: string, minLength: 1, maxLength: 1000000}
-        tokenCount: {type: integer, minimum: 1}
-        charCount: {type: integer, minimum: 1}
-        contentHash: {type: string}
-        sectionPath: {type: array, maxItems: 32, items: {type: string, maxLength: 512}}
-        pageRange: {oneOf: [{$ref: '#/components/schemas/PageRange'}, {type: 'null'}]}
-        bboxes: {type: array, items: {$ref: '#/components/schemas/BoundingBox'}}
-        parentContext: {oneOf: [{$ref: '#/components/schemas/ParentContext'}, {type: 'null'}]}
-        neighbors: {type: array, maxItems: 10, items: {$ref: '#/components/schemas/NeighborChunk'}}
-        assets: {type: array, items: {$ref: '#/components/schemas/AssetSummary'}}
-        enhancement: {type: [object, 'null']}
-        version: {type: integer, minimum: 1}
+        tokenCount: {type: integer, minimum: 0}
+        charCount: {type: integer, minimum: 0}
+        embedStatus: {type: [string, 'null']}
+        parentId: {type: [string, 'null'], format: uuid}
+        positionMeta: {type: [object, 'null'], additionalProperties: true}
+        sourceSnippet: {type: [string, 'null']}
+        snippetStart: {type: [integer, 'null'], minimum: 0}
+        snippetEnd: {type: [integer, 'null'], minimum: 0}
+        metadata: {type: object, additionalProperties: true}
+        createdAt: {type: [string, 'null'], format: date-time}
+        updatedAt: {type: [string, 'null'], format: date-time}
     UpdateChunkRequest:
       type: object
       additionalProperties: false
@@ -1281,14 +1225,17 @@ components:
         droppedAssetRelations: {type: array, items: {type: string, format: uuid}}
     EnhancementItem:
       type: object
-      additionalProperties: false
-      required: [enhancementId, sourceChunkId, type, ordinal, content]
+      required: [artifactId, chunkId, chunkSeq, artifactType, content, metadata]
       properties:
-        enhancementId: {type: string, format: uuid}
-        sourceChunkId: {type: string, format: uuid}
-        type: {type: string, enum: [SUMMARY, KEYWORDS, FAQ]}
-        ordinal: {type: integer, minimum: 0}
-        content: {description: "SUMMARY 为 string，KEYWORDS 为 string[]，FAQ 为 question/answer object。"}
+        artifactId: {type: string, format: uuid}
+        chunkId: {type: string, format: uuid}
+        chunkSeq: {type: integer, minimum: 0}
+        chunkContent: {type: [string, 'null']}
+        artifactType: {type: string}
+        content: {}
+        embedStatus: {type: [string, 'null']}
+        metadata: {type: object, additionalProperties: true}
+        createdAt: {type: [string, 'null'], format: date-time}
     CreateBuildJobRequest:
       type: object
       additionalProperties: false
@@ -1459,12 +1406,13 @@ components:
         openOriginalAction: {type: [string, 'null']}
     RetrievalResult:
       type: object
-      additionalProperties: false
-      required: [partial, degradedChannels, results]
+      required: [results, retrievalMeta]
       properties:
-        partial: {type: boolean}
-        degradedChannels: {type: array, items: {type: string}}
-        results: {type: array, maxItems: 100, items: {$ref: '#/components/schemas/Evidence'}}
+        results:
+          type: array
+          maxItems: 100
+          items: {type: object, additionalProperties: true}
+        retrievalMeta: {type: object, additionalProperties: true}
     PurgeOperation:
       type: object
       additionalProperties: false
@@ -1569,33 +1517,43 @@ components:
         checks: {type: array, items: {$ref: '#/components/schemas/DependencyCheck'}}
     PageKnowledgeBase:
       type: object
-      required: [records, total, page, pageSize]
+      required: [items, total, page, pageSize]
       properties:
-        records: {type: array, items: {$ref: '#/components/schemas/KnowledgeBaseSummary'}}
+        items: {type: array, items: {$ref: '#/components/schemas/KnowledgeBaseSummary'}}
         total: {type: integer, minimum: 0}
         page: {type: integer, minimum: 1}
         pageSize: {type: integer, minimum: 1, maximum: 100}
     PageDocument:
       type: object
-      required: [records, total, page, pageSize]
+      required: [knowledgeBaseId, items, total, page, pageSize]
       properties:
-        records: {type: array, items: {$ref: '#/components/schemas/DocumentSummary'}}
+        knowledgeBaseId: {type: string, minLength: 1}
+        items: {type: array, items: {$ref: '#/components/schemas/DocumentSummary'}}
         total: {type: integer, minimum: 0}
         page: {type: integer, minimum: 1}
         pageSize: {type: integer, minimum: 1, maximum: 100}
     PageChunk:
       type: object
-      required: [records, total, page, pageSize]
+      required: [knowledgeBaseId, documentId, stats, items, total, page, pageSize]
       properties:
-        records: {type: array, items: {$ref: '#/components/schemas/ChunkDetail'}}
+        knowledgeBaseId: {type: string, minLength: 1}
+        documentId: {type: string, minLength: 1}
+        jobId: {type: [string, 'null']}
+        stats: {type: object, additionalProperties: true}
+        items: {type: array, items: {$ref: '#/components/schemas/ChunkDetail'}}
         total: {type: integer, minimum: 0}
         page: {type: integer, minimum: 1}
         pageSize: {type: integer, minimum: 1, maximum: 100}
     PageEnhancement:
       type: object
-      required: [records, total, page, pageSize]
+      required: [knowledgeBaseId, documentId, enhanceType, items, stats, total, page, pageSize]
       properties:
-        records: {type: array, items: {$ref: '#/components/schemas/EnhancementItem'}}
+        knowledgeBaseId: {type: string, minLength: 1}
+        documentId: {type: string, minLength: 1}
+        jobId: {type: [string, 'null']}
+        enhanceType: {type: string}
+        items: {type: array, items: {$ref: '#/components/schemas/EnhancementItem'}}
+        stats: {type: object, additionalProperties: true}
         total: {type: integer, minimum: 0}
         page: {type: integer, minimum: 1}
         pageSize: {type: integer, minimum: 1, maximum: 100}
@@ -1664,91 +1622,3 @@ components:
     DataOpenKnowledgeBase: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/OpenKnowledgeBase'}}}
     DataHealth: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/Health'}}}
     DataReadiness: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/Readiness'}}}
-    LegacyAdapterConfig:
-      type: object
-      required: [type]
-      properties: {type: {type: string}, options: {type: object}}
-    LegacyPipelineConfig:
-      type: object
-      required: [parser, chunking, enhance, embedding, vectorStore]
-      properties:
-        parser: {$ref: '#/components/schemas/LegacyAdapterConfig'}
-        chunking: {$ref: '#/components/schemas/LegacyAdapterConfig'}
-        enhance: {$ref: '#/components/schemas/LegacyAdapterConfig'}
-        embedding: {$ref: '#/components/schemas/LegacyAdapterConfig'}
-        vectorStore: {$ref: '#/components/schemas/LegacyAdapterConfig'}
-    LegacyCreateRequest:
-      type: object
-      required: [directoryId, name, pipelineConfig]
-      properties:
-        directoryId: {type: integer}
-        name: {type: string}
-        description: {type: [string, 'null']}
-        pipelineConfig: {$ref: '#/components/schemas/LegacyPipelineConfig'}
-        metadata: {type: object, additionalProperties: true}
-    LegacyKnowledgeBase:
-      type: object
-      required: [knowledgeBaseId, directoryId, name, visibility, status, pipelineConfig, createdAt]
-      properties:
-        knowledgeBaseId: {type: integer}
-        directoryId: {type: integer}
-        name: {type: string}
-        visibility: {type: string}
-        status: {type: string}
-        pipelineConfig: {$ref: '#/components/schemas/LegacyPipelineConfig'}
-        createdAt: {type: string, format: date-time}
-    LegacyResponse:
-      type: object
-      required: [code, message, data, requestId]
-      properties:
-        code: {type: integer, const: 0}
-        message: {type: string, const: success}
-        data: {$ref: '#/components/schemas/LegacyKnowledgeBase'}
-        requestId: {type: string}
-    LegacyKnowledgeBaseDetail:
-      allOf:
-        - {$ref: '#/components/schemas/LegacyKnowledgeBase'}
-        - type: object
-          required: [updatedAt]
-          properties: {updatedAt: {type: string, format: date-time}}
-    LegacyDetailResponse:
-      type: object
-      required: [code, message, data, requestId]
-      properties:
-        code: {type: integer, const: 0}
-        message: {type: string, const: success}
-        data: {$ref: '#/components/schemas/LegacyKnowledgeBaseDetail'}
-        requestId: {type: string}
-    LegacyListResponse:
-      type: object
-      required: [code, message, data, requestId]
-      properties:
-        code: {type: integer, const: 0}
-        message: {type: string, const: success}
-        data:
-          type: object
-          required: [items, page, pageSize, total]
-          properties:
-            items: {type: array, items: {$ref: '#/components/schemas/LegacyKnowledgeBaseDetail'}}
-            page: {type: integer}
-            pageSize: {type: integer}
-            total: {type: integer}
-        requestId: {type: string}
-    LegacyKnowledgeTagResponse:
-      type: object
-      additionalProperties: false
-      required: [code, message, data, requestId]
-      properties:
-        code: {type: integer, const: 0}
-        message: {type: string, const: success}
-        data: {$ref: '#/components/schemas/KnowledgeTag'}
-        requestId: {type: string}
-    LegacyKnowledgeTagListResponse:
-      type: object
-      additionalProperties: false
-      required: [code, message, data, requestId]
-      properties:
-        code: {type: integer, const: 0}
-        message: {type: string, const: success}
-        data: {type: array, items: {$ref: '#/components/schemas/KnowledgeTag'}}
-        requestId: {type: string}
