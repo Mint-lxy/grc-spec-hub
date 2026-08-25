@@ -1,6 +1,6 @@
 ---
 name: hub-assistant
-description: 'Hub 日常运维助手：管理 watchlist 待办项（查看/新增/更新/关闭）、总结项目状态、登记术语、登记文档缺口、登记用户疑问（在原文插标记 + 记入 watchlist）。Use when: 查看当前待办、更新 watchlist 条目状态、新增待办项、总结 watchlist、登记术语到 glossary、用户对某段文档/设计提出质疑或疑问需要记录跟进、日常 hub 维护操作。'
+description: 'Hub 日常运维助手：执行 watchlist/glossary/state 的写入操作——新增/更新/关闭待办、登记术语、登记文档缺口、登记用户疑问（原文插标记 + watchlist 登记）、总结 watchlist。Use when: 新增待办项、更新 watchlist 条目状态、关闭条目、登记术语到 glossary、登记文档缺口、用户对某段文档/设计提出质疑需要留痕跟进、总结 watchlist、日常 hub 维护写入操作。Not for: 事实性提问或信息检索（用 hub-qa）、设计方案评审（用 design-decision）、spec/ADR/契约修改（用对应写入型 Skill）。'
 argument-hint: '操作指令，如 "总结 watchlist"、"关闭 #5"、"新增待办: xxx"、"登记疑问: xxx"'
 ---
 
@@ -148,6 +148,6 @@ glossary.md 表头为三列：`| 术语 | 定义 | 备注 / 不是什么 |`，�
 
 | Skill | 关系 |
 |-------|------|
-| hub-qa | hub-qa 答不出时建议调用 hub-assistant 登记缺口 |
+| hub-qa | hub-qa 是只读问答，发现缺口时建议用户调用 hub-assistant 登记；hub-assistant 不回答事实性问题 |
 | memory-sync | memory-sync 发现漂移后可调用 hub-assistant 更新 watchlist |
 | architecture-decision-records | ADR 新增待确认项后可调用 hub-assistant 同步到 watchlist |

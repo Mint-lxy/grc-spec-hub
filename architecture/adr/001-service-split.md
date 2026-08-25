@@ -70,8 +70,10 @@ PRD v1.0 的建议模块划分（§10.1）列出了 10 个逻辑模块（对话/
 ```
 前端 → grc-api-gateway ─gRPC→ 护栏检测服务（云原生或自建）
                         │
-                        └→ 缓冲全文 → 检测通过 → 按段回放给前端
-                           检测命中 → 返回「已拦截」
+                        └→ 输出侧双路径检测
+                           流式：重叠滑动窗口，窗口通过才释放
+                           非流式：全文缓冲检测，通过后直接完整呈现
+                           命中：撤回已下发内容并展示护栏类型
 ```
 
 | 决策点 | 结论 |
@@ -79,18 +81,18 @@ PRD v1.0 的建议模块划分（§10.1）列出了 10 个逻辑模块（对话/
 | 模板 CRUD | grc-mgmt-service 的 PostgreSQL |
 | 运行时检测 | grc-api-gateway 经 **gRPC** 调用外部护栏检测服务 |
 | 护栏检测服务 | `[待确认]` 两种候选：① 云原生 Guard 服务（Azure AI Content Safety 等）② 自建 guardrail-service |
-| 全文缓冲与回放 | 在 grc-api-gateway 内完成（PRD §9.5 要求网关缓冲→检测→回放，逻辑不可分离） |
+| 输出侧检测与呈现 | 在 grc-api-gateway 内完成（PRD §9.5 要求流式滑动窗口、非流式全文缓冲直出、命中撤回与占位提示逻辑不可分离） |
 | 模板热加载 | grc-api-gateway 从 mgmt-service 拉取模板缓存（Redis），模板变更时 mgmt 发 invalidation 事件 |
 
 ### D4 — 凭据解析
 
 | 决策点 | 结论 |
 |--------|------|
-| 运行时凭据解析 | **grc-api-gateway** 内执行——路由时已知目标资产，就地从 Key Vault 取凭据并注入出站请求 |
-| 资产级服务凭据存储 | 资产属性，mgmt-service 管理其元数据，密钥值加密存入 Key Vault |
+| 运行时凭据解析 | 运行时组件发起解析请求，业务解析由 **grc-mgmt-service** 提供（详见 [ADR-005](005-credential-resolution.md)）；资产调用使用当前用户个人凭据，不回落共享身份 |
+| 资产凭据元数据声明 | 资产属性，mgmt-service 管理其元数据；资产侧不保存密钥值 |
 | 个人出站凭据存储 | mgmt-service 管理，密钥值加密存入 Key Vault |
-| 凭据缓存 | Redis（TTL 5min），Key Vault 不可达时降级使用缓存 |
-| 模型凭据解析 | **grc-ai-sdk** 将凭据解析与模型调用合并，SDK 内部调用 auth-service 凭据转换接口（独立于 gateway 出站凭据解析）（详见 [ADR-003](003-ai-sdk.md)）（2026-08-14 确认） |
+| 凭据缓存 | Redis 缓存非敏感解析元数据与凭据引用；Key Vault 不可达时只按安全策略使用仍有效的短期缓存 |
+| 模型凭据解析 | **grc-ai-sdk** 将凭据解析与模型调用合并，按触发人解析个人 Nexus 凭据，必要时使用平台默认 Nexus 凭据对象兜底（详见 [ADR-005](005-credential-resolution.md)）（2026-08-24 修订） |
 
 ### D5 — 知识检索调用链
 
@@ -248,12 +250,12 @@ knowledge-engine / parser-engine / eval-service
 | 006 | 运行时检测 | api-gateway | 护栏检测服务 | gRPC |
 | 007 | PAT 管理 | mgmt-service | auth-service（签发） | REST |
 | 007 | 个人凭据管理 | mgmt-service | Key Vault | HTTPS |
-| 007 | 凭据解析（运行时） | api-gateway | Key Vault | HTTPS + Redis 缓存 |
+| 007 | 凭据解析（运行时） | mgmt-service | api-gateway / AI SDK / Key Vault | 内部 REST + Redis 缓存 |
 | 008 | 治理中心/推荐位/角色映射/模型设置 | mgmt-service | — | REST |
 | 008 | 平台资源注册表 | mgmt-service | — | REST |
 | 008 | 出站调用停用 | mgmt-service | api-gateway（运行时感知） | 内部事件 → Redis |
 | 009 | 十三类通知 | mgmt-service | — | 同步写表 + SSE |
-| 009 | Health Check 探测 | P0 不做（K8s 探针即可） | — | — |
+| 009 | Health Check 周期探测 | mgmt-service | api-gateway / notification | 定时任务 + 内部事件 |
 
 ---
 
@@ -274,7 +276,7 @@ knowledge-engine / parser-engine / eval-service
 - [ ] **护栏检测服务实现**：云原生（Azure AI Content Safety）还是自建 guardrail-service——需 PoC 比较延迟与准确率
 - [x] **BFF 层**：选 ① mgmt-service 同时承担 BFF（2026-08-14 确认）
 - [x] **会话数据持久化**：会话数据归 mgmt-service，新增 chat-agent domain 直接存储；mgmt 作为 BFF 包装 chat 接口时直接写入（2026-08-14 确认）
-- [x] **Health Check 探测**：P0 不做周期探测，各服务自带 K8s liveness/readiness 探针即可（2026-08-14 确认）
+- [x] **Health Check 周期探测**：P0 对已发布资产执行周期 Health Check；已下架资产暂停，重新上架后恢复（2026-08-23/24 规格裁定取代 2026-08-14 旧结论）
 - [x] **grc-mgmt-service 拆分时机**：当前不拆分；按 domain 内部隔离，domain 间不共享表，跨 domain 通过 service 方法调用（2026-08-14 确认）
 - [x] **模型凭据解析路径**：选 ③ Python SDK——SDK 内部调用 auth-service 密钥转换接口完成凭据解析（2026-08-14 确认）
 - [x] **Gateway 运行时状态投影**：gateway 拉取 mgmt 资产清单 API，Redis + 本地双层缓存，~30s TTL（2026-08-14 确认）
