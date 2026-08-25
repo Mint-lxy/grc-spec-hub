@@ -2,9 +2,9 @@
 
 **Feature Branch**: `spec-sync-prd-v1.2`（本文件为既有 AC 格式 spec 的 spec-kit 风格重写，对齐 PRD v1.2 全量口径；原 AC 编号对照见文末附录）
 
-**Created**: 2026-08-13（初版，随 specs/001–009 拆解）；2026-08-21（v1.2 同步）；2026-08-24（spec-kit 风格重写，待 peer review）
+**Created**: 2026-08-13（初版，随 specs/001–009 拆解）；2026-08-21（v1.2 同步）；2026-08-24（spec-kit 风格重写）；2026-08-25（grill-me 终审通过）
 
-**Status**: Draft
+**Status**: Reviewed（2026-08-25 grill-me 终审：4 项疑点全部裁定回写，跨 spec 一致性核查通过，用户授权升 Reviewed）
 
 **PRD 来源（v1.2）**: §7 M6（功能清单）、§6 J7（用户旅程）、§8.6 US106–US114、§9.5（护栏运行时规则）、§12.3（部署初始化清单）、§12.1/§12.2、hub `architecture/adr/001-service-split.md`
 
