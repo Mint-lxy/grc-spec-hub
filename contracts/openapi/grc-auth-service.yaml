@@ -12,12 +12,13 @@ tags:
   - name: User Profile
   - name: Token
   - name: OIDC
+  - name: Alice Sync
 paths:
   /login:
     post:
-      tags: [Token]
-      summary: Authenticate with username and password
-      operationId: loginWithPassword
+      tags: [User Profile]
+      summary: 账号密码登录
+      operationId: login
       security: []
       requestBody:
         required: true
@@ -41,7 +42,7 @@ paths:
   /users/{userId}:
     get:
       tags: [User Profile]
-      summary: Get user profile by user ID
+      summary: 按用户 ID 查询资料
       operationId: getUserProfile
       security:
         - bearerAuth: []
@@ -63,8 +64,8 @@ paths:
   /verify:
     post:
       tags: [Token]
-      summary: Verify an access token
-      operationId: verifyAccessToken
+      summary: 校验访问令牌
+      operationId: verify
       security: []
       requestBody:
         required: true
@@ -86,7 +87,7 @@ paths:
   /refresh:
     post:
       tags: [Token]
-      summary: Rotate refresh token and issue a new token pair
+      summary: 刷新令牌并签发新会话
       operationId: refreshToken
       security: []
       requestBody:
@@ -111,10 +112,16 @@ paths:
   /logout:
     post:
       tags: [Token]
-      summary: Revoke the current access and refresh session
+      summary: 注销当前会话
       operationId: logout
-      security:
-        - bearerAuth: []
+      security: []
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          description: Bearer 访问令牌
+          schema:
+            type: string
       responses:
         '200':
           description: Logout completed
@@ -127,9 +134,23 @@ paths:
   /oauth/authorize:
     get:
       tags: [OIDC]
-      summary: Create an OIDC authorization request
+      summary: 生成 OIDC 授权请求
       operationId: authorizeOidc
       security: []
+      parameters:
+        - name: provider
+          in: query
+          required: true
+          description: OIDC 提供方标识
+          schema:
+            type: string
+            minLength: 1
+        - name: redirectUri
+          in: query
+          required: false
+          description: 回调地址，未传时使用服务端默认配置
+          schema:
+            type: string
       responses:
         '200':
           description: OIDC authorization URL and one-time state
@@ -144,19 +165,28 @@ paths:
   /oauth/callback:
     get:
       tags: [OIDC]
-      summary: Complete OIDC callback login
+      summary: 处理 OIDC 回调并创建本地会话
       operationId: callbackOidc
       security: []
       parameters:
+        - name: provider
+          in: query
+          required: true
+          description: OIDC 提供方标识
+          schema:
+            type: string
+            minLength: 1
         - name: code
           in: query
           required: true
+          description: 授权码
           schema:
             type: string
             minLength: 1
         - name: state
           in: query
           required: true
+          description: 防重放状态参数
           schema:
             type: string
             minLength: 1
@@ -177,6 +207,42 @@ paths:
           $ref: '#/components/responses/AuthError'
         '503':
           $ref: '#/components/responses/AuthError'
+  /alice/users/sync:
+    post:
+      tags: [Alice Sync]
+      summary: 手动触发 Alice 用户同步
+      operationId: triggerAliceUserSync
+      responses:
+        '200':
+          description: 同步任务已创建
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AliceSyncResponseEnvelope'
+        '409':
+          $ref: '#/components/responses/AuthError'
+  /alice/users/sync-jobs/{correlationId}:
+    get:
+      tags: [Alice Sync]
+      summary: 查询 Alice 同步任务状态
+      operationId: getAliceSyncJob
+      parameters:
+        - name: correlationId
+          in: path
+          required: true
+          description: 同步关联 ID
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        '200':
+          description: 同步任务状态
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AliceSyncJobQueryResponseEnvelope'
+        '404':
+          $ref: '#/components/responses/AuthError'
 components:
   securitySchemes:
     bearerAuth:
@@ -188,6 +254,7 @@ components:
       name: userId
       in: path
       required: true
+      description: 用户 ID
       schema:
         type: integer
         format: int64
@@ -202,33 +269,43 @@ components:
   schemas:
     PasswordLoginRequest:
       type: object
+      description: 账号密码登录请求
       required: [username, password]
       properties:
         username:
           type: string
           minLength: 1
+          description: 登录账号
         password:
           type: string
           minLength: 1
           writeOnly: true
+          description: 登录密码
         clientType:
           type: [string, 'null']
+          description: 客户端类型
     LoginResult:
       type: object
+      description: 登录结果
       required: [userId, username, accessToken, expiresIn]
       properties:
         userId:
           type: integer
           format: int64
+          description: 用户 ID
         username:
           type: string
+          description: 用户名
         accessToken:
           type: string
+          description: 访问令牌
         refreshToken:
           type: [string, 'null']
+          description: 刷新令牌
         expiresIn:
           type: integer
           format: int64
+          description: 访问令牌有效期（秒）
     LoginResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
@@ -239,6 +316,7 @@ components:
               $ref: '#/components/schemas/LoginResult'
     ApiResponse:
       type: object
+      description: 统一成功响应
       required: [code, message]
       properties:
         code:
@@ -247,15 +325,20 @@ components:
           description: Successful response code
         message:
           type: string
+          description: 响应消息
         detail:
           type: [string, "null"]
+          description: 补充明细
         traceId:
           type: string
+          description: 链路追踪 ID
         timestamp:
           type: string
           format: date-time
+          description: 响应时间
         path:
           type: [string, "null"]
+          description: 请求路径
     EmptySuccessResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
@@ -266,22 +349,29 @@ components:
               type: 'null'
     UserProfile:
       type: object
+      description: 用户资料
       required: [id, username, displayName, email, accountStatus]
       properties:
         id:
           type: integer
           format: int64
+          description: 用户 ID
         username:
           type: string
+          description: 登录用户名
         displayName:
           type: string
+          description: 展示名称
         email:
           type: string
           format: email
+          description: 邮箱地址
         accountStatus:
           type: string
+          description: 账号状态
         tenantId:
           type: [string, "null"]
+          description: 租户 ID
     UserProfileResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
@@ -292,29 +382,37 @@ components:
               $ref: '#/components/schemas/UserProfile'
     TokenVerifyRequest:
       type: object
+      description: 访问令牌校验请求
       required: [token]
       properties:
         token:
           type: string
           minLength: 1
+          description: 待校验访问令牌
     TokenVerifyResult:
       type: object
+      description: 访问令牌校验结果
       required: [valid, userId]
       properties:
         valid:
           type: boolean
+          description: 令牌是否有效
         userId:
           type: integer
           format: int64
+          description: 用户 ID
         roles:
           type: array
+          description: 角色列表
           items:
             type: string
         tenantId:
           type: [string, "null"]
+          description: 租户 ID
         exp:
           type: integer
           format: int64
+          description: 令牌过期时间戳（秒）
     TokenVerifyResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
@@ -325,25 +423,32 @@ components:
               $ref: '#/components/schemas/TokenVerifyResult'
     TokenRefreshRequest:
       type: object
+      description: 刷新令牌换新请求
       required: [refreshToken, clientId]
       properties:
         refreshToken:
           type: string
           minLength: 1
+          description: 刷新令牌
         clientId:
           type: string
           minLength: 1
+          description: 客户端 ID
     TokenPair:
       type: object
+      description: 新令牌对
       required: [accessToken, refreshToken, expiresIn]
       properties:
         accessToken:
           type: string
+          description: 访问令牌
         refreshToken:
           type: string
+          description: 刷新令牌
         expiresIn:
           type: integer
           format: int64
+          description: 访问令牌有效期（秒）
     TokenRefreshResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
@@ -354,13 +459,16 @@ components:
               $ref: '#/components/schemas/TokenPair'
     OidcAuthorizeResult:
       type: object
+      description: OIDC 授权请求结果
       required: [url, state, expireIn]
       properties:
         url:
           type: string
           format: uri
+          description: OIDC 授权跳转地址
         state:
           type: string
+          description: 防重放状态参数
         expireIn:
           type: integer
           format: int64
@@ -376,23 +484,126 @@ components:
               $ref: '#/components/schemas/OidcAuthorizeResult'
     OidcCallbackResult:
       type: object
+      description: OIDC 回调登录结果
       required: [accessToken, userInfo]
       properties:
         accessToken:
           type: string
+          description: 本地访问令牌
         refreshToken:
           type: [string, "null"]
+          description: 本地刷新令牌
         userInfo:
           type: object
           additionalProperties: true
+          description: OIDC 用户原始信息
         roles:
           type: array
+          description: 用户角色列表
           items:
             type: string
         permissions:
           type: array
+          description: 用户权限列表
           items:
             type: string
+    SyncTaskStats:
+      type: object
+      description: 同步任务统计信息
+      properties:
+        syncType:
+          type: string
+          description: 同步类型
+        status:
+          type: string
+          description: 同步状态
+        totalCount:
+          type: integer
+          format: int32
+          description: 总数量
+        fetchedCount:
+          type: integer
+          format: int32
+          description: 已拉取数量
+        insertedCount:
+          type: integer
+          format: int32
+          description: 新增数量
+        updatedCount:
+          type: integer
+          format: int32
+          description: 更新数量
+        deletedCount:
+          type: integer
+          format: int32
+          description: 删除数量
+        failedCount:
+          type: integer
+          format: int32
+          description: 失败数量
+        errorMessage:
+          type: [string, 'null']
+          description: 错误信息
+        startedAt:
+          type: string
+          format: date-time
+          description: 开始时间
+        finishedAt:
+          type: string
+          format: date-time
+          description: 完成时间
+    AliceSyncResponseData:
+      type: object
+      description: 触发 Alice 同步响应数据
+      properties:
+        correlationId:
+          type: string
+          description: 同步关联 ID
+        status:
+          type: string
+          description: 同步任务状态
+        triggerType:
+          type: string
+          description: 触发类型
+        tasks:
+          type: array
+          description: 任务明细列表
+          items:
+            $ref: '#/components/schemas/SyncTaskStats'
+    AliceSyncJobQueryResponseData:
+      type: object
+      description: Alice 同步任务查询数据
+      properties:
+        correlationId:
+          type: string
+          description: 同步关联 ID
+        triggerType:
+          type: string
+          description: 触发类型
+        status:
+          type: string
+          description: 任务整体状态
+        tasks:
+          type: array
+          description: 子任务统计列表
+          items:
+            $ref: '#/components/schemas/SyncTaskStats'
+    AliceSyncResponseEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/AliceSyncResponseData'
+    AliceSyncJobQueryResponseEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          required: [data]
+          properties:
+            data:
+              $ref: '#/components/schemas/AliceSyncJobQueryResponseData'
     OidcCallbackResponse:
       allOf:
         - $ref: '#/components/schemas/ApiResponse'
@@ -403,20 +614,27 @@ components:
               $ref: '#/components/schemas/OidcCallbackResult'
     AuthErrorResponse:
       type: object
+      description: 统一认证错误响应
       required: [code, message, traceId, timestamp]
       properties:
         code:
           type: string
           pattern: '^AUTH-(?:[1-5]|9)[0-9]{3}$'
+          description: 认证错误码
         message:
           type: string
+          description: 错误消息
         detail:
           type: [string, "null"]
+          description: 错误细节
         traceId:
           type: string
           minLength: 1
+          description: 链路追踪 ID
         timestamp:
           type: string
           format: date-time
+          description: 错误时间
         path:
           type: [string, "null"]
+          description: 请求路径
