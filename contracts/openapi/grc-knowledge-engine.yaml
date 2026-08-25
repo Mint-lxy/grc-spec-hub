@@ -35,7 +35,7 @@ paths:
       parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
       requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/CreateKnowledgeTagRequest'}}}}
       responses:
-        '201': {$ref: '#/components/responses/KnowledgeTagResponse'}
+        '200': {$ref: '#/components/responses/KnowledgeTagResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '409': {$ref: '#/components/responses/Conflict'}
@@ -72,7 +72,7 @@ paths:
       parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
       requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/CreateKnowledgeBaseRequest'}}}}
       responses:
-        '201': {$ref: '#/components/responses/KnowledgeBaseResponse'}
+        '200': {$ref: '#/components/responses/KnowledgeBaseResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '409': {$ref: '#/components/responses/Conflict'}
@@ -106,8 +106,8 @@ paths:
         '409': {$ref: '#/components/responses/Conflict'}
         '412': {$ref: '#/components/responses/PreconditionFailed'}
         '428': {$ref: '#/components/responses/PreconditionRequired'}
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/pipeline-config:
-    post:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/config:
+    patch:
       tags: [knowledge-bases]
       summary: 更新业务可调管线配置并触发重建
       operationId: updatePipelineConfig
@@ -117,7 +117,7 @@ paths:
         - {$ref: '#/components/parameters/IdempotencyKey'}
       requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/UpdatePipelineConfigRequest'}}}}
       responses:
-        '202': {$ref: '#/components/responses/PipelineUpdateResponse'}
+        '200': {$ref: '#/components/responses/PipelineUpdateResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
@@ -223,6 +223,19 @@ paths:
         '422': {$ref: '#/components/responses/Unprocessable'}
         '503': {$ref: '#/components/responses/DependencyUnavailable'}
   /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents:
+    post:
+      tags: [documents]
+      summary: 创建单份文档并启动构建
+      operationId: createDocument
+      parameters:
+        - {$ref: '#/components/parameters/KnowledgeBaseId'}
+      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/CreateKnowledgeDocumentRequest'}}}}
+      responses:
+        '200': {$ref: '#/components/responses/KnowledgeDocumentCreateResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
     get:
       tags: [documents]
       summary: 查询 active manifest 下的逻辑文档
@@ -250,7 +263,7 @@ paths:
         - {$ref: '#/components/parameters/IdempotencyKey'}
       requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/BatchDocumentStageConfigRequest'}}}}
       responses:
-        '202': {$ref: '#/components/responses/BuildJobResponse'}
+        '200': {$ref: '#/components/responses/BuildJobResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
@@ -269,9 +282,9 @@ paths:
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
   /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/stage-config:
-    post:
+    patch:
       tags: [documents]
-      summary: 更新文档 parser/chunking/enhance 覆盖
+      summary: 更新文档 parser/chunking/enhance 覆盖并异步重建
       operationId: updateDocumentStageConfig
       parameters:
         - {$ref: '#/components/parameters/KnowledgeBaseId'}
@@ -280,7 +293,7 @@ paths:
         - {$ref: '#/components/parameters/IdempotencyKey'}
       requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/DocumentStageOverride'}}}}
       responses:
-        '202': {$ref: '#/components/responses/BuildJobResponse'}
+        '200': {$ref: '#/components/responses/DocumentStageConfigUpdateResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
@@ -296,6 +309,7 @@ paths:
       parameters:
         - {$ref: '#/components/parameters/KnowledgeBaseId'}
         - {$ref: '#/components/parameters/DocumentId'}
+        - {name: jobId, in: query, required: false, schema: {type: integer, format: int64}}
       responses:
         '200': {$ref: '#/components/responses/ParseViewResponse'}
         '403': {$ref: '#/components/responses/Forbidden'}
@@ -323,6 +337,7 @@ paths:
       parameters:
         - {$ref: '#/components/parameters/KnowledgeBaseId'}
         - {$ref: '#/components/parameters/DocumentId'}
+        - {name: jobId, in: query, required: false, schema: {type: integer, format: int64}}
         - {name: keyword, in: query, schema: {type: string, maxLength: 255}}
         - {name: snippetContext, in: query, schema: {type: integer, minimum: 0, maximum: 10, default: 0}}
         - {$ref: '#/components/parameters/Page'}
@@ -341,13 +356,13 @@ paths:
         - {$ref: '#/components/parameters/KnowledgeBaseId'}
         - {$ref: '#/components/parameters/DocumentId'}
         - {$ref: '#/components/parameters/ChunkId'}
+        - {name: jobId, in: query, required: false, schema: {type: integer, format: int64}}
         - {name: snippetContext, in: query, schema: {type: integer, minimum: 0, maximum: 10, default: 0}}
       responses:
         '200': {$ref: '#/components/responses/ChunkResponse'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/chunks/{chunkId}/update:
-    post:
+    put:
       tags: [documents]
       summary: 写时复制编辑 Leaf 并从增强阶段重建
       operationId: updateLeafChunk
@@ -359,7 +374,7 @@ paths:
         - {$ref: '#/components/parameters/IdempotencyKey'}
       requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/UpdateChunkRequest'}}}}
       responses:
-        '202': {$ref: '#/components/responses/ChunkMutationResponse'}
+        '200': {$ref: '#/components/responses/ChunkResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
@@ -393,6 +408,7 @@ paths:
         - {$ref: '#/components/parameters/KnowledgeBaseId'}
         - {$ref: '#/components/parameters/DocumentId'}
         - {name: enhanceType, in: path, required: true, schema: {type: string, enum: [SUMMARY, KEYWORDS, FAQ]}}
+        - {name: jobId, in: query, required: false, schema: {type: integer, format: int64}}
         - {$ref: '#/components/parameters/Page'}
         - {$ref: '#/components/parameters/PageSize'}
       responses:
@@ -454,12 +470,26 @@ paths:
         - {$ref: '#/components/parameters/IdempotencyKey'}
       requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/CreateBuildJobRequest'}}}}
       responses:
-        '202': {$ref: '#/components/responses/BuildJobResponse'}
+        '200': {$ref: '#/components/responses/BuildJobResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '422': {$ref: '#/components/responses/Unprocessable'}
+  /api/v1/knowledge/documents/{documentId}/stages/{stageType}/run:
+    post:
+      tags: [build-jobs]
+      summary: 执行文档阶段
+      operationId: runKnowledgeDocumentStage
+      parameters:
+        - {$ref: '#/components/parameters/DocumentId'}
+        - {name: stageType, in: path, required: true, schema: {type: string}}
+      requestBody: {content: {application/json: {schema: {$ref: '#/components/schemas/StageRunRequest'}}}}
+      responses:
+        '200': {$ref: '#/components/responses/StageRunResponse'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
   /api/v1/knowledge/jobs/{jobId}:
     get:
       tags: [build-jobs]
@@ -479,7 +509,7 @@ paths:
         - {$ref: '#/components/parameters/JobId'}
         - {$ref: '#/components/parameters/IdempotencyKey'}
       responses:
-        '202': {$ref: '#/components/responses/BuildJobResponse'}
+        '200': {$ref: '#/components/responses/BuildJobResponse'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
@@ -492,7 +522,7 @@ paths:
         - {$ref: '#/components/parameters/JobId'}
         - {$ref: '#/components/parameters/IdempotencyKey'}
       responses:
-        '202': {$ref: '#/components/responses/BuildJobResponse'}
+        '200': {$ref: '#/components/responses/BuildJobResponse'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
@@ -625,8 +655,10 @@ components:
     KnowledgeBaseStatsResponse: {description: 成功, content: {application/json: {schema: {$ref: '#/components/schemas/KnowledgeBaseStatsEnvelope'}}}}
     KnowledgeTagResponse: {description: 创建成功, content: {application/json: {schema: {$ref: '#/components/schemas/KnowledgeTagEnvelope'}}}}
     KnowledgeTagListResponse: {description: 成功, content: {application/json: {schema: {$ref: '#/components/schemas/KnowledgeTagListEnvelope'}}}}
-    PipelineUpdateResponse: {description: 已接受重建, content: {application/json: {schema: {$ref: '#/components/schemas/PipelineUpdateEnvelope'}}}}
+    PipelineUpdateResponse: {description: 更新成功, content: {application/json: {schema: {$ref: '#/components/schemas/PipelineUpdateEnvelope'}}}}
+    DocumentStageConfigUpdateResponse: {description: 更新成功, content: {application/json: {schema: {$ref: '#/components/schemas/DocumentStageConfigUpdateEnvelope'}}}}
     DocumentImportResponse: {description: 整体请求有效；逐项结果保持输入顺序, content: {application/json: {schema: {$ref: '#/components/schemas/DocumentImportEnvelope'}}}}
+    KnowledgeDocumentCreateResponse: {description: 创建文档并启动构建, content: {application/json: {schema: {$ref: '#/components/schemas/KnowledgeDocumentCreateEnvelope'}}}}
     DocumentPageResponse: {description: 成功, content: {application/json: {schema: {$ref: '#/components/schemas/DocumentPageEnvelope'}}}}
     DocumentResponse: {description: 成功, headers: {ETag: {schema: {type: string}}}, content: {application/json: {schema: {$ref: '#/components/schemas/DocumentEnvelope'}}}}
     ParseViewResponse: {description: 成功, content: {application/json: {schema: {$ref: '#/components/schemas/ParseViewEnvelope'}}}}
@@ -636,6 +668,7 @@ components:
     ChunkMutationResponse: {description: 已接受写时复制, content: {application/json: {schema: {$ref: '#/components/schemas/ChunkMutationEnvelope'}}}}
     EnhancementPageResponse: {description: 成功, content: {application/json: {schema: {$ref: '#/components/schemas/EnhancementPageEnvelope'}}}}
     BuildJobResponse: {description: jobId 仅用于运维状态, content: {application/json: {schema: {$ref: '#/components/schemas/BuildJobEnvelope'}}}}
+    StageRunResponse: {description: 执行成功, content: {application/json: {schema: {$ref: '#/components/schemas/StageRunEnvelope'}}}}
     BuildJobPageResponse: {description: 成功, content: {application/json: {schema: {$ref: '#/components/schemas/BuildJobPageEnvelope'}}}}
     RetrievalResponse: {description: rank 为 1-based，score 为原始小数, content: {application/json: {schema: {$ref: '#/components/schemas/RetrievalEnvelope'}}}}
     PurgeResponse: {description: 已不可见；Milvus 确认后立即清理且无恢复窗口, content: {application/json: {schema: {$ref: '#/components/schemas/PurgeEnvelope'}}}}
@@ -801,21 +834,19 @@ components:
       properties:
         name: {type: string, minLength: 1, maxLength: 64}
     KnowledgeTagList:
-      type: object
-      additionalProperties: false
-      required: [items]
-      properties:
-        items: {type: array, items: {$ref: '#/components/schemas/KnowledgeTag'}}
+      type: array
+      items: {$ref: '#/components/schemas/KnowledgeTag'}
     CreateKnowledgeBaseRequest:
       type: object
       additionalProperties: false
-      required: [directoryId, name, pipelineConfig]
+      required: [directoryId, name, visibility, pipelineConfig]
       properties:
         directoryId: {type: integer, format: int64, minimum: 1}
         name: {type: string, minLength: 1, maxLength: 255}
-        description: {type: [string, 'null'], maxLength: 4000}
-        tags: {type: array, maxItems: 20, uniqueItems: true, items: {type: string, minLength: 1, maxLength: 64}}
-        visibility: {type: string, enum: [PRIVATE, PUBLIC], default: PRIVATE}
+        description: {type: [string, 'null'], maxLength: 512}
+        recommendedConfig: {type: boolean, default: true}
+        tags: {type: array, maxItems: 20, items: {$ref: '#/components/schemas/KnowledgeTag'}}
+        visibility: {type: string, enum: [PRIVATE, PUBLIC]}
         pipelineConfig: {$ref: '#/components/schemas/BusinessPipelineConfig'}
     UpdateKnowledgeBaseRequest:
       type: object
@@ -934,17 +965,11 @@ components:
         retrieval: {type: array, items: {$ref: '#/components/schemas/PipelineCapability'}}
     PipelineUpdateResult:
       type: object
-      additionalProperties: false
-      required: [affectedDocuments, rebuildRequired, effectScope]
+      required: [knowledgeBaseId, pipelineConfig, updatedAt]
       properties:
-        jobId: {type: integer, format: int64, minimum: 1}
-        affectedDocuments: {type: integer, minimum: 0}
-        rebuildRequired: {type: boolean}
-        effectScope:
-          type: string
-          enum: [future-builds-only, rebuild-required]
-          description: 未产生可检索事实时仅影响未来构建；已有 active Generation 且检索相关配置变化时必须重建。
-        fromStage: {$ref: '#/components/schemas/BuildStage'}
+        knowledgeBaseId: {type: string}
+        pipelineConfig: {type: object, additionalProperties: true}
+        updatedAt: {type: string, format: date-time}
     SourceAccessGrant:
       type: object
       additionalProperties: false
@@ -962,6 +987,24 @@ components:
       properties:
         start: {type: integer, minimum: 1}
         end: {type: integer, minimum: 1}
+    CreateKnowledgeDocumentRequest:
+      type: object
+      additionalProperties: false
+      required: [fileName, sourceType, fileId, docType]
+      properties:
+        fileName: {type: string, minLength: 1, maxLength: 512}
+        sourceType: {type: string, minLength: 1}
+        fileId: {type: integer, format: int64}
+        docType: {type: string, minLength: 1}
+        sourceMeta: {type: object, additionalProperties: true}
+        stageOverrides: {type: object, additionalProperties: true}
+    KnowledgeDocumentCreateResult:
+      type: object
+      required: [documentId, jobId, status]
+      properties:
+        documentId: {type: string}
+        jobId: {type: string}
+        status: {type: string}
     DocumentImportItem:
       type: object
       additionalProperties: false
@@ -1236,6 +1279,11 @@ components:
         embedStatus: {type: [string, 'null']}
         metadata: {type: object, additionalProperties: true}
         createdAt: {type: [string, 'null'], format: date-time}
+    StageRunRequest:
+      type: object
+      properties:
+        stageConfig: {type: object, additionalProperties: true}
+        persist: {type: boolean, default: false}
     CreateBuildJobRequest:
       type: object
       additionalProperties: false
@@ -1572,7 +1620,9 @@ components:
     KnowledgeBasePageEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataKnowledgeBasePage'}]}
     KnowledgeBaseStatsEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataKnowledgeBaseStats'}]}
     PipelineUpdateEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataPipelineUpdate'}]}
+    DocumentStageConfigUpdateEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataDocumentStageConfigUpdate'}]}
     DocumentImportEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataDocumentImport'}]}
+    KnowledgeDocumentCreateEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataKnowledgeDocumentCreate'}]}
     DocumentPageEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataDocumentPage'}]}
     DocumentEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataDocument'}]}
     ParseViewEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataParseView'}]}
@@ -1582,6 +1632,7 @@ components:
     ChunkMutationEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataChunkMutation'}]}
     EnhancementPageEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataEnhancementPage'}]}
     BuildJobEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataBuildJob'}]}
+    StageRunEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataStageRun'}]}
     BuildJobPageEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataBuildJobPage'}]}
     RetrievalEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataRetrieval'}]}
     PurgeEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataPurge'}]}
@@ -1597,7 +1648,18 @@ components:
     DataKnowledgeBasePage: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/PageKnowledgeBase'}}}
     DataKnowledgeBaseStats: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/KnowledgeBaseStats'}}}
     DataPipelineUpdate: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/PipelineUpdateResult'}}}
+    DataDocumentStageConfigUpdate:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [pipelineConfig, updatedAt]
+          properties:
+            pipelineConfig: {type: object, additionalProperties: true}
+            updatedAt: {type: string, format: date-time}
     DataDocumentImport: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/DocumentImportResult'}}}
+    DataKnowledgeDocumentCreate: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/KnowledgeDocumentCreateResult'}}}
     DataDocumentPage: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/PageDocument'}}}
     DataDocument: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/DocumentDetail'}}}
     DataParseView: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/DocumentParseView'}}}
@@ -1607,6 +1669,18 @@ components:
     DataChunkMutation: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/ChunkMutationResult'}}}
     DataEnhancementPage: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/PageEnhancement'}}}
     DataBuildJob: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/BuildJob'}}}
+    DataStageRun:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          properties:
+            pipelineJobId: {type: string}
+            previousJobId: {type: [string, 'null']}
+            isNewJob: {type: boolean}
+            stageStatus: {type: string}
+            runMode: {type: string}
     DataBuildJobPage: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/PageBuildJob'}}}
     DataRetrieval: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/RetrievalResult'}}}
     DataPurge: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/PurgeOperation'}}}
