@@ -46,6 +46,10 @@
 - 「建库人/创建者」等不明确表述统一为全称「知识库创建角色持有人」（FR-013c 与 Clarifications）。
 - 结构：补齐 spec-kit 头部字段与本目录质量检查单（checklists/requirements.md）。
 
+### Session 2026-08-28（用户裁定）
+
+- Q: 知识库页面应如何按 Viewer、Consumer、Contributor、Owner 与无权限用户区分展示和操作？ → A: 采用四级有效权限加无权限视图：Viewer 仅可见文档列表的 Name 与 Update，隐藏全部操作按钮、Pipeline、Source、Trunk 等处理明细列，不可进入文档详情；Consumer 可见完整文档列表并进入详情只读查看，但不显示编辑、构建、删除按钮；Contributor 与 Owner（Deputy 按既有 Owner 等效权限）可见完整列表和全部状态信息，可执行上传、编辑、删除及 Auto/Manual 构建，进入知识库默认展示 Documents Tab；无权限用户仅可查看可发现知识库的 Information 页（含描述、Owner 信息等），不可见文档列表，并须在右上角或导航栏等显著位置获得「查看/申请权限」入口跳转 Alice。完全隐藏知识库仍遵循 FR-011 的不可发现边界。该裁定不改变 FR-039：Pipeline 配置保存仍仅限 Owner/Deputy；Viewer 的 Alice 角色映射与默认分配方式由 watchlist #73 继续跟踪。
+
 ---
 
 ## User Scenarios & Testing
@@ -170,6 +174,10 @@
 3. **Given** 知识库级维护角色回收, **When** 知识库 Owner 或知识库 Deputy 发起回收, **Then** 平台调用 Alice 接口完成角色移除。
 4. **Given** 公共目录建库完成, **When** 平台创建该库的三个维护角色, **Then** 知识库 Owner 角色授予建库时指定的知识库 Owner 与知识库 Deputy；后续授予由知识库 Owner 或 Deputy 审批；两者全部失效时采用双层兜底（2026-08-25 用户裁定）——第一责任人为上级目录控制角色在 Alice 侧补员；上级目录控制角色亦无有效人员时，由 Alice 侧管理员或应用账号补充新成员，平台同步后恢复库级治理。
 5. **Given** 我的目录知识库, **When** 查看权限信息, **Then** 不展示任何角色信息，不调用 Alice（不存在 Alice 角色概念）。
+6. **Given** 用户对知识库具有 Viewer 有效权限, **When** 打开知识库的 Documents Tab, **Then** 文档列表仅展示 Name 与 Update 两列，全部操作按钮及 Pipeline、Source、Trunk 等处理明细列均不展示，且文档名称不可点击、无法进入详情或执行编辑和构建。
+7. **Given** 用户对知识库具有 Consumer 有效权限, **When** 打开 Documents Tab 并选择一份文档, **Then** 可查看完整文档列表并进入文档详情只读查看，但页面不展示编辑、构建或删除按钮。
+8. **Given** 用户对知识库具有 Contributor 或 Owner 有效权限（Deputy 按 Owner 等效权限）, **When** 进入知识库, **Then** 默认展示 Documents Tab，可查看完整文档列表及 Pipeline、Trunk 等全部状态信息，并可执行上传、编辑、删除及 Auto/Manual 构建；Pipeline 配置保存权限仍遵循 FR-039。
+9. **Given** 用户对一个可发现的知识库无任何有效权限, **When** 通过知识库入口打开页面, **Then** 仅展示 Information 页（含描述与 Owner 信息等），不展示 Documents Tab，并在右上角或导航栏等显著位置展示「查看/申请权限」入口以跳转 Alice；完全隐藏知识库仍不可被无权限用户发现。
 
 ---
 
@@ -404,6 +412,10 @@
 - **FR-036**: 系统 MUST 仅允许「已向量化」的文档参与检索。
 - **FR-037**: 系统 MUST 在文件详情中展示：源文件分页预览、解析后的 Markdown 内容、切片列表（支持搜索、逐条编辑文本与删除单个切片）、文档摘要与关键词、解析信息。切片文本编辑保存后重算词元数并触发该文档重新增强与向量化；删除切片后其向量立即从向量库移除、不再参与检索（不触发全文档重跑，文档级指标随之减少）。不支持切片的新增、拆分与合并——结构性变更经文档级参数重跑或文档删除实现（2026-08-21 clarify 用户裁定：删除切片为敏感内容的切片级下架粒度）。
 - **FR-037b**: 切片编辑与文档级参数保存 MUST 实施版本校验（乐观锁）：提交时携带读取时的版本，不匹配则拒绝并提示「内容已被他人修改，请刷新后重试」——与资产热改并发保护（PRD §9.1.1）同构，不静默覆盖他人修改（2026-08-21 clarify 确认）。
+- **FR-037c**: 系统 MUST 对 Viewer 有效权限采用最小展示：Documents Tab 的文档列表仅展示 Name 与 Update，隐藏全部操作按钮及 Pipeline、Source、Trunk 等处理明细列；文档名称不可点击，Viewer 不可进入文档详情，也不可执行上传、编辑、删除或构建（2026-08-28 用户裁定）。
+- **FR-037d**: 系统 MUST 对 Consumer 有效权限展示完整文档列表并允许进入文档详情只读查看，同时隐藏编辑、构建与删除按钮，禁止任何内容或构建操作（2026-08-28 用户裁定）。
+- **FR-037e**: 系统 MUST 对 Contributor 与 Owner 有效权限展示完整文档列表及 Pipeline、Trunk 等全部状态信息，允许执行上传、编辑、删除及 Auto/Manual 构建；Contributor 或 Owner 进入知识库时 MUST 默认展示 Documents Tab。Deputy 沿用既有 Owner 等效权限；Pipeline 配置保存仍仅限 Owner/Deputy，遵循 FR-039（2026-08-28 用户裁定）。
+- **FR-037f**: 对可被当前用户发现但用户无任何有效权限的知识库，系统 MUST 仅展示 Information 页（至少包含描述与 Owner 信息），不得展示 Documents Tab，并 MUST 在右上角或导航栏等显著位置展示「查看/申请权限」入口以跳转 Alice。可见范围为「完全隐藏」的知识库仍遵循 FR-011，不向无权限用户暴露（2026-08-28 用户裁定）。
 
 **构建参数**
 
@@ -469,7 +481,8 @@
 - **文档（Document）**: 知识库内的单个文件。关键属性：文件名、格式、大小、构建状态（未解析/已解析/已切片/已增强/已向量化/构建失败）、失败阶段与原因、来源通道、导入时间、文档级参数覆盖。
 - **切片（Chunk）**: 文档经切片策略处理后的最小检索单元。关键属性：内容文本、词元数、向量、所属文档、排序位次。
 - **构建流水线（Build Pipeline）**: 文档从导入到可检索的处理过程。四个阶段：解析→切片→内容增强→向量化。同一知识库至多一条活跃流水线。
-- **知识侧角色（Knowledge Role）**: 五种角色——目录控制角色、知识库创建角色、知识库 Owner、知识库 Contributor、知识库 Consumer。目录级角色的授予、回收、同级多人控制与角色交接以 Alice 流程为主，平台展示权限 ID、申请入口与同步后的当前权限状态；知识库级维护角色由平台调用 Alice 创建，授予与回收由知识库 Owner 或知识库 Deputy 单级审批。
+- **知识侧角色（Knowledge Role）**: 五种既有治理角色——目录控制角色、知识库创建角色、知识库 Owner、知识库 Contributor、知识库 Consumer。目录级角色的授予、回收、同级多人控制与角色交接以 Alice 流程为主，平台展示权限 ID、申请入口与同步后的当前权限状态；知识库级维护角色由平台调用 Alice 创建，授予与回收由知识库 Owner 或知识库 Deputy 单级审批。
+- **知识库页面有效权限层级（Knowledge Page Access Level）**: 用于页面展示与交互判定的四级权限——Viewer、Consumer、Contributor、Owner；另有无权限状态。Viewer 低于 Consumer，仅可查看文档 Name 与 Update；Deputy 按 Owner 等效权限处理。Viewer 与 Alice 角色的映射及默认分配方式由 watchlist #73 跟踪，不改变本 spec 已确定的页面权限矩阵。
 - **分享授权（Share Grant）**: 我的目录知识库的平台内授权记录。关键属性：目标知识库、被分享者、授权级别（可查看/可编辑）、创建时间。由平台管理、不写入 Alice；被分享者账号被 Alice 停用即失效；创建者账号被停用时随知识库软删除同步失效。
 
 ---
