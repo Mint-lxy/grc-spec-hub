@@ -34,4 +34,5 @@
 - 本文件为 2026-08-23 BA Lead 逐项复核（19 组）后补建；复核修正与补充见 spec.md Clarifications「Session 2026-08-23」记录块。
 - 解析器收敛为 Docling / MinerU（不使用 DeepDoc）；语言提示为中文/英文/德语/自动检测；构建参数矩阵提醒 Li Zhonghao 审阅（watchlist #51）。
 - 2026-08-28 按用户裁定补充 Viewer、Consumer、Contributor、Owner 与无权限用户的知识库页面展示及操作矩阵；复核后仍满足本检查单全部条目。
+- 2026-08-30 按用户裁定明确建库 `Description` 必填，字数限制保留 `[待确认]`；已补充验收场景并复核需求可测试性。
 - specs/** 属守门点，本 spec 任何后续改动需人审后方可合并。
