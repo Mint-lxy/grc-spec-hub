@@ -1,5 +1,5 @@
 <!-- 自动区块：由 memory-digest 管线维护，人工修改会被覆盖 -->
-# grc-agent-service 状态卡（更新于 2026-W34）
+# grc-agent-service 状态卡（更新于 2026-W35）
 
 ## 职责与边界
 无状态推理执行引擎：接收已组装好的会话上下文 → 知识库检索 → MCP 工具调用 → LLM 推理 → 流式输出。
@@ -14,6 +14,8 @@
 - 消费契约：`contracts/openapi/grc-knowledge-engine.yaml`、`contracts/openapi/grc-mgmt-service.yaml`
 
 ## 近期重要变化（最近 4 周）
+- W35: Chat SSE 协议增强——新增 thinking 事件与 done 事件 messageId（`801a16f`，spec 001）；
+  服务文档与 hub 要求对齐（`14d2dac`）。注意：thinking 事件实现先行，契约未同步（见已知问题）
 - W34: Nexus 网关适配完成——Chat 适配器加 `query_params` 支持 Azure OpenAI 风格 URL；
   新增 `VertexStyleEmbeddingAdapter` 对接 gemini-embedding-001
 - W34: userId 凭据解析链路打通——`SessionContext` 加 `user_id` 字段，`llm_client.py`
@@ -23,6 +25,7 @@
 - W33: 服务孵化，初始化仓库脚手架；三端点首版实现 + 本地 mock 端到端联调通过
 
 ## 已知问题
+- SSE thinking 事件/messageId 实现先于契约（`801a16f`），grc-agent-service.yaml 未同步 [待确认 @Zhang Hao]
 - T115 护栏钩子仍是占位实现（等 plan.md 待评审确认项定论：由 agent-service 还是网关负责）
 - ADR-007（A2A 协议统一，状态 Proposed）若 Accept，现有 3 个自定义端点将替换为 A2A handler
 - 多实例部署下 cancel 路由方案待架构确认（一致性哈希 vs Redis 广播）
