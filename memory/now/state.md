@@ -1,27 +1,33 @@
 <!-- 自动区块：由 memory-digest 管线维护摘要性内容；人工可在人审 PR 中订正 -->
 # 项目现状总览
 
-> 更新于：2026-W35 · 维持 ≤ 2 页
+> 更新于：2026-W36（digest 2026-W35）· 维持 ≤ 2 页
 
 ## 所处阶段
 项目启动，第 0 周奠基中。PRD v1.2（与用户旅程 v1.2 差异收敛版）为当前需求基线，specs 已拆解为 9 个 feature spec 并完成 v1.0→v1.2 同步，服务拆分 ADR 已产出。
 
 ## 本里程碑目标
 - M1：P0 核心交付——平台全链路跑通（目标日期待确认）
+- 9 月 MVP 节奏（2026-08-25 Qianqian 推动）：9/7 知识库开放接口供 defi 场景外部调用（INT 端到端首次业务测试）、9/14 与 9 月底分段交付；INT 先行、SSO 与完整权限体系上生产前必须补齐
 
 ## 进行中的 specs
-- 已 Reviewed（需求面冻结）：001-conversation、002-marketplace、003-asset-creation、004-publish、005-knowledge、007-credential、009-notification——002/003/004/005/007/009 可直接进 plan；001 进 plan 前置为 watchlist #45/#50（紧急，Zhang Hao）
-- 仍 Draft：006-guardrail、008-admin（均已完成 spec-kit 重写与澄清，待 BA Lead/人审终审后再决定是否升 Reviewed）
+- **9 个 feature spec 全部 Reviewed（需求面冻结）**：006-guardrail 与 008-admin 于 2026-08-25 经 grill-me 终审升 Reviewed（`b37e029`/`9670628`，用户授权）
+- 002/003/004/005/006/007/008/009 可直接进 plan；001 进 plan 前置为 watchlist #45/#50（紧急，Zhang Hao）
 
 ## 当前风险
 - 记忆腐化是本体系最大单点风险 → 依赖每周 digest 审核纪律。
 - 架构待确认项已收窄至 **1 项**（护栏检测服务实现，待 PoC），其余 11 项均已确认关闭。
 - 各 feature spec 未决问题散布在「未决问题」或 plan 待确认章节；PRD §13.10 共 16 项已全部确认或关闭；002/005 Open Questions 已清零，003/004 经三轮澄清+终审后仅剩有归属的 watchlist 项；spec 侧遗留待确认：#22 测评阈值、#44 裁判模型算力与护栏/凭据缓存等架构参数、#52 测评超时 30 分钟审定、#58 个人出站凭据探测设计、#59 个人模型凭据失效 vs 抖动判定。#33 模板维护归属、#53 MCP 协议审核、#54 通知事件归类已关闭；#61 P0 护栏类型是否不含 PII 待客户确认。
-- 契约门禁已于 2026-08-22 修复并通过（watchlist #48 closed）；遗留一项回溯确认：main 上 "update api" 提交删除 `DELETE /mgmt/knowledge/knowledge-bases/{kbId}` 未经消费方确认（watchlist #49，责任人 Zhang Hao）。
+- 契约门禁已于 2026-08-22 修复并通过（watchlist #48 closed）；遗留一项回溯确认：main 上 "update api" 提交删除 `DELETE /mgmt/knowledge/knowledge-bases/{kbId}` 未经消费方确认（watchlist #49，责任人 Zhang Hao）。**2026-08-27 新增同类**：`7c62373` 重写 grc-mgmt-service.yaml，vault 内部接口 `resolve-model`/`report-credential-failure` 被替换为 `tokens/verify` + `credentials/{id}/resolve`，版本未升 MAJOR、无消费方确认；消费方 grc-python-sdk 仍调旧端点，凭据解析链路断裂（digest 2026-W35）。
+- 分支/基线风险（2026-W35）：全部服务仓库 active 开发在 feature/release260831，main 无回流、release/release260831 全面落后 feature（3~25 提交）；8/31 发版基线待确认。hub 侧 spec-sync-prd-v1.2 残余 1 提交（`2848b62`）未上 main；feat/chat-subdomain-memory-update、watchlist_emma 两分支含 memory/now 改动待处置。
 - 里程碑日期（M1/M2/M3）仍为 `[待确认]`。
 - 环境与账号阻塞（2 项未闭环）：Alice admin 账号待申请（最晚 2026-08-19）、Azure→SharePoint 方案进行中；GitHub 账号已开通（2026-08-17）。
 
 ## 近期重要变化
+- 2026-08-28：**知识库会议待办登记与 spec 005 权限回写**——知识库页面角色权限 FR-037c~f 入 spec（`2e72686`，Viewer/Consumer/Contributor-Owner/无权限四档交互边界）；watchlist #75 关闭，新增 #76（建库表单与检索策略）/#77（构建信息展示）/#78（Overview KPI）open（`c6f697f`）。
+- 2026-08-27：**mgmt 契约大改写（流程存疑）**——`7c62373` 重写 grc-mgmt-service.yaml（+1849/-992）：vault 内部 API 换成 `tokens/verify` + `credentials/{id}/resolve`；auth-service `a23cf4e` 同分钟联动，mgmt-service 已实现新端点；python-sdk 未跟随（见「当前风险」）。
+- 2026-08-24~28：**服务仓库 release260831 冲刺**——ai-portal 落地 Marketplace M1/M3~M9 前端与知识库概览/设置（对齐 005 三档可见性）；mgmt-service 落地 Chat 子域（001）+ Marketplace 后端 + MCP 管理面；knowledge-engine/parser-engine 打通解析链路上传与状态回传；mcp-server 转 monorepo（conf/sharepoint/oss）；agent-service 补 SSE thinking 事件。均在 feature/release260831，未合并 main（详见 digests/2026-W35.md）。
+- 2026-08-25：**006/008 经 grill-me 终审升 Reviewed（用户授权）**——006 裁定 4 项（停用终态补验收场景、SC-007 措辞），008 裁定 4 项（FR-052 措辞、补 FR-009、Story 标注统一、FR-011 维持 PRD 口径）；9 个 feature spec 需求面全部冻结。
 - 2026-08-25：**005/001/000 经 grill-me 裁定回写（当日两场会议决议）**——005：删除三层语义（向量索引立即物理删／PG 原始 chunk+metadata 按可配置保留期保留供审计排查／平台不支持恢复完整知识库）、可见范围两档扩三档（公开可用／公开需申请／完全隐藏，公共目录默认公开需申请）、构建参数保存权限收敛为仅 Owner/Deputy、Owner/Deputy 空缺双层兜底（上级目录控制角色→Alice 侧管理员或应用账号）、一期静态推荐配置＋按文档类型动态推荐列 P1 扩展点；000：AC-G7 补知识库留存层、新增 AC-G8 统一清理任务（定时执行＋监控告警＋禁人工操作数据库）；001：新增回答渲染 FR-027b/c（表格横滑／代码块高亮行号复制／Mermaid 公式／防闪烁／不强制滚动／长回答折叠）、Chat 多模态本期不支持入 Non-Goals（原生视觉为主路线）；006 与会议口径核对一致零改动。契约与 FR-038/FR-011/FR-042 对齐差距及全部待定项登记 watchlist #62–#71（含 #70 重建机制细则待续谈终态后回写）。上午会议的中间过程状态流呈现为倩倩待办（下周一前补 001 细节、璇璇先评估），本次未改 001 该部分。
 - 2026-08-25：**9 月 MVP 节奏（Qianqian 推动）**——9/7 一周优先知识库开放接口供 defi 场景外部系统调用（INT 环境端到端可首次业务测试）、9/14 与 9 月底分段交付，小步快跑 MVP、增强排到 1.1 及之后；INT 先行、SSO 与完整权限体系可滞后但上生产前必须补齐；云资源 PO 已提交（ITT 建独立 Microsoft subscription）；9/7 版本可用简化 UI。里程碑正式日期仍待确认（watchlist #13）。
 - 2026-08-24：**凭据模型与负责人模型修订（项目组线下对齐后用户裁定）**——旧资产凭据模型整体取消（一切资产调用使用订阅者个人凭据：静态＝订阅者平台外获取→密钥库填入→详情页绑定；动态＝订阅通过后平台代颁发入库）；创建者只声明凭据元数据、全程不接触密钥值；密钥值轻发布通道撤销；首发成功才产生首位 Owner（中止/失败不产生），首发前指定 Deputy（可多位、≥1 位）自动成为草稿协作者，首发成功时创建者转 Owner、协作者转 Deputy；术语归一（资产侧统一使用创建者、Owner/Deputy、订阅者）。PRD §9.3/§9.1.1/§9.1.2/§4/J1/J2/J8/M2/M3/M7 与 specs 001/002/003/004/007/008/009、CONTEXT、glossary 已同步修订；新凭据模型替代口径由 ADR-005 承载，不新增单独 ADR。同日：006/007/008/009 完成 spec-kit 重写与澄清（006 采纳护栏滑动窗口机制基线＋命中零字留存＋模板不可变模型；007 取消 PAT 重新生成、动作语义统一、凭据编辑矩阵、审计三元组；008 收敛孤儿补员、角色权限并集、P0 模型生命周期只读、连接器技术鉴权与 Nexus 凭据对象引用；009 十三类通知含「资产治理通知」）。

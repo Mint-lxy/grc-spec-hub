@@ -1,5 +1,5 @@
 <!-- 自动区块：由 memory-digest 管线维护，人工修改会被覆盖 -->
-# grc-python-sdk 状态卡（更新于 2026-W34）
+# grc-python-sdk 状态卡（更新于 2026-W35）
 
 ## 职责与边界
 Python AI SDK（grc-ai-sdk，ADR-003）：凭据解析（对接 grc-mgmt-service resolve-model）、
@@ -25,6 +25,7 @@ Provider 适配器（Chat/Embedding/Rerank/Parser）、重试基础设施、AC-1
 - W33: 服务孵化，初始化仓库脚手架；六边形架构（ports/adapters/domain）+ ProviderRegistry
 
 ## 已知问题
+- **【高】契约断裂**：hub main 契约 `7c62373`（2026-08-27）将 vault 内部接口替换为 `tokens/verify` + `credentials/{id}/resolve`，SDK `credential_resolver.py` 仍调旧端点 `resolve-model`/`report-credential-failure`（源码与测试），凭据解析链路联调必断，需立即适配 [待确认 @Zhang Hao]（digest 2026-W35）
 - Embedding/Rerank/Parser 有代码有单测，从未对接过真实服务（下游都还是空脚手架），等真实消费方接入时联调
 - `complete_chat_for_user` 的 AC-13 降级模式仅实现了 Chat，Embedding/Rerank 等有真实消费方时再复制
 <!-- /自动区块 -->
