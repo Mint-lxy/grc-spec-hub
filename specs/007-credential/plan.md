@@ -33,8 +33,9 @@
 
 **Project Type**: library
 
-**Performance Goals**: `[待确认]`（凭据缓存 TTL 具体取值待与 grc-mgmt-service 团队对齐，
-ADR-005 提到该服务侧缓存 TTL 5min，SDK 侧缓存可以对齐或更短）
+**Performance Goals**: SDK 凭据解析缓存 TTL＝60 秒（phase1 暂定基线，2026-08-31 用户裁定，
+watchlist #44 子项④收敛；服务侧缓存 TTL 5min 见 ADR-005，SDK 侧更短属保守策略；
+调用方可经 `cache_ttl_seconds` 构造参数覆盖）
 
 **Constraints**: SDK 不能引入业务逻辑（ADR-003"边界红线"：不做 prompt 管理、不做对话历史管理、
 不做模型选择策略）
