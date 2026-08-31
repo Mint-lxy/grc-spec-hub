@@ -25,6 +25,8 @@ tags:
     description: 历史凭据内部接口分组；当前实现以 Internal Vault API 为准。
   - name: File Management
     description: 文件上传会话、下载地址、文件详情、删除与结果文件登记。
+  - name: MCP File Connector
+    description: MCP 外部文件资源连接器 (Confluence/SharePoint/S3) 目录预览与知识库导入。
   - name: Internal File
     description: 历史内部文件接口分组；当前实现未启用独立内部文件 controller。
   - name: Knowledge Directory
@@ -47,6 +49,8 @@ tags:
     description: 创作者中心统计、资产控制台、待审批订阅与待发布资产。
   - name: Marketplace Subscription
     description: 订阅初始化、提交、查询、重新申请与取消。
+  - name: Marketplace Favorites
+    description: 个人收藏新增、取消与列表查询。
   - name: Marketplace Tags
     description: Marketplace 标签查询。
   - name: User Management
@@ -336,6 +340,27 @@ paths:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/RegisterResultFileRequest' } } }
       responses: { '200': { description: 登记成功, content: { application/json: { schema: { $ref: '#/components/schemas/RegisterResultFileResponseEnvelope' } } } } }
+  /mgmt/knowledge/mcp/connectors/preview-tree:
+    post:
+      tags: [MCP File Connector]
+      operationId: previewMcpConnectorTree
+      summary: 获取 MCP 外部文件资源连接器目录树预览
+      description: 解析 Confluence, SharePoint/OneDrive 或 S3/Blob 远程目录结构与文件可导入状态
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/McpConnectorTreeRequest' } } }
+      responses: { '200': { description: 预览成功, content: { application/json: { schema: { $ref: '#/components/schemas/McpConnectorTreeEnvelope' } } } } }
+  /mgmt/knowledge/knowledge-bases/{kbId}/mcp-imports:
+    parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
+    post:
+      tags: [MCP File Connector]
+      operationId: importMcpFilesToKnowledgeBase
+      summary: MCP 选定文件处理并导入知识库
+      description: 转换勾选节点获得 fileId 数组，并调用 facadeService.importDocuments(kbId, request) 写入知识库
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/McpImportRequest' } } }
+      responses: { '200': { description: 导入成功, content: { application/json: { schema: { $ref: '#/components/schemas/McpImportEnvelope' } } } } }
   /mgmt/knowledge/directories/tree:
     get:
       tags: [Knowledge Directory]
@@ -507,8 +532,8 @@ paths:
       summary: 创建知识库构建任务
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/CreateKnowledgeBuildJobRequest' } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBuildJobEnvelope' } } } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/CreateKnowledgeBatchBuildJobRequest' } } }
+      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBatchBuildJobEnvelope' } } } } }
     get:
       tags: [Knowledge Base]
       operationId: listKnowledgeBuildJobs
@@ -750,6 +775,32 @@ paths:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/RetrievalRequest' } } }
       responses: { '200': { description: 检索成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeRetrievalEnvelope' } } } } }
+  /open/v1/knowledge/knowledge-bases/{kbId}:
+    parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
+    get:
+      tags: [PAT Open API]
+      operationId: getOpenKnowledgeBase
+      summary: 通过 PAT 查询知识库元数据
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/OpenKnowledgeBaseEnvelope' } } } } }
+  /open/v1/knowledge/retrievals:
+    post:
+      tags: [PAT Open API]
+      operationId: retrieveOpenKnowledge
+      summary: 通过 PAT scope 执行检索
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/OpenRetrievalRequest' } } }
+      responses: { '200': { description: 检索成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeRetrievalEnvelope' } } } } }
+  /open/v1/knowledge/knowledge-bases/{kbId}/documents:
+    parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
+    post:
+      tags: [PAT Open API]
+      operationId: updateOpenKnowledgeDocument
+      summary: 通过 PAT 更新单份文档并自动构建
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/OpenDocumentUpdateRequest' } } }
+      responses: { '200': { description: 导入成功, content: { application/json: { schema: { $ref: '#/components/schemas/DocumentImportResultEnvelope' } } } } }
   /mgmt/knowledge/directories/{directoryId}/permissions:
     parameters: [{ $ref: '#/components/parameters/DirectoryId' }]
     get:
@@ -782,6 +833,7 @@ paths:
         - { name: keyword, in: query, description: 搜索关键词, required: false, schema: { type: string } }
         - { name: category, in: query, description: 分类, required: false, schema: { type: string } }
         - { name: tagIds, in: query, required: false, description: 逗号分隔的标签 ID, schema: { type: string } }
+        - { name: sort, in: query, description: "排序规则：published_at_desc(默认/全部上架倒序), hot(热门近30天订阅数及调用量倒序)", required: false, schema: { type: string, enum: [published_at_desc, hot], default: published_at_desc } }
         - { name: page, in: query, description: 当前页码, required: false, schema: { type: integer, minimum: 1, default: 1 } }
         - { name: size, in: query, description: 每页数量, required: false, schema: { type: integer, minimum: 1, default: 20 } }
       responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/MarketplaceAssetPageEnvelope' } } } } }
@@ -861,6 +913,7 @@ paths:
       operationId: listMyPendingApprovals
       summary: 查询我的待审批
       parameters:
+        - { name: assetId, in: query, description: 可选资产 ID，按资产筛选待审批步骤, required: false, schema: { type: integer, format: int64 } }
         - { name: page, in: query, description: 当前页码, required: false, schema: { type: integer, minimum: 1, default: 1 } }
         - { name: size, in: query, description: 每页数量, required: false, schema: { type: integer, minimum: 1, default: 20 } }
       responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/PendingApprovalListEnvelope' } } } } }
@@ -940,6 +993,29 @@ paths:
       tags: [Marketplace Subscription]
       operationId: cancelSubscription
       summary: 取消订阅
+      requestBody: { required: false, content: { application/json: { schema: { $ref: '#/components/schemas/CancelSubscriptionRequest' } } } }
+      responses: { '200': { description: 取消成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } }
+  /mgmt/marketplace/favorites:
+    get:
+      tags: [Marketplace Favorites]
+      operationId: listFavorites
+      summary: 查询我的收藏列表
+      parameters:
+        - { name: page, in: query, description: 当前页码, required: false, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: size, in: query, description: 每页数量, required: false, schema: { type: integer, minimum: 1, default: 20 } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/MarketplaceFavoritePageEnvelope' } } } } }
+    post:
+      tags: [Marketplace Favorites]
+      operationId: addFavorite
+      summary: 收藏资产
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/FavoriteAssetRequest' } } } }
+      responses: { '200': { description: 收藏成功, content: { application/json: { schema: { $ref: '#/components/schemas/MarketplaceFavoriteEnvelope' } } } } }
+  /mgmt/marketplace/favorites/{assetId}:
+    parameters: [{ $ref: '#/components/parameters/AssetId' }]
+    delete:
+      tags: [Marketplace Favorites]
+      operationId: removeFavorite
+      summary: 取消收藏
       responses: { '200': { description: 取消成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } }
   /mgmt/marketplace/creator-center/summary:
     get:
@@ -1299,6 +1375,15 @@ components:
         termsAccepted: { type: boolean, description: 是否同意使用条款 }
     ResubmitSubscriptionRequest:
       allOf: [{ $ref: '#/components/schemas/SubmitSubscriptionRequest' }]
+    CancelSubscriptionRequest:
+      type: object
+      properties:
+        reason: { type: string, description: 主动退订原因（可选，默认为用户主动退订） }
+    FavoriteAssetRequest:
+      type: object
+      required: [assetId]
+      properties:
+        assetId: { type: integer, format: int64, description: 收藏的目标资产 ID }
     SaveSubscriptionSettingsRequest:
       type: object
       properties:
@@ -1407,17 +1492,68 @@ components:
       properties:
         fieldCount: { type: integer, description: 解析出的字段数量 }
         formSchema: { type: object, additionalProperties: true, description: 表单 schema }
+    CreateMarketplaceAssetResponse:
+      type: object
+      description: 创建或更新资产响应。
+      properties:
+        assetId: { type: integer, format: int64, description: 资产 ID }
+        assetType: { type: string, description: 资产类型 (AGENT/MCP) }
+        agentMode: { type: string, description: Agent 形态 (HIGH_CODE/LOW_CODE) }
+        status: { type: string, description: 资产生命周期状态 }
+        evaluationStatus: { type: string, description: 测评状态 }
+        currentVersionId: { type: integer, format: int64, description: 当前版本 ID }
+        currentVersionNo: { type: string, description: 当前版本号 }
+        createdAt: { type: string, format: date-time, description: 创建时间 }
+        message: { type: string, description: 响应消息 }
     ApprovalActionResponse:
       type: object
-      additionalProperties: true
       description: 审批操作结果。
+      properties:
+        stepId: { type: integer, format: int64, description: 审批步骤 ID }
+        flowId: { type: integer, format: int64, description: 审批流 ID }
+        stepStatus: { type: string, description: 步骤更新后状态 }
+        flowStatus: { type: string, description: 流程更新后状态 }
+        subscriptionStatus: { type: string, description: 订阅更新后状态 }
+        handledAt: { type: string, format: date-time, description: 处理时间 }
+        message: { type: string, description: 操作结果消息 }
     ApprovalFlow:
       type: object
-      additionalProperties: true
       description: 审批流详情。
+      properties:
+        id: { type: integer, format: int64, description: 审批流 ID }
+        assetId: { type: integer, format: int64, description: 资产 ID }
+        subscriptionId: { type: integer, format: int64, description: 订阅 ID }
+        flowType: { type: string, description: 流程类型 }
+        status: { type: string, description: 流程状态 (PENDING/APPROVED/REJECTED/CANCELLED) }
+        initiatorId: { type: integer, format: int64, description: 发起人用户 ID }
+        snapshot: { type: object, additionalProperties: true, description: 提交时的审批链快照 }
+        fallbackUsed: { type: boolean, description: 是否触发死锁回落 }
+        fallbackReason: { type: string, description: 回落原因说明 }
+        createdAt: { type: string, format: date-time, description: 创建时间 }
+        updatedAt: { type: string, format: date-time, description: 更新时间 }
+        steps:
+          type: array
+          description: 审批步骤列表
+          items: { $ref: '#/components/schemas/ApprovalStep' }
+    ApprovalStep:
+      type: object
+      description: 审批步骤项。
+      properties:
+        id: { type: integer, format: int64, description: 步骤 ID }
+        flowId: { type: integer, format: int64, description: 审批流 ID }
+        approverId: { type: integer, format: int64, description: 审批人用户 ID }
+        approverName: { type: string, description: 审批人姓名 }
+        stepLevel: { type: integer, description: 审批层级 (同级 OR，跨级 AND) }
+        status: { type: string, description: 步骤状态 (PENDING/APPROVED/REJECTED/CANCELLED) }
+        comment: { type: string, description: 审批意见/驳回原因 }
+        handledAt: { type: string, format: date-time, description: 处理时间 }
+        createdAt: { type: string, format: date-time, description: 创建时间 }
+        updatedAt: { type: string, format: date-time, description: 更新时间 }
     PendingApproval:
       type: object
       properties:
+        flowId: { type: integer, format: int64, description: 审批流 ID }
+        stepId: { type: integer, format: int64, description: 当前待处理步骤 ID }
         flowType: { type: string, description: 审批流类型 }
         assetId: { type: integer, format: int64, description: 资产 ID }
         assetName: { type: string, description: 资产名称 }
@@ -1435,12 +1571,66 @@ components:
         category: { type: string, description: 标签分类 }
     SubscribePageInit:
       type: object
-      additionalProperties: true
       description: 订阅提交页初始化数据。
+      properties:
+        assetId: { type: integer, format: int64, description: 资产 ID }
+        assetName: { type: string, description: 资产名称 }
+        assetType: { type: string, description: 资产类型 (AGENT/MCP) }
+        owner:
+          type: object
+          description: 资产 Owner 摘要
+          properties:
+            userId: { type: integer, format: int64, description: Owner 用户 ID }
+            name: { type: string, description: Owner 姓名 }
+        currentVersion:
+          type: object
+          description: 当前版本摘要
+          properties:
+            versionId: { type: integer, format: int64, description: 版本 ID }
+            versionNo: { type: string, description: 版本号 }
+            versionName: { type: string, description: 版本名称 }
+        releaseNote: { type: string, description: 发布说明 }
+        formSchema: { type: object, additionalProperties: true, description: 表单 schema }
+        terms:
+          type: object
+          description: 使用条款信息
+          properties:
+            version: { type: string, description: 条款版本 }
+            content: { type: string, description: 条款正文 }
+        approvalChain:
+          type: array
+          description: 预览审批链层级列表
+          items:
+            type: object
+            properties:
+              level: { type: integer, description: 层级 }
+              approvers:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    approverId: { type: integer, format: int64, description: 审批人 ID }
+                    name: { type: string, description: 审批人姓名 }
+        submitRules:
+          type: object
+          description: 提交规则说明
+          properties:
+            termsAcceptedRequired: { type: boolean, description: 是否要求勾选同意条款 }
+            requiredFields: { type: array, items: { type: string }, description: 必填字段列表 }
+        subscriptionState: { type: string, description: 当前用户对该资产的订阅状态 }
+        canSubscribe: { type: boolean, description: 是否允许发起订阅 }
+        disabledReason: { type: string, description: 不可订阅原因提示 }
     SubmitSubscriptionResponse:
       type: object
-      additionalProperties: true
       description: 订阅提交结果。
+      properties:
+        subscriptionId: { type: integer, format: int64, description: 订阅 ID }
+        assetId: { type: integer, format: int64, description: 资产 ID }
+        status: { type: string, description: 订阅状态 }
+        displayStatus: { type: string, description: 展示状态 }
+        approvalFlowId: { type: integer, format: int64, description: 关联的审批流 ID }
+        createdAt: { type: string, format: date-time, description: 创建时间 }
+        message: { type: string, description: 结果消息 }
     SubscriberCenterSummary:
       type: object
       required: [passed, pending, rejected]
@@ -1457,38 +1647,147 @@ components:
         records: { type: array, items: { $ref: '#/components/schemas/SubscriptionItem' }, description: 订阅记录 }
     SubscriptionItem:
       type: object
-      additionalProperties: true
       description: 订阅列表项。
+      properties:
+        subscriptionId: { type: integer, format: int64, description: 订阅 ID }
+        assetId: { type: integer, format: int64, description: 资产 ID }
+        assetName: { type: string, description: 资产名称 }
+        assetType: { type: string, description: 资产类型 (AGENT/MCP) }
+        owner: { type: string, description: Owner 姓名 }
+        bizSystem: { type: string, description: 业务系统 }
+        status: { type: string, description: 订阅状态 }
+        displayStatus: { type: string, description: 展示状态 }
+        createdAt: { type: string, format: date-time, description: 申请创建时间 }
+        approvals: { type: array, items: { $ref: '#/components/schemas/ApprovalSummaryVO' }, description: 审批阶段摘要 }
+        rejectInfo: { type: object, properties: { reason: { type: string, description: 驳回原因 }, suggestion: { type: string, description: 建议 } }, description: 驳回信息 }
+    ApprovalSummaryVO:
+      type: object
+      properties:
+        id: { type: string, description: 节点标识/ID }
+        name: { type: string, description: 阶段或审批人名称 }
+        status: { type: string, description: 节点状态 }
     SubscriptionDetail:
       type: object
-      additionalProperties: true
       description: 订阅详情。
+      properties:
+        subscriptionId: { type: integer, format: int64, description: 订阅 ID }
+        assetId: { type: integer, format: int64, description: 资产 ID }
+        assetName: { type: string, description: 资产名称 }
+        assetType: { type: string, description: 资产类型 (AGENT/MCP) }
+        owner: { type: string, description: Owner 姓名 }
+        applicant: { type: string, description: 申请人姓名 }
+        bizSystem: { type: string, description: 业务系统 }
+        status: { type: string, description: 订阅状态 }
+        displayStatus: { type: string, description: 展示状态 }
+        createdAt: { type: string, format: date-time, description: 申请创建时间 }
+        accessGrantedAt: { type: string, format: date-time, description: 授权生效时间 }
+        lastAccessAt: { type: string, format: date-time, description: 最近访问时间 }
+        currentApprovalFlowId: { type: integer, format: int64, description: 当前审批流 ID }
+        cancelSource: { type: string, description: 取消来源 }
+        cancelReason: { type: string, description: 取消理由 }
+        cancelledBy: { type: integer, format: int64, description: 取消操作人 ID }
+        cancelledAt: { type: string, format: date-time, description: 取消时间 }
+        reason: { type: string, description: 申请原因/场景 }
+        yamlAnswers: { type: object, additionalProperties: true, description: 填写的表单答案快照 }
+        terms:
+          type: object
+          properties:
+            version: { type: string, description: 条款版本 }
+            acceptedBy: { type: string, description: 确认人 }
+            acceptedAt: { type: string, format: date-time, description: 确认时间 }
+        approvals: { type: array, items: { $ref: '#/components/schemas/ApprovalSummaryVO' }, description: 审批摘要 }
+        rejectInfo:
+          type: object
+          properties:
+            reason: { type: string, description: 驳回原因 }
+            suggestion: { type: string, description: 建议补充 }
     ResubmitSubscriptionResponse:
       type: object
-      additionalProperties: true
       description: 重新申请结果。
+      properties:
+        subscriptionId: { type: integer, format: int64, description: 新订阅 ID }
+        sourceSubscriptionId: { type: integer, format: int64, description: 源订阅 ID }
+        assetId: { type: integer, format: int64, description: 资产 ID }
+        status: { type: string, description: 订阅状态 }
+        displayStatus: { type: string, description: 展示状态 }
+        approvalFlowId: { type: integer, format: int64, description: 审批流 ID }
+        message: { type: string, description: 响应消息 }
     CreatorCenterSummary:
       type: object
       properties:
         myAssetCount: { type: integer, format: int64, description: 当前用户负责的资产数 }
         pendingSubscriptionCount: { type: integer, format: int64, description: 待审批订阅数 }
         pendingPublishCount: { type: integer, format: int64, description: 待发布资产数 }
+    CreatorAssetItem:
+      type: object
+      description: 创作者资产项。
+      properties:
+        id: { type: integer, format: int64, description: 资产 ID }
+        assetType: { type: string, description: 资产类型 }
+        agentMode: { type: string, description: Agent 形态 }
+        assetName: { type: string, description: 资产名称 }
+        description: { type: string, description: 简介 }
+        assetIcon: { type: string, description: 图标 }
+        status: { type: string, description: 状态 }
+        category: { type: string, description: 分类 }
+        ownerName: { type: string, description: Owner 姓名 }
+        tagNames: { type: array, items: { type: string }, description: 标签列表 }
+        usageCount: { type: integer, description: 调用次数 }
+        pendingSubscriptionCount: { type: integer, description: 待处理订阅数 }
+        publishedAt: { type: string, format: date-time, description: 发布时间 }
+        updatedAt: { type: string, format: date-time, description: 更新时间 }
     CreatorAssetPage:
       type: object
-      additionalProperties: true
       description: 创作者资产分页结果。
+      properties:
+        records: { type: array, items: { $ref: '#/components/schemas/CreatorAssetItem' }, description: 资产记录 }
+        total: { type: integer, format: int64, description: 总记录数 }
+        page: { type: integer, description: 当前页码 }
+        size: { type: integer, description: 每页条数 }
     PendingSubscriptionItem:
       type: object
-      additionalProperties: true
       description: 待审批订阅项。
+      properties:
+        subscriptionId: { type: integer, format: int64, description: 订阅 ID }
+        assetId: { type: integer, format: int64, description: 资产 ID }
+        assetName: { type: string, description: 资产名称 }
+        assetType: { type: string, description: 资产类型 }
+        subscriberId: { type: integer, format: int64, description: 订阅者 ID }
+        subscriberName: { type: string, description: 订阅者姓名 }
+        bizSystem: { type: string, description: 业务系统 }
+        reason: { type: string, description: 申请原因 }
+        createdAt: { type: string, format: date-time, description: 申请时间 }
+    PendingPublishAssetItem:
+      type: object
+      description: 待发布资产项。
+      properties:
+        id: { type: integer, format: int64, description: 资产 ID }
+        assetType: { type: string, description: 资产类型 }
+        agentMode: { type: string, description: Agent 形态 }
+        assetName: { type: string, description: 资产名称 }
+        description: { type: string, description: 简介 }
+        status: { type: string, description: 状态 }
+        evaluationStatus: { type: string, description: 测评状态 }
+        evaluationJobId: { type: string, description: 测评任务 ID }
+        updatedAt: { type: string, format: date-time, description: 最近更新时间 }
     PendingPublishAsset:
       type: object
-      additionalProperties: true
       description: 待发布资产分页结果。
+      properties:
+        records: { type: array, items: { $ref: '#/components/schemas/PendingPublishAssetItem' }, description: 资产记录 }
+        total: { type: integer, format: int64, description: 总记录数 }
+        page: { type: integer, description: 当前页码 }
+        size: { type: integer, description: 每页条数 }
     AssetConsole:
       type: object
-      additionalProperties: true
       description: 创作者资产控制台数据。
+      properties:
+        asset: { $ref: '#/components/schemas/MarketplaceAssetDetail', description: 资产详情 }
+        currentVersion: { type: object, properties: { versionId: { type: integer, format: int64 }, versionNo: { type: string }, versionName: { type: string }, changeSummary: { type: string }, createdAt: { type: string, format: date-time } }, description: 当前版本 }
+        historyVersions: { type: array, items: { type: object, properties: { versionId: { type: integer, format: int64 }, versionNo: { type: string }, versionName: { type: string }, changeSummary: { type: string }, createdAt: { type: string, format: date-time } } }, description: 历史版本 }
+        pendingSubscriptions: { type: array, items: { $ref: '#/components/schemas/PendingSubscriptionItem' }, description: 待审批订阅列表 }
+        subscriberStats: { type: object, additionalProperties: true, description: 订阅者统计数据 }
+        subscriptionSettings: { $ref: '#/components/schemas/SubscriptionSettings', description: 订阅设置 }
     SubscriptionSettings:
       type: object
       properties:
@@ -1498,8 +1797,15 @@ components:
         updatedAt: { type: string, format: date-time, description: 更新时间 }
     CreatorDecisionResponse:
       type: object
-      additionalProperties: true
       description: 创作者审批结果。
+      properties:
+        subscriptionId: { type: integer, format: int64, description: 订阅 ID }
+        flowId: { type: integer, format: int64, description: 审批流 ID }
+        decision: { type: string, description: 决策 (APPROVE/REJECT) }
+        status: { type: string, description: 订阅状态 }
+        displayStatus: { type: string, description: 展示状态 }
+        handledAt: { type: string, format: date-time, description: 处理时间 }
+        message: { type: string, description: 结果消息 }
     RevokeSubscriptionResponse:
       type: object
       properties:
@@ -1544,6 +1850,17 @@ components:
     CreatorDecisionEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/CreatorDecisionResponse', description: 响应数据 } } }] }
     RevokeSubscriptionEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/RevokeSubscriptionResponse', description: 响应数据 } } }] }
     EvaluationResultEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/EvaluationResult', description: 响应数据 } } }] }
+    MarketplaceFavoriteItem:
+      type: object
+      properties:
+        assetId: { type: integer, format: int64, description: 资产 ID }
+        assetName: { type: string, description: 资产名称 }
+        assetType: { type: string, description: 资产类型 (AGENT/MCP) }
+        status: { type: string, description: 资产状态 }
+        displayStatus: { type: string, description: 面向前端展示的状态（如已下架置灰） }
+        favoritedAt: { type: string, format: date-time, description: 收藏时间 }
+    MarketplaceFavoriteEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { type: object, properties: { assetId: { type: integer, format: int64 }, favorited: { type: boolean }, createdAt: { type: string, format: date-time } } } } }] }
+    MarketplaceFavoritePageEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { type: object, properties: { total: { type: integer, format: int64 }, records: { type: array, items: { $ref: '#/components/schemas/MarketplaceFavoriteItem' } } } } } }] }
     ApiResponseBase:
       type: object
       required: [code, message, traceId, timestamp]
@@ -1631,7 +1948,7 @@ components:
     KnowledgeBuildJobPageResponse:
       type: object
       properties:
-        records: { type: array, items: { $ref: '#/components/schemas/KnowledgeBuildJobResponse' }, description: 构建任务记录 }
+        records: { type: array, items: { $ref: '#/components/schemas/KnowledgeDocumentBatchImportResponse' }, description: 构建任务记录 }
         total: { type: integer, format: int64, description: 总记录数 }
         page: { type: integer, description: 当前页码 }
         pageSize: { type: integer, description: 每页条数 }
@@ -1853,6 +2170,77 @@ components:
     FileDetailResponseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/FileDetailResponse', description: 响应数据 } } }] }
     DeleteFileResponseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/DeleteFileResponse', description: 响应数据 } } }] }
 
+    McpConnectorTreeRequest:
+      type: object
+      required: [connectorType, link]
+      properties:
+        connectorType: { type: string, enum: [CONFLUENCE, SHAREPOINT, S3_BLOB], description: 连接器类型 }
+        connectorSource: { type: string, description: 连接器来源（SharePoint/OneDrive） }
+        link: { type: string, description: 外部链接或资源路径 }
+        sourceType: { type: string, description: 对象存储来源类型（S3/Blob） }
+        accessMode: { type: string, description: 访问方式 }
+        traverseSubDir: { type: boolean, default: true, description: 是否遍历子级目录 }
+        credentialId: { type: string, description: Vault 出站凭据 ID }
+
+    McpConnectorTreeResponse:
+      type: object
+      description: MCP 连接器目录树预览响应。
+      properties:
+        root: { type: object, additionalProperties: true, description: 根页面节点 }
+        selectable: { type: array, items: { type: object, additionalProperties: true }, description: 可选择导入的项目 }
+        truncated: { type: boolean, description: 是否因深度或节点上限截断 }
+        stats: { type: object, properties: { nodes: { type: integer }, max_depth_reached: { type: integer } }, description: 统计信息 }
+        traverse_children: { type: boolean, description: 是否遍历子节点 }
+
+    McpImportRequest:
+      type: object
+      required: [itemIds]
+      properties:
+        itemIds: { type: array, minItems: 1, maxItems: 200, items: { type: string }, description: 选中的项目 ID 列表 }
+        credentialId: { type: string, description: Vault 出站凭据 ID }
+        bizType: { type: string, default: KNOWLEDGE_SOURCE, description: 业务类型 }
+        bizRefId: { type: string, description: 业务引用 ID，例如知识库 ID }
+
+    McpImportResponse:
+      type: object
+      description: MCP 文件导入知识库响应。
+      properties:
+        results:
+          type: array
+          description: 导入结果列表
+          items:
+            type: object
+            properties:
+              item_id: { type: string, description: 项目 ID }
+              kind: { type: string, description: 种类 }
+              page_id: { type: string, description: 页面 ID }
+              name: { type: string, description: 名称 }
+              media_type: { type: string, description: 媒体类型 }
+              size: { type: integer, format: int64, description: 文件大小（字节） }
+              file_id: { type: string, description: 产生的 File ID }
+              session_id: { type: string, description: 上传会话 ID }
+              status: { type: string, description: 状态 }
+              title: { type: string, description: 标题 }
+              space_key: { type: string, description: 空间 key }
+              error: { type: string, description: 错误 }
+              message: { type: string, description: 消息 }
+        manifest:
+          type: object
+          description: 导入汇总
+          properties:
+            exported_at: { type: string, description: 导出时间 }
+            landing: { type: string, description: 目标服务 }
+            source: { type: string, description: 来源 }
+            credential_id: { type: string, description: 凭据 ID }
+            biz_type: { type: string, description: 业务类型 }
+            biz_ref_id: { type: string, description: 业务引用 ID }
+            requested: { type: integer, description: 请求总数 }
+            uploaded: { type: integer, description: 成功处理数 }
+            failed: { type: integer, description: 失败数 }
+
+    McpConnectorTreeEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/McpConnectorTreeResponse', description: 响应数据 } } }] }
+    McpImportEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/McpImportResponse', description: 响应数据 } } }] }
+
     SaveKnowledgeDocumentChunkRequest:
       type: object
       additionalProperties: false
@@ -2055,6 +2443,24 @@ components:
           type: array
           minItems: 1
           items: { $ref: '#/components/schemas/KnowledgeBuildSourceRequest' }
+
+    CreateKnowledgeBatchBuildJobRequest:
+      type: object
+      required: [sources]
+      properties:
+        stageConfig:
+          type: object
+          additionalProperties: true
+          description: 批量构建阶段配置，可只覆盖需要调整的阶段
+        sources:
+          description: 待构建文档列表
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [documentId]
+            properties:
+              documentId: { type: string, description: 已有文档 ID }
 
     CreateDirectoryRequest:
       type: object
@@ -2267,7 +2673,7 @@ components:
         status: { type: string, description: 状态 }
         sourceType: { type: string, description: 来源类型 }
 
-    KnowledgeBuildJobResponse:
+    KnowledgeDocumentBatchImportResponse:
       type: object
       properties:
         batchJobId: { type: string, description: 批处理任务 ID }
@@ -2276,6 +2682,25 @@ components:
         status: { type: string, description: 状态 }
         totalDocs: { type: integer, description: 字段：totalDocs }
         pipelineJobs: { type: array, items: { $ref: '#/components/schemas/KnowledgePipelineJobResponse' }, description: 字段：pipelineJobs }
+
+    KnowledgeBatchBuildJobResponse:
+      type: object
+      properties:
+        batchJobId: { type: string, description: 批构建任务 ID }
+        knowledgeBaseId: { type: string, description: 知识库 ID }
+        type: { type: string, description: 任务类型 }
+        status: { type: string, description: 批任务状态 }
+        totalDocs: { type: integer, description: 构建文档总数 }
+        pipelineJobs:
+          type: array
+          description: 文档管线任务列表
+          items:
+            type: object
+            properties:
+              pipelineJobId: { type: string, description: 管线任务 ID }
+              documentId: { type: string, description: 文档 ID }
+              sourceType: { type: string, description: 来源类型 }
+              status: { type: string, description: 状态 }
 
     KnowledgeDocumentStageConfigUpdateResponse:
       type: object
@@ -2494,6 +2919,49 @@ components:
         results: { type: array, items: { type: object, additionalProperties: true }, description: 字段：results }
         retrievalMeta: { type: object, additionalProperties: true, description: 字段：retrievalMeta }
 
+    OpenKnowledgeBaseResponse:
+      type: object
+      properties:
+        knowledgeBaseId: { type: integer, format: int64, description: 知识库 ID }
+        name: { type: string, description: 知识库名称 }
+        description: { type: string, description: 描述 }
+        documentCount: { type: integer, description: 文档数量 }
+        embeddingModel: { type: string, description: 向量模型 }
+        dimensions: { type: integer, description: 向量维度 }
+        lastBuildAt: { type: string, description: 最后构建时间 }
+
+    OpenRetrievalRequest:
+      type: object
+      required: [query]
+      properties:
+        query: { type: string, minLength: 1, description: 用户检索问题 }
+        topK: { type: integer, minimum: 1, default: 10, description: TopK 返回数量 }
+        strategy: { type: string, description: 检索策略类型 }
+        retrieval: { type: object, additionalProperties: true, description: 检索策略配置 }
+        filters: { type: object, additionalProperties: true, description: 过滤条件配置 }
+        rerank: { type: object, additionalProperties: true, description: 重排配置 }
+        options: { type: object, additionalProperties: true, description: 检索选项配置 }
+
+    OpenDocumentUpdateRequest:
+      type: object
+      required: [sourceType, item]
+      properties:
+        sourceType: { type: string, default: FILE, description: 来源类型 }
+        item: { type: object, additionalProperties: true, description: 导入文档项 }
+        duplicatePolicy: { type: string, default: OVERWRITE, description: 重复处理策略 }
+        documentOverride: { type: object, additionalProperties: true, description: 管线覆盖配置 }
+
+    DocumentImportResultResponse:
+      type: object
+      properties:
+        operationId: { type: string, description: 操作流转 ID }
+        batchJobId: { type: object, description: 批处理任务 ID }
+        accepted: { type: array, items: { type: object, additionalProperties: true }, description: 已接受项列表 }
+        rejected: { type: array, items: { type: object, additionalProperties: true }, description: 已拒绝项列表 }
+
+    OpenKnowledgeBaseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/OpenKnowledgeBaseResponse', description: 响应数据 } } }] }
+    DocumentImportResultEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/DocumentImportResultResponse', description: 响应数据 } } }] }
+
     DirectoryPermissionResponse:
       type: object
       properties:
@@ -2526,7 +2994,8 @@ components:
     KnowledgeBaseStatisticsEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseStatisticsResponse', description: 响应数据 } } }] }
     KnowledgeDocumentCreateEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentCreateResponse', description: 响应数据 } } }] }
     KnowledgeBaseDocumentPageEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseDocumentPageResponse', description: 响应数据 } } }] }
-    KnowledgeBuildJobEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBuildJobResponse', description: 响应数据 } } }] }
+    KnowledgeBuildJobEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentBatchImportResponse', description: 响应数据 } } }] }
+    KnowledgeBatchBuildJobEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBatchBuildJobResponse', description: 响应数据 } } }] }
     KnowledgeDocumentStageConfigUpdateEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentStageConfigUpdateResponse', description: 响应数据 } } }] }
     KnowledgeDocumentParseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentParseResponse', description: 响应数据 } } }] }
     KnowledgeDocumentEnhancePageEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentEnhancePageResponse', description: 响应数据 } } }] }

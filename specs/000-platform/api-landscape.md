@@ -94,7 +94,14 @@
 | POST | /mgmt/file/files/{fileId}/download-url | 创建文件下载地址 | Path: FileId; Body: CreateDownloadUrlRequest | CreateDownloadUrlResponseEnvelope | 000 |
 | POST | /mgmt/file/files/results | 登记结果文件 | RegisterResultFileRequest | RegisterResultFileResponseEnvelope | 000 |
 
-### 3.4 知识目录
+### 3.4 MCP 文件连接器
+
+| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
+|------|------|------|---------|---------|------|
+| POST | /mgmt/knowledge/mcp/connectors/preview-tree | 获取 MCP 外部文件资源连接器目录树预览 | McpConnectorTreeRequest | McpConnectorTreeEnvelope | 005 |
+| POST | /mgmt/knowledge/knowledge-bases/{kbId}/mcp-imports | MCP 选定文件处理并导入知识库 | Path: KnowledgeBaseId; Body: McpImportRequest | McpImportEnvelope | 005 |
+
+### 3.5 知识目录
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
@@ -118,7 +125,7 @@
 | POST | /mgmt/knowledge/knowledge-bases/{kbId}/documents | 创建知识库文档 | Path: KnowledgeBaseId; Body: CreateKnowledgeDocumentRequest | KnowledgeDocumentCreateEnvelope | 005 |
 | GET | /mgmt/knowledge/knowledge-bases/{kbId}/documents | 查询知识库文档列表 | Path: KnowledgeBaseId; ?keyword; ?sourceType; ?status; ?retrievalReady; ?page; ?pageSize | KnowledgeBaseDocumentPageEnvelope | 005 |
 | POST | /mgmt/knowledge/knowledge-bases/{kbId}/documents/imports | 导入知识库文档 | Path: KnowledgeBaseId; Body: CreateKnowledgeBuildJobRequest | KnowledgeBuildJobEnvelope | 005 |
-| POST | /mgmt/knowledge/knowledge-bases/{kbId}/build-jobs | 创建知识库构建任务 | Path: KnowledgeBaseId; Body: CreateKnowledgeBuildJobRequest | KnowledgeBuildJobEnvelope | 005 |
+| POST | /mgmt/knowledge/knowledge-bases/{kbId}/build-jobs | 创建知识库构建任务 | Path: KnowledgeBaseId; Body: CreateKnowledgeBatchBuildJobRequest | KnowledgeBatchBuildJobEnvelope | 005 |
 | GET | /mgmt/knowledge/knowledge-bases/{kbId}/build-jobs | 查询知识库构建任务 | Path: KnowledgeBaseId; ?page; ?pageSize | KnowledgeBuildJobPageEnvelope | 005 |
 | GET | /mgmt/knowledge/knowledge-bases/{kbId}/stats | 查询知识库统计 | Path: KnowledgeBaseId | KnowledgeBaseStatisticsEnvelope | 005 |
 | POST | /mgmt/knowledge/knowledge-bases/{kbId}/enable | 启用知识库 | Path: KnowledgeBaseId | KnowledgeBaseDetailEnvelope | 005 |
@@ -174,7 +181,7 @@
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
 | POST | /mgmt/marketplace/assets | 创建资产 | CreateMarketplaceAssetRequest | CreateMarketplaceAssetEnvelope | 002/003/004/005 |
-| GET | /mgmt/marketplace/assets | 查询资产列表 | ?assetType; ?status; ?keyword; ?category; ?tagIds; ?page; ?size | MarketplaceAssetPageEnvelope | 002/003/004/005 |
+| GET | /mgmt/marketplace/assets | 查询资产列表 | ?assetType; ?status; ?keyword; ?category; ?tagIds; ?sort; ?page; ?size | MarketplaceAssetPageEnvelope | 002/003/004/005 |
 | GET | /mgmt/marketplace/assets/{assetId} | 查询资产详情 | Path: AssetId | MarketplaceAssetDetailEnvelope | 002/003/004/005 |
 | PUT | /mgmt/marketplace/assets/{assetId} | 更新资产 | Path: AssetId; Body: UpdateMarketplaceAssetRequest | CreateMarketplaceAssetEnvelope | 002/003/004/005 |
 | POST | /mgmt/marketplace/assets/{assetId}/publish | 发布资产 | Path: AssetId | PublishMarketplaceAssetEnvelope | 002/003/004/005 |
@@ -190,7 +197,7 @@
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
 | GET | /mgmt/marketplace/approval-flows/{flowId} | 查询审批流详情 | Path: FlowId | ApprovalFlowEnvelope | 002/003/004/005 |
-| GET | /mgmt/marketplace/approval-flows/my-pending | 查询我的待审批 | ?page; ?size | PendingApprovalListEnvelope | 002/003/004/005 |
+| GET | /mgmt/marketplace/approval-flows/my-pending | 查询我的待审批 | ?assetId; ?page; ?size | PendingApprovalListEnvelope | 002/003/004/005 |
 | POST | /mgmt/marketplace/approval-flows/{flowId}/steps/{stepId}/approve | 审批通过 | Path: FlowId; Path: StepId; Body: ApprovalActionRequest | ApprovalActionEnvelope | 002/003/004/005 |
 | POST | /mgmt/marketplace/approval-flows/{flowId}/steps/{stepId}/reject | 审批驳回 | Path: FlowId; Path: StepId; Body: ApprovalActionRequest | ApprovalActionEnvelope | 002/003/004/005 |
 
@@ -200,7 +207,15 @@
 |------|------|------|---------|---------|------|
 | GET | /mgmt/marketplace/tags | 查询全部标签 | — | MarketplaceTagListEnvelope | 002/003/004/005 |
 
-### 3.13 Marketplace 订阅
+### 3.13 Marketplace 收藏
+
+| 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
+|------|------|------|---------|---------|------|
+| GET | /mgmt/marketplace/favorites | 查询我的收藏列表 | ?page; ?size | MarketplaceFavoritePageEnvelope | 008 |
+| POST | /mgmt/marketplace/favorites | 收藏资产 | FavoriteAssetRequest | MarketplaceFavoriteEnvelope | 008 |
+| DELETE | /mgmt/marketplace/favorites/{assetId} | 取消收藏 | Path: AssetId | VoidEnvelope | 008 |
+
+### 3.14 Marketplace 订阅
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
@@ -210,9 +225,9 @@
 | GET | /mgmt/marketplace/subscriptions | 查询订阅列表 | ?status; ?assetType; ?keyword; ?page; ?size | SubscriptionPageEnvelope | 002/003/004/005 |
 | GET | /mgmt/marketplace/subscriptions/{subscriptionId} | 查询订阅详情 | Path: SubscriptionId | SubscriptionDetailEnvelope | 002/003/004/005 |
 | POST | /mgmt/marketplace/subscriptions/{subscriptionId}/resubmit | 重新申请订阅 | Path: SubscriptionId; Body: ResubmitSubscriptionRequest | ResubmitSubscriptionEnvelope | 002/003/004/005 |
-| POST | /mgmt/marketplace/subscriptions/{subscriptionId}/cancel | 取消订阅 | Path: SubscriptionId | VoidEnvelope | 002/003/004/005 |
+| POST | /mgmt/marketplace/subscriptions/{subscriptionId}/cancel | 取消订阅 | Path: SubscriptionId; Body: CancelSubscriptionRequest? | VoidEnvelope | 002/003/004/005 |
 
-### 3.14 Marketplace 创作者中心
+### 3.15 Marketplace 创作者中心
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
@@ -227,7 +242,7 @@
 | POST | /mgmt/marketplace/assets/{assetId}/publish-evaluations | 发起发布前测评 | Path: AssetId; Body: CreateEvaluationRequest | EvaluationResultEnvelope | 002/003/004/005 |
 | GET | /mgmt/marketplace/assets/{assetId}/publish-evaluations/{evaluationId} | 查询发布前测评结果 | Path: AssetId; Path: EvaluationId | EvaluationResultEnvelope | 002/003/004/005 |
 
-### 3.15 用户管理
+### 3.16 用户管理
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
@@ -240,7 +255,7 @@
 | POST | /mgmt/rbac/users/{userId}/disable | 禁用用户 | Path: UserId | VoidEnvelope | 003 |
 | POST | /mgmt/rbac/users/{userId}/lock | 锁定用户 | Path: UserId | VoidEnvelope | 003 |
 
-### 3.16 角色管理
+### 3.17 角色管理
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
@@ -252,7 +267,7 @@
 | POST | /mgmt/rbac/roles/{roleId}/enable | 启用角色 | Path: RoleId | VoidEnvelope | 003 |
 | POST | /mgmt/rbac/roles/{roleId}/disable | 禁用角色 | Path: RoleId | VoidEnvelope | 003 |
 
-### 3.17 角色权限绑定
+### 3.18 角色权限绑定
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
@@ -260,7 +275,7 @@
 | POST | /mgmt/rbac/roles/{roleId}/permissions/{permissionId} | 为角色授予权限 | Path: RoleId; Path: PermissionId | VoidEnvelope | 003 |
 | DELETE | /mgmt/rbac/roles/{roleId}/permissions/{permissionId} | 移除角色权限 | Path: RoleId; Path: PermissionId | VoidEnvelope | 003 |
 
-### 3.18 用户角色绑定
+### 3.19 用户角色绑定
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
@@ -268,7 +283,7 @@
 | POST | /mgmt/rbac/users/{userId}/roles/{roleId} | 为用户授予角色 | Path: UserId; Path: RoleId | VoidEnvelope | 003 |
 | DELETE | /mgmt/rbac/users/{userId}/roles/{roleId} | 移除用户角色 | Path: UserId; Path: RoleId | VoidEnvelope | 003 |
 
-### 3.19 权限管理
+### 3.20 权限管理
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
@@ -280,26 +295,26 @@
 | POST | /mgmt/rbac/permissions/{permissionId}/enable | 启用权限 | Path: PermissionId | VoidEnvelope | 003 |
 | POST | /mgmt/rbac/permissions/{permissionId}/disable | 禁用权限 | Path: PermissionId | VoidEnvelope | 003 |
 
-### 3.20 有效权限
+### 3.21 有效权限
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
 | GET | /mgmt/rbac/permissions/effective/self | 查询我的有效权限 | — | EffectivePermissionSetEnvelope | 003 |
 | GET | /mgmt/rbac/permissions/effective | 查询指定用户有效权限 | ?userId | EffectivePermissionSetEnvelope | 003 |
 
-### 3.21 权限检查
+### 3.22 权限检查
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
 | POST | /mgmt/rbac/check | 检查权限 | PermissionCheckRequest | PermissionCheckEnvelope | 003 |
 
-### 3.22 内部权限检查
+### 3.23 内部权限检查
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
 | POST | /mgmt/rbac/internal/check | [内部] 检查服务间权限 | PermissionCheckRequest | PermissionCheckEnvelope | 003 |
 
-### 3.23 入站 PAT
+### 3.24 入站 PAT
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
@@ -311,14 +326,14 @@
 | PUT | /mgmt/vault/inbound/tokens/{id}/status | 更新 PAT 状态 | Path: CredentialId; Body: UpdatePatStatusRequest | VoidEnvelope | 007 |
 | GET | /mgmt/vault/inbound/tokens/stats | 获取 PAT 统计 | — | ObjectEnvelope | 007 |
 
-### 3.24 Vault 内部接口
+### 3.25 Vault 内部接口
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
 | POST | /mgmt/vault/inbound/tokens/verify | [内部] 验证 PAT | VerifyTokenRequest | VerifyTokenEnvelope | 007 |
 | GET | /mgmt/vault/outbound/credentials/{id}/resolve | [内部] 解析出站凭据 | Path: CredentialId | ResolvedCredentialEnvelope | 007 |
 
-### 3.25 出站凭据
+### 3.26 出站凭据
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
@@ -332,7 +347,7 @@
 | GET | /mgmt/vault/outbound/credentials/presets/{targetType}/{targetId} | 获取目标资源认证参数预设 | Path: TargetType; Path: TargetId | AuthPresetEnvelope | 007 |
 | GET | /mgmt/vault/outbound/credentials/stats | 获取出站凭据统计 | — | OutboundCredentialStatsEnvelope | 007 |
 
-### 3.26 Vault 审计
+### 3.27 Vault 审计
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
@@ -457,13 +472,13 @@
 ### 6.6 开放接口（PAT）
 
 > PAT 校验委托 mgmt-service `POST /mgmt/vault/inbound/tokens/verify`。
-> 凭据：`Authorization: Bearer <PAT>`。路径前缀独立为 `/open/knowledge/**`。
+> 凭据：`Authorization: Bearer <PAT>`。路径前缀独立为 `/open/v1/knowledge/**`。
 
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
-| GET | `/open/knowledge/knowledge-bases/{kbId}` | `[开放]` 查询知识库元数据 | — | `{ kbId, name, description, documentCount, embeddingModel, dimensions, lastBuildAt }` | 005 |
-| POST | `/open/knowledge/retrievals` | `[开放]` 检索（不接受 `snapshotMode`） | `{ query, knowledgeBaseIds[], topK?, ... }` | 同 §6.5 检索响应 | 005 |
-| POST | `/open/knowledge/knowledge-bases/{kbId}/documents` | `[开放]` 上传文档更新知识库内容（`sourceType` 限 `file`） | `{ sourceType: "file", items[]{fileId, name} }` | `{ accepted[], rejected[] }` | 005 |
+| GET | `/open/knowledge/knowledge-bases/{kbId}` | `[开放]` 查询知识库元数据 | — | `{ knowledgeBaseId, name, description, documentCount, embeddingModel, dimensions, lastBuildAt }` | 005 |
+| POST | `/open/knowledge/retrievals` | `[开放]` 检索（PAT scope 范围） | `{ query, topK?, strategy?, filters?, rerank?, options? }` | 同 §6.5 检索响应 | 005 |
+| POST | `/open/knowledge/knowledge-bases/{kbId}/documents` | `[开放]` 上传文档更新知识库内容（`sourceType` 限 `FILE`） | `{ sourceType: "FILE", item{clientItemId, fileId, fileName, ...} }` | `{ operationId, batchJobId, accepted[], rejected[] }` | 005 |
 
 ### 6.7 健康检查
 

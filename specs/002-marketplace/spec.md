@@ -26,6 +26,14 @@
 ### Session 2026-08-23
 
 - Q: Agent 详情页是否缺「凭据状态」页签（MCP 有而 Agent 无）？ → A: 缺漏确认——系 v1.2 凭据模型改为按场景区分（Agent 与 MCP 均支持 PAT 平台外调用、均需个人出站凭据）后未回写 M2-5 的升版遗漏。增补 Agent 详情第五页签「凭据状态」，内容与 MCP 同构（FR-007/FR-008），仅订阅者与负责人可见（BA Lead 复核裁定；002 冻结后首个变更，双资产一致性复审产物；2026-08-23 用户终审追认通过，Status 维持 Reviewed）。
+
+### Session 2026-08-31（前后端联调澄清）
+
+- Q1: 订阅与审批流是否 1:1 映射？前端如何从 `subscriptionId` 拿到操作的 `flowId` 与 `stepId`？ → A: 1:1 映射。`my-pending` 接口返回的每项直接带出 `flowId` + `stepId` + `subscriptionId` + `assetId`；`getSubscription` 详情返回 `subscriptionId` 与审批摘要列表（含 `flowId`）。
+- Q2: 资产维度的待办列表与审批历史归属？ → A: `my-pending` 端点支持可选参数 `assetId` 进行过滤；审批历史由 `GET /approval-flows/{flowId}` 返回。
+- Q3: 主动退订是否需要取消理由？取消来源字段？ → A: 主动退订 (`cancel`) requestBody 为可选（默认为用户主动退订）；负责人取消 (`revoke`) reason 为必填。取消来源枚举 (`cancelSource`: `ACTIVE_USER_CANCEL`, `OWNER_CANCEL`, `ASSET_UNPUBLISHED`, `ASSET_DELETED`, `ACCOUNT_DISABLED`) 连同 `cancelReason` 在订阅详情中返回。
+- Q4: 收藏端点缺失与上限？ → A: 提供 `GET /favorites`、`POST /favorites`、`DELETE /favorites/{assetId}`。超过 50 个返回错误码 `ASSET_FAVORITE_LIMIT_EXCEEDED`。
+- Q5: 热门榜排序与运行状态？ → A: `GET /assets` 增加排序参数 `sort` (`published_at_desc` | `hot`)；列表/详情 VO 返回 `healthCheckStatus` 和 `outboundDisabled` 字段标注不可达或停用状态。
 - 备注：本 spec 无 Zeng Ziyang 提交；002 的全部演进为用户账号下的前序会话产物，本次复核完成后 spec 002 视为 BA 终审通过，可交架构写 plan。
 
 ---
