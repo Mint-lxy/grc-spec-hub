@@ -34,7 +34,7 @@
 | 26 | Azure 账号→SharePoint 方案落地（进行中）——2026-08-24 watchlist 质量复核未见最新检查点；下一步需补落地负责人、当前阶段与下一检查点 | 基础设施 | spec 005 AC-10, mcp-m365-server | `[待确认]` | in-progress |
 | 27 | Nexus Teams 创建 + 模型订阅 + 支持模型列表对齐 | 外部依赖 | spec 001/004, agent-service, eval-service | `[待确认]` | closed |
 | 28 | Nexus 缺少多模态/OCR 模型，需自行部署（用户指令 2026-08-14）——下一步需确认自部署模型方案、责任人、目标日期与是否影响 P0 交付 | 外部依赖 | parser-engine, knowledge-engine | `[待确认]` | open |
-| 73 | 确认 Alice 集成方案——统一确认角色默认分配、创建者默认权限、组织用户账号获取方式，以及 Add Documents 中 `Refresh Frequency` 与 `Schedule` 是否重复；目标检查点为 2026-08-31（来源：2026-08-28 用户提供的会议待办） | 外部集成 | spec 005, spec 008, Alice | `[待确认]` | open |
+| 73 | 确认 Alice 集成方案——统一确认角色默认分配、创建者默认权限、组织用户账号获取方式，以及 Add Documents 中 `Refresh Frequency` 与 `Schedule` 是否重复。2026-08-31 用户转述业务方 Emma 补充：知识库 Owner 无需向 Alice 单独申请 Contributor 权限；现有 spec 005 已赋予 Owner 覆盖 Contributor 的操作能力，仍待 BA 明确有效权限是否为 `Owner ⊇ Contributor ⊇ Consumer`，并由架构/开发确认 Alice 侧采用角色继承、权限并集还是自动附加角色 | 外部集成/权限模型 | spec 005 FR-019/FR-037c~FR-037f, spec 008, Alice | BA+架构/开发 | open |
 
 ## Spec 高优未决（来源：各 spec §4）
 
