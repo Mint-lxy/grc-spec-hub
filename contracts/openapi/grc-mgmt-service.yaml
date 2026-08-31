@@ -775,14 +775,14 @@ paths:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/RetrievalRequest' } } }
       responses: { '200': { description: 检索成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeRetrievalEnvelope' } } } } }
-  /open/v1/knowledge/knowledge-bases/{kbId}:
+  /open/knowledge/knowledge-bases/{kbId}:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     get:
       tags: [PAT Open API]
       operationId: getOpenKnowledgeBase
       summary: 通过 PAT 查询知识库元数据
       responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/OpenKnowledgeBaseEnvelope' } } } } }
-  /open/v1/knowledge/retrievals:
+  /open/knowledge/retrievals:
     post:
       tags: [PAT Open API]
       operationId: retrieveOpenKnowledge
@@ -791,7 +791,7 @@ paths:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/OpenRetrievalRequest' } } }
       responses: { '200': { description: 检索成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeRetrievalEnvelope' } } } } }
-  /open/v1/knowledge/knowledge-bases/{kbId}/documents:
+  /open/knowledge/knowledge-bases/{kbId}/documents:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     post:
       tags: [PAT Open API]
