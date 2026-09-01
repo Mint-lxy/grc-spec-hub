@@ -1366,7 +1366,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RetrievalRequest'
+              $ref: '#/components/schemas/DifyRetrievalRequest'
         required: true
       responses:
         '200':
@@ -1399,9 +1399,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              additionalProperties: true
-              title: Request
+              $ref: '#/components/schemas/BatchDocumentsRequest'
       responses:
         '202':
           description: Successful Response
@@ -1556,6 +1554,44 @@ components:
       required:
         - name
       title: CreateKnowledgeTagRequest
+    DifyRetrievalRequest:
+      properties:
+        knowledge_id:
+          type: string
+          maxLength: 64
+          minLength: 1
+          title: Knowledge Id
+        query:
+          type: string
+          maxLength: 10000
+          minLength: 1
+          title: Query
+        retrieval_setting:
+          $ref: '#/components/schemas/DifyRetrievalSetting'
+      additionalProperties: false
+      type: object
+      required:
+        - knowledge_id
+        - query
+      title: DifyRetrievalRequest
+    DifyRetrievalSetting:
+      properties:
+        top_k:
+          type: integer
+          maximum: 100
+          minimum: 1
+          title: Top K
+          default: 10
+        score_threshold:
+          anyOf:
+            - type: number
+              maximum: 1
+              minimum: 0
+            - type: 'null'
+          title: Score Threshold
+      additionalProperties: false
+      type: object
+      title: DifyRetrievalSetting
     HTTPValidationError:
       properties:
         detail:
@@ -1636,6 +1672,13 @@ components:
               type: object
             - type: 'null'
           title: Stageoverrides
+        runMode:
+          type: string
+          enum:
+            - auto
+            - manual
+          title: Runmode
+          default: auto
       additionalProperties: false
       type: object
       required:
