@@ -36,6 +36,10 @@
 - Q5: 热门榜排序与运行状态？ → A: `GET /assets` 增加排序参数 `sort` (`published_at_desc` | `hot`)；列表/详情 VO 返回 `healthCheckStatus` 和 `outboundDisabled` 字段标注不可达或停用状态。
 - 备注：本 spec 无 Zeng Ziyang 提交；002 的全部演进为用户账号下的前序会话产物，本次复核完成后 spec 002 视为 BA 终审通过，可交架构写 plan。
 
+### Session 2026-09-01（一级导航信息架构裁定）
+
+- Q: PRD v1.2 §5.1/§5.2 的一级导航（Marketplace 下设 Agent/MCP/订阅者中心/创作者中心）与 2026-08-26 会议裁定的新一级导航冲突，以哪个为准？ → A（用户裁定 2026-09-01，源自 2026-08-26 平台导航与详情页设计会议决议）：**采用新一级导航 Chat / Explore / Curate / Build / Govern**。对本 spec 的影响仅限导航归属，功能域与 FR 内容不变：①Agent/MCP 发现与订阅目录归入 **Explore**；②订阅者中心并入 **Explore 页内**（不再是独立二级入口，右上角 console 或页内入口）；③创作者中心归入 **Build**（Build 同时承载上架入口、Dify 跳转、Agent Kit 预留）；④Explore 置引导 button 跳 Build 的入口 9/7 首期不做；⑤provider 审批 request 归 Build 还是 Govern 会上未定论，随 watchlist #80 跟踪，本 spec 的审批相关页面（创作者中心待我审批、资产控制台审批人视图）暂按归 Build 计。PRD §5.1/§5.2 仍为旧 IA，为需求基线文档不直接反写，待走 PRD 升版流程对齐（watchlist #80）。本 spec 中「Marketplace」「订阅者中心」「创作者中心」保留为功能域名称，仅对应导航归属按上述口径变更。
+
 ---
 
 ## User Scenarios & Testing
