@@ -1,0 +1,44 @@
+# 样例 OpenAPI 契约 —— 仅供参照，勿被消费。
+# 正式契约请置于 contracts/openapi/<svc>.yaml。
+openapi: 3.1.0
+info:
+  title: Example Service API
+  version: "1.0"
+  description: 样例契约，展示本项目的 OpenAPI 约定。
+servers:
+  - url: https://api.example.internal/v1
+security:
+  - bearerAuth: []
+paths:
+  /examples/{id}:
+    get:
+      operationId: getExample
+      summary: 按 ID 获取样例
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Example" }
+        "404":
+          description: Not Found
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Example:
+      type: object
+      required: [id, status]
+      properties:
+        id: { type: string }
+        status:
+          type: string
+          enum: [ACTIVE, ARCHIVED]

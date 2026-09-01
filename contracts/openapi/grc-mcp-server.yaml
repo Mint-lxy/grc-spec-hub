@@ -1,0 +1,402 @@
+openapi: 3.1.0
+info:
+  title: GRC Confluence MCP Server API
+  version: "0.8"
+  description: >-
+    本契约定义 Confluence 原生 MCP 通道 `/mcp/confluence`。调用采用 MCP JSON-RPC 2.0
+    over Streamable HTTP：工具发现使用 `tools/list`，工具调用使用 `tools/call`。Chat 与
+    知识导入是调用方业务接口，不属于本服务的 MCP path。
+servers:
+  - url: https://api.internal/api/v1
+    description: 经 grc-api-gateway 转发后的生产地址
+security:
+  - bearerAuth: []
+tags:
+  - name: ConfluenceMCP
+    description: Confluence 原生工具的 MCP JSON-RPC 接口
+  - name: Health
+    description: MCP 进程存活探测
+paths:
+  /mcp/confluence:
+    post:
+      tags: [ConfluenceMCP]
+      operationId: handleMcpRequest
+      summary: 调用原生 MCP 工具
+      description: >-
+        生产调用地址为 `POST /api/v1/mcp/confluence`。请求 method 为 `tools/list` 或 `tools/call`；
+        工具由 params.name 区分，详细 IO 见 McpRequest 中的各工具 schema。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/McpRequest'
+      responses:
+        '200':
+          description: MCP JSON-RPC 响应；工具错误以 error 字段返回
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/McpResponse'
+
+  /mcp/confluence/healthz:
+    get:
+      tags: [Health]
+      operationId: getMcpHealth
+      security: []
+      summary: 原生 MCP 进程存活探测
+      description: >-
+        生产调用地址为 `GET /api/v1/mcp/confluence/healthz`。本接口不探测下游 Confluence 可达性。
+      responses:
+        '200':
+          description: MCP 进程可接流量；不检查下游 Confluence 可达性
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status, service, version]
+      properties:
+        status: { type: string, const: ok }
+        service: { type: string, const: mcp-conf-server }
+        version: { type: string, example: 0.8.0 }
+
+    JsonRpcId:
+      oneOf:
+        - type: integer
+        - type: string
+        - type: 'null'
+
+    McpRequest:
+      oneOf:
+        - $ref: '#/components/schemas/ToolsListRequest'
+        - $ref: '#/components/schemas/ToolsCallRequest'
+
+    ToolsListRequest:
+      type: object
+      required: [jsonrpc, id, method]
+      properties:
+        jsonrpc: { type: string, const: "2.0" }
+        id: { $ref: '#/components/schemas/JsonRpcId' }
+        method: { type: string, const: tools/list }
+
+    ToolsCallRequest:
+      type: object
+      required: [jsonrpc, id, method, params]
+      properties:
+        jsonrpc: { type: string, const: "2.0" }
+        id: { $ref: '#/components/schemas/JsonRpcId' }
+        method: { type: string, const: tools/call }
+        params:
+          oneOf:
+            - $ref: '#/components/schemas/ConfluenceSearchCall'
+            - $ref: '#/components/schemas/ConfluenceGetPageCall'
+            - $ref: '#/components/schemas/ConfluenceSearchImportCall'
+            - $ref: '#/components/schemas/ConfluenceListChildrenCall'
+            - $ref: '#/components/schemas/ConfluenceGetPageTreeCall'
+            - $ref: '#/components/schemas/ConfluenceImportPageCall'
+
+    McpResponse:
+      type: object
+      required: [jsonrpc, id]
+      properties:
+        jsonrpc: { type: string, const: "2.0" }
+        id: { $ref: '#/components/schemas/JsonRpcId' }
+        result:
+          oneOf:
+            - $ref: '#/components/schemas/ToolsListResult'
+            - $ref: '#/components/schemas/SearchResult'
+            - $ref: '#/components/schemas/GetPageResult'
+            - $ref: '#/components/schemas/ListChildrenResult'
+            - $ref: '#/components/schemas/GetPageTreeResult'
+            - $ref: '#/components/schemas/ImportPageResult'
+        error: { $ref: '#/components/schemas/ToolError' }
+
+    ToolError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          description: >-
+            格式为 [code] message；code 为 missing_credential、credential_invalid、
+            rate_limited、timeout、network_error、api_error、not_found、invalid_args、
+            invalid_url 或 tool_error。
+
+    McpToolCall:
+      type: object
+      required: [name, arguments]
+      properties:
+        name: { type: string }
+        arguments: { type: object }
+
+    ConfluenceSearchCall:
+      description: >-
+        组 A Chat 搜索 Confluence 页面。调用：`name = "confluence_search"`；
+        使用平台资源 PAT，arguments 中禁止 credential。
+      allOf:
+        - $ref: '#/components/schemas/McpToolCall'
+        - type: object
+          properties:
+            name: { type: string, const: confluence_search }
+            arguments: { $ref: '#/components/schemas/SearchArguments' }
+
+    ConfluenceGetPageCall:
+      description: >-
+        组 A Chat 分段读取 Confluence 页面。调用：`name = "confluence_get_page"`；
+        使用平台资源 PAT，arguments 中禁止 credential。
+      allOf:
+        - $ref: '#/components/schemas/McpToolCall'
+        - type: object
+          properties:
+            name: { type: string, const: confluence_get_page }
+            arguments: { $ref: '#/components/schemas/GetPageArguments' }
+
+    ConfluenceSearchImportCall:
+      description: >-
+        组 B 知识导入向导搜索 Confluence 页面。调用：`name = "confluence_search_import"`；
+        arguments.credential 必填，使用操作人个人 PAT。
+      allOf:
+        - $ref: '#/components/schemas/McpToolCall'
+        - type: object
+          properties:
+            name: { type: string, const: confluence_search_import }
+            arguments: { $ref: '#/components/schemas/SearchImportArguments' }
+
+    ConfluenceListChildrenCall:
+      description: >-
+        组 B 查询页面一层子节点和附件元数据。调用：`name = "confluence_list_children"`；
+        arguments.credential 必填，使用操作人个人 PAT。
+      allOf:
+        - $ref: '#/components/schemas/McpToolCall'
+        - type: object
+          properties:
+            name: { type: string, const: confluence_list_children }
+            arguments: { $ref: '#/components/schemas/ListChildrenArguments' }
+
+    ConfluenceGetPageTreeCall:
+      description: >-
+        组 B 查询页面有界子树和附件元数据。调用：`name = "confluence_get_page_tree"`；
+        arguments.credential 必填，使用操作人个人 PAT。
+      allOf:
+        - $ref: '#/components/schemas/McpToolCall'
+        - type: object
+          properties:
+            name: { type: string, const: confluence_get_page_tree }
+            arguments: { $ref: '#/components/schemas/GetPageTreeArguments' }
+
+    ConfluenceImportPageCall:
+      description: >-
+        组 B 导入整页 Markdown 并暂存附件。调用：`name = "confluence_import_page"`；
+        arguments.credential 必填，使用操作人个人 PAT。
+      allOf:
+        - $ref: '#/components/schemas/McpToolCall'
+        - type: object
+          properties:
+            name: { type: string, const: confluence_import_page }
+            arguments: { $ref: '#/components/schemas/ImportPageArguments' }
+
+    SearchArguments:
+      type: object
+      required: [query]
+      properties:
+        query: { type: string }
+        space_key: { type: string }
+
+    GetPageArguments:
+      type: object
+      oneOf:
+        - required: [page_id]
+        - required: [url]
+      properties:
+        page_id: { type: string }
+        url: { type: string }
+        cursor: { type: string }
+
+    Credential:
+      type: object
+      required: [value]
+      properties:
+        type:
+          type: string
+          enum: [confluence_pat, pat, bearer]
+          default: confluence_pat
+        value:
+          type: string
+          writeOnly: true
+          description: 个人 Confluence PAT；用完即弃，不缓存、不落库、不写日志
+
+    SearchImportArguments:
+      type: object
+      required: [query, credential]
+      properties:
+        query: { type: string }
+        space_key: { type: string }
+        credential: { $ref: '#/components/schemas/Credential' }
+
+    ListChildrenArguments:
+      type: object
+      required: [credential]
+      oneOf:
+        - required: [page_id]
+        - required: [space_key]
+      properties:
+        page_id: { type: string }
+        space_key: { type: string }
+        include_attachments: { type: boolean, default: true }
+        credential: { $ref: '#/components/schemas/Credential' }
+
+    GetPageTreeArguments:
+      type: object
+      required: [credential]
+      oneOf:
+        - required: [page_id]
+        - required: [space_key]
+      properties:
+        page_id: { type: string }
+        space_key: { type: string }
+        max_depth: { type: integer, default: 3 }
+        max_nodes: { type: integer, default: 200 }
+        include_attachments: { type: boolean, default: true }
+        credential: { $ref: '#/components/schemas/Credential' }
+
+    ImportPageArguments:
+      type: object
+      required: [credential]
+      oneOf:
+        - required: [page_id]
+        - required: [url]
+      properties:
+        page_id: { type: string }
+        url: { type: string }
+        credential: { $ref: '#/components/schemas/Credential' }
+
+    ToolsListResult:
+      type: object
+      required: [tools]
+      properties:
+        tools:
+          type: array
+          items:
+            type: object
+            required: [name, inputSchema]
+            properties:
+              name:
+                type: string
+                enum: [confluence_search, confluence_get_page, confluence_search_import, confluence_list_children, confluence_get_page_tree, confluence_import_page]
+              inputSchema: { type: object }
+
+    SearchResult:
+      type: object
+      required: [results]
+      properties:
+        results:
+          type: array
+          maxItems: 10
+          items:
+            type: object
+            required: [page_id, title, space_key, url, excerpt]
+            properties:
+              page_id: { type: string }
+              title: { type: string }
+              space_key: { type: string }
+              url: { type: string }
+              excerpt: { type: string, maxLength: 200 }
+
+    GetPageResult:
+      type: object
+      required: [title, url, content, has_more, next_cursor]
+      properties:
+        title: { type: string }
+        url: { type: string }
+        content: { type: string, description: "单段约 4000 字；图片表示为 [图片：alt]，不含附件" }
+        has_more: { type: boolean }
+        next_cursor: { type: string }
+
+    ConfluencePageNode:
+      type: object
+      required: [page_id, title, space_key, url, path, has_children]
+      properties:
+        page_id: { type: string }
+        title: { type: string }
+        space_key: { type: string }
+        url: { type: string }
+        path: { type: string }
+        has_children: { type: boolean }
+        attachments:
+          type: array
+          items: { $ref: '#/components/schemas/AttachmentMetadata' }
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/ConfluencePageNode' }
+
+    AttachmentMetadata:
+      type: object
+      properties:
+        attachment_id: { type: string }
+        name: { type: string }
+        media_type: { type: string }
+        size: { type: integer }
+
+    ListChildrenResult:
+      type: object
+      required: [parent_page_id, children]
+      properties:
+        parent_page_id: { type: string }
+        children:
+          type: array
+          items: { $ref: '#/components/schemas/ConfluencePageNode' }
+
+    GetPageTreeResult:
+      type: object
+      required: [root, truncated, stats]
+      properties:
+        root: { $ref: '#/components/schemas/ConfluencePageNode' }
+        truncated: { type: boolean }
+        stats:
+          type: object
+          properties:
+            nodes: { type: integer }
+            max_depth_reached: { type: integer }
+
+    ImportPageResult:
+      type: object
+      required: [title, space_key, markdown, attachments, manifest]
+      properties:
+        title: { type: string }
+        space_key: { type: string }
+        markdown: { type: string }
+        attachments:
+          type: array
+          items: { $ref: '#/components/schemas/ImportedAttachment' }
+        manifest:
+          $ref: '#/components/schemas/ImportManifest'
+
+    ImportedAttachment:
+      type: object
+      required: [name, local_ref, media_type, size]
+      properties:
+        name: { type: string }
+        local_ref:
+          type: string
+          description: confluence/{page_id}/{filename}，相对 ATTACHMENT_TEMP_DIR
+        media_type: { type: string }
+        size: { type: integer }
+
+    ImportManifest:
+      type: object
+      required: [page_id, landing, source, staging_root]
+      properties:
+        page_id: { type: string }
+        landing: { type: string, const: local_temp }
+        source: { type: string, const: confluence }
+        staging_root: { type: string, description: "confluence/{page_id}" }

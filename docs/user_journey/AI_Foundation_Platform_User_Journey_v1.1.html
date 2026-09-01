@@ -1,0 +1,1636 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:,">
+<title>AI Foundation Platform 用户旅程交互图（业务视角版）</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<style>
+:root {
+  --ink: #15191d;
+  --ink-2: #30373d;
+  --muted: #59646b;
+  --line: #d9dddf;
+  --line-strong: #aeb5ba;
+  --paper: #f5f6f3;
+  --surface: #ffffff;
+  --surface-2: #eef1ef;
+  --accent: #2f61a8;
+  --accent-soft: #e4ecf7;
+  --sidebar: 300px;
+  --header: 58px;
+  --radius: 6px;
+  --shadow: 0 8px 24px rgba(21, 25, 29, 0.06);
+  --font-sans: "IBM Plex Sans", "Noto Sans SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+  --font-mono: "IBM Plex Mono", "JetBrains Mono", "Cascadia Mono", monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: auto; scroll-padding-top: 78px; }
+body {
+  color: var(--ink);
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(rgba(21, 25, 29, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(21, 25, 29, 0.02) 1px, transparent 1px);
+  background-size: 28px 28px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.7;
+}
+a { color: inherit; }
+button { font: inherit; }
+code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: #edf0ee;
+  border: 1px solid #dfe3e1;
+  border-radius: 3px;
+  padding: 1px 5px;
+  overflow-wrap: anywhere;
+}
+p { margin: 0 0 12px; color: var(--ink-2); font-size: 13px; line-height: 1.75; }
+h2, h3 { color: var(--ink); }
+
+.reading-progress { position: fixed; inset: 0 auto auto 0; z-index: 1000; width: 0; height: 3px; background: var(--accent); }
+
+.topbar {
+  position: fixed; inset: 0 0 auto 0; z-index: 800;
+  height: var(--header); display: flex; align-items: center;
+  justify-content: space-between; gap: 20px; padding: 0 24px;
+  color: #fff; background: rgba(21, 25, 29, 0.97);
+  border-bottom: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(12px);
+}
+.brandline { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+.brandline strong { font-size: 15px; font-weight: 700; white-space: nowrap; }
+.brandline span { color: #b8c0c5; font-family: var(--font-mono); font-size: 11px; white-space: nowrap; }
+.top-actions { display: flex; align-items: center; gap: 8px; }
+.print-btn {
+  min-height: 34px; padding: 5px 12px; color: #fff; background: transparent;
+  border: 1px solid #626b72; border-radius: 4px; cursor: pointer; font-size: 12px;
+}
+.print-btn:hover { border-color: #fff; }
+.menu-btn {
+  display: none; width: 40px; height: 40px; padding: 0; color: #fff;
+  background: transparent; border: 0; font-size: 22px; cursor: pointer;
+}
+
+.page-shell { display: grid; grid-template-columns: var(--sidebar) minmax(0, 1fr); min-height: 100vh; padding-top: var(--header); }
+
+.sidebar {
+  position: sticky; top: var(--header); align-self: start;
+  height: calc(100vh - var(--header)); overflow-y: auto;
+  color: #dfe4e7; background: #20262a; border-right: 1px solid #343b40;
+  scrollbar-width: thin; scrollbar-color: #596168 transparent;
+}
+.sidebar-head { padding: 22px 20px 16px; border-bottom: 1px solid #394146; }
+.sidebar-kicker { color: #8fb4e0; font-family: var(--font-mono); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.sidebar-head h2 { margin: 4px 0 0; font-size: 16px; line-height: 1.35; color: #fff; }
+.sidebar-head p { margin: 6px 0 0; color: #9fa9af; font-size: 11px; line-height: 1.5; }
+
+.toc { padding: 12px 10px 28px; }
+.toc-group {
+  display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 0; align-items: center;
+  margin: 16px 8px 4px; padding-top: 10px; color: #dfe4e7;
+  border-top: 1px solid #394146; font-size: 12px; font-weight: 700;
+}
+.toc-group:first-child { margin-top: 2px; border-top: 0; }
+.toc-group-no { color: #8fb4e0; font-family: var(--font-mono); font-size: 10px; }
+.toc a {
+  display: grid; grid-template-columns: 36px 1fr; align-items: center;
+  min-height: 36px; padding: 4px 8px; color: #d8dee1; text-decoration: none;
+  border-radius: 4px; transition: background 120ms ease, color 120ms ease;
+}
+.toc a:hover { background: #2d353a; color: #fff; }
+.toc a.active { color: #fff; background: #33404f; font-weight: 600; }
+.toc a.active .toc-no { color: #9fc4ef; }
+.toc-no { color: #7f8a91; font-family: var(--font-mono); font-size: 10px; }
+.toc-label { font-size: 12px; line-height: 1.4; }
+
+main { min-width: 0; }
+.report { width: min(100%, 1320px); margin: 0 auto; padding: 40px 48px 80px; }
+
+.hero { padding: 20px 0 40px; border-bottom: 1px solid var(--line-strong); }
+.eyebrow { margin: 0 0 14px; color: var(--accent); font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.hero h1 { margin: 0; max-width: 900px; font-size: 34px; line-height: 1.2; font-weight: 700; }
+.callout { margin: 18px 0 0; padding: 16px 20px; background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 4px; }
+.callout p { margin: 0 0 8px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.callout p:last-child { margin-bottom: 0; }
+
+.section { padding: 52px 0 16px; border-bottom: 1px solid var(--line); }
+.section:last-of-type { border-bottom: 0; }
+.section-head { display: grid; grid-template-columns: 60px minmax(0, 1fr); gap: 20px; align-items: start; margin-bottom: 24px; }
+.section-no { padding-top: 4px; color: var(--accent); font-family: var(--font-mono); font-size: 11px; font-weight: 700; border-top: 3px solid var(--accent); }
+.section-title h2 { margin: 0; font-size: 25px; line-height: 1.3; }
+
+.technical-subsection { margin: 34px 0 16px; padding-top: 20px; border-top: 1px solid var(--line-strong); }
+.technical-subsection-head { display: grid; grid-template-columns: 60px minmax(0, 1fr); gap: 20px; align-items: start; }
+.technical-subsection-no { padding-top: 3px; color: var(--accent); font-family: var(--font-mono); font-size: 11px; font-weight: 700; border-top: 2px solid var(--accent); }
+.technical-subsection h3 { margin: 0; font-size: 18px; line-height: 1.3; }
+
+.bullet-list { margin: 0 0 20px; padding-left: 20px; }
+.bullet-list li { margin: 8px 0; color: var(--ink-2); font-size: 13px; line-height: 1.75; }
+.bullet-list strong { color: var(--ink); }
+
+.technical-table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); margin: 0 0 20px; }
+.technical-table { width: 100%; min-width: 900px; border-collapse: collapse; font-size: 11px; line-height: 1.6; }
+.technical-table th, .technical-table td { padding: 10px 12px; text-align: left; vertical-align: top; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.technical-table th:last-child, .technical-table td:last-child { border-right: 0; }
+.technical-table tr:last-child td { border-bottom: 0; }
+.technical-table th { color: #fff; background: var(--ink-2); font-weight: 600; white-space: nowrap; }
+.technical-table tr:nth-child(even) td { background: #fafbf9; }
+
+/* Flowcard Container & Diagram Wrapper */
+.flow-card-container {
+  margin: 0 0 28px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.flow-card-head {
+  display: flex; justify-content: space-between; gap: 16px; align-items: flex-start;
+  padding: 16px 20px; border-bottom: 1px solid var(--line); background: #fafbf9;
+}
+.flow-card-head h3 { margin: 0; font-size: 15px; }
+.role-badge-group { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.role-badge { display: inline-block; padding: 2px 9px; color: var(--accent); background: var(--accent-soft); border: 1px solid #b9cce8; border-radius: 4px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.role-badge-user { color: #173B7A; background: #EAF2FF; border-color: #4C78D8; }
+.role-badge-owner { color: #14512B; background: #EAF7EF; border-color: #3E9B61; }
+.role-badge-knowledge { color: #3B277D; background: #F1ECFF; border-color: #7B61D1; }
+.role-badge-admin { color: #7A1F25; background: #FFEDEE; border-color: #D85C63; }
+.role-badge-platform { color: #253858; background: #F4F6F8; border-color: #7A869A; }
+.journey-line { margin: 0 0 18px; padding: 10px 16px; color: var(--ink-2); background: var(--surface-2); border-left: 3px solid var(--line-strong); border-radius: 4px; font-size: 13px; line-height: 1.7; }
+.journey-line strong { color: var(--ink); }
+.flow-card-tools { display: flex; align-items: center; gap: 10px; }
+.flow-card-id { color: var(--muted); font-family: var(--font-mono); font-size: 10px; white-space: nowrap; }
+.zoom-btn {
+  padding: 5px 12px; color: var(--accent); background: var(--accent-soft); border: 1px solid #b9cce8;
+  border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 700; transition: all 120ms ease; white-space: nowrap;
+}
+.zoom-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.flow-card-body { padding: 24px; overflow-x: auto; background: #ffffff; }
+
+.mermaid-diagram-wrap {
+  display: flex; justify-content: center; align-items: center; min-height: 160px; width: 100%; overflow-x: auto; background: #ffffff;
+}
+pre.mermaid {
+  width: 100%; font-family: var(--font-sans) !important; background: #ffffff !important;
+  border: 0; margin: 0; padding: 0; white-space: normal;
+}
+.mermaid svg {
+  max-width: 100%; height: auto !important; margin: 0 auto; display: block; background: #ffffff !important;
+}
+.diagram-scale-sm svg {
+  max-width: 600px;
+}
+
+.footer { display: flex; justify-content: space-between; gap: 24px; margin-top: 60px; padding-top: 20px; color: var(--muted); border-top: 1px solid var(--line-strong); font-family: var(--font-mono); font-size: 9px; }
+
+.mobile-overlay { display: none; }
+
+/* Modal Fullscreen Viewer */
+.diagram-modal {
+  position: fixed; inset: 0; z-index: 2000; display: none;
+  color-scheme: light; background: #f3f5f6; backdrop-filter: blur(10px);
+}
+.diagram-modal.active { display: flex; flex-direction: column; }
+.modal-head {
+  display: flex; justify-content: space-between; align-items: center; padding: 12px 24px;
+  color: var(--ink); background: #ffffff; border-bottom: 1px solid var(--line-strong);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.modal-head-title { display: flex; align-items: baseline; gap: 12px; }
+.modal-head h3 { margin: 0; font-size: 16px; font-weight: 700; color: var(--ink); }
+.modal-zoom-badge {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--accent);
+  background: var(--accent-soft); padding: 2px 8px; border-radius: 4px; border: 1px solid #b9cce8;
+}
+.modal-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+.modal-btn {
+  min-height: 32px; padding: 4px 12px; color: var(--ink-2); background: #ffffff;
+  border: 1px solid var(--line-strong); border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;
+  transition: all 120ms ease;
+}
+.modal-btn:hover { background: var(--surface-2); color: var(--ink); border-color: var(--ink); }
+.modal-btn.close-btn { background: #fdf2f0; color: #a33a32; border-color: #f5c2be; }
+.modal-btn.close-btn:hover { background: #a33a32; color: #ffffff; border-color: #a33a32; }
+
+.modal-body {
+  flex: 1; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center;
+  cursor: grab; padding: 20px; user-select: none; background-color: #f3f5f6;
+  background-image:
+    linear-gradient(#e4e8ea 1px, transparent 1px),
+    linear-gradient(90deg, #e4e8ea 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.modal-body:active { cursor: grabbing; }
+.modal-viewport {
+  transform-origin: center center;
+  background: #ffffff; border: 1px solid var(--line-strong); border-radius: 8px;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.12); padding: 32px; margin: 0;
+  max-width: none; max-height: none;
+}
+.modal-viewport svg {
+  max-width: none !important; display: block; margin: 0 auto; background: #ffffff !important;
+  color: var(--ink) !important;
+}
+.modal-viewport svg text,
+.modal-viewport svg .nodeLabel,
+.modal-viewport svg .edgeLabel,
+.modal-viewport svg .labelText,
+.modal-viewport svg foreignObject div,
+.modal-viewport svg foreignObject span,
+.modal-viewport svg foreignObject p {
+  color: var(--ink) !important;
+  fill: var(--ink) !important;
+}
+
+@media (max-width: 1180px) {
+  :root { --sidebar: 260px; }
+  .report { padding-inline: 30px; }
+}
+
+@media (max-width: 880px) {
+  :root { --header: 54px; }
+  .menu-btn { display: block; }
+  .brandline span, .print-btn { display: none; }
+  .page-shell { grid-template-columns: 1fr; }
+  .sidebar { position: fixed; z-index: 900; inset: var(--header) auto 0 0; width: min(86vw, 300px); height: calc(100vh - var(--header)); transform: translateX(-105%); transition: transform 180ms ease; }
+  body.nav-open .sidebar { transform: translateX(0); }
+  .mobile-overlay { position: fixed; z-index: 850; inset: var(--header) 0 0 0; display: block; visibility: hidden; opacity: 0; background: rgba(0,0,0,0.4); transition: opacity 180ms ease, visibility 180ms ease; }
+  body.nav-open .mobile-overlay { visibility: visible; opacity: 1; }
+  .report { padding: 24px 16px 60px; }
+  .hero h1 { font-size: 26px; }
+  .section { padding-top: 40px; }
+  .section-head, .technical-subsection-head { grid-template-columns: 46px minmax(0, 1fr); gap: 12px; }
+  .section-title h2 { font-size: 21px; }
+  .modal-head { flex-direction: column; align-items: stretch; gap: 10px; padding: 10px 12px; }
+  .modal-head-title { width: 100%; flex-wrap: wrap; gap: 6px; }
+  .modal-head h3 { font-size: 13px; line-height: 1.35; }
+  .modal-controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; overflow: visible; }
+  .modal-btn { min-height: 30px; padding: 3px 8px; font-size: 11px; }
+}
+
+@media print {
+  @page { size: A4 landscape; margin: 10mm; }
+  body { background: #fff; font-size: 10pt; }
+  .topbar, .sidebar, .mobile-overlay, .reading-progress, .diagram-modal { display: none !important; }
+  .page-shell { display: block; padding: 0; }
+  .report { width: 100%; max-width: none; padding: 0; }
+  .section { padding-top: 12mm; break-before: page; }
+  .flow-card-container, .technical-table-wrap { break-inside: avoid; box-shadow: none; }
+  .footer { break-before: page; }
+}
+</style>
+</head>
+<body>
+  <div class="reading-progress" id="readingProgress" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brandline">
+      <button class="menu-btn" id="menuButton" type="button" aria-label="打开目录" aria-expanded="false">☰</button>
+      <strong>AI Foundation Platform｜用户旅程交互图</strong>
+      <span>业务视角版 · 用户旅程 + PRD v1.0</span>
+    </div>
+    <div class="top-actions">
+      <button class="print-btn" type="button" onclick="window.print()">打印 / 导出 PDF</button>
+    </div>
+  </header>
+
+  <div class="page-shell">
+    <aside class="sidebar" id="sidebar" aria-label="报告目录">
+      <div class="sidebar-head">
+        <div class="sidebar-kicker">User Journey</div>
+        <h2>旅程图目录</h2>
+        <p>按角色划分的用户旅程、关键状态图与功能对应表</p>
+      </div>
+      <nav class="toc">
+        <div class="toc-group"><span class="toc-group-no">01</span><span>全平台角色旅程总览</span></div>
+        <a class="toc-l2" href="#sec-01"><span class="toc-no">1.0</span><span class="toc-label">全平台角色旅程总览</span></a>
+        <div class="toc-group"><span class="toc-group-no">02</span><span>资产订阅者旅程</span></div>
+        <a class="toc-l2" href="#sec-02-ctx-0"><span class="toc-no">2.0</span><span class="toc-label">业务上下文</span></a>
+        <a class="toc-l2" href="#sec-02-2-1"><span class="toc-no">2.1</span><span class="toc-label">发现资产，订阅申请</span></a>
+        <a class="toc-l2" href="#sec-02-2-2"><span class="toc-no">2.2</span><span class="toc-label">资产使用</span></a>
+        <a class="toc-l2" href="#sec-02-2-3"><span class="toc-no">2.3</span><span class="toc-label">资产变化通知</span></a>
+        <div class="toc-group"><span class="toc-group-no">03</span><span>资产创建者旅程</span></div>
+        <a class="toc-l2" href="#sec-03-ctx-0"><span class="toc-no">3.0</span><span class="toc-label">业务上下文</span></a>
+        <a class="toc-l2" href="#sec-03-3-1"><span class="toc-no">3.1</span><span class="toc-label">创建高代码Agent旅程</span></a>
+        <a class="toc-l2" href="#sec-03-3-2"><span class="toc-no">3.2</span><span class="toc-label">创建低代码Agent旅程（二期）</span></a>
+        <a class="toc-l2" href="#sec-03-3-3"><span class="toc-no">3.3</span><span class="toc-label">创建MCP旅程</span></a>
+        <a class="toc-l2" href="#sec-03-3-4"><span class="toc-no">3.4</span><span class="toc-label">资产上架运营</span></a>
+        <div class="toc-group"><span class="toc-group-no">04</span><span>知识库管理与使用</span></div>
+        <a class="toc-l2" href="#sec-04-ctx-0"><span class="toc-no">4.0</span><span class="toc-label">业务上下文</span></a>
+        <a class="toc-l2" href="#sec-04-4-1"><span class="toc-no">4.1</span><span class="toc-label">目录管理旅程</span></a>
+        <a class="toc-l2" href="#sec-04-4-2"><span class="toc-no">4.2</span><span class="toc-label">知识库创建旅程</span></a>
+        <a class="toc-l2" href="#sec-04-4-3"><span class="toc-no">4.3</span><span class="toc-label">知识库拥有者（Owner）</span></a>
+        <a class="toc-l2" href="#sec-04-4-4"><span class="toc-no">4.4</span><span class="toc-label">知识库贡献者（Contributor）</span></a>
+        <a class="toc-l2" href="#sec-04-4-5"><span class="toc-no">4.5</span><span class="toc-label">知识库使用者（Consumer）</span></a>
+        <div class="toc-group"><span class="toc-group-no">05</span><span>平台管理员旅程：测评、护栏与管理后台治理</span></div>
+        <a class="toc-l2" href="#sec-05-ctx-0"><span class="toc-no">5.0</span><span class="toc-label">业务上下文</span></a>
+        <a class="toc-l2" href="#sec-05-5-1"><span class="toc-no">5.1</span><span class="toc-label">测评模板与发布准入测评</span></a>
+        <a class="toc-l2" href="#sec-05-5-2"><span class="toc-no">5.2</span><span class="toc-label">二期测评中心能力</span></a>
+        <a class="toc-l2" href="#sec-05-5-3"><span class="toc-no">5.3</span><span class="toc-label">护栏策略与运行时拦截</span></a>
+        <a class="toc-l2" href="#sec-05-5-4"><span class="toc-no">5.4</span><span class="toc-label">管理后台治理运营</span></a>
+        <div class="toc-group"><span class="toc-group-no">06</span><span>密钥库旅程：个人访问令牌与个人出站凭据</span></div>
+        <a class="toc-l2" href="#sec-06-ctx-0"><span class="toc-no">6.0</span><span class="toc-label">业务上下文</span></a>
+        <a class="toc-l2" href="#sec-06-6-1"><span class="toc-no">6.1</span><span class="toc-label">配置个人入站凭据（PAT）</span></a>
+        <a class="toc-l2" href="#sec-06-6-2"><span class="toc-no">6.2</span><span class="toc-label">配置个人出站凭据</span></a>
+
+        <div class="toc-group"><span class="toc-group-no">08</span><span>功能层级对应表</span></div>
+        <a class="toc-l2" href="#sec-08"><span class="toc-no">8.0</span><span class="toc-label">功能层级对应表</span></a>
+        <div class="toc-group"><span class="toc-group-no">09</span><span>首版与二期边界提示</span></div>
+        <a class="toc-l2" href="#sec-09"><span class="toc-no">9.0</span><span class="toc-label">首版与二期边界提示</span></a>
+      </nav>
+    </aside>
+
+    <div class="mobile-overlay" id="mobileOverlay" aria-hidden="true"></div>
+
+    <main>
+      <div class="report">
+        <section class="hero">
+          <p class="eyebrow">AI Foundation Platform · Business User Journey</p>
+          <h1>AI Foundation Platform 用户旅程交互图（业务视角版）</h1>
+          <div class="callout"><p>来源：<code>Prototype/AI_Foundation_Platform_User_Journey_v1.md</code> 与 <code>PRD/GRC-AI-Foundation-Platform-PRD-v1.0.md</code>。若两份来源冲突，以 PRD v1.0 为准；用户旅程文档用于补充交互细节。</p><p>本版面向业务评审：图中不使用需求编号、技术任务编号或时间缩写；所有顺序均写成「第一步、第二步……」。功能对应关系以「一级功能 &gt; 二级功能 &gt; 页面或动作」标注，便于回到产品设计和产品需求文档核对。</p><p>术语说明：Agent 是可对话的资产；MCP（Model Context Protocol）是可被系统或已订阅 Agent 调用的工具，不是对话对象；个人访问令牌是外部系统调用本平台开放能力时使用的入站凭据；Alice 是奔驰企业权限系统，负责账号、角色和知识授权。</p></div>
+        </section>
+
+
+<section class="section" id="sec-01" data-section>
+  <header class="section-head">
+    <div class="section-no">01</div>
+    <div class="section-title">
+      <h2>一、全平台角色旅程总览</h2>
+    </div>
+  </header>
+  <p class="journey-line">作为平台上的资产订阅者、资产创建者、知识库管理员或平台管理员，我可以在各自的入口（Marketplace、创作者中心、知识管理、管理后台）完成发现资产、创建与上架资产、构建知识库、维护测评与护栏等工作，以共同支撑起从资产诞生到被安全使用的完整闭环。</p>
+  <div class="flow-card-container" id="sec-01-card">
+  <div class="flow-card-head">
+    <div>
+      <h3>全平台角色旅程总览</h3>
+      <div class="role-badge-group">
+        <span class="role-badge role-badge-user">角色：资产订阅者</span>
+        <span class="role-badge role-badge-owner">角色：资产创建者</span>
+        <span class="role-badge role-badge-knowledge">角色：知识库管理员</span>
+        <span class="role-badge role-badge-admin">角色：平台管理员</span>
+        <span class="role-badge role-badge-platform">角色：平台系统</span>
+      </div>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">1.0</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-1-0', '全平台角色旅程总览')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap" id="fig-1-0">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 72, "rankSpacing": 72}}}%%
+flowchart TB
+  Start(["AI Foundation Platform&lt;br/&gt;业务用户旅程总览"]):::platform
+
+  subgraph Discover["资产订阅者"]
+    D1["发现资产&lt;br/&gt;功能：Marketplace &gt; 资产浏览"]:::user
+    D2["提交订阅申请&lt;br/&gt;功能：Marketplace &gt; 订阅申请"]:::user
+    D3["使用对话Chat功能&lt;br/&gt;使用已订阅 Agent&lt;br/&gt;或调用已订阅 MCP"]:::user
+  end
+
+  subgraph Build["资产创建者"]
+    B1["创建 Agent 或 MCP&lt;br/&gt;功能：创作者中心 &gt; 创建向导"]:::owner
+    B2["通过门控并自助上架&lt;br/&gt;功能：资产创建 &gt; 发布流程"]:::owner
+    B3["审批订阅、维护版本、下架或重新上架&lt;br/&gt;功能：资产控制台"]:::owner
+  end
+
+  subgraph KnowledgeJourney["知识库管理员"]
+    K1["选择目录并建库&lt;br/&gt;功能：知识管理 &gt; 建库向导"]:::knowledge
+    K2["导入资料并构建索引&lt;br/&gt;功能：知识管理 &gt; 文档导入与构建"]:::knowledge
+    K3["开放给有权限用户检索&lt;br/&gt;功能：对话 &gt; 知识库挂载"]:::knowledge
+  end
+
+  subgraph AdminJourney["平台管理员"]
+    A1["维护测评与护栏模板&lt;br/&gt;功能：测评 / 护栏策略"]:::admin
+    A2["维护平台资源、模型、推荐位和角色映射&lt;br/&gt;功能：管理后台"]:::admin
+    A3["处理平台侧运行控制&lt;br/&gt;功能：治理中心"]:::admin
+  end
+
+  Start --&gt; D1 --&gt; D2 --&gt; D3
+  Start --&gt; B1 --&gt; B2 --&gt; B3
+  Start --&gt; K1 --&gt; K2 --&gt; K3 --&gt; D3
+  Start --&gt; A1 --&gt; A2 --&gt; A3
+  A1 --&gt; B2
+  A2 --&gt; K1
+  B3 --&gt; D3
+
+  classDef user fill:#EAF2FF,stroke:#4C78D8,stroke-width:1.5px,color:#173B7A;
+  classDef owner fill:#EAF7EF,stroke:#3E9B61,stroke-width:1.5px,color:#14512B;
+  classDef knowledge fill:#F1ECFF,stroke:#7B61D1,stroke-width:1.5px,color:#3B277D;
+  classDef admin fill:#FFEDEE,stroke:#D85C63,stroke-width:1.5px,color:#7A1F25;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="section" id="sec-02" data-section>
+  <header class="section-head">
+    <div class="section-no">02</div>
+    <div class="section-title">
+      <h2>二、资产订阅者旅程</h2>
+    </div>
+  </header>
+  <div class="technical-subsection" id="sec-02-ctx-0"><div class="technical-subsection-head"><div class="technical-subsection-no">2.0</div><div><h3>业务上下文</h3></div></div></div>
+<p>用户在日常工作中需要使用一个 Agent 或 MCP。用户的核心目标是先在平台中找到适合自己业务场景的资产，再提交订阅申请、获得使用授权，并清楚知道订阅需要填写什么、由谁审批、审批通过后如何使用，以及后续资产变化会怎样影响自己。</p>
+<ul class="bullet-list"><li><strong>发现与判断</strong>：用户进入 Marketplace 后选择 Agent 或 MCP 频道，通过推荐、热门、全部列表或搜索浏览资产。列表只展示状态为「已发布」且质量门控全部通过的资产，资产卡片展示名称、类型、业务标签、状态、是否按人鉴权以及健康检查结果。Agent 详情包含基本信息、接入配置、测评信息和发布记录；基本信息展示能力标签、适用场景和负责人，测评信息展示准入测评结果、分项得分和执行时间，发布记录展示版本、发布说明和变更记录。MCP 详情包含基本信息、接入配置、工具能力和凭据状态。未订阅用户只看到订阅决策所需信息。</li><li><strong>提交申请</strong>：用户在详情页点击「订阅」后直接进入单页申请。申请表包含资产说明、业务系统、使用场景和创建者配置的自定义字段，并展示当前版本使用条款与并行多级审批人链。用户勾选同意后一次提交；申请记录锁定审批链快照，使用条款版本以审批通过生效时刻的现行版本为准。</li><li><strong>跟踪结果</strong>：用户可在订阅者中心通过「已通过、待审批、被驳回、已取消」四类统计查看申请状态；点击统计卡可查看对应资产，悬停状态可查看各级审批进展。待审批时可查看各级审批进展；被驳回时可查看理由并重新申请；已取消时可查看取消理由与取消来源。</li><li><strong>使用已订阅 Agent</strong>：Agent 订阅通过后，详情页出现「去使用」。用户进入该 Agent 的专属对话页，页面顶部展示 Agent 名称；该会话不能挂载知识库，能力以 Agent 自身返回内容为准。</li><li><strong>使用 MCP</strong>：MCP 不是对话对象，不能在 Chat 中直接调用；可由已订阅 Agent 的服务端接入，也可由外部系统通过平台开放接口调用。服务间鉴权通常无需用户配置凭据；按人鉴权时，用户需要在密钥库配置个人凭据，缺失或失效时调用失败且不使用共享身份替代。</li><li><strong>订阅变化与后续管理</strong>：资产下架时，已通过订阅失效、待审批申请自动取消，用户收到附原因的通知。资产重新上架后，原订阅不会自动恢复，重新上架通知不附带一键重新申请入口，用户需要从资产详情页重新申请。资产发布新版本或使用条款升版时，订阅者与待审批申请人会收到通知；申报为强治理变更时，通知附带影响说明与迁移指引。不再需要资产时，用户可在订阅者中心主动退订。</li></ul>
+<div class="technical-subsection" id="sec-02-2-1"><div class="technical-subsection-head"><div class="technical-subsection-no">2.1</div><div><h3>发现资产，订阅申请</h3></div></div></div>
+<p class="journey-line">作为资产订阅者，我可以在 Marketplace 中浏览、搜索并查看 Agent 或 MCP 的详情，再提交订阅申请，以获得使用该资产所需的授权。</p>
+<div class="flow-card-container" id="sec-02-2-1-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-user">角色：资产订阅者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">2.1</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-2-1', '发现资产，订阅申请')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap" id="fig-2-1">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
+flowchart LR
+  subgraph Phase1["模块一：找到合适资产"]
+    U1["第一步：进入 Marketplace&lt;br/&gt;选择 Agent 或 MCP 频道"]:::user
+    U2["第二步：浏览推荐、热门或全部列表&lt;br/&gt;也可以按名称、标签、简介搜索&lt;br/&gt;卡片展示名称、类型、标签和状态"]:::user
+    U3["第三步：打开详情页判断是否适合&lt;br/&gt;含基本信息、接入配置、测评信息和发布记录四个页签"]:::user
+  end
+
+  subgraph Phase2["模块二：提交申请"]
+    U4["第四步：点击订阅&lt;br/&gt;直接进入单页申请表&lt;br/&gt;不再经过只展示资产说明的中间页面&lt;br/&gt;&lt;br/&gt;功能：Marketplace &gt; 订阅申请"]:::user
+    U5["第五步：填写申请信息&lt;br/&gt;包括业务系统、使用场景&lt;br/&gt;以及资产自定义字段&lt;br/&gt;阅读带版本号的使用条款并同意&lt;br/&gt;&lt;br/&gt;功能：Marketplace&lt;br/&gt;订阅申请表单"]:::user
+    U6["第六步：查看审批人链并提交&lt;br/&gt;用户在提交前知道&lt;br/&gt;会由谁审批&lt;br/&gt;&lt;br/&gt;功能：Marketplace&lt;br/&gt;订阅审批预览"]:::user
+  end
+
+  subgraph Phase3["模块三：审批与结果"]
+    PlatformStepOne["第七步：进入订阅者中心&lt;br/&gt;用户在卡片右上角的状态悬停时&lt;br/&gt;可以查看各级审批进展"]:::user
+    PlatformStepTwo{"第八步：审批结果&lt;br/&gt;各审批级并行处理申请"}:::platform
+    U7["第九步（通过）&lt;br/&gt;用户获得使用授权&lt;br/&gt;&lt;br/&gt;功能：订阅者中心 &gt; 已通过"]:::user
+    U8["第九步（驳回）&lt;br/&gt;用户查看理由&lt;br/&gt;并可重新申请&lt;br/&gt;&lt;br/&gt;功能：订阅者中心 &gt; 被驳回"]:::user
+    U9["第九步（待审批）&lt;br/&gt;用户可查看各级审批进展&lt;br/&gt;&lt;br/&gt;功能：订阅者中心 &gt; 待审批"]:::user
+  end
+
+  U1 --&gt; U2 --&gt; U3 --&gt; U4 --&gt; U5 --&gt; U6 --&gt; PlatformStepOne --&gt; PlatformStepTwo
+  PlatformStepTwo --&gt;|通过| U7
+  PlatformStepTwo --&gt;|驳回| U8
+  PlatformStepTwo --&gt;|待审批| U9
+  U8 -.-&gt;|重新申请会新建记录| U4
+
+  classDef user fill:#EAF2FF,stroke:#4C78D8,stroke-width:1.5px,color:#173B7A;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+<div class="technical-subsection" id="sec-02-2-2"><div class="technical-subsection-head"><div class="technical-subsection-no">2.2</div><div><h3>资产使用</h3></div></div></div>
+<p class="journey-line">作为资产订阅者，我可以在对话页面或通过平台网关调用已订阅的 Agent 和 MCP，以在日常工作中直接使用这些资产的能力。</p>
+<div class="flow-card-container" id="sec-02-2-2-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-user">角色：资产订阅者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">2.2</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-2-2', '资产使用')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap" id="fig-2-2">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
+flowchart TB
+  Start(["用户已登录平台&lt;br/&gt;使用资产时订阅已通过"]):::user
+
+  subgraph ModulesRow2_2[" "]
+  direction LR
+    subgraph AgentPath["模块一：使用已订阅 Agent"]
+      G1["第一步：从 Agent 详情页点击去使用&lt;br/&gt;&lt;br/&gt;功能：Marketplace &gt; 订阅者中心"]:::user
+      G2["第二步：进入该 Agent 专属对话页&lt;br/&gt;页面顶部展示当前 Agent 名称&lt;br/&gt;&lt;br/&gt;功能：对话 &gt; Agent 对话"]:::user
+      G4{"第三步：资产是否声明按人鉴权"}:::platform
+      G5["服务间鉴权分支&lt;br/&gt;平台使用该 Agent 的资产级服务凭据&lt;br/&gt;订阅者无需配置凭据"]:::platform
+      G6{"个人凭据是否可用"}:::platform
+      G7["个人凭据异常分支&lt;br/&gt;调用失败并提示前往密钥库配置&lt;br/&gt;不使用共享身份替代&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 出站个人凭据"]:::platform
+      G8["第四步：查看 Agent 回答&lt;br/&gt;能力以该 Agent 自身返回内容为准"]:::user
+      G9["重要边界：Agent 会话不能挂载知识库&lt;br/&gt;能力以该 Agent 自身返回内容为准"]:::platform
+    end
+
+    subgraph ToolPath["模块二：使用已订阅 MCP"]
+      T1["第一步：进入 MCP 详情页&lt;br/&gt;查看接入配置&lt;br/&gt;工具能力和凭据状态&lt;br/&gt;&lt;br/&gt;功能：Marketplace &gt; 订阅者中心"]:::user
+      T2{"第二步：资产是否声明按人鉴权"}:::platform
+      T3["服务间鉴权分支&lt;br/&gt;平台使用该 MCP 的资产级服务凭据&lt;br/&gt;订阅者无需配置凭据"]:::platform
+      T4["按人鉴权分支&lt;br/&gt;用户需在密钥库配置个人出站凭据&lt;br/&gt;凭据缺失或失效时调用失败&lt;br/&gt;不使用共享身份替代&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 出站个人凭据"]:::platform
+      T5["第三步：MCP 被实际调用&lt;br/&gt;平台侧：已订阅 Agent 服务端自动接入调用&lt;br/&gt;外部侧：外部系统凭 PAT 经开放接口调用"]:::platform
+      T6["外部系统集成分支&lt;br/&gt;创建入站 PAT 时&lt;br/&gt;需勾选该资产所在的&lt;br/&gt;已授权 MCP 列表&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 入站管理"]:::user
+    end
+    AgentPath ~~~ ToolPath
+  end
+
+  Start --&gt; G1 --&gt; G2 --&gt; G4
+  G4 --&gt;|服务间鉴权| G5 --&gt; G8
+  G4 --&gt;|按人鉴权| G6
+  G6 --&gt;|可用| G8
+  G6 --&gt;|缺失或失效| G7
+  G7 --&gt;|配置完成后| G8
+  G8 --&gt; G9
+  Start --&gt; T1 --&gt; T2
+  T2 --&gt;|服务间鉴权| T3 --&gt; T5
+  T2 --&gt;|按人鉴权| T4 --&gt; T5
+  T1 -.-&gt;|外部系统集成场景| T6 --&gt; T5
+
+  classDef user fill:#EAF2FF,stroke:#4C78D8,stroke-width:1.5px,color:#173B7A;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+<div class="technical-subsection" id="sec-02-2-3"><div class="technical-subsection-head"><div class="technical-subsection-no">2.3</div><div><h3>资产变化通知</h3></div></div></div>
+<p class="journey-line">作为资产订阅者，我可以在通知列表和订阅者中心中查看订阅、资产下架或版本变化带来的影响，以及时了解授权状态并决定是否需要重新申请。</p>
+<div class="flow-card-container" id="sec-02-2-3-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-user">角色：资产订阅者</span>
+      <span class="role-badge role-badge-owner">角色：资产创建者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">2.3</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-2-3', '资产变化通知')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap" id="fig-2-3">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "linear", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
+flowchart LR
+  subgraph Trigger["变化来源"]
+    U1["订阅者主动退订"]:::user
+    O1["创建者取消他人订阅"]:::owner
+    O2["创建者选择下架"]:::owner
+    O3["资产发布新版或使用条款升级"]:::owner
+    O0["需填写理由"]:::owner
+  end
+
+  subgraph Platform["平台处理"]
+    PlatformStepOne["取消已通过订阅&lt;br/&gt;使用权限失效"]:::platform
+    PlatformStepThree["平台发送站内通知&lt;br/&gt;说明变化原因、影响范围&lt;br/&gt;与用户可采取的后续动作"]:::platform
+  end
+
+  subgraph User["用户看到的结果"]
+    R1["收到通知&lt;br/&gt;查看取消、下架或变更的具体说明&lt;br/&gt;&lt;br/&gt;功能：通知列表 / 订阅者中心"]:::user
+    R2["授权已失效且仍需使用&lt;br/&gt;重新提交订阅申请&lt;br/&gt;原申请记录保留、新申请重新走审批&lt;br/&gt;&lt;br/&gt;功能：Marketplace &gt; 订阅申请"]:::user
+    R3["仅版本或使用条款变化&lt;br/&gt;原订阅继续有效&lt;br/&gt;订阅者自动使用新版本&lt;br/&gt;&lt;br/&gt;功能：订阅者中心 &gt; 已通过"]:::user
+  end
+
+  O1 --&gt; O0
+  O2 --&gt; O0
+  O0 --&gt; PlatformStepOne
+  U1 --&gt; PlatformStepOne
+  PlatformStepOne --&gt; PlatformStepThree
+  O3 --&gt; PlatformStepThree
+  PlatformStepThree --&gt; R1
+  R1 --&gt;|授权已失效| R2
+  R1 --&gt;|订阅仍有效| R3
+
+  classDef user fill:#EAF2FF,stroke:#4C78D8,stroke-width:1.5px,color:#173B7A;
+  classDef owner fill:#EAF7EF,stroke:#3E9B61,stroke-width:1.5px,color:#14512B;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="section" id="sec-03" data-section>
+  <header class="section-head">
+    <div class="section-no">03</div>
+    <div class="section-title">
+      <h2>三、资产创建者旅程</h2>
+    </div>
+  </header>
+  <div class="technical-subsection" id="sec-03-ctx-0"><div class="technical-subsection-head"><div class="technical-subsection-no">3.0</div><div><h3>业务上下文</h3></div></div></div>
+<p>创建者希望把自己的 Agent 或 MCP 发布到平台，让其他用户订阅使用。创建资产的用户自动成为该资产的首位创建者，也可以在创建过程中增加共同创建者和 Deputy，保证后续有人共同维护资产、审批订阅申请并处理上下架。</p>
+<ul class="bullet-list"><li><strong>创建高代码 Agent</strong>：从创作者中心点击「创建 Agent」，选择高代码方式并接入已部署的 Agent 服务。依次完成基础信息、接入配置、鉴权配置、能力声明、订阅申请表单、使用条款、审批人链、护栏策略模板和发布说明。鉴权支持静态凭据与动态凭据，可声明 API Key、Bearer Token、OAuth2 或自定义 Header；服务间鉴权资产需要配置并探测资产级服务凭据。</li><li><strong>创建低代码 Agent（二期能力）</strong>：选择有创建权限的 Dify 工作区，前往 Dify 完成应用编排。Dify 侧发布只表示应用可在 Dify 中运行，不代表已经在本平台 Marketplace 上架；平台同步元数据后，创建者仍需补齐治理字段，并继续走平台上架流程。</li><li><strong>创建 MCP</strong>：从创作者中心点击「创建 MCP」，依次完成基础信息、链接配置、鉴权配置、能力声明、订阅申请配置和发布说明。</li><li><strong>测评并上架</strong>：Agent 通过质量门控后进入发布准入测评；三类测评均达到平台阈值才算整体通过。测评通过后可直接上架；测评未通过时是否阻断上架由平台管理员的阻断开关决定，默认不阻断。开关关闭时资产仍可上架，但详情页标注「准入测评未通过」。MCP 不执行发布准入测评，质量门控全部通过后即可自助上架。</li><li><strong>资产日常管理</strong>：创建者可在资产控制台查看基本信息、订阅管理、测评结果、发布记录和使用情况；可审批或驳回订阅申请，也可取消他人订阅并填写理由；可维护共同创建者和 Deputy，保证已发布资产始终满足负责人冗余要求。</li><li><strong>热改与版本变更</strong>：负责人名单、订阅申请表单、审批人链、护栏策略绑定、基础信息、超时与重试等配置可即时生效；服务地址、鉴权声明、能力声明等版本类配置通过未发布修订提交，重走门控与测评；只修改使用条款时走轻发布。发布完成前当前版本持续对外服务，新版本替换后全体订阅者自动跟随；创建者发布时显式申报是否为强治理变更，申报时必填影响说明与迁移指引。</li><li><strong>发布互斥与中止发布</strong>：资产处于发布进行中时，下架与删除会被阻断；任一创建者或Deputy可执行「中止发布」，中止后修订保留并通知发起人。</li><li><strong>下架与修复</strong>：创建者可在资产控制台下架资产，需要二次确认并填写下架原因。下架后订阅失效、待审批申请取消、审批人待办清除、平台调用停止。创建者仍可修改未发布修订并重新上架；重新上架不恢复原订阅，订阅者需重新申请。</li><li><strong>删除资产</strong>：已发布资产须先下架才能删除，未发布或已下架资产可直接删除。删除是终态，资产对全部用户不可见且不可恢复；订阅历史等业务记录永久保留，资产级服务凭据被清理，已签发的 PAT 对该资产的访问随之失效。</li></ul>
+<div class="technical-subsection" id="sec-03-3-1"><div class="technical-subsection-head"><div class="technical-subsection-no">3.1</div><div><h3>创建高代码Agent旅程</h3></div></div></div>
+<p class="journey-line">作为资产创建者，我可以在创作者中心的创建向导中依次完成基础信息、接入配置、鉴权、能力声明、订阅配置和护栏绑定，以将已部署的 Agent 服务发布到 Marketplace 供其他用户订阅使用。</p>
+<div class="flow-card-container" id="sec-03-3-1-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-owner">角色：资产创建者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">3.1</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-3-1', '创建高代码Agent旅程')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap" id="fig-3-1">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 66}}}%%
+flowchart LR
+  subgraph Prepare["模块一：填写资产资料"]
+    A1["第一步：从创作者中心&lt;br/&gt;创建 Agent&lt;br/&gt;&lt;br/&gt;功能：Marketplace&lt;br/&gt;创作者中心&lt;br/&gt;创建 Agent"]:::owner
+    A2["第二步：填写基础信息和负责人&lt;br/&gt;创建者为首位创建者&lt;br/&gt;也可以增加 Deputy/共同创建者"]:::owner
+    A3["第三步：配置服务接入&lt;br/&gt;填写服务地址、健康检查、超时和重试&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 接入配置"]:::owner
+    A4["第四步：配置鉴权&lt;br/&gt;选择静态凭据或动态凭据&lt;br/&gt;声明鉴权方式与主体类型&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 鉴权配置"]:::owner
+  end
+
+  subgraph Govern["模块二：补齐治理配置"]
+    A5["第五步：拉取并确认能力声明&lt;br/&gt;平台读取 Agent 能力描述&lt;br/&gt;展示协议版本、接口数量和鉴权方式&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 能力声明"]:::owner
+    A6["第六步：配置订阅申请规则&lt;br/&gt;支持上传 YAML 文件并实时预览&lt;br/&gt;支持开启订阅审批管理&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 订阅配置"]:::owner
+    A7["第七步：选择护栏策略模板&lt;br/&gt;并填写发布说明&lt;br/&gt;只能选择启用中的模板&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 护栏策略与发布说明"]:::owner
+  end
+
+  subgraph Release["模块三：门控、测评与上架"]
+    PlatformStepOne{"第八步：质量门控是否通过"}:::platform
+    PlatformStepTwo["门控未通过&lt;br/&gt;展示失败原因&lt;br/&gt;修正配置后重新运行门控&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 质量门控"]:::platform
+    PlatformStepThree["第九步：执行发布准入测评&lt;br/&gt;查看进度、样本明细和分项结果&lt;br/&gt;&lt;br/&gt;功能：测评 &gt; 发布准入测评"]:::platform
+    PlatformStepFour{"第十步：测评是否通过"}:::platform
+    PlatformStepFive{"第十一步：阻断开关是否开启"}:::platform
+    PlatformStepSix["开关关闭&lt;br/&gt;允许上架并标注准入测评未通过"]:::platform
+    PlatformStepSeven["开关开启&lt;br/&gt;不可上架，修复后重新测评"]:::platform
+    PlatformStepEight["第十二步：上架成功&lt;br/&gt;资产进入 Marketplace&lt;br/&gt;用户可发现并申请订阅&lt;br/&gt;&lt;br/&gt;功能：Marketplace &gt; 资产列表"]:::owner
+  end
+
+  A1 --&gt; A2 --&gt; A3 --&gt; A4 --&gt; A5 --&gt; A6 --&gt; A7 --&gt; PlatformStepOne
+  PlatformStepOne --&gt;|否| PlatformStepTwo --&gt; PlatformStepOne
+  PlatformStepOne --&gt;|是| PlatformStepThree --&gt; PlatformStepFour
+  PlatformStepFour --&gt;|通过| PlatformStepEight
+  PlatformStepFour --&gt;|未通过| PlatformStepFive
+  PlatformStepFive --&gt;|关闭| PlatformStepSix --&gt; PlatformStepEight
+  PlatformStepFive --&gt;|开启| PlatformStepSeven --&gt; PlatformStepThree
+
+  classDef owner fill:#EAF7EF,stroke:#3E9B61,stroke-width:1.5px,color:#14512B;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+<div class="technical-subsection" id="sec-03-3-2"><div class="technical-subsection-head"><div class="technical-subsection-no">3.2</div><div><h3>创建低代码Agent旅程（二期）</h3></div></div></div>
+<p class="journey-line">作为资产创建者，我可以在创作者中心选择已获权限的 Dify 实例与 Workspace，把已经搭建好的 Agent 接入平台并补齐治理字段，以更快地把低代码 Agent 上架到 Marketplace。</p>
+<div class="flow-card-container" id="sec-03-3-2-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-owner">角色：资产创建者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">3.2</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-3-2', '创建低代码Agent旅程（二期）')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap" id="fig-3-2">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
+flowchart LR
+  L0["前置条件&lt;br/&gt;平台管理员已配置好 Dify 实例与 Workspace&lt;br/&gt;创建者已在 Dify 里自建好 Agent&lt;br/&gt;本向导不提供编排能力，只接入已有 Agent"]:::platform
+  L1["第一步：选择低代码 Agent 创建方式&lt;br/&gt;二期能力，首版不显示入口&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 低代码 Agent"]:::owner
+  L2["第二步：选择有权限的实例 + Workspace&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 实例与 Workspace 选择"]:::owner
+  L3["第三步：从该 Workspace 下已自建的&lt;br/&gt;Agent 列表中勾选想要接入的 Agent&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; Agent 列表勾选"]:::owner
+  L4["第四步：平台拉取并同步该 Agent 的元数据&lt;br/&gt;同步结果进入未发布修订&lt;br/&gt;由创建者确认后再发布生效"]:::platform
+  L5["第五步：回到平台补齐治理字段&lt;br/&gt;包括展示名称、业务归属&lt;br/&gt;简介和建议可见范围&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 治理字段补录"]:::owner
+  L6["第六步：沿用 Agent 门控、测评和上架流程&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 发布流程"]:::owner
+
+  L0 --&gt; L1 --&gt; L2 --&gt; L3 --&gt; L4 --&gt; L5 --&gt; L6
+
+  classDef owner fill:#EAF7EF,stroke:#3E9B61,stroke-width:1.5px,color:#14512B;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+<div class="technical-subsection" id="sec-03-3-3"><div class="technical-subsection-head"><div class="technical-subsection-no">3.3</div><div><h3>创建MCP旅程</h3></div></div></div>
+<p class="journey-line">作为资产创建者，我可以在创作者中心完成基础信息、链接配置、鉴权、能力声明和订阅配置，以将 MCP 工具发布到 Marketplace，供已订阅 Agent 或外部系统调用。</p>
+<div class="flow-card-container" id="sec-03-3-3-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-owner">角色：资产创建者</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">3.3</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-3-3', '创建MCP旅程')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap" id="fig-3-3">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
+flowchart LR
+  ToolStepOne["第一步：从创作者中心&lt;br/&gt;创建 MCP&lt;br/&gt;&lt;br/&gt;功能：Marketplace&lt;br/&gt;创作者中心&lt;br/&gt;创建 MCP"]:::owner
+  ToolStepTwo["第二步：填写基础信息和负责人&lt;br/&gt;包括名称、分类和描述&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 基础信息"]:::owner
+  ToolStepThree["第三步：配置工具服务链接&lt;br/&gt;服务地址、协议、托管方式和健康检查&lt;br/&gt;托管方式属于版本类配置&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 链接配置"]:::owner
+  ToolStepFour["第四步：配置凭据&lt;br/&gt;仅支持静态凭据&lt;br/&gt;声明鉴权主体&lt;br/&gt;配置服务凭据&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 鉴权配置"]:::owner
+  ToolStepFive["第五步：填写清单链接并拉取工具清单&lt;br/&gt;确认工具名称、能力说明&lt;br/&gt;参数摘要、鉴权方式和识别状态&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 能力声明"]:::owner
+  ToolStepSix["第六步：配置订阅申请和发布说明&lt;br/&gt;包括申请表单、使用条款和审批人&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 订阅配置"]:::owner
+  ToolStepNine["第七步：直接上架&lt;br/&gt;MCP 不执行发布准入测评&lt;br/&gt;&lt;br/&gt;功能：Marketplace &gt; 资产列表"]:::owner
+
+  ToolStepOne --&gt; ToolStepTwo --&gt; ToolStepThree --&gt; ToolStepFour --&gt; ToolStepFive --&gt; ToolStepSix --&gt; ToolStepNine
+
+  classDef owner fill:#EAF7EF,stroke:#3E9B61,stroke-width:1.5px,color:#14512B;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+<div class="technical-subsection" id="sec-03-3-4"><div class="technical-subsection-head"><div class="technical-subsection-no">3.4</div><div><h3>资产上架运营</h3></div></div></div>
+<p class="journey-line">作为资产创建者，我可以在资产控制台中查看基本信息、审批订阅申请、维护共创者和 Deputy、发布新版本或下架资产，以保证已上架资产持续满足业务需求和治理要求。</p>
+<div class="flow-card-container" id="sec-03-3-4-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-owner">角色：资产创建者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">3.4</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-3-4', '资产上架运营')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap diagram-scale-sm" id="fig-3-4">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "13px", "nodeTextMargin": 10, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 160, "nodeSpacing": 36, "rankSpacing": 44, "subGraphTitleMargin": {"top": 8, "bottom": 20}}}}%%
+flowchart TB
+  Console["【创作者中心】&lt;br/&gt;Provider Console 提供四个状态统计卡&lt;br/&gt;已创建、待审批、待发布、已下架&lt;br/&gt;点击统计卡查看对应资产和订阅请求&lt;br/&gt;&lt;br/&gt;功能：Marketplace &gt; 创作者中心"]:::owner
+  Center["点击资产卡片&lt;br/&gt;进入资产控制台&lt;br/&gt;&lt;br/&gt;功能：Marketplace &gt; 资产控制台"]:::owner
+
+  subgraph ModulesRow3_4[" "]
+  direction LR
+    subgraph InfoArea["【查看基本信息】"]
+      I1["查看资产基本信息&lt;br/&gt;测评结果、发布记录和用量检测&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 基本信息"]:::owner
+    end
+
+    subgraph SubscribeArea["【管理订阅】"]
+      M1["用户管理&lt;br/&gt;审批或驳回订阅申请&lt;br/&gt;查看订阅者信息和用量&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 订阅管理"]:::owner
+      M2["取消他人订阅&lt;br/&gt;需要填写取消理由&lt;br/&gt;使用授权立即失效&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 订阅管理"]:::owner
+      M3["设置订阅申请表单&lt;br/&gt;与订阅审批人链&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 订阅设置"]:::owner
+    end
+
+    subgraph UpdateArea["【更新】"]
+      U1["需要变更资产配置&lt;br/&gt;先判断变更内容的类型&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 编辑 / 发布新版"]:::owner
+      U2{"是否为轻量变更&lt;br/&gt;（名称、简介、标签等基础信息&lt;br/&gt;使用条款、元数据）"}:::platform
+      U3["是：轻量变更&lt;br/&gt;资产控制台内直接修改&lt;br/&gt;基础信息类即时生效&lt;br/&gt;使用条款类走轻发布&lt;br/&gt;（版本号递增，通知存量订阅者与待审批申请人）&lt;br/&gt;均不重新进行质量门控和发布准入测评&lt;br/&gt;也不要求订阅者重新确认&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 基础信息 / 使用条款发布"]:::platform
+      U4["否：影响功能的变更&lt;br/&gt;（服务地址、鉴权配置、能力声明等）&lt;br/&gt;点击「发布新版」进入创建向导同款配置流程&lt;br/&gt;重新执行质量门控&lt;br/&gt;Agent 还需要执行发布准入测评&lt;br/&gt;校验通过后新版本发布并替换当前版本&lt;br/&gt;订阅者自动使用新版本&lt;br/&gt;发布完成前当前版本继续对外服务&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 发布新版"]:::platform
+      U5["发布进行中&lt;br/&gt;创建者或 Deputy 可点击「中止发布」&lt;br/&gt;未发布修订保留、可继续编辑&lt;br/&gt;并通知发起本次发布的人&lt;br/&gt;发布进行中会阻断下架和删除&lt;br/&gt;&lt;br/&gt;功能：资产控制台 &gt; 中止发布"]:::owner
+    end
+
+    subgraph OffShelfArea["【下架与删除】"]
+      D1["点击下架&lt;br/&gt;系统弹出确认窗口&lt;br/&gt;确认后填写下架原因并提交&lt;br/&gt;&lt;br/&gt;功能：资产控制台右上角操作区 &gt; 下架"]:::owner
+      D2["资产状态变为已下架&lt;br/&gt;所有已通过订阅立即失效&lt;br/&gt;待审批申请自动取消&lt;br/&gt;相关用户收到带下架原因的通知&lt;br/&gt;平台停止经平台流向该资产的调用"]:::platform
+      D3["下架后仍可点击发布新版进行修复&lt;br/&gt;系统继续沿用原有配置&lt;br/&gt;修改需要修复的内容后重新提交"]:::owner
+      D4["重新执行质量门控和发布流程&lt;br/&gt;修复发布成功后资产重新上架&lt;br/&gt;原有订阅不会自动恢复&lt;br/&gt;原订阅者需要重新申请"]:::platform
+      D5["点击删除&lt;br/&gt;已发布资产须先下架才能删除&lt;br/&gt;未发布或已下架资产可直接删除&lt;br/&gt;&lt;br/&gt;功能：资产控制台右上角操作区 &gt; 删除"]:::owner
+      D6["删除为终态&lt;br/&gt;资产对全部用户不可见且不可恢复&lt;br/&gt;订阅历史等业务记录永久保留&lt;br/&gt;资产级服务凭据被清理&lt;br/&gt;已签发 PAT 对该资产的访问随之失效"]:::platform
+    end
+    InfoArea ~~~ SubscribeArea ~~~ UpdateArea ~~~ OffShelfArea
+  end
+
+  Console --&gt; Center
+  Center --&gt; I1
+  Center --&gt; M1
+  Center --&gt; M2
+  Center --&gt; M3
+  Center --&gt; U1 --&gt; U2
+  U2 --&gt;|是| U3
+  U2 --&gt;|否| U4
+  U4 -.-&gt; U5
+  Center --&gt; D1 --&gt; D2
+  D2 --&gt; D3 --&gt; D4
+  Center --&gt; D5 --&gt; D6
+
+  classDef owner fill:#EAF7EF,stroke:#3E9B61,stroke-width:1.5px,color:#14512B;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="section" id="sec-04" data-section>
+  <header class="section-head">
+    <div class="section-no">04</div>
+    <div class="section-title">
+      <h2>四、知识库管理与使用</h2>
+    </div>
+  </header>
+  <div class="technical-subsection" id="sec-04-ctx-0"><div class="technical-subsection-head"><div class="technical-subsection-no">4.0</div><div><h3>业务上下文</h3></div></div></div>
+<p>知识库管理员希望把业务资料整理成可检索的企业知识库，让有权限的用户可以在 Chat 中挂载知识库并检索，也让外部系统可以通过开放接口调用知识库能力。目录和知识库的权限以 Alice 为唯一授权来源；平台提供目录与知识库入口、展示权限状态、发起权限申请，并管理文档导入、解析和向量化流程。</p>
+<ul class="bullet-list"><li><strong>进入目录</strong>：知识库管理员进入知识管理，从目录树选择公共目录或我的目录。目录控制角色持有人可在授权范围内新建子目录、重命名或删除目录；目录调整即时生效并同步至 Alice；含知识库的目录不允许删除。没有权限时，页面展示 Alice 权限编号并跳转权限申请，目录权限申请为上级目录控制角色持有人的单级审批。</li><li><strong>创建知识库</strong>：在叶子目录创建知识库。公共目录建库需要知识库创建角色，建库者自动获得知识库 Owner 角色；我的目录由创建者本人直接管理，知识库仅创建者本人可见和使用。建库时填写名称、可见范围、描述和标签，并配置解析、切片、内容增强、向量模型和向量库实例；默认采用 Docling 解析、语义切片、摘要与关键词增强、BGE-M3 向量化和 Milvus 存储。可见范围只控制卡片可发现性，访问权限始终由 Alice 决定；公开知识库卡片对全员可见，无权限用户点击后可看到 Alice 权限编号和申请入口。知识库创建后不可在既有目录间移动、不可复制，唯一允许的移位方式是在同一目录控制角色的子树内下沉分层。</li><li><strong>导入文件</strong>：知识库支持四个导入入口：本地上传、Confluence、SharePoint 与 OneDrive、对象存储。执行导入需要操作者具备知识库 Contributor 及以上权限。本地上传支持单文件不超过 40 MB，也支持压缩包展开预览；只有外部通道导入才使用操作人在密钥库中配置的个人凭据。导入前提供文件预览，不支持的文件格式自动置灰。</li><li><strong>执行构建</strong>：导入后文件初始状态为「未解析」。用户可勾选文件后一键构建，也可切换手动模式按阶段执行；手动模式下前一阶段未完成时，后一阶段不能执行。平台按解析、切片、内容增强、向量化四个阶段处理文件；构建失败时展示原因，失败文件置顶，可修复后从失败阶段重新执行。</li><li><strong>知识库转为可用</strong>：库内首份文件完成向量化后，知识库自动从「草稿」转为「可用」。只有可用的知识库才会出现在 Chat 挂载列表，并可被开放接口检索。全库重建期间继续使用原有索引，不会因重建而暂时失去检索能力。</li><li><strong>知识库详情</strong>：详情页展示文档数、切片数、向量数和就绪度，并包含文档、设置、总览三个区域。知识库卡片支持查看权限、重命名和删除。设置区域用于维护库级默认参数，保存库级解析器、切片或内容增强配置会触发全库重建；向量模型和向量数据库锁定在知识库级别。总览区域用于查看知识库描述、内容摘要、构建状态和可共享能力。</li><li><strong>文件与内容维护</strong>：用户可进入文件详情页分页预览源文件，查看解析后的内容、文档摘要、关键词和解析信息；可搜索并逐条编辑切片，保存后重新执行内容增强和向量化。也可批量调整文档级参数，范围限于解析器、切片策略和内容增强。知识库 Owner 或知识库 Contributor 可删除库内文档，删除后的文档不再参与检索。</li><li><strong>停用与删除</strong>：知识库 Owner 可停用知识库，停用后新会话不再挂载或检索，进行中的会话继续使用会话级快照直至结束。知识库 Owner 可删除知识库；可用状态的知识库须先停用，删除需要二次确认。公共目录下的知识库删除后，平台调用 Alice 清理该知识库的角色。</li></ul>
+<div class="callout"><p><strong>板块一：目录管理</strong>——对应目录控制权限与知识库创建权限两种持有人；目录控制角色持有人负责维护目录结构与目录下的两类权限，知识库创建角色持有人负责在叶子目录创建知识库。</p></div>
+<div class="technical-subsection" id="sec-04-4-1"><div class="technical-subsection-head"><div class="technical-subsection-no">4.1</div><div><h3>目录管理旅程</h3></div></div></div>
+<p class="journey-line">作为目录控制角色持有者，我可以在知识管理的目录树中新建、重命名或删除子目录，并为目录配置权限持有人，以维护清晰、可追溯的知识库归属结构。</p>
+<div class="flow-card-container" id="sec-04-4-1-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-knowledge">角色：目录控制角色持有者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">4.1</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-4-1', '目录管理旅程')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap diagram-scale-sm" id="fig-4-1">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "13px", "nodeTextMargin": 10, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 160, "nodeSpacing": 36, "rankSpacing": 44, "subGraphTitleMargin": {"top": 8, "bottom": 20}}}}%%
+flowchart TB
+  Start(["进入知识管理&lt;br/&gt;点开目标目录"]):::knowledge
+
+  subgraph ModulesRow4_1[" "]
+  direction LR
+    subgraph Mod1ViewPerm["模块一"]
+      P0["第一步：点击查看权限"]:::knowledge
+      P1["第二步：查看该目录的&lt;br/&gt;目录控制权限与知识库创建权限者&lt;br/&gt;Alice ID&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 查看权限"]:::knowledge
+      P0 --&gt; P1
+    end
+
+    subgraph Mod2CreateSub["模块二"]
+      C0["第一步：点击创建子级目录"]:::knowledge
+      C1{"第二步：当前目录是否为最子级&lt;br/&gt;且已存在知识库"}:::platform
+      C2["否：直接创建子目录&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 创建子级目录"]:::knowledge
+      C3["是：创建时弹窗提示&lt;br/&gt;是否迁移知识库&lt;br/&gt;确认后创建子目录并将知识库下沉迁入&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 创建子级目录（迁移提示）"]:::knowledge
+      C4["为新建子目录添加&lt;br/&gt;目录控制权限与知识库创建权限成员&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 目录权限配置"]:::knowledge
+      C0 --&gt; C1
+      C1 --&gt;|否| C2 --&gt; C4
+      C1 --&gt;|是| C3 --&gt; C4
+    end
+
+    subgraph Mod3ManageDir["模块三"]
+      M0["第一步：点击管理目录"]:::knowledge
+      M1["重命名目录&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 目录重命名"]:::knowledge
+      M2["删除目录&lt;br/&gt;仅允许删除该目录及其子级&lt;br/&gt;下均不存在知识库的目录&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 目录删除"]:::knowledge
+      M0 --&gt; M1
+      M0 --&gt; M2
+    end
+  end
+
+  Start --&gt; P0
+  Start --&gt; C0
+  Start --&gt; M0
+
+  classDef knowledge fill:#F1ECFF,stroke:#7B61D1,stroke-width:1.5px,color:#3B277D;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+<div class="technical-subsection" id="sec-04-4-2"><div class="technical-subsection-head"><div class="technical-subsection-no">4.2</div><div><h3>知识库创建旅程</h3></div></div></div>
+<p class="journey-line">作为知识库创建角色持有者，我可以在具备权限的叶子目录中通过建库向导填写基础信息并配置构建 Pipeline，以创建一个可供后续导入资料和检索使用的知识库。</p>
+<div class="flow-card-container" id="sec-04-4-2-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-knowledge">角色：知识库创建角色持有者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">4.2</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-4-2', '知识库创建旅程')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap" id="fig-4-2">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
+flowchart LR
+  K1["第一步：进入知识管理&lt;br/&gt;找到具备创建权限的子级目录&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 目录树"]:::knowledge
+  K2["第二步：点击「新建知识库」按钮&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 建库向导"]:::knowledge
+  K5["第三步：填写基础信息&lt;br/&gt;名称、可见范围、描述、标签&lt;br/&gt;可见范围只控制卡片可发现性&lt;br/&gt;&lt;br/&gt;功能：建库向导 &gt; 基础信息"]:::knowledge
+  K6["第四步：配置构建 Pipeline&lt;br/&gt;解析、切片、内容增强&lt;br/&gt;向量模型、向量库实例&lt;br/&gt;向量模型与向量库锁定在库级&lt;br/&gt;&lt;br/&gt;功能：建库向导 &gt; 构建管线配置"]:::knowledge
+  K7["第五步：创建成功&lt;br/&gt;知识库进入草稿状态"]:::platform
+
+  K1 --&gt; K2 --&gt; K5 --&gt; K6 --&gt; K7
+
+  classDef knowledge fill:#F1ECFF,stroke:#7B61D1,stroke-width:1.5px,color:#3B277D;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+<div class="callout"><p><strong>板块二：知识库</strong>——对应知识库 Owner、知识库 Contributor 与知识库 Consumer 三种角色。Owner 负责知识库构建 Pipeline 整体修改与删除知识库；Contributor 负责文件导入、构建以及日常维护编辑；Consumer 通过 Chat 或开放接口使用知识库。</p></div>
+<div class="technical-subsection" id="sec-04-4-3"><div class="technical-subsection-head"><div class="technical-subsection-no">4.3</div><div><h3>知识库拥有者（Owner）</h3></div></div></div>
+<p class="journey-line">作为知识库 Owner，我可以进入知识库卡片修改构建 Pipeline 整体配置，或在目录中删除知识库，以确保知识库始终处于自己的治理之下。</p>
+<div class="flow-card-container" id="sec-04-4-3-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-knowledge">角色：知识库 Owner</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">4.3</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-4-3', '知识库拥有者（Owner）')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap diagram-scale-sm" id="fig-4-3">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "13px", "nodeTextMargin": 10, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 160, "nodeSpacing": 36, "rankSpacing": 44, "subGraphTitleMargin": {"top": 8, "bottom": 20}}}}%%
+flowchart TB
+  Start(["进入知识管理&lt;br/&gt;点开目标目录"]):::knowledge
+
+  subgraph ModulesRow4_3[" "]
+  direction LR
+    subgraph PipelineMod["模块一：知识库构建 Pipeline 整体修改"]
+      K_S0["第一步：进入知识库卡片内部&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 知识库详情"]:::knowledge
+      K_S1["第二步：进入 Settings&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; Settings"]:::knowledge
+      K_S2["第三步：修改构建 Pipeline&lt;br/&gt;调整解析器、切片策略、内容增强配置&lt;br/&gt;保存后触发全库重建&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; Pipeline 配置修改"]:::knowledge
+      K_S0 --&gt; K_S1 --&gt; K_S2
+    end
+
+    subgraph DeleteKB["模块二：删除知识库"]
+      K_D0["第一步：在目录中找到知识库卡片&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 目录树"]:::knowledge
+      K_D1["第二步：点击知识库卡片右上方三个点&lt;br/&gt;选择删除知识库&lt;br/&gt;需二次确认&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 删除知识库"]:::knowledge
+      K_D0 --&gt; K_D1
+    end
+    PipelineMod ~~~ DeleteKB
+  end
+
+  Start --&gt; K_S0
+  Start --&gt; K_D0
+
+  classDef knowledge fill:#F1ECFF,stroke:#7B61D1,stroke-width:1.5px,color:#3B277D;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+<div class="technical-subsection" id="sec-04-4-4"><div class="technical-subsection-head"><div class="technical-subsection-no">4.4</div><div><h3>知识库贡献者（Contributor）</h3></div></div></div>
+<p class="journey-line">作为知识库 Contributor，我可以在知识库详情页导入文件并触发一键构建，也可以进行日常维护与编辑（包括编辑、更新文档等），但无法更改知识库整体的 Settings 或删除知识库。</p>
+<div class="flow-card-container" id="sec-04-4-4-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-knowledge">角色：知识库 Contributor</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">4.4</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-4-4', '知识库贡献者（Contributor）')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap diagram-scale-sm" id="fig-4-4">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "13px", "nodeTextMargin": 10, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 160, "nodeSpacing": 36, "rankSpacing": 44, "subGraphTitleMargin": {"top": 8, "bottom": 20}}}}%%
+flowchart TB
+  Start(["点击进入知识库卡片内部&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 知识库详情"]):::knowledge
+
+  subgraph ModulesRow4_4[" "]
+  direction LR
+    subgraph ImportBuild["模块一：文件导入、解析与构建"]
+      C8["第一步：导入资料&lt;br/&gt;本地上传&lt;br/&gt;Confluence&lt;br/&gt;SharePoint 与 OneDrive&lt;br/&gt;对象存储&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 四通道文档导入"]:::knowledge
+      C9["第二步（仅外部通道）&lt;br/&gt;使用操作人的个人凭据&lt;br/&gt;未配置时引导至密钥库&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 出站个人凭据"]:::platform
+      C10["第三步：一键构建或手动分阶段构建&lt;br/&gt;解析、切片、内容增强、向量化&lt;br/&gt;手动模式必须按阶段顺序执行&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 文档构建执行"]:::knowledge
+      C11{"第四步：构建是否成功"}:::platform
+      C12["失败：展示原因，失败文件置顶&lt;br/&gt;修复后从失败阶段重跑&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 构建失败处理"]:::platform
+      C13["成功：首份文档完成向量化&lt;br/&gt;知识库自动变为可用"]:::platform
+      C8 --&gt;|本地上传| C10
+      C8 --&gt;|外部通道| C9 --&gt; C10
+      C10 --&gt; C11
+      C11 --&gt;|失败| C12 --&gt; C10
+      C11 --&gt;|成功| C13
+    end
+
+    subgraph Maintain["模块二：知识库维护与编辑"]
+      C14["第一步：点击文档进入文件详情页&lt;br/&gt;分页预览源文件&lt;br/&gt;查看解析后的 Markdown 内容&lt;br/&gt;文档摘要、关键词与解析信息&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 文件详情页"]:::knowledge
+      C15b["第二步：在切片列表中搜索&lt;br/&gt;并逐条编辑切片&lt;br/&gt;保存后重新执行内容增强与向量化&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 切片编辑"]:::knowledge
+      C15["第三步：选择单个或多个文档&lt;br/&gt;打开批量配置修改&lt;br/&gt;调整文档级解析器、切片策略与内容增强&lt;br/&gt;&lt;br/&gt;功能：知识管理 &gt; 批量参数配置"]:::knowledge
+      C14 --&gt; C15b --&gt; C15
+    end
+
+    subgraph NotAllowed["不可执行的操作"]
+      C16["更改知识库整体 Settings&lt;br/&gt;以及删除知识库&lt;br/&gt;均为 Owner 专属操作&lt;br/&gt;Contributor 不可执行"]:::platform
+    end
+    ImportBuild ~~~ Maintain ~~~ NotAllowed
+  end
+
+  Start --&gt; C8
+  Start --&gt; C14
+  Start --&gt; C16
+
+  classDef knowledge fill:#F1ECFF,stroke:#7B61D1,stroke-width:1.5px,color:#3B277D;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+<div class="technical-subsection" id="sec-04-4-5"><div class="technical-subsection-head"><div class="technical-subsection-no">4.5</div><div><h3>知识库使用者（Consumer）</h3></div></div></div>
+<p class="journey-line">作为知识库 Consumer，我可以在 Chat 中挂载已获权限的知识库进行检索提问，或通过个人访问令牌让外部系统调用知识库开放接口，以在对话或系统集成中使用知识库中的内容。</p>
+<div class="flow-card-container" id="sec-04-4-5-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-knowledge">角色：知识库 Consumer（外部更新接口需 Owner / Contributor）</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">4.5</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-4-5', '知识库使用者（Consumer）')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap" id="fig-4-5">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
+flowchart LR
+  Start(["知识库已构建完成&lt;br/&gt;状态为可用"]):::platform
+
+  subgraph InternalUse["模块一：内部使用（Chat 挂载检索）"]
+    U1["第一步：进入对话工作台&lt;br/&gt;默认对话对象为 Chat agent-runtime&lt;br/&gt;&lt;br/&gt;功能：对话 &gt; Chat 会话"]:::knowledge
+    U2["第二步：选择模型并挂载知识库&lt;br/&gt;只显示本人有权限&lt;br/&gt;且状态可用的知识库&lt;br/&gt;&lt;br/&gt;功能：对话 &gt; 模型选择 / 知识库挂载"]:::knowledge
+    U3["第三步：提问并查看回答依据&lt;br/&gt;可查看思考过程、引用&lt;br/&gt;检索证据&lt;br/&gt;图片或图表证据&lt;br/&gt;也可随时中止生成&lt;br/&gt;&lt;br/&gt;功能：对话 &gt; 回答与证据展示"]:::knowledge
+    U4["重要边界&lt;br/&gt;Chat 不调用 Marketplace 资产&lt;br/&gt;只做模型对话&lt;br/&gt;知识库检索&lt;br/&gt;平台原生工具调用"]:::platform
+    U1 --&gt; U2 --&gt; U3 --&gt; U4
+  end
+
+  subgraph ExternalUse["模块二：外部使用（开放接口调用）"]
+    E1["第一步：进入密钥库 &gt; 入站管理&lt;br/&gt;点击创建 PAT&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 入站管理"]:::knowledge
+    E2["第二步：选择权限范围&lt;br/&gt;列表只展示本人已获权限的&lt;br/&gt;资产与知识库&lt;br/&gt;勾选目标知识库"]:::knowledge
+    E3["第三步：提交创建&lt;br/&gt;PAT 明文仅在创建成功时&lt;br/&gt;完整展示一次&lt;br/&gt;需立即复制并妥善保存"]:::platform
+    E4["第四步：携带该 PAT&lt;br/&gt;前往外部系统调用知识库开放接口&lt;br/&gt;读取知识库元数据、检索知识库&lt;br/&gt;更新知识库内容"]:::knowledge
+    E5{"第五步：调用接口是否&lt;br/&gt;支持更新知识库"}:::platform
+    E6["是：需要 PAT 持有人具备&lt;br/&gt;知识库 Owner / Contributor 权限"]:::platform
+    E7["否：仅获得单次 PAT&lt;br/&gt;对应的访问权限"]:::platform
+    E8["重要边界&lt;br/&gt;PAT 默认有效期 90 天&lt;br/&gt;到期或失效需重新生成"]:::platform
+    E1 --&gt; E2 --&gt; E3 --&gt; E4 --&gt; E5
+    E5 --&gt;|是| E6 --&gt; E8
+    E5 --&gt;|否| E7 --&gt; E8
+  end
+
+  Start --&gt; U1
+  Start --&gt; E1
+
+  classDef knowledge fill:#F1ECFF,stroke:#7B61D1,stroke-width:1.5px,color:#3B277D;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="section" id="sec-05" data-section>
+  <header class="section-head">
+    <div class="section-no">05</div>
+    <div class="section-title">
+      <h2>五、平台管理员旅程：测评、护栏与管理后台治理</h2>
+    </div>
+  </header>
+  <div class="technical-subsection" id="sec-05-ctx-0"><div class="technical-subsection-head"><div class="technical-subsection-no">5.0</div><div><h3>业务上下文</h3></div></div></div>
+<p>平台管理员负责维护平台统一的测评基线和护栏基线，为创建者的 Agent 发布提供质量与安全判断依据。平台管理员不直接审批用户的资产订阅，也不代替创建者上下架资产；管理员主要维护模板、开关、平台资源和运行控制。</p>
+<ul class="bullet-list"><li><strong>测评管理</strong>：平台管理员维护发布准入测评模板，覆盖提示词注入、意图偏离和内容安全三类问题集，并为三类测评分别设置通过阈值。发布流程中的准入测评由创建者触发；独立的测评中心、数据集管理、任务中心和对比报告属于二期能力。</li><li><strong>测评模板配置</strong>：二期模板可配置裁判模型、被测 Agent、数据集、测评指标、并发度、单条样本超时、失败重试次数和失败处理策略。部分指标要求数据集提供预期输出；数据集缺少预期输出时，平台提示相关指标不可用。任务绑定模板与数据集快照，后续修改模板或数据集不影响已完成任务结果。</li><li><strong>数据集与任务（二期能力）</strong>：管理员可导入、校验、复制和编辑数据集，也可创建测评任务、查看运行状态、样本明细、重试失败样本并导出结果。</li><li><strong>护栏策略</strong>：平台管理员创建、编辑、启用或停用护栏策略模板，配置护栏组合、灵敏度和作用侧；护栏可覆盖个人信息识别、毒性内容过滤、提示注入和违禁词。管理员还需指定一个全局唯一的平台默认模板，用于平台 Chat 会话；当前默认模板不能直接停用，需要先指定另一个启用模板。</li><li><strong>运行时生效</strong>：创建者创建 Agent 时，只能从启用模板中选择一个并绑定，并可只读查看模板明细。平台网关对 Chat 和资产 Agent 会话执行护栏检测；输入侧命中时直接拒答，输出侧命中时拦截原回答并展示命中的护栏类型。模板修改对已绑定 Agent 即时生效；模板停用只影响新绑定，但资产下一次发布或重新上架时会强制校验所绑模板仍处于启用状态。</li><li><strong>运营看板（二期能力）</strong>：管理员可查看各策略的检测量、命中率、近期拦截次数和命中记录，并据此调整护栏组合、灵敏度与作用侧。</li><li><strong>管理后台治理</strong>：管理员在治理中心查看全平台资产、按资产维度停用或恢复出站调用、为孤儿资产补充新负责人；同时维护平台原生工具、平台资源、推荐位、用户视图、角色映射、公共目录冷启动和模型清单。</li></ul>
+<div class="technical-subsection" id="sec-05-5-1"><div class="technical-subsection-head"><div class="technical-subsection-no">5.1</div><div><h3>测评模板与发布准入测评</h3></div></div></div>
+<p class="journey-line">作为平台管理员，我可以维护发布准入测评模板及各类问题的通过阈值，并配置测评未通过时是否阻断上架，以为资产创建者发布 Agent 提供统一的质量与安全基线。</p>
+<div class="flow-card-container" id="sec-05-5-1-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-admin">角色：平台管理员</span>
+      <span class="role-badge role-badge-owner">角色：资产创建者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">5.1</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-5-1', '测评模板与发布准入测评')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap" id="fig-5-1">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
+flowchart LR
+  subgraph Admin["平台管理员维护规则"]
+    A1["第一步：维护发布准入测评模板&lt;br/&gt;包含提示词注入&lt;br/&gt;意图偏离&lt;br/&gt;内容安全三类问题集&lt;br/&gt;&lt;br/&gt;功能：测评 &gt; 准入测评模板维护"]:::admin
+    A2["第二步：设置各类通过阈值&lt;br/&gt;三类均达标才算整体通过"]:::admin
+    A3["第三步：配置是否阻断上架&lt;br/&gt;测评未通过时&lt;br/&gt;是否允许继续上架&lt;br/&gt;由开关决定&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 测评阻断开关"]:::admin
+  end
+
+  subgraph Owner["创建者发布 Agent"]
+    O1["第四步：Agent 发布流程触发测评&lt;br/&gt;MCP 不执行发布准入测评&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 发布流程"]:::owner
+    O2["第五步：查看测评进度、样本明细和结果&lt;br/&gt;&lt;br/&gt;功能：测评 &gt; 发布准入测评执行"]:::owner
+  end
+
+  subgraph Platform["平台判断结果"]
+    PlatformStepOne{"第六步：测评是否通过"}:::platform
+    PlatformStepTwo{"第七步：阻断开关是否开启"}:::platform
+    PlatformStepThree["测评通过：进入上架&lt;br/&gt;&lt;br/&gt;功能：Marketplace&lt;br/&gt;资产列表"]:::platform
+    PlatformStepFour["开关关闭：允许上架&lt;br/&gt;详情页标注准入测评未通过&lt;br/&gt;&lt;br/&gt;功能：Marketplace&lt;br/&gt;资产详情测评信息"]:::platform
+    PlatformStepFive["开关开启：不可上架&lt;br/&gt;修复后重新测评"]:::platform
+  end
+
+  A1 --&gt; A2 --&gt; A3 --&gt; O1 --&gt; O2 --&gt; PlatformStepOne
+  PlatformStepOne --&gt;|通过| PlatformStepThree
+  PlatformStepOne --&gt;|未通过| PlatformStepTwo
+  PlatformStepTwo --&gt;|关闭| PlatformStepFour
+  PlatformStepTwo --&gt;|开启| PlatformStepFive --&gt; O1
+
+  classDef admin fill:#FFEDEE,stroke:#D85C63,stroke-width:1.5px,color:#7A1F25;
+  classDef owner fill:#EAF7EF,stroke:#3E9B61,stroke-width:1.5px,color:#14512B;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+<div class="technical-subsection" id="sec-05-5-2"><div class="technical-subsection-head"><div class="technical-subsection-no">5.2</div><div><h3>二期测评中心能力</h3></div></div></div>
+<p class="journey-line">作为平台管理员，我可以在测评中心管理数据集、维护测评模板并创建测评任务，以对已上架的 Agent 进行更灵活的质量评估和结果对比。</p>
+<div class="flow-card-container" id="sec-05-5-2-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-admin">角色：平台管理员</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">5.2</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-5-2', '二期测评中心能力')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap" id="fig-5-2">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
+flowchart LR
+  Center["平台管理员进入测评中心&lt;br/&gt;二期能力，首版不显示独立入口"]:::admin
+
+  subgraph DatasetArea["数据集管理"]
+    D1["第一步：查看或搜索数据集&lt;br/&gt;&lt;br/&gt;功能：测评中心 &gt; 数据集管理"]:::admin
+    D2["第二步：下载模板并上传表格&lt;br/&gt;填写数据集名称&lt;br/&gt;&lt;br/&gt;功能：测评中心 &gt; 数据集导入"]:::admin
+    D3["第三步：查看校验结果&lt;br/&gt;样本数量、预期输出列&lt;br/&gt;异常行和数据集状态&lt;br/&gt;&lt;br/&gt;功能：测评中心 &gt; 数据集校验"]:::platform
+    D4["第四步（需要修改时）：复制数据集&lt;br/&gt;形成独立副本&lt;br/&gt;不影响历史任务&lt;br/&gt;&lt;br/&gt;功能：测评中心 &gt; 数据集复制与编辑"]:::admin
+  end
+
+  subgraph TemplateArea["模板管理"]
+    TemplateStepOne["第五步：创建或编辑测评模板&lt;br/&gt;配置裁判模型、被测 Agent&lt;br/&gt;数据集、测评指标和执行参数&lt;br/&gt;&lt;br/&gt;功能：测评中心 &gt; 模板管理"]:::admin
+    TemplateStepTwo["第六步：校验指标与数据集&lt;br/&gt;缺少预期输出时&lt;br/&gt;相关指标不可用"]:::platform
+  end
+
+  subgraph TaskArea["任务中心"]
+    TaskStepOne["第七步：创建测评任务&lt;br/&gt;选择被测 Agent&lt;br/&gt;测评模板和可用数据集&lt;br/&gt;&lt;br/&gt;功能：测评中心 &gt; 任务中心"]:::admin
+    TaskStepTwo["第八步：设置执行方式&lt;br/&gt;立即或定时执行&lt;br/&gt;并发、超时和失败处理策略&lt;br/&gt;&lt;br/&gt;功能：测评中心 &gt; 任务参数"]:::admin
+    TaskStepThree["第九步：查看任务状态与结果&lt;br/&gt;状态包括待执行、执行中、已完成、执行失败&lt;br/&gt;可筛选全部、成功或失败样本&lt;br/&gt;查看输入、预期输出、实际输出、失败原因和指标得分&lt;br/&gt;&lt;br/&gt;功能：测评中心 &gt; 任务结果"]:::admin
+    TaskStepFour["第十步：重试失败样本&lt;br/&gt;或导出结果并生成对比报告&lt;br/&gt;&lt;br/&gt;功能：测评中心 &gt; 报告与对比"]:::admin
+  end
+
+  Center --&gt; D1 --&gt; D2 --&gt; D3
+  D3 --&gt;|需要修改| D4 --&gt; TemplateStepOne
+  D3 --&gt;|无需修改| TemplateStepOne
+  TemplateStepOne --&gt; TemplateStepTwo --&gt; TaskStepOne --&gt; TaskStepTwo --&gt; TaskStepThree --&gt; TaskStepFour
+
+  classDef admin fill:#FFEDEE,stroke:#D85C63,stroke-width:1.5px,color:#7A1F25;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+<div class="technical-subsection" id="sec-05-5-3"><div class="technical-subsection-head"><div class="technical-subsection-no">5.3</div><div><h3>护栏策略与运行时拦截</h3></div></div></div>
+<p class="journey-line">作为平台管理员，我可以创建和维护护栏策略模板并指定平台默认模板，以保证平台 Chat 和资产 Agent 的对话都受到统一的内容安全保护。</p>
+<div class="flow-card-container" id="sec-05-5-3-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-admin">角色：平台管理员</span>
+      <span class="role-badge role-badge-owner">角色：资产创建者</span>
+      <span class="role-badge role-badge-user">角色：资产订阅者</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">5.3</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-5-3', '护栏策略与运行时拦截')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap" id="fig-5-3">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
+flowchart LR
+  subgraph Config["模块一：管理员配置护栏策略"]
+    H1["第一步：创建或编辑护栏策略模板&lt;br/&gt;配置护栏组合、灵敏度和作用侧&lt;br/&gt;可启用或停用模板&lt;br/&gt;&lt;br/&gt;功能：护栏策略 &gt; 策略模板管理"]:::admin
+    H2["第二步：指定平台默认护栏策略模板&lt;br/&gt;用于平台 Chat 会话&lt;br/&gt;当前默认模板不能直接停用&lt;br/&gt;需先指定另一个启用模板作为新默认&lt;br/&gt;&lt;br/&gt;功能：护栏策略 &gt; 平台默认模板"]:::admin
+  end
+
+  subgraph Bind["模块二：资产绑定策略"]
+    H3["第三步：创建者创建 Agent 时&lt;br/&gt;从启用中的模板里选择一个绑定&lt;br/&gt;只能查看模板明细，不能修改规则和灵敏度&lt;br/&gt;&lt;br/&gt;功能：资产创建 &gt; 护栏策略绑定"]:::owner
+  end
+
+  subgraph Runtime["模块三：会话运行时命中处置"]
+    U1["第四步：用户发起 Chat 或 Agent 会话&lt;br/&gt;&lt;br/&gt;功能：对话 &gt; Chat / Agent 对话"]:::user
+    G1["第五步：平台网关选择适用模板&lt;br/&gt;Chat 会话使用平台默认模板&lt;br/&gt;Agent 会话使用其绑定模板"]:::platform
+    G2{"第六步：输入或输出是否命中护栏"}:::platform
+    G3["命中：输入侧直接拒答&lt;br/&gt;输出侧先缓冲完整回答&lt;br/&gt;命中后以已拦截结果替代原回答&lt;br/&gt;用户看到命中的护栏类型&lt;br/&gt;&lt;br/&gt;功能：对话 &gt; 护栏命中提示"]:::platform
+    G4["未命中：回答通过检测后按段展示&lt;br/&gt;用户可随时中止生成&lt;br/&gt;&lt;br/&gt;功能：对话 &gt; 流式输出与中止"]:::platform
+  end
+
+  subgraph Maintain["模块四：模板维护与运营反馈"]
+    H5["模板修改对已绑定 Agent 即时生效&lt;br/&gt;模板停用只影响后续新绑定"]:::admin
+    H4["运营反馈（二期）&lt;br/&gt;查看各策略检测量、命中率和拦截次数&lt;br/&gt;命中记录包含时间、条目、用户&lt;br/&gt;拦截信息及输入输出内容&lt;br/&gt;&lt;br/&gt;功能：护栏策略 &gt; 运营看板"]:::admin
+  end
+
+  H1 --&gt; H2 --&gt; H3 --&gt; U1 --&gt; G1 --&gt; G2
+  G2 --&gt;|命中| G3
+  G2 --&gt;|未命中| G4
+  G3 -.-&gt;|命中记录进入看板| H4
+  G4 -.-&gt;|检测记录进入看板| H4
+  H1 -.-&gt; H5
+
+  classDef user fill:#EAF2FF,stroke:#4C78D8,stroke-width:1.5px,color:#173B7A;
+  classDef owner fill:#EAF7EF,stroke:#3E9B61,stroke-width:1.5px,color:#14512B;
+  classDef admin fill:#FFEDEE,stroke:#D85C63,stroke-width:1.5px,color:#7A1F25;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+<div class="technical-subsection" id="sec-05-5-4"><div class="technical-subsection-head"><div class="technical-subsection-no">5.4</div><div><h3>管理后台治理运营</h3></div></div></div>
+<p class="journey-line">作为平台管理员，我可以在管理后台查看和治理全平台资产、维护平台原生工具与资源、配置角色权限和推荐位，以保障平台整体的稳定运行和合规治理。</p>
+<div class="flow-card-container" id="sec-05-5-4-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-admin">角色：平台管理员</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">5.4</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-5-4', '管理后台治理运营')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap" id="fig-5-4">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
+flowchart TB
+  AdminHome["平台管理员进入管理后台&lt;br/&gt;功能：管理后台"]:::admin
+
+  subgraph ModulesRow5_4[" "]
+  direction LR
+    subgraph AssetControlArea["资产治理"]
+      G1["查看全平台资产&lt;br/&gt;资产状态、负责人&lt;br/&gt;出站调用停用标记&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 治理中心"]:::admin
+      G2["停用或恢复出站调用&lt;br/&gt;按资产维度执行&lt;br/&gt;不改变上下架状态&lt;br/&gt;停用必须填写原因&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 治理中心"]:::admin
+      G3["为孤儿资产补充新负责人&lt;br/&gt;恢复订阅入口和负责人职能&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 治理中心"]:::admin
+    end
+
+    subgraph PlatformConfig["平台配置"]
+      C1["维护平台原生工具&lt;br/&gt;Confluence&lt;br/&gt;SharePoint 与 OneDrive&lt;br/&gt;对象存储通道&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 平台原生工具维护"]:::admin
+      C2["维护平台资源注册表&lt;br/&gt;登记向量数据库实例&lt;br/&gt;维护平台资源凭据与可用范围&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 平台资源"]:::admin
+      C3["维护模型清单和默认模型&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 模型设置"]:::admin
+    end
+
+    subgraph Operation["运营与权限配置"]
+      O1["管理 Marketplace 推荐位&lt;br/&gt;下架资产自动退出推荐位&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 推荐位管理"]:::admin
+      O2["查看 Alice 同步的用户视图&lt;br/&gt;配置角色到功能点&lt;br/&gt;配置角色到可用模型&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 身份与权限"]:::admin
+      O3["创建公共目录一级节点并指定一级角色&lt;br/&gt;&lt;br/&gt;功能：管理后台 &gt; 公共目录冷启动"]:::admin
+    end
+    AssetControlArea ~~~ PlatformConfig ~~~ Operation
+  end
+
+  AdminHome --&gt; G1 --&gt; G2
+  G1 --&gt; G3
+  AdminHome --&gt; C1
+  AdminHome --&gt; C2
+  AdminHome --&gt; C3
+  AdminHome --&gt; O1
+  AdminHome --&gt; O2
+  AdminHome --&gt; O3
+
+  classDef admin fill:#FFEDEE,stroke:#D85C63,stroke-width:1.5px,color:#7A1F25;</pre>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="section" id="sec-06" data-section>
+  <header class="section-head">
+    <div class="section-no">06</div>
+    <div class="section-title">
+      <h2>六、密钥库旅程：个人访问令牌与个人出站凭据</h2>
+    </div>
+  </header>
+  <div class="technical-subsection" id="sec-06-ctx-0"><div class="technical-subsection-head"><div class="technical-subsection-no">6.0</div><div><h3>业务上下文</h3></div></div></div>
+<p>用户在调用按人鉴权资产、导入外部知识来源、通过开放接口集成外部系统，或使用个人模型能力时，需要在密钥库中管理自己的凭据。密钥库只管理用户侧凭据的两个入口：入站的个人访问令牌，以及出站的个人凭据。资产级服务凭据由创建者在资产配置中维护；平台资源凭据由平台管理员在平台资源注册表中维护。</p>
+<ul class="bullet-list"><li><strong>入站个人访问令牌</strong>：用户创建令牌时填写名称和有效期，默认有效期为自创建时刻起算 90 天。令牌权限范围只能选择用户已经订阅或已经获得权限的资产和知识库，外部系统如需调用 MCP，也需勾选对应的已授权 MCP；选择时进行权限校验。令牌明文只在创建成功时完整展示一次；用户可停用、删除或重新生成令牌，停用和删除需要二次确认，重新生成后原令牌立即失效。</li><li><strong>按人鉴权资产凭据</strong>：目标列表只展示用户已订阅且声明按人鉴权的资产。平台根据资产声明的鉴权方式生成认证表单，资产已声明字段只读，用户填写个人凭据并执行一键探测。凭据未配置或探测失败时，平台不会在资产调用中回落到共享身份。</li><li><strong>外部知识来源凭据</strong>：用户可为 Confluence、SharePoint 与 OneDrive、对象存储三个知识导入通道配置凭据。执行导入时，用户还需要具备目标知识库的知识库 Contributor 或更高权限。</li><li><strong>个人模型凭据</strong>：用户可配置多条个人模型凭据，通过启用、禁用和排序决定使用顺序。保存后平台执行一次模型可用性检测并保存结果，用户也可手动刷新。后续模型调用优先使用可用个人凭据，无可用个人凭据时使用平台默认凭据。真实调用发生鉴权或权限失败时，本次调用改用平台默认凭据，并通知用户更新凭据或申请模型权限；瞬时故障不改写检测结果，也不发送通知。</li><li><strong>凭据展示与维护</strong>：个人凭据的密文字段默认掩码展示，用户可查看明文，查看动作会被记录。用户可更新、停用、删除或重新探测凭据。</li></ul>
+<div class="technical-subsection" id="sec-06-6-1"><div class="technical-subsection-head"><div class="technical-subsection-no">6.1</div><div><h3>配置个人入站凭据（PAT）</h3></div></div></div>
+<p class="journey-line">作为平台用户，我可以在密钥库的入站管理中创建个人访问令牌并勾选授权范围，以让外部系统凭该令牌调用我已获授权的资产或知识库能力。</p>
+<div class="flow-card-container" id="sec-06-6-1-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-user">角色：全体用户</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">6.1</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-6-1', '配置个人入站凭据（PAT）')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap" id="fig-6-1">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
+flowchart LR
+  PlatformStepOne["第一步：进入密钥库入站管理&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 入站管理"]:::user
+  PlatformStepTwo["第二步：创建个人访问令牌&lt;br/&gt;填写名称和有效期&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 入站管理"]:::user
+  PlatformStepThree["第三步：选择授权范围&lt;br/&gt;只能选择本人已订阅资产&lt;br/&gt;或有权限的知识库&lt;br/&gt;选择时平台即时校验权限&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 开放接口权限范围"]:::user
+  PlatformStepFour["第四步：创建成功后只显示一次令牌明文&lt;br/&gt;用户复制后安全保存&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 入站管理"]:::user
+  PlatformStepFive["第五步：配置到外部系统&lt;br/&gt;用于调用资产能力或知识库开放接口&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 开放接口"]:::user
+  PlatformStepSix["第六步：后续可停用、删除或重新生成&lt;br/&gt;停用和删除需要二次确认&lt;br/&gt;重新生成后原令牌立即失效&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 入站管理"]:::user
+  PlatformStepSeven["平台持续校验授权&lt;br/&gt;订阅取消&lt;br/&gt;资产下架&lt;br/&gt;知识权限回收&lt;br/&gt;账号停用时&lt;br/&gt;对应访问立即失效"]:::platform
+
+  PlatformStepOne --&gt; PlatformStepTwo --&gt; PlatformStepThree --&gt; PlatformStepFour --&gt; PlatformStepFive --&gt; PlatformStepSix --&gt; PlatformStepSeven
+
+  classDef user fill:#EAF2FF,stroke:#4C78D8,stroke-width:1.5px,color:#173B7A;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+<div class="technical-subsection" id="sec-06-6-2"><div class="technical-subsection-head"><div class="technical-subsection-no">6.2</div><div><h3>配置个人出站凭据</h3></div></div></div>
+<p class="journey-line">作为平台用户，我可以在密钥库的出站管理中为按人鉴权资产、外部知识来源或个人模型服务配置并探测个人凭据，以用自己的身份完成这些需要个人授权的调用。</p>
+<div class="flow-card-container" id="sec-06-6-2-card">
+  <div class="flow-card-head">
+    <div class="role-badge-group">
+      <span class="role-badge role-badge-user">角色：全体用户</span>
+      <span class="role-badge role-badge-platform">角色：平台系统</span>
+    </div>
+    <div class="flow-card-tools">
+      <span class="flow-card-id">6.2</span>
+      <button class="zoom-btn" type="button" onclick="openModal('fig-6-2', '配置个人出站凭据')">&#10021; 放大全屏</button>
+    </div>
+  </div>
+  <div class="flow-card-body">
+    <div class="mermaid-diagram-wrap" id="fig-6-2">
+      <pre class="mermaid">%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Inter, Microsoft YaHei, Arial", "primaryColor": "#EEF4FF", "primaryTextColor": "#172B4D", "fontSize": "14px", "nodeTextMargin": 14, "lineColor": "#6B778C", "clusterBkg": "#FFFFFF", "clusterBorder": "#E1E7EF"}, "flowchart": {"curve": "basis", "htmlLabels": true, "wrappingWidth": 180, "nodeSpacing": 66, "rankSpacing": 82}}}%%
+flowchart TB
+  Start["用户进入密钥库出站管理&lt;br/&gt;功能：密钥库 &gt; 出站管理"]:::user
+  Choose{"选择凭据用途"}:::user
+
+  subgraph ModulesRow6_2[" "]
+  direction LR
+    subgraph AssetCredential["用途一：调用按人鉴权资产"]
+      A1["选择已订阅资产&lt;br/&gt;且该资产要求按人鉴权&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 出站个人凭据"]:::user
+      A2["填写平台生成的认证表单并一键探测&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 凭据探测"]:::user
+      A3["调用时使用本人凭据&lt;br/&gt;缺失或失效则调用失败&lt;br/&gt;不使用共享身份替代"]:::platform
+    end
+
+    subgraph ImportCredential["用途二：导入外部知识来源"]
+      I1["选择外部知识来源&lt;br/&gt;Confluence&lt;br/&gt;SharePoint 与 OneDrive&lt;br/&gt;对象存储通道&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 出站个人凭据"]:::user
+      I2["填写对应通道的认证信息并探测&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 凭据探测"]:::user
+      I3["导入资料时&lt;br/&gt;使用操作人个人凭据&lt;br/&gt;只能导入操作人&lt;br/&gt;在来源系统中有权阅读的内容"]:::platform
+    end
+
+    subgraph ModelCredential["用途三：使用个人模型凭据"]
+      ModelStepOne["配置一条或多条个人模型凭据&lt;br/&gt;可排序、启用或停用&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 个人模型凭据"]:::user
+      ModelStepTwo["保存后平台检测&lt;br/&gt;各模型可用性并保存结果&lt;br/&gt;用户可手动刷新检测&lt;br/&gt;&lt;br/&gt;功能：密钥库 &gt; 可用性检测"]:::platform
+      ModelStepThree["模型调用优先使用&lt;br/&gt;可用个人凭据&lt;br/&gt;无可用个人凭据时使用平台默认凭据&lt;br/&gt;瞬时故障不改写检测结果"]:::platform
+    end
+    AssetCredential ~~~ ImportCredential ~~~ ModelCredential
+  end
+
+  Start --&gt; Choose
+  Choose --&gt;|按人鉴权资产| A1 --&gt; A2 --&gt; A3
+  Choose --&gt;|外部知识来源| I1 --&gt; I2 --&gt; I3
+  Choose --&gt;|模型服务| ModelStepOne --&gt; ModelStepTwo --&gt; ModelStepThree
+
+  classDef user fill:#EAF2FF,stroke:#4C78D8,stroke-width:1.5px,color:#173B7A;
+  classDef platform fill:#F4F6F8,stroke:#7A869A,stroke-width:1.5px,color:#253858;</pre>
+    </div>
+  </div>
+</div>
+</section>
+
+
+
+<section class="section" id="sec-08" data-section>
+  <header class="section-head">
+    <div class="section-no">08</div>
+    <div class="section-title">
+      <h2>八、功能层级对应表</h2>
+    </div>
+  </header>
+  <div class="technical-table-wrap"><table class="technical-table"><thead><tr><th>业务旅程</th><th>对应一级功能</th><th>对应二级功能或页面</th><th>业务用户看到的结果</th></tr></thead><tbody><tr><td>发现资产并申请订阅</td><td>Marketplace</td><td>频道与榜单、搜索、资产详情、订阅申请、订阅者中心</td><td>找到合适资产、提交申请、查看审批进展</td></tr><tr><td>审批订阅申请</td><td>Marketplace</td><td>创作者中心、资产控制台、审批人视图</td><td>审批人集中处理待办，申请人收到结果</td></tr><tr><td>使用平台 Chat</td><td>对话</td><td>Chat 会话、模型选择、知识库挂载、流式输出、引用证据</td><td>用户直接提问并获得带证据的回答</td></tr><tr><td>使用已订阅 Agent</td><td>对话、Marketplace</td><td>Agent 详情、去使用、Agent 对话、资产不可用提示</td><td>用户进入指定 Agent 透传会话</td></tr><tr><td>收藏与我的资产抽屉</td><td>对话、Marketplace</td><td>我的资产抽屉、已订阅分区、收藏分区、资产详情</td><td>用户快速回到已订阅资产，并持续关注收藏资产</td></tr><tr><td>使用 MCP</td><td>Marketplace、密钥库</td><td>MCP 详情、开放接口、个人访问令牌</td><td>MCP 由系统或已订阅 Agent 调用，不作为对话对象</td></tr><tr><td>创建并上架 Agent</td><td>创作者中心、资产创建、测评、护栏策略</td><td>创建向导、质量门控、发布准入测评、护栏模板绑定、发布说明</td><td>资产自助上架，无管理员上架审批</td></tr><tr><td>创建并上架 MCP</td><td>创作者中心、资产创建</td><td>工具创建向导、质量门控、订阅配置、发布说明</td><td>MCP 通过质量门控后上架，不执行发布准入测评</td></tr><tr><td>资产日常运营</td><td>Marketplace</td><td>资产控制台、订阅管理、负责人维护、未发布修订、中止发布、下架、重新上架、删除</td><td>创建者持续维护资产与订阅关系</td></tr><tr><td>知识库建设与开放</td><td>知识管理、密钥库、对话</td><td>目录树、建库向导、文档导入、文档构建、文件详情、知识库挂载</td><td>知识库从草稿变为可用后，可被有权限用户挂载检索</td></tr><tr><td>测评治理</td><td>测评、管理后台</td><td>准入测评模板、发布准入测评、测评阻断开关</td><td>平台管理员维护测评标准，创建者发布时执行</td></tr><tr><td>二期测评中心</td><td>测评</td><td>数据集管理、任务中心、报告与对比</td><td>平台管理员可管理数据集、执行自助测评任务并对比结果</td></tr><tr><td>护栏治理</td><td>护栏策略、对话</td><td>策略模板、平台默认模板、模板绑定、运行时命中处置</td><td>输入或输出命中护栏时被拦截并提示原因</td></tr><tr><td>密钥库凭据管理</td><td>密钥库</td><td>入站管理、出站管理、凭据探测、开放接口</td><td>用户管理自己的个人访问令牌和个人出站凭据</td></tr><tr><td>管理后台运营</td><td>管理后台</td><td>治理中心、平台原生工具维护、推荐位、用户视图、角色映射、目录冷启动、模型设置、平台资源</td><td>平台管理员维护平台公共规则与资源，但不改变资产上下架状态</td></tr><tr><td>通知</td><td>通知</td><td>顶栏未读角标、通知列表</td><td>用户收到审批、发布、下架、测评、构建、凭据等事件结果</td></tr></tbody></table></div>
+</section>
+
+<section class="section" id="sec-09" data-section>
+  <header class="section-head">
+    <div class="section-no">09</div>
+    <div class="section-title">
+      <h2>九、首版与二期边界提示</h2>
+    </div>
+  </header>
+  <div class="technical-table-wrap"><table class="technical-table"><thead><tr><th>类型</th><th>首版包含</th><th>二期或后续规划</th></tr></thead><tbody><tr><td>对话</td><td>Chat、Agent 透传会话、知识库挂载、模型选择、深度分析、流式输出、中止生成、引用证据、图片与图表证据、我的资产抽屉</td><td>临时文件上传、建议追问、对话记忆、引用阅读面板</td></tr><tr><td>资产</td><td>高代码 Agent、MCP、自助上架、下架、重新上架、中止发布、删除、订阅审批</td><td>低代码 Agent 创建、独立低代码平台实例管理</td></tr><tr><td>知识</td><td>目录、建库、四通道导入、构建、停用、删除、开放接口</td><td>定时同步、重复文档识别、检索测试、更换向量化模型、扩展解析与检索组件</td></tr><tr><td>测评</td><td>发布流程内的准入测评、全局准入模板、阻断开关</td><td>独立测评中心、自助测评、任务中心、对比报告</td></tr><tr><td>护栏</td><td>策略模板、默认模板、绑定、运行时拦截</td><td>护栏运营看板、命中明细分析</td></tr><tr><td>密钥库</td><td>入站个人访问令牌、出站个人凭据、凭据探测、开放接口</td><td>经个人访问令牌调用平台原生工具为首版明确排除项，暂不纳入二期规划</td></tr><tr><td>管理后台</td><td>治理中心、平台原生工具维护、平台资源、用户视图、模型设置、角色映射、推荐位、目录冷启动</td><td>管理员首页、系统公告、监控中心</td></tr><tr><td>通知</td><td>顶栏未读角标、通知列表</td><td>完整通知中心、分类筛选、跨模块跳转、通知偏好</td></tr></tbody></table></div>
+</section>
+
+        <footer class="footer">
+          <span>AI FOUNDATION PLATFORM · USER JOURNEY (BUSINESS VIEW)</span>
+          <span>来源：AI_Foundation_Platform_User_Journey_v1.md · PRD v1.0</span>
+        </footer>
+      </div>
+    </main>
+  </div>
+
+  <!-- Interactive Diagram Fullscreen Modal -->
+  <div class="diagram-modal" id="diagramModal" aria-hidden="true">
+    <div class="modal-head">
+      <div class="modal-head-title">
+        <h3 id="modalTitle">流程图放大视图</h3>
+        <span class="modal-zoom-badge" id="zoomBadge">100%</span>
+      </div>
+      <div class="modal-controls">
+        <button class="modal-btn" type="button" onclick="fitModalToWindow()">适合窗口</button>
+        <button class="modal-btn" type="button" onclick="setPresetZoom(1.0, true)">原始 100%</button>
+        <button class="modal-btn" type="button" onclick="setPresetZoom(1.5)">150%</button>
+        <button class="modal-btn" type="button" onclick="setPresetZoom(2.0)">200%</button>
+        <button class="modal-btn" type="button" onclick="zoomModal(1.2)">+ 放大</button>
+        <button class="modal-btn" type="button" onclick="zoomModal(0.8)">- 缩小</button>
+        <button class="modal-btn" type="button" onclick="resetModalZoom()">居中</button>
+        <button class="modal-btn close-btn" type="button" onclick="closeModal()">关闭 (ESC)</button>
+      </div>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <div class="modal-viewport" id="modalViewport"></div>
+    </div>
+  </div>
+
+  <script>
+    if (window.mermaid) {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'base',
+        themeVariables: {
+          fontFamily: '"IBM Plex Sans", "Noto Sans SC", "Microsoft YaHei", sans-serif',
+          fontSize: '14px',
+          primaryColor: '#EEF4FF',
+          primaryTextColor: '#172B4D',
+          lineColor: '#6B778C',
+          clusterBkg: '#FFFFFF',
+          clusterBorder: '#E1E7EF'
+        },
+        flowchart: { useMaxWidth: false, htmlLabels: true, curve: 'basis' },
+        stateDiagram: { useMaxWidth: false }
+      });
+    }
+
+    (() => {
+      const body = document.body;
+      const menuButton = document.getElementById('menuButton');
+      const overlay = document.getElementById('mobileOverlay');
+      const progress = document.getElementById('readingProgress');
+      const links = Array.from(document.querySelectorAll('.toc a'));
+      const targets = links
+        .map(link => document.querySelector(link.getAttribute('href')))
+        .filter(Boolean);
+
+      const closeNavigation = () => {
+        body.classList.remove('nav-open');
+        menuButton.setAttribute('aria-expanded', 'false');
+      };
+
+      menuButton.addEventListener('click', () => {
+        const isOpen = body.classList.toggle('nav-open');
+        menuButton.setAttribute('aria-expanded', String(isOpen));
+      });
+      overlay.addEventListener('click', closeNavigation);
+      links.forEach(link => link.addEventListener('click', closeNavigation));
+
+      const updateProgress = () => {
+        const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+        const percent = scrollable > 0 ? (window.scrollY / scrollable) * 100 : 0;
+        progress.style.width = `${Math.min(100, Math.max(0, percent))}%`;
+      };
+
+      const activateLink = id => {
+        links.forEach(link => {
+          const active = link.getAttribute('href') === `#${id}`;
+          link.classList.toggle('active', active);
+        });
+      };
+
+      const observer = new IntersectionObserver(entries => {
+        const visible = entries
+          .filter(entry => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible[0]) activateLink(visible[0].target.id);
+      }, { rootMargin: '-15% 0px -70% 0px', threshold: [0, 0.1, 0.25] });
+
+      targets.forEach(target => observer.observe(target));
+      window.addEventListener('scroll', updateProgress, { passive: true });
+      window.addEventListener('resize', () => {
+        if (window.innerWidth > 880) closeNavigation();
+      });
+      updateProgress();
+    })();
+
+    // ---- Fullscreen diagram modal (pan + zoom) ----
+    let currentZoom = 1.0;
+    let isDragging = false;
+    let startX = 0, startY = 0, translateX = 0, translateY = 0;
+    let modalDiagramWidth = 0;
+    let modalDiagramHeight = 0;
+    let modalCloneIndex = 0;
+
+    function namespaceSvgIds(svg) {
+      const prefix = `modal-svg-${Date.now()}-${modalCloneIndex += 1}`;
+      const elementsWithIds = [svg, ...svg.querySelectorAll('[id]')].filter(el => el.id);
+      const idMap = new Map();
+      elementsWithIds.forEach(el => {
+        const oldId = el.id;
+        const newId = `${prefix}-${oldId}`;
+        idMap.set(oldId, newId);
+        el.id = newId;
+      });
+      svg.querySelectorAll('style').forEach(style => {
+        let css = style.textContent;
+        idMap.forEach((newId, oldId) => { css = css.split(`#${oldId}`).join(`#${newId}`); });
+        style.textContent = css;
+      });
+      [svg, ...svg.querySelectorAll('*')].forEach(el => {
+        [...el.attributes].forEach(attr => {
+          if (attr.name === 'id') return;
+          let value = attr.value;
+          idMap.forEach((newId, oldId) => {
+            value = value.split(`url(#${oldId})`).join(`url(#${newId})`);
+            if (value === `#${oldId}`) value = `#${newId}`;
+          });
+          if (value !== attr.value) el.setAttribute(attr.name, value);
+        });
+      });
+    }
+
+    function openModal(containerId, title) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      const modal = document.getElementById('diagramModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalViewport = document.getElementById('modalViewport');
+
+      modalTitle.textContent = title || '流程图放大视图';
+      modalViewport.innerHTML = '';
+
+      const svg = container.querySelector('svg');
+      if (svg) {
+        const clonedSvg = svg.cloneNode(true);
+        namespaceSvgIds(clonedSvg);
+        const viewBox = clonedSvg.viewBox && clonedSvg.viewBox.baseVal;
+        modalDiagramWidth = viewBox && viewBox.width ? viewBox.width : svg.getBoundingClientRect().width;
+        modalDiagramHeight = viewBox && viewBox.height ? viewBox.height : svg.getBoundingClientRect().height;
+        clonedSvg.setAttribute('width', modalDiagramWidth);
+        clonedSvg.setAttribute('height', modalDiagramHeight);
+        clonedSvg.style.maxWidth = 'none';
+        clonedSvg.style.width = `${modalDiagramWidth}px`;
+        clonedSvg.style.height = `${modalDiagramHeight}px`;
+        clonedSvg.style.background = '#ffffff';
+        modalViewport.style.width = `${modalDiagramWidth + 64}px`;
+        modalViewport.style.height = `${modalDiagramHeight + 64}px`;
+        modalViewport.appendChild(clonedSvg);
+      } else {
+        modalDiagramWidth = 0;
+        modalDiagramHeight = 0;
+        modalViewport.style.width = '';
+        modalViewport.style.height = '';
+        modalViewport.innerHTML = container.innerHTML;
+      }
+
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      setPresetZoom(1.0, true);
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('diagramModal');
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    function setPresetZoom(level, recenter = false) {
+      currentZoom = level;
+      if (recenter) { translateX = 0; translateY = 0; }
+      updateTransform();
+    }
+
+    function fitModalToWindow() {
+      const body = document.getElementById('modalBody');
+      if (!body || !modalDiagramWidth || !modalDiagramHeight) return;
+      const bodyRect = body.getBoundingClientRect();
+      const availableWidth = Math.max(1, bodyRect.width - 48);
+      const availableHeight = Math.max(1, bodyRect.height - 48);
+      currentZoom = Math.min(1, availableWidth / (modalDiagramWidth + 64), availableHeight / (modalDiagramHeight + 64));
+      translateX = 0; translateY = 0;
+      updateTransform('适合窗口');
+    }
+
+    function zoomModal(factor) {
+      currentZoom = Math.min(4.0, Math.max(0.4, currentZoom * factor));
+      updateTransform();
+    }
+
+    function resetModalZoom() {
+      translateX = 0; translateY = 0;
+      updateTransform();
+    }
+
+    function updateTransform(mode = '') {
+      const viewport = document.getElementById('modalViewport');
+      const badge = document.getElementById('zoomBadge');
+      if (viewport) viewport.style.transform = `translate(${translateX}px, ${translateY}px) scale(${currentZoom})`;
+      if (badge) badge.textContent = `${Math.round(currentZoom * 100)}%${mode ? ` · ${mode}` : ''}`;
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+      if (e.key === '+' || e.key === '=') zoomModal(1.2);
+      if (e.key === '-') zoomModal(0.8);
+      if (e.key === '0') resetModalZoom();
+    });
+
+    const modalBody = document.getElementById('modalBody');
+    if (modalBody) {
+      modalBody.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX - translateX;
+        startY = e.clientY - translateY;
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        translateX = e.clientX - startX;
+        translateY = e.clientY - startY;
+        updateTransform();
+      });
+      window.addEventListener('mouseup', () => { isDragging = false; });
+      modalBody.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.15 : 0.85;
+        zoomModal(factor);
+      }, { passive: false });
+    }
+  </script>
+</body>
+</html>
