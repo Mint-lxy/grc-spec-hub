@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: GRC Management Service API
-  version: "2.0"
+  version: "2.1"
   description: >-
     grc-mgt-service 的对外契约，覆盖 chat、文件、知识库、marketplace、RBAC 与 vault 管理接口。
     其中 chat 会话子域
@@ -53,6 +53,8 @@ tags:
     description: 个人收藏新增、取消与列表查询。
   - name: Marketplace Tags
     description: Marketplace 标签查询。
+  - name: Marketplace Guardrail Templates
+    description: 创建向导可选的启用护栏策略模板查询。
   - name: User Management
     description: 用户创建、查询、更新、删除、启用、禁用与锁定。
   - name: Role Management
@@ -886,6 +888,27 @@ paths:
       operationId: precheckMarketplaceAsset
       summary: 执行资产预检
       responses: { '200': { description: 预检完成, content: { application/json: { schema: { $ref: '#/components/schemas/PrecheckEnvelope' } } } } }
+  /mgmt/marketplace/assets/{assetId}/quality-gate:
+    parameters: [{ $ref: '#/components/parameters/AssetId' }]
+    post:
+      tags: [Marketplace Asset]
+      operationId: runMarketplaceAssetQualityGate
+      summary: 执行资产质量门控
+      responses: { '200': { description: 门控完成, content: { application/json: { schema: { $ref: '#/components/schemas/QualityGateResultEnvelope' } } } } }
+  /mgmt/marketplace/assets/health-probe:
+    post:
+      tags: [Marketplace Asset]
+      operationId: probeMarketplaceAssetHealth
+      summary: 探测未保存资产配置的健康状态
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/MarketplaceAssetHealthProbeRequest' } } } }
+      responses: { '200': { description: 探测完成, content: { application/json: { schema: { $ref: '#/components/schemas/PrecheckEnvelope' } } } } }
+  /mgmt/marketplace/assets/capability-preview:
+    post:
+      tags: [Marketplace Asset]
+      operationId: previewMarketplaceAssetCapability
+      summary: 拉取并预览资产能力声明
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/MarketplaceAssetCapabilityPreviewRequest' } } } }
+      responses: { '200': { description: 拉取完成, content: { application/json: { schema: { $ref: '#/components/schemas/MarketplaceAssetCapabilityPreviewEnvelope' } } } } }
   /mgmt/marketplace/assets/yaml-preview:
     post:
       tags: [Marketplace Asset]
@@ -939,6 +962,14 @@ paths:
       operationId: listMarketplaceTags
       summary: 查询全部标签
       responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/MarketplaceTagListEnvelope' } } } } }
+  /mgmt/marketplace/guardrail-templates:
+    get:
+      tags: [Marketplace Guardrail Templates]
+      operationId: listMarketplaceGuardrailTemplates
+      summary: 查询创建向导可选护栏模板
+      parameters:
+        - { name: includeEntries, in: query, required: false, description: 是否返回模板条目明细, schema: { type: boolean, default: true } }
+      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/MarketplaceGuardrailTemplateListEnvelope' } } } } }
   /mgmt/marketplace/assets/{assetId}/subscribe/page-init:
     parameters: [{ $ref: '#/components/parameters/AssetId' }]
     get:
@@ -1287,7 +1318,7 @@ components:
     JobId: { name: jobId, in: path, required: true, description: 构建任务 ID, schema: { type: string } }
     OperationId: { name: operationId, in: path, required: true, description: 异步操作 ID, schema: { type: string } }
     ChunkId: { name: chunkId, in: path, required: true, description: 文档切片 ID, schema: { type: string } }
-    StageType: { name: stageType, in: path, required: true, description: 文档处理阶段类型, schema: { type: string } }
+    StageType: { name: stageType, in: path, required: true, description: 文档处理阶段类型，取值：parse，chunk，enhance，embed, schema: { type: string } }
     AssetId: { name: assetId, in: path, required: true, description: 资产 ID, schema: { type: string } }
     FlowId: { name: flowId, in: path, required: true, description: 审批流 ID, schema: { type: string } }
     StepId: { name: stepId, in: path, required: true, description: 审批步骤 ID, schema: { type: string } }
@@ -1332,7 +1363,7 @@ components:
         authConfig: { type: object, additionalProperties: true, description: 资产鉴权配置 }
         capabilityConfig: { type: object, additionalProperties: true, description: 资产能力声明 }
         interfaceConfig: { type: object, additionalProperties: true, description: 接口清单配置 }
-        platformGovernance: { type: object, additionalProperties: true, description: 平台治理配置 }
+        platformGovernance: { $ref: '#/components/schemas/MarketplaceAssetPlatformGovernance', description: 平台治理配置 }
         manifestSnapshot: { type: object, additionalProperties: true, description: Agent Card 或 MCP Manifest 快照 }
         subscriptionFormYaml: { type: string, maxLength: 200000, description: 订阅申请表单 YAML }
         subscriptionApprovalEnabled: { type: boolean, description: 是否启用订阅审批 }
@@ -1347,8 +1378,17 @@ components:
         approverId: { type: integer, format: int64, description: 审批人用户 ID }
         approverName: { type: string, maxLength: 100, description: 审批人姓名快照 }
         order: { type: integer, description: 审批层级 }
+    MarketplaceAssetPlatformGovernance:
+      type: object
+      additionalProperties: true
+      properties:
+        guardrailTemplateId: { type: integer, format: int64, description: Agent 绑定的启用护栏模板 ID；Agent 提交时必填，MCP 不填写 }
     UpdateMarketplaceAssetRequest:
-      allOf: [{ $ref: '#/components/schemas/MarketplaceAssetDraftData' }]
+      allOf:
+        - $ref: '#/components/schemas/MarketplaceAssetDraftData'
+        - type: object
+          properties:
+            submit: { type: boolean, default: false, description: 是否提交完成的草稿进入质量门控；false 时仅保存 DRAFT }
     TransferMarketplaceOwnerRequest:
       type: object
       required: [targetOwnerId]
@@ -1360,6 +1400,23 @@ components:
       required: [yaml]
       properties:
         yaml: { type: string, description: 待解析的订阅表单 YAML }
+    MarketplaceAssetHealthProbeRequest:
+      type: object
+      required: [assetType, endpointUrl, healthCheckUrl]
+      properties:
+        assetType: { type: string, enum: [AGENT, MCP], description: 资产类型 }
+        endpointUrl: { type: string, format: uri, description: 服务接入地址 }
+        healthCheckUrl: { type: string, format: uri, description: Health Check 探测地址 }
+        timeoutSeconds: { type: integer, minimum: 5, maximum: 120, default: 30, description: 单次探测超时秒数 }
+        retryCount: { type: integer, minimum: 0, maximum: 3, default: 1, description: 失败重试次数 }
+    MarketplaceAssetCapabilityPreviewRequest:
+      type: object
+      required: [assetType, endpointUrl]
+      properties:
+        assetType: { type: string, enum: [AGENT, MCP], description: 资产类型 }
+        endpointUrl: { type: string, format: uri, description: Agent Card 或 MCP 工具清单的服务地址 }
+        timeoutSeconds: { type: integer, minimum: 5, maximum: 120, default: 30, description: 单次拉取超时秒数 }
+        retryCount: { type: integer, minimum: 0, maximum: 3, default: 1, description: 失败重试次数 }
     ApprovalActionRequest:
       type: object
       properties:
@@ -1437,10 +1494,6 @@ components:
         publishedAt: { type: string, format: date-time, description: 发布时间 }
         createdAt: { type: string, format: date-time, description: 创建时间 }
         updatedAt: { type: string, format: date-time, description: 更新时间 }
-    CreateMarketplaceAssetResponse:
-      type: object
-      additionalProperties: true
-      description: 创建或更新资产响应。
     AssetListItem:
       type: object
       properties:
@@ -1487,6 +1540,50 @@ components:
         latencyMs: { type: integer, format: int64, description: 检查耗时毫秒数 }
         invalidInterfaces: { type: array, items: { type: string }, description: 无效接口列表 }
         message: { type: string, description: 预检说明 }
+    QualityGateItem:
+      type: object
+      required: [key, label, passed, condition]
+      properties:
+        key: { type: string, description: 稳定门控项标识 }
+        label: { type: string, description: 门控项展示名称 }
+        passed: { type: boolean, description: 本项是否通过 }
+        condition: { type: string, description: 本项判定条件 }
+        failReason: { type: string, description: 未通过的安全错误原因；通过时省略 }
+        stepHint: { type: string, description: 需要修正的向导配置步骤标识；通过时省略 }
+    QualityGateResult:
+      type: object
+      required: [assetId, assetType, passed, checkedAt, items]
+      properties:
+        assetId: { type: integer, format: int64, description: 资产 ID }
+        assetType: { type: string, enum: [AGENT, MCP], description: 资产类型 }
+        passed: { type: boolean, description: 所有门控项是否均通过 }
+        checkedAt: { type: string, format: date-time, description: 本次门控完成时间 }
+        items: { type: array, minItems: 6, items: { $ref: '#/components/schemas/QualityGateItem' }, description: 有序门控项；Agent 固定七项，MCP 固定六项 }
+    MarketplaceGuardrailTemplateEntry:
+      type: object
+      required: [key, label, sensitivity, appliesTo]
+      properties:
+        key: { type: string, description: 护栏规则标识 }
+        label: { type: string, description: 护栏规则展示名称 }
+        sensitivity: { type: string, enum: [LOW, MEDIUM, HIGH], description: 规则敏感度 }
+        appliesTo: { type: string, enum: [INPUT, OUTPUT], description: 护栏作用侧 }
+    MarketplaceGuardrailTemplate:
+      type: object
+      required: [id, name, enabled, entries]
+      properties:
+        id: { type: integer, format: int64, description: 护栏模板 ID，可作为 guardrailTemplateId 提交 }
+        name: { type: string, description: 护栏模板名称 }
+        enabled: { type: boolean, description: 是否启用；该接口仅返回 true }
+        entries: { type: array, items: { $ref: '#/components/schemas/MarketplaceGuardrailTemplateEntry' }, description: 模板只读规则条目 }
+    MarketplaceAssetCapabilityPreview:
+      type: object
+      required: [assetType, manifestSnapshot, capabilityConfig, interfaceConfig, fetchedAt]
+      properties:
+        assetType: { type: string, enum: [AGENT, MCP], description: 资产类型 }
+        manifestSnapshot: { type: object, additionalProperties: true, description: 拉取到的 Agent Card 或 MCP Manifest 原始快照 }
+        capabilityConfig: { type: object, additionalProperties: true, description: 后端解析后的只读能力声明 }
+        interfaceConfig: { type: object, additionalProperties: true, description: 后端解析后的只读接口或工具清单 }
+        fetchedAt: { type: string, format: date-time, description: 拉取完成时间 }
     YamlPreviewResponse:
       type: object
       properties:
@@ -1830,11 +1927,14 @@ components:
     PublishMarketplaceAssetEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/PublishMarketplaceAssetResponse', description: 响应数据 } } }] }
     OwnerTransferEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/OwnerTransferResponse', description: 响应数据 } } }] }
     PrecheckEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/PrecheckResponse', description: 响应数据 } } }] }
+    QualityGateResultEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/QualityGateResult', description: 响应数据 } } }] }
+    MarketplaceAssetCapabilityPreviewEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/MarketplaceAssetCapabilityPreview', description: 响应数据 } } }] }
     YamlPreviewEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/YamlPreviewResponse', description: 响应数据 } } }] }
     ApprovalFlowEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/ApprovalFlow', description: 响应数据 } } }] }
     PendingApprovalListEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/PendingApproval' }, description: 响应数据 } } }] }
     ApprovalActionEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/ApprovalActionResponse', description: 响应数据 } } }] }
     MarketplaceTagListEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/MarketplaceTag' }, description: 响应数据 } } }] }
+    MarketplaceGuardrailTemplateListEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { type: array, items: { $ref: '#/components/schemas/MarketplaceGuardrailTemplate' }, description: 响应数据 } } }] }
     SubscribePageInitEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/SubscribePageInit', description: 响应数据 } } }] }
     SubmitSubscriptionEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/SubmitSubscriptionResponse', description: 响应数据 } } }] }
     SubscriberCenterSummaryEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/SubscriberCenterSummary', description: 响应数据 } } }] }
@@ -2885,6 +2985,7 @@ components:
       type: object
       properties:
         stageConfig: { $ref: '#/components/schemas/KnowledgeStageConfigRequest', description: 阶段配置 }
+        persist: { type: boolean, description: 是否持久化 }
 
     KnowledgeStageRunResponse:
       type: object
@@ -2894,6 +2995,9 @@ components:
         isNewJob: { type: boolean, description: 是否新建任务 }
         stageStatus: { type: string, description: 阶段状态 }
         runMode: { type: string, description: 运行模式 }
+        docId: { type: integer, format: int64, description: doc ID }
+        stageType: { type: string, description: 阶段类型 }
+        stageConfig: { $ref: '#/components/schemas/KnowledgeJobStatusEnvelope', description: 阶段执行明细 }
 
     KnowledgeJobStatusResponse:
       type: object

@@ -189,6 +189,9 @@
 | POST | /mgmt/marketplace/assets/{assetId}/archive | 归档资产 | Path: AssetId | VoidEnvelope | 002/003/004/005 |
 | POST | /mgmt/marketplace/assets/{assetId}/transfer-owner | 转移资产 Owner | Path: AssetId; Body: TransferMarketplaceOwnerRequest | OwnerTransferEnvelope | 002/003/004/005 |
 | POST | /mgmt/marketplace/assets/{assetId}/precheck | 执行资产预检 | Path: AssetId | PrecheckEnvelope | 002/003/004/005 |
+| POST | /mgmt/marketplace/assets/{assetId}/quality-gate | 执行资产质量门控 | Path: AssetId | QualityGateResultEnvelope | 003 |
+| POST | /mgmt/marketplace/assets/health-probe | 探测未保存资产的健康状态 | MarketplaceAssetHealthProbeRequest | PrecheckEnvelope | 003 |
+| POST | /mgmt/marketplace/assets/capability-preview | 拉取并预览资产能力声明 | MarketplaceAssetCapabilityPreviewRequest | MarketplaceAssetCapabilityPreviewEnvelope | 003 |
 | POST | /mgmt/marketplace/assets/yaml-preview | 预览资产 YAML | YamlPreviewRequest | YamlPreviewEnvelope | 002/003/004/005 |
 | DELETE | /mgmt/marketplace/assets/draft/{assetId} | 删除资产草稿 | Path: AssetId | VoidEnvelope | 002/003/004/005 |
 
@@ -206,6 +209,7 @@
 | 方法 | 路径 | 描述 | 请求要点 | 响应要点 | Spec |
 |------|------|------|---------|---------|------|
 | GET | /mgmt/marketplace/tags | 查询全部标签 | — | MarketplaceTagListEnvelope | 002/003/004/005 |
+| GET | /mgmt/marketplace/guardrail-templates | 查询创建向导可选护栏模板 | ?includeEntries | MarketplaceGuardrailTemplateListEnvelope | 003/006 |
 
 ### 3.13 Marketplace 收藏
 
