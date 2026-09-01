@@ -54,11 +54,15 @@
 
 - Q: 建库基础信息中的 `Description` 是否必填，字数如何限制？ → A: `Description` 必填；字数限制暂未确定，标记为 `[待确认]`。2026-08-28 会议提出的「不少于 15 字」仅为历史建议，不作为当前验收基线。
 
+### Session 2026-09-01（用户裁定）
+
+- Q: User Story 优先级标注格式统一（watchlist #34 剩余动作）？ → A: 14 个 US 全部按 006/008 已裁定约定改写为「Delivery: <PRD 批次> + Story Order: S<n>」——依据 PRD v1.2 §8.4/M4，本 spec 全部 US 对应 P0 批次（P1 项仅「库内重复文档识别」§8.4#77 与「检索测试」§8.4#94，均在 Non-Goals 而非 US 范围），Story Order 按章节顺序 S1–S14；不再使用 spec-kit 的 P1/P2/P3 标注。watchlist #34 随之关闭。
+
 ---
 
 ## User Scenarios & Testing
 
-### User Story 1 — 知识维护员建库与构建 (Priority: P1)
+### User Story 1 — 知识维护员建库与构建 (Delivery: P0, Story Order: S1)
 
 知识维护员在目录树中选择一个叶子目录，通过两步建库向导创建知识库并配置构建管线参数；随后通过四个通道导入文档，勾选文档一键构建，实时查看四个阶段的进度；构建完成后知识库自动转为「可用」，可被对话工作台挂载与开放接口检索。
 
@@ -77,7 +81,7 @@
 
 ---
 
-### User Story 2 — 四通道文档导入 (Priority: P1)
+### User Story 2 — 四通道文档导入 (Delivery: P0, Story Order: S2)
 
 知识维护员通过本地上传、Confluence、SharePoint/OneDrive、S3/Azure Blob 四个通道导入文档。外部通道使用操作人在密钥库配置的个人凭据拉取，操作人只能导入其在来源系统中有权阅读的内容。导入前提供目录预览与勾选，不支持的格式自动置灰。
 
@@ -100,7 +104,7 @@
 
 ---
 
-### User Story 3 — 构建执行与失败处理 (Priority: P1)
+### User Story 3 — 构建执行与失败处理 (Delivery: P0, Story Order: S3)
 
 知识维护员对已导入文档执行构建，支持一键构建（自动执行四阶段）与手动分阶段构建（逐阶段单独执行或重跑）。构建失败时立即弹窗说明原因，失败文件在列表中置顶，可从失败阶段重跑。
 
@@ -123,7 +127,7 @@
 
 ---
 
-### User Story 4 — 目录树管理与权限 (Priority: P2)
+### User Story 4 — 目录树管理与权限 (Delivery: P0, Story Order: S4)
 
 知识维护员通过目录树浏览公共目录与我的目录，目录控制角色持有人可创建子目录、重命名、删除目录；无权限用户看到 Alice 权限 ID 与申请入口。
 
@@ -144,7 +148,7 @@
 
 ---
 
-### User Story 5 — 知识库状态管理 (Priority: P2)
+### User Story 5 — 知识库状态管理 (Delivery: P0, Story Order: S5)
 
 知识库 Owner 管理知识库的三态生命周期（草稿→可用→已停用），包括手动停用与重新启用。停用立即生效——退出挂载列表且立即不可检索，进行中的会话同样如此。
 
@@ -164,7 +168,7 @@
 
 ---
 
-### User Story 6 — 角色授予与权限申请 (Priority: P2)
+### User Story 6 — 角色授予与权限申请 (Delivery: P0, Story Order: S6)
 
 目录级角色（目录控制角色、知识库创建角色）的授予、回收、同级多人控制与角色交接以 Alice 流程为主；平台展示 Alice 权限 ID、申请入口与同步后的当前权限状态，不在 P0 内实现目录级完整审批闭环。知识库级维护角色由该库的知识库 Owner 或知识库 Deputy 审批，平台调用 Alice 接口完成角色写入。
 
@@ -186,7 +190,7 @@
 
 ---
 
-### User Story 7 — 文件详情与切片编辑 (Priority: P2)
+### User Story 7 — 文件详情与切片编辑 (Delivery: P0, Story Order: S7)
 
 知识维护员在文件详情中审阅构建结果，包括源文件分页预览、解析后的 Markdown 内容、切片列表的搜索与逐条编辑，以及文档摘要与关键词。编辑保存后自动触发该文档的重新增强与向量化。
 
@@ -203,7 +207,7 @@
 
 ---
 
-### User Story 8 — 构建参数配置 (Priority: P2)
+### User Story 8 — 构建参数配置 (Delivery: P0, Story Order: S8)
 
 知识库 Owner/Deputy 配置库级与文档级的构建参数，包括解析器、切片策略、内容增强、向量化模型、向量数据库与检索重排序（参数保存权限 2026-08-25 用户裁定收敛为仅 Owner/Deputy，Contributor 不可修改；Contributor 的导入、构建、切片编辑权限不变）。库级参数保存后触发全库重建；文档级参数可覆盖部分库级默认。
 
@@ -225,7 +229,7 @@
 
 ---
 
-### User Story 9 — 知识库与文档删除 (Priority: P2)
+### User Story 9 — 知识库与文档删除 (Delivery: P0, Story Order: S9)
 
 知识库 Owner 可删除知识库（须先停用，软删除），知识库 Owner 与 Contributor 可删除库内文档。
 
@@ -248,7 +252,7 @@
 
 ---
 
-### User Story 10 — 开放接口 (Priority: P3)
+### User Story 10 — 开放接口 (Delivery: P0, Story Order: S10)
 
 外部系统通过 PAT 认证调用知识库的三个开放接口（读取元数据、检索、更新内容），实现系统间集成。
 
@@ -266,7 +270,7 @@
 
 ---
 
-### User Story 11 — 对话中的知识库挂载与检索 (Priority: P2)
+### User Story 11 — 对话中的知识库挂载与检索 (Delivery: P0, Story Order: S11)
 
 普通用户在平台 Chat agent-runtime（Chat）会话中挂载有权限且状态为「可用」的知识库，回答附带引用来源与检索证据，图片与图表类证据内嵌渲染。
 
@@ -286,7 +290,7 @@
 
 ---
 
-### User Story 12 — 平台管理员目录冷启动 (Priority: P3)
+### User Story 12 — 平台管理员目录冷启动 (Delivery: P0, Story Order: S12)
 
 平台管理员创建公共目录一级节点，指定一级目录控制角色与知识库创建角色的持有人；之后各层级由目录控制角色自行维护。
 
@@ -302,7 +306,7 @@
 
 ---
 
-### User Story 13 — 我的目录平台内分享授权 (Priority: P2)
+### User Story 13 — 我的目录平台内分享授权 (Delivery: P0, Story Order: S13)
 
 我的目录知识库创建者将知识库平台内分享给同事（可查看/可编辑两级，不调用 Alice），被分享者在「我的知识库 > 分享给我的」子分区按授权级别使用；授权可撤销，账号失效即失效。
 
@@ -320,7 +324,7 @@
 
 ---
 
-### User Story 14 — 知识库重命名、详情指标与批量参数 (Priority: P2)
+### User Story 14 — 知识库重命名、详情指标与批量参数 (Delivery: P0, Story Order: S14)
 
 知识库 Owner 可重命名知识库；知识库详情页展示文档数、切片数、向量数与就绪度；文件列表支持批量选择并批量修改文档级参数。
 
