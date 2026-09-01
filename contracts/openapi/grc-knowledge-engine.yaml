@@ -1,1698 +1,1862 @@
 openapi: 3.1.0
 info:
-  title: GRC Knowledge Engine API
-  version: "2.0"
-  license: {name: Proprietary, identifier: LicenseRef-Proprietary}
-  description: |
-    知识库、构建、检索和证据访问契约。内部正式接口使用 /api/v1/knowledge，
-    PAT 开放接口继续使用 /open/v1/knowledge。旧版非正式 v1 接口已在迁移完成后下线。
-    jobId 只表示执行状态，不能选择正文、Chunk、Asset 或 Evidence 版本。
-servers:
-  - url: https://knowledge.grc.internal
-security:
-  - bearerAuth: []
-    accessContext: []
-tags:
-  - {name: knowledge-bases, description: 知识库生命周期、配置和统计。}
-  - {name: documents, description: 文档、解析视图、Leaf Chunk 与增强产物。}
-  - {name: build-jobs, description: 构建任务的创建、查询、重试和取消。}
-  - {name: retrieval, description: 检索、Evidence 和媒体短期访问。}
-  - {name: open-api, description: PAT 认证的三个开放能力。}
-  - {name: operations, description: 存活与就绪探针。}
+  title: GRC Knowledge Engine
+  description: grc-knowledge-engine
+  version: 0.1.0
 paths:
   /api/v1/knowledge/tags:
     get:
-      tags: [knowledge-bases]
-      summary: 查询知识库标签
-      operationId: listKnowledgeTags
+      tags:
+        - knowledge-bases
+      summary: List Knowledge Tags
+      operationId: list_knowledge_tags_api_v1_knowledge_tags_get
       responses:
-        '200': {$ref: '#/components/responses/KnowledgeTagListResponse'}
-        '403': {$ref: '#/components/responses/Forbidden'}
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response List Knowledge Tags Api V1 Knowledge Tags Get
     post:
-      tags: [knowledge-bases]
-      summary: 创建知识库标签
-      operationId: createKnowledgeTag
-      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/CreateKnowledgeTagRequest'}}}}
+      tags:
+        - knowledge-bases
+      summary: Create Knowledge Tag
+      operationId: create_knowledge_tag_api_v1_knowledge_tags_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateKnowledgeTagRequest'
+        required: true
       responses:
-        '200': {$ref: '#/components/responses/KnowledgeTagResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '409': {$ref: '#/components/responses/Conflict'}
-
-  /api/v1/knowledge/knowledge-bases/pipeline-options:
-    get:
-      tags: [knowledge-bases]
-      summary: 查询业务参数选项和运行能力
-      operationId: getPipelineOptions
-      responses:
-        '200': {$ref: '#/components/responses/PipelineOptionsResponse'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '503': {$ref: '#/components/responses/DependencyUnavailable'}
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Create Knowledge Tag Api V1 Knowledge Tags Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /api/v1/knowledge/knowledge-bases:
     get:
-      tags: [knowledge-bases]
-      summary: 查询调用者可见的知识库
-      operationId: listKnowledgeBases
+      tags:
+        - knowledge-bases
+      summary: List Knowledge Bases
+      operationId: list_knowledge_bases_api_v1_knowledge_knowledge_bases_get
       parameters:
-        - {name: directoryId, in: query, schema: {type: integer, format: int64, minimum: 1}}
-        - {name: status, in: query, schema: {$ref: '#/components/schemas/KnowledgeBaseStatus'}}
-        - {name: keyword, in: query, schema: {type: string, maxLength: 255}}
-        - {name: retrievalReady, in: query, schema: {type: boolean}}
-        - {$ref: '#/components/parameters/Page'}
-        - {$ref: '#/components/parameters/PageSize'}
+        - name: directoryId
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Directoryid
+        - name: status
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Status
+        - name: keyword
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+                maxLength: 255
+              - type: 'null'
+            title: Keyword
+        - name: retrievalReady
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: boolean
+              - type: 'null'
+            title: Retrievalready
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+            title: Page
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            maximum: 100
+            minimum: 1
+            default: 20
+            title: Pagesize
       responses:
-        '200': {$ref: '#/components/responses/KnowledgeBasePageResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response List Knowledge Bases Api V1 Knowledge Knowledge Bases Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
     post:
-      tags: [knowledge-bases]
-      summary: 创建草稿知识库
-      operationId: createKnowledgeBase
-      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/CreateKnowledgeBaseRequest'}}}}
+      tags:
+        - knowledge-bases
+      summary: Create Knowledge Base
+      operationId: create_knowledge_base_api_v1_knowledge_knowledge_bases_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateKnowledgeBaseRequest'
       responses:
-        '200': {$ref: '#/components/responses/KnowledgeBaseResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '422': {$ref: '#/components/responses/Unprocessable'}
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Create Knowledge Base Api V1 Knowledge Knowledge Bases Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/pipeline-options:
+    get:
+      tags:
+        - knowledge-bases
+      summary: Get Pipeline Options
+      operationId: get_pipeline_options_api_v1_knowledge_knowledge_bases_pipeline_options_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Get Pipeline Options Api V1 Knowledge Knowledge Bases Pipeline Options Get
   /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}:
     get:
-      tags: [knowledge-bases]
-      summary: 获取知识库详情
-      operationId: getKnowledgeBase
-      parameters: [{$ref: '#/components/parameters/KnowledgeBaseId'}]
-      responses:
-        '200': {$ref: '#/components/responses/KnowledgeBaseResponse'}
-        '304': {description: ETag 未变化}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/update:
-    post:
-      tags: [knowledge-bases]
-      summary: 更新知识库基础信息
-      operationId: updateKnowledgeBase
+      tags:
+        - knowledge-bases
+      summary: Get Knowledge Base
+      operationId: get_knowledge_base_api_v1_knowledge_knowledge_bases__knowledgeBaseId__get
       parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/IfMatch'}
-        - {$ref: '#/components/parameters/IdempotencyKey'}
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/UpdateKnowledgeBaseRequest'}}}}
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
       responses:
-        '200': {$ref: '#/components/responses/KnowledgeBaseResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '412': {$ref: '#/components/responses/PreconditionFailed'}
-        '428': {$ref: '#/components/responses/PreconditionRequired'}
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Knowledge Base Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/config:
     patch:
-      tags: [knowledge-bases]
-      summary: 更新业务可调管线配置并触发重建
-      operationId: updatePipelineConfig
+      tags:
+        - knowledge-bases
+      summary: Update Pipeline Config
+      operationId: update_pipeline_config_api_v1_knowledge_knowledge_bases__knowledgeBaseId__config_patch
       parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/IfMatch'}
-        - {$ref: '#/components/parameters/IdempotencyKey'}
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/UpdatePipelineConfigRequest'}}}}
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateKnowledgeBaseConfigRequest'
       responses:
-        '200': {$ref: '#/components/responses/PipelineUpdateResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '412': {$ref: '#/components/responses/PreconditionFailed'}
-        '422': {$ref: '#/components/responses/Unprocessable'}
-        '428': {$ref: '#/components/responses/PreconditionRequired'}
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Update Pipeline Config Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Config Patch
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/enable:
     post:
-      tags: [knowledge-bases]
-      summary: 重新启用已停用知识库
-      description: 仅允许 DISABLED 到 ACTIVE；DRAFT 由首份 READY 文档自动激活。
-      operationId: enableKnowledgeBase
+      tags:
+        - knowledge-bases
+      summary: Enable Knowledge Base
+      operationId: enable_knowledge_base_api_v1_knowledge_knowledge_bases__knowledgeBaseId__enable_post
       parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/IfMatch'}
-        - {$ref: '#/components/parameters/IdempotencyKey'}
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
       responses:
-        '200': {$ref: '#/components/responses/KnowledgeBaseResponse'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '412': {$ref: '#/components/responses/PreconditionFailed'}
-        '422': {$ref: '#/components/responses/Unprocessable'}
-        '428': {$ref: '#/components/responses/PreconditionRequired'}
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Enable Knowledge Base Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Enable Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/publish:
     post:
-      tags: [knowledge-bases]
-      summary: 发布已具备可检索内容的草稿知识库
-      description: 对应 mgmt publish 门面；只允许 DRAFT 到 ACTIVE，且至少存在一个 active READY 文档。
-      operationId: publishKnowledgeBase
+      tags:
+        - knowledge-bases
+      summary: Publish Knowledge Base
+      operationId: publish_knowledge_base_api_v1_knowledge_knowledge_bases__knowledgeBaseId__publish_post
       parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/IfMatch'}
-        - {$ref: '#/components/parameters/IdempotencyKey'}
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
       responses:
-        '200': {$ref: '#/components/responses/KnowledgeBaseResponse'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '412': {$ref: '#/components/responses/PreconditionFailed'}
-        '422': {$ref: '#/components/responses/Unprocessable'}
-        '428': {$ref: '#/components/responses/PreconditionRequired'}
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Publish Knowledge Base Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Publish Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/offline:
     post:
-      tags: [knowledge-bases]
-      summary: 立即停用知识库消费面
-      operationId: disableKnowledgeBase
+      tags:
+        - knowledge-bases
+      summary: Disable Knowledge Base
+      operationId: disable_knowledge_base_api_v1_knowledge_knowledge_bases__knowledgeBaseId__offline_post
       parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/IfMatch'}
-        - {$ref: '#/components/parameters/IdempotencyKey'}
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
       responses:
-        '200': {$ref: '#/components/responses/KnowledgeBaseResponse'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '412': {$ref: '#/components/responses/PreconditionFailed'}
-        '428': {$ref: '#/components/responses/PreconditionRequired'}
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Disable Knowledge Base Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Offline Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/delete:
     post:
-      tags: [knowledge-bases]
-      summary: 删除知识库并开始不可恢复清理
-      operationId: deleteKnowledgeBase
+      tags:
+        - knowledge-bases
+      summary: Delete Knowledge Base
+      operationId: delete_knowledge_base_api_v1_knowledge_knowledge_bases__knowledgeBaseId__delete_post
       parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/IfMatch'}
-        - {$ref: '#/components/parameters/IdempotencyKey'}
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
       responses:
-        '202': {$ref: '#/components/responses/PurgeResponse'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '412': {$ref: '#/components/responses/PreconditionFailed'}
-        '422': {$ref: '#/components/responses/Unprocessable'}
-        '428': {$ref: '#/components/responses/PreconditionRequired'}
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Delete Knowledge Base Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Delete Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/stats:
     get:
-      tags: [knowledge-bases]
-      summary: 获取构建和清理统计
-      operationId: getKnowledgeBaseStats
-      parameters: [{$ref: '#/components/parameters/KnowledgeBaseId'}]
-      responses:
-        '200': {$ref: '#/components/responses/KnowledgeBaseStatsResponse'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/imports:
-    post:
-      tags: [documents]
-      summary: 批量导入文档并可自动构建
-      operationId: importDocuments
+      tags:
+        - knowledge-bases
+      summary: Knowledge Base Stats
+      operationId: knowledge_base_stats_api_v1_knowledge_knowledge_bases__knowledgeBaseId__stats_get
       parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/IdempotencyKey'}
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/DocumentImportRequest'}}}}
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
       responses:
-        '200': {$ref: '#/components/responses/DocumentImportResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '422': {$ref: '#/components/responses/Unprocessable'}
-        '503': {$ref: '#/components/responses/DependencyUnavailable'}
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents:
-    post:
-      tags: [documents]
-      summary: 创建单份文档并启动构建
-      operationId: createDocument
-      parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/CreateKnowledgeDocumentRequest'}}}}
-      responses:
-        '200': {$ref: '#/components/responses/KnowledgeDocumentCreateResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '409': {$ref: '#/components/responses/Conflict'}
-    get:
-      tags: [documents]
-      summary: 查询 active manifest 下的逻辑文档
-      operationId: listDocuments
-      parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {name: status, in: query, schema: {$ref: '#/components/schemas/DocumentStatus'}}
-        - {name: keyword, in: query, schema: {type: string, maxLength: 255}}
-        - {name: sourceType, in: query, schema: {type: string, maxLength: 64}}
-        - {name: retrievalReady, in: query, schema: {type: boolean}}
-        - {$ref: '#/components/parameters/Page'}
-        - {$ref: '#/components/parameters/PageSize'}
-      responses:
-        '200': {$ref: '#/components/responses/DocumentPageResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/document-stage-config-batches:
-    post:
-      tags: [documents]
-      summary: 批量更新所选文档的 parser/chunking/enhance 覆盖
-      operationId: batchUpdateDocumentStageConfig
-      parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/IdempotencyKey'}
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/BatchDocumentStageConfigRequest'}}}}
-      responses:
-        '200': {$ref: '#/components/responses/BuildJobResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '422': {$ref: '#/components/responses/Unprocessable'}
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}:
-    get:
-      tags: [documents]
-      summary: 获取 active 文档版本详情
-      operationId: getDocument
-      parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/DocumentId'}
-      responses:
-        '200': {$ref: '#/components/responses/DocumentResponse'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/stage-config:
-    patch:
-      tags: [documents]
-      summary: 更新文档 parser/chunking/enhance 覆盖并异步重建
-      operationId: updateDocumentStageConfig
-      parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/DocumentId'}
-        - {$ref: '#/components/parameters/IfMatch'}
-        - {$ref: '#/components/parameters/IdempotencyKey'}
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/DocumentStageOverride'}}}}
-      responses:
-        '200': {$ref: '#/components/responses/DocumentStageConfigUpdateResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '412': {$ref: '#/components/responses/PreconditionFailed'}
-        '422': {$ref: '#/components/responses/Unprocessable'}
-        '428': {$ref: '#/components/responses/PreconditionRequired'}
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/parse:
-    get:
-      tags: [documents]
-      summary: 获取 active 文档解析视图
-      operationId: getDocumentParseView
-      parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/DocumentId'}
-        - {name: jobId, in: query, required: false, schema: {type: integer, format: int64}}
-      responses:
-        '200': {$ref: '#/components/responses/ParseViewResponse'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/pages/{page}:
-    get:
-      tags: [documents]
-      summary: 获取文档指定页的前端工作台聚合数据
-      description: 聚合 active DocumentVersion 的解析内容、Leaf Chunk、摘要关键词和解析信息；不按 jobId 选择事实版本。
-      operationId: getDocumentPageWorkspace
-      parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/DocumentId'}
-        - {$ref: '#/components/parameters/PageNumberPath'}
-      responses:
-        '200': {$ref: '#/components/responses/PageWorkspaceResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/chunks:
-    get:
-      tags: [documents]
-      summary: 查询 active 文档的 Leaf Chunk
-      operationId: listLeafChunks
-      parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/DocumentId'}
-        - {name: jobId, in: query, required: false, schema: {type: integer, format: int64}}
-        - {name: keyword, in: query, schema: {type: string, maxLength: 255}}
-        - {name: snippetContext, in: query, schema: {type: integer, minimum: 0, maximum: 10, default: 0}}
-        - {$ref: '#/components/parameters/Page'}
-        - {$ref: '#/components/parameters/PageSize'}
-      responses:
-        '200': {$ref: '#/components/responses/ChunkPageResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/chunks/{chunkId}:
-    get:
-      tags: [documents]
-      summary: 获取 active Leaf Chunk 详情
-      operationId: getLeafChunk
-      parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/DocumentId'}
-        - {$ref: '#/components/parameters/ChunkId'}
-        - {name: jobId, in: query, required: false, schema: {type: integer, format: int64}}
-        - {name: snippetContext, in: query, schema: {type: integer, minimum: 0, maximum: 10, default: 0}}
-      responses:
-        '200': {$ref: '#/components/responses/ChunkResponse'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-    put:
-      tags: [documents]
-      summary: 写时复制编辑 Leaf 并从增强阶段重建
-      operationId: updateLeafChunk
-      parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/DocumentId'}
-        - {$ref: '#/components/parameters/ChunkId'}
-        - {$ref: '#/components/parameters/IfMatch'}
-        - {$ref: '#/components/parameters/IdempotencyKey'}
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/UpdateChunkRequest'}}}}
-      responses:
-        '200': {$ref: '#/components/responses/ChunkResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '412': {$ref: '#/components/responses/PreconditionFailed'}
-        '428': {$ref: '#/components/responses/PreconditionRequired'}
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/chunks/{chunkId}/delete:
-    post:
-      tags: [documents]
-      summary: 删除 Leaf 并立即退出检索
-      operationId: deleteLeafChunk
-      parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/DocumentId'}
-        - {$ref: '#/components/parameters/ChunkId'}
-        - {$ref: '#/components/parameters/IfMatch'}
-        - {$ref: '#/components/parameters/IdempotencyKey'}
-      responses:
-        '202': {$ref: '#/components/responses/PurgeResponse'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '412': {$ref: '#/components/responses/PreconditionFailed'}
-        '428': {$ref: '#/components/responses/PreconditionRequired'}
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/enhance/{enhanceType}:
-    get:
-      tags: [documents]
-      summary: 查询 active Leaf 增强产物
-      operationId: listEnhancements
-      parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/DocumentId'}
-        - {name: enhanceType, in: path, required: true, schema: {type: string, enum: [SUMMARY, KEYWORDS, FAQ]}}
-        - {name: jobId, in: query, required: false, schema: {type: integer, format: int64}}
-        - {$ref: '#/components/parameters/Page'}
-        - {$ref: '#/components/parameters/PageSize'}
-      responses:
-        '200': {$ref: '#/components/responses/EnhancementPageResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/original-url:
-    post:
-      tags: [documents]
-      summary: 签发原文短期 URL
-      operationId: createOriginalDocumentUrl
-      parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/DocumentId'}
-        - {$ref: '#/components/parameters/IdempotencyKey'}
-      requestBody: {content: {application/json: {schema: {$ref: '#/components/schemas/CreateAccessUrlRequest'}}}}
-      responses:
-        '200': {$ref: '#/components/responses/AccessUrlResponse'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/delete:
-    post:
-      tags: [documents]
-      summary: 删除文档并开始不可恢复清理
-      operationId: deleteDocument
-      parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/DocumentId'}
-        - {$ref: '#/components/parameters/IfMatch'}
-        - {$ref: '#/components/parameters/IdempotencyKey'}
-      responses:
-        '202': {$ref: '#/components/responses/PurgeResponse'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '412': {$ref: '#/components/responses/PreconditionFailed'}
-        '428': {$ref: '#/components/responses/PreconditionRequired'}
-
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/build-jobs:
-    get:
-      tags: [build-jobs]
-      summary: 查询知识库构建历史
-      operationId: listBuildJobs
-      parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/Page'}
-        - {$ref: '#/components/parameters/PageSize'}
-      responses:
-        '200': {$ref: '#/components/responses/BuildJobPageResponse'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-    post:
-      tags: [build-jobs]
-      summary: 创建文档或全库构建任务
-      operationId: createBuildJob
-      parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/IdempotencyKey'}
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/CreateBuildJobRequest'}}}}
-      responses:
-        '200': {$ref: '#/components/responses/BuildJobResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '422': {$ref: '#/components/responses/Unprocessable'}
-  /api/v1/knowledge/documents/{documentId}/stages/{stageType}/run:
-    post:
-      tags: [build-jobs]
-      summary: 执行文档阶段
-      operationId: runKnowledgeDocumentStage
-      parameters:
-        - {$ref: '#/components/parameters/DocumentId'}
-        - {name: stageType, in: path, required: true, schema: {type: string}}
-      requestBody: {content: {application/json: {schema: {$ref: '#/components/schemas/StageRunRequest'}}}}
-      responses:
-        '200': {$ref: '#/components/responses/StageRunResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-  /api/v1/knowledge/jobs/{jobId}:
-    get:
-      tags: [build-jobs]
-      summary: 获取构建任务运维状态
-      operationId: getBuildJob
-      parameters: [{$ref: '#/components/parameters/JobId'}]
-      responses:
-        '200': {$ref: '#/components/responses/BuildJobResponse'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-  /api/v1/knowledge/jobs/{jobId}/retry:
-    post:
-      tags: [build-jobs]
-      summary: 从失败阶段重试构建任务
-      operationId: retryBuildJob
-      parameters:
-        - {$ref: '#/components/parameters/JobId'}
-        - {$ref: '#/components/parameters/IdempotencyKey'}
-      responses:
-        '200': {$ref: '#/components/responses/BuildJobResponse'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '409': {$ref: '#/components/responses/Conflict'}
-  /api/v1/knowledge/jobs/{jobId}/cancel:
-    post:
-      tags: [build-jobs]
-      summary: 取消尚未提交的 candidate
-      operationId: cancelBuildJob
-      parameters:
-        - {$ref: '#/components/parameters/JobId'}
-        - {$ref: '#/components/parameters/IdempotencyKey'}
-      responses:
-        '200': {$ref: '#/components/responses/BuildJobResponse'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '409': {$ref: '#/components/responses/Conflict'}
-
-  /api/v1/knowledge/retrievals:
-    post:
-      tags: [retrieval]
-      summary: 在授权范围内执行多知识库检索
-      operationId: retrieveKnowledge
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/RetrievalRequest'}}}}
-      responses:
-        '200': {$ref: '#/components/responses/RetrievalResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '422': {$ref: '#/components/responses/Unprocessable'}
-        '429': {$ref: '#/components/responses/RateLimited'}
-        '503': {$ref: '#/components/responses/DependencyUnavailable'}
-  /api/v1/knowledge/artifacts/access-urls:
-    post:
-      tags: [retrieval]
-      summary: 批量签发或刷新证据媒体短期 URL
-      operationId: createArtifactAccessUrls
-      parameters: [{$ref: '#/components/parameters/IdempotencyKey'}]
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/CreateArtifactAccessUrlsRequest'}}}}
-      responses:
-        '200': {$ref: '#/components/responses/ArtifactAccessUrlsResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Knowledge Base Stats Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Stats Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /api/v1/knowledge/operations/{operationId}:
     get:
-      tags: [operations]
-      summary: 查询不可恢复清理操作状态
-      operationId: getPurgeOperation
-      parameters: [{$ref: '#/components/parameters/OperationId'}]
+      tags:
+        - operations
+      summary: Get Purge Operation
+      operationId: get_purge_operation_api_v1_knowledge_operations__operationId__get
+      parameters:
+        - name: operationId
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Operationid
       responses:
-        '200': {$ref: '#/components/responses/PurgeResponse'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Purge Operation Api V1 Knowledge Operations  Operationid  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/retrievals:
+    post:
+      tags:
+        - retrievals
+      summary: Retrieve
+      operationId: retrieve_api_v1_knowledge_retrievals_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RetrievalRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Retrieve Api V1 Knowledge Retrievals Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents:
+    post:
+      tags:
+        - documents
+      summary: Create Document
+      operationId: create_document_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDocumentRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Create Document Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+        - documents
+      summary: List Documents
+      operationId: list_documents_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents_get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+            title: Page
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            maximum: 100
+            minimum: 1
+            default: 20
+            title: Pagesize
+        - name: status
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Status
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response List Documents Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/parse:
+    get:
+      tags:
+        - documents
+      summary: Get Document Parse View
+      operationId: get_document_parse_view_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__parse_get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+        - name: jobId
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Jobid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Document Parse View Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Parse Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/pages/{page}:
+    get:
+      tags:
+        - documents
+      summary: Get Document Page Workspace
+      operationId: get_document_page_workspace_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__pages__page__get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+        - name: page
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            title: Page
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Document Page Workspace Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Pages  Page  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/chunks:
+    get:
+      tags:
+        - chunks
+      summary: List Leaf Chunks
+      operationId: list_leaf_chunks_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__chunks_get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+        - name: jobId
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Jobid
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+            title: Page
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            maximum: 100
+            minimum: 1
+            default: 20
+            title: Pagesize
+        - name: snippetContext
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            title: Snippetcontext
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response List Leaf Chunks Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Chunks Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/enhance/{enhanceType}:
+    get:
+      tags:
+        - enhance
+      summary: List Enhancements
+      operationId: list_enhancements_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__enhance__enhanceType__get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+        - name: enhanceType
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Enhancetype
+        - name: jobId
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Jobid
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+            title: Page
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            maximum: 100
+            minimum: 1
+            default: 20
+            title: Pagesize
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response List Enhancements Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Enhance  Enhancetype  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}:
+    get:
+      tags:
+        - documents
+      summary: Get Document
+      operationId: get_document_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Document Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/original-url:
+    post:
+      tags:
+        - documents
+      summary: Create Original Document Url
+      operationId: create_original_document_url_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__original_url_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Create Original Document Url Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Original Url Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/chunks/{chunkId}:
+    get:
+      tags:
+        - chunks
+      summary: Get Leaf Chunk
+      operationId: get_leaf_chunk_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__chunks__chunkId__get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+        - name: chunkId
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Chunkid
+        - name: jobId
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Jobid
+        - name: snippetContext
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            title: Snippetcontext
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Leaf Chunk Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Chunks  Chunkid  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+        - chunks
+      summary: Update Leaf Chunk
+      operationId: update_leaf_chunk_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__chunks__chunkId__put
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+        - name: chunkId
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Chunkid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateChunkContentRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Update Leaf Chunk Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Chunks  Chunkid  Put
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/delete:
+    post:
+      tags:
+        - documents
+      summary: Delete Document
+      operationId: delete_document_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__delete_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Delete Document Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Delete Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/imports:
+    post:
+      tags:
+        - documents
+      summary: Import Documents
+      operationId: import_documents_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents_imports_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchDocumentsRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Import Documents Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents Imports Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/build-jobs:
+    get:
+      tags:
+        - jobs
+      summary: List Build Jobs
+      operationId: list_build_jobs_api_v1_knowledge_knowledge_bases__knowledgeBaseId__build_jobs_get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+            title: Page
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            maximum: 100
+            minimum: 1
+            default: 20
+            title: Pagesize
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response List Build Jobs Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Build Jobs Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+        - jobs
+      summary: Create Build Job
+      operationId: create_build_job_api_v1_knowledge_knowledge_bases__knowledgeBaseId__build_jobs_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchDocumentsRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Create Build Job Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Build Jobs Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/documents/{documentId}/stages/{stageType}/run:
+    post:
+      tags:
+        - jobs
+      summary: Run Document Stage
+      operationId: run_document_stage_api_v1_knowledge_documents__documentId__stages__stageType__run_post
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+        - name: stageType
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Stagetype
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StageRunRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Run Document Stage Api V1 Knowledge Documents  Documentid  Stages  Stagetype  Run Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/jobs/{jobId}:
+    get:
+      tags:
+        - jobs
+      summary: Get Build Job
+      operationId: get_build_job_api_v1_knowledge_jobs__jobId__get
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Jobid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Build Job Api V1 Knowledge Jobs  Jobid  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/jobs/{jobId}/cancel:
+    post:
+      tags:
+        - jobs
+      summary: Cancel Build Job
+      operationId: cancel_build_job_api_v1_knowledge_jobs__jobId__cancel_post
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Jobid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Cancel Build Job Api V1 Knowledge Jobs  Jobid  Cancel Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/jobs/{jobId}/retry:
+    post:
+      tags:
+        - jobs
+      summary: Retry Build Job
+      operationId: retry_build_job_api_v1_knowledge_jobs__jobId__retry_post
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Jobid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Retry Build Job Api V1 Knowledge Jobs  Jobid  Retry Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/update:
+    post:
+      tags:
+        - knowledge-bases
+      summary: Update Knowledge Base
+      operationId: update_knowledge_base_api_v1_knowledge_knowledge_bases__knowledgeBaseId__update_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateKnowledgeBaseRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Update Knowledge Base Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Update Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/stage-config:
+    patch:
+      tags:
+        - documents
+      summary: Update Document Stage Config
+      operationId: update_document_stage_config_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__stage_config_patch
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDocumentStageConfigRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Update Document Stage Config Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Stage Config Patch
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/document-stage-config-batches:
+    post:
+      tags:
+        - documents
+      summary: Batch Update Document Stage Config
+      operationId: batch_update_document_stage_config_api_v1_knowledge_knowledge_bases__knowledgeBaseId__document_stage_config_batches_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchUpdateDocumentStageConfigRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Batch Update Document Stage Config Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Document Stage Config Batches Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/chunks/{chunkId}/delete:
+    post:
+      tags:
+        - chunks
+      summary: Delete Leaf Chunk
+      operationId: delete_leaf_chunk_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__chunks__chunkId__delete_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+        - name: chunkId
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Chunkid
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Delete Leaf Chunk Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Chunks  Chunkid  Delete Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/artifacts/access-urls:
+    post:
+      tags:
+        - artifacts
+      summary: Create Artifact Access Urls
+      operationId: create_artifact_access_urls_api_v1_knowledge_artifacts_access_urls_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: true
+              type: object
+              title: Request
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Create Artifact Access Urls Api V1 Knowledge Artifacts Access Urls Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /open/v1/knowledge/knowledge-bases/{knowledgeBaseId}:
     get:
-      tags: [open-api]
-      summary: 通过 PAT 查询知识库元数据
-      operationId: getOpenKnowledgeBase
-      security: [{patBearer: []}]
-      parameters: [{$ref: '#/components/parameters/KnowledgeBaseId'}]
+      summary: Get Open Knowledge Base Alias
+      operationId: get_open_knowledge_base_alias_open_v1_knowledge_knowledge_bases__knowledgeBaseId__get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
       responses:
-        '200': {$ref: '#/components/responses/OpenKnowledgeBaseResponse'}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Open Knowledge Base Alias Open V1 Knowledge Knowledge Bases  Knowledgebaseid  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /open/v1/knowledge/retrievals:
     post:
-      tags: [open-api]
-      summary: 通过 PAT scope 执行检索
-      description: 请求体禁止 knowledgeBaseIds 和 documentIds，资源范围完全来自 PAT scope。
-      operationId: retrieveOpenKnowledge
-      security: [{patBearer: []}]
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/OpenRetrievalRequest'}}}}
+      summary: Retrieve Open Knowledge Alias
+      operationId: retrieve_open_knowledge_alias_open_v1_knowledge_retrievals_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RetrievalRequest'
+        required: true
       responses:
-        '200': {$ref: '#/components/responses/RetrievalResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '429': {$ref: '#/components/responses/RateLimited'}
-        '503': {$ref: '#/components/responses/DependencyUnavailable'}
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Retrieve Open Knowledge Alias Open V1 Knowledge Retrievals Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /open/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents:
     post:
-      tags: [open-api]
-      summary: 通过 PAT 更新单份文档并自动构建
-      operationId: updateOpenKnowledgeDocument
-      security: [{patBearer: []}]
+      summary: Update Open Knowledge Document Alias
+      operationId: update_open_knowledge_document_alias_open_v1_knowledge_knowledge_bases__knowledgeBaseId__documents_post
       parameters:
-        - {$ref: '#/components/parameters/KnowledgeBaseId'}
-        - {$ref: '#/components/parameters/IdempotencyKey'}
-      requestBody: {required: true, content: {application/json: {schema: {$ref: '#/components/schemas/OpenDocumentUpdateRequest'}}}}
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              title: Request
       responses:
-        '202': {$ref: '#/components/responses/DocumentImportResponse'}
-        '400': {$ref: '#/components/responses/BadRequest'}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-        '404': {$ref: '#/components/responses/NotFound'}
-        '409': {$ref: '#/components/responses/Conflict'}
-        '422': {$ref: '#/components/responses/Unprocessable'}
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Update Open Knowledge Document Alias Open V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /health:
     get:
-      tags: [operations]
-      summary: 存活探针
-      operationId: getKnowledgeHealth
-      security: []
+      summary: Health
+      operationId: health_health_get
       responses:
-        '200': {$ref: '#/components/responses/HealthResponse'}
-        '429': {$ref: '#/components/responses/RateLimited'}
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Health Health Get
   /readyz:
     get:
-      tags: [operations]
-      summary: 就绪探针
-      operationId: getKnowledgeReadiness
-      security: []
+      summary: Readyz
+      operationId: readyz_readyz_get
       responses:
-        '200': {$ref: '#/components/responses/ReadinessResponse'}
-        '429': {$ref: '#/components/responses/RateLimited'}
-        '503': {$ref: '#/components/responses/ReadinessResponse'}
-
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Readyz Readyz Get
 components:
-  securitySchemes:
-    bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT or service token}
-    patBearer: {type: http, scheme: bearer, bearerFormat: PAT}
-    accessContext:
-      type: apiKey
-      in: header
-      name: X-GRC-Access-Context
-      description: 受众、方法、路径和 bodyHash 绑定的短期 compact JWS；网关剥离外部伪造值。
-  parameters:
-    KnowledgeBaseId: {name: knowledgeBaseId, in: path, required: true, schema: {type: integer, format: int64, minimum: 1}}
-    DocumentId: {name: documentId, in: path, required: true, schema: {type: integer, format: int64, minimum: 1}}
-    JobId: {name: jobId, in: path, required: true, schema: {type: integer, format: int64, minimum: 1}}
-    ChunkId: {name: chunkId, in: path, required: true, schema: {type: string, format: uuid}}
-    OperationId: {name: operationId, in: path, required: true, schema: {type: string, format: uuid}}
-    Page: {name: page, in: query, schema: {type: integer, minimum: 1, default: 1}}
-    PageSize: {name: pageSize, in: query, schema: {type: integer, minimum: 1, maximum: 100, default: 20}}
-    PageNumberPath: {name: page, in: path, required: true, schema: {type: integer, minimum: 1}}
-    IdempotencyKey: {name: X-Idempotency-Key, in: header, required: true, schema: {type: string, format: uuid}}
-    IfMatch: {name: If-Match, in: header, required: true, schema: {type: string, minLength: 3, maxLength: 128}}
-  responses:
-    PipelineOptionsResponse: {description: 成功, content: {application/json: {schema: {$ref: '#/components/schemas/PipelineOptionsEnvelope'}}}}
-    KnowledgeBaseResponse: {description: 成功, headers: {ETag: {schema: {type: string}}}, content: {application/json: {schema: {$ref: '#/components/schemas/KnowledgeBaseEnvelope'}}}}
-    KnowledgeBasePageResponse: {description: 成功, content: {application/json: {schema: {$ref: '#/components/schemas/KnowledgeBasePageEnvelope'}}}}
-    KnowledgeBaseStatsResponse: {description: 成功, content: {application/json: {schema: {$ref: '#/components/schemas/KnowledgeBaseStatsEnvelope'}}}}
-    KnowledgeTagResponse: {description: 创建成功, content: {application/json: {schema: {$ref: '#/components/schemas/KnowledgeTagEnvelope'}}}}
-    KnowledgeTagListResponse: {description: 成功, content: {application/json: {schema: {$ref: '#/components/schemas/KnowledgeTagListEnvelope'}}}}
-    PipelineUpdateResponse: {description: 更新成功, content: {application/json: {schema: {$ref: '#/components/schemas/PipelineUpdateEnvelope'}}}}
-    DocumentStageConfigUpdateResponse: {description: 更新成功, content: {application/json: {schema: {$ref: '#/components/schemas/DocumentStageConfigUpdateEnvelope'}}}}
-    DocumentImportResponse: {description: 整体请求有效；逐项结果保持输入顺序, content: {application/json: {schema: {$ref: '#/components/schemas/DocumentImportEnvelope'}}}}
-    KnowledgeDocumentCreateResponse: {description: 创建文档并启动构建, content: {application/json: {schema: {$ref: '#/components/schemas/KnowledgeDocumentCreateEnvelope'}}}}
-    DocumentPageResponse: {description: 成功, content: {application/json: {schema: {$ref: '#/components/schemas/DocumentPageEnvelope'}}}}
-    DocumentResponse: {description: 成功, headers: {ETag: {schema: {type: string}}}, content: {application/json: {schema: {$ref: '#/components/schemas/DocumentEnvelope'}}}}
-    ParseViewResponse: {description: 成功, content: {application/json: {schema: {$ref: '#/components/schemas/ParseViewEnvelope'}}}}
-    PageWorkspaceResponse: {description: 成功, content: {application/json: {schema: {$ref: '#/components/schemas/PageWorkspaceEnvelope'}}}}
-    ChunkPageResponse: {description: records 仅包含 Leaf, content: {application/json: {schema: {$ref: '#/components/schemas/ChunkPageEnvelope'}}}}
-    ChunkResponse: {description: 成功, headers: {ETag: {schema: {type: string}}}, content: {application/json: {schema: {$ref: '#/components/schemas/ChunkEnvelope'}}}}
-    ChunkMutationResponse: {description: 已接受写时复制, content: {application/json: {schema: {$ref: '#/components/schemas/ChunkMutationEnvelope'}}}}
-    EnhancementPageResponse: {description: 成功, content: {application/json: {schema: {$ref: '#/components/schemas/EnhancementPageEnvelope'}}}}
-    BuildJobResponse: {description: jobId 仅用于运维状态, content: {application/json: {schema: {$ref: '#/components/schemas/BuildJobEnvelope'}}}}
-    StageRunResponse: {description: 执行成功, content: {application/json: {schema: {$ref: '#/components/schemas/StageRunEnvelope'}}}}
-    BuildJobPageResponse: {description: 成功, content: {application/json: {schema: {$ref: '#/components/schemas/BuildJobPageEnvelope'}}}}
-    RetrievalResponse: {description: rank 为 1-based，score 为原始小数, content: {application/json: {schema: {$ref: '#/components/schemas/RetrievalEnvelope'}}}}
-    PurgeResponse: {description: 已不可见；Milvus 确认后立即清理且无恢复窗口, content: {application/json: {schema: {$ref: '#/components/schemas/PurgeEnvelope'}}}}
-    AccessUrlResponse: {description: 成功, content: {application/json: {schema: {$ref: '#/components/schemas/AccessUrlEnvelope'}}}}
-    ArtifactAccessUrlsResponse: {description: 成功, content: {application/json: {schema: {$ref: '#/components/schemas/ArtifactAccessUrlsEnvelope'}}}}
-    OpenKnowledgeBaseResponse: {description: 成功, content: {application/json: {schema: {$ref: '#/components/schemas/OpenKnowledgeBaseEnvelope'}}}}
-    HealthResponse: {description: 存活, content: {application/json: {schema: {$ref: '#/components/schemas/HealthEnvelope'}}}}
-    ReadinessResponse: {description: 就绪状态, content: {application/json: {schema: {$ref: '#/components/schemas/ReadinessEnvelope'}}}}
-    BadRequest: {$ref: '#/components/responses/ProblemResponse'}
-    Unauthorized: {$ref: '#/components/responses/ProblemResponse'}
-    Forbidden: {$ref: '#/components/responses/ProblemResponse'}
-    NotFound: {$ref: '#/components/responses/ProblemResponse'}
-    Conflict: {$ref: '#/components/responses/ProblemResponse'}
-    PreconditionFailed: {$ref: '#/components/responses/ProblemResponse'}
-    Unprocessable: {$ref: '#/components/responses/ProblemResponse'}
-    PreconditionRequired: {$ref: '#/components/responses/ProblemResponse'}
-    InternalError: {$ref: '#/components/responses/ProblemResponse'}
-    DependencyUnavailable: {$ref: '#/components/responses/ProblemResponse'}
-    RateLimited:
-      description: 请求被限流
-      headers: {Retry-After: {schema: {type: integer, minimum: 1}}}
-      content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}
-    ProblemResponse:
-      description: 标准错误响应；HTTP 状态由 operation 定义
-      content: {application/problem+json: {schema: {$ref: '#/components/schemas/ProblemDetails'}}}
   schemas:
-    SuccessBase:
-      type: object
-      required: [code, message, traceId, timestamp]
+    AdapterConfig:
       properties:
-        code: {type: string, const: "0"}
-        message: {type: string, const: success}
-        traceId: {type: string, minLength: 16, maxLength: 64}
-        timestamp: {type: string, format: date-time}
-    ProblemDetails:
-      type: object
-      additionalProperties: false
-      required: [code, message, traceId, timestamp]
-      properties:
-        code: {type: string, pattern: '^[A-Z][A-Z0-9]{1,5}-[1-9][0-9]{3}$', description: 业务错误使用 KB；认证/网关错误可使用 AUTH/GW。}
-        message: {type: string, minLength: 1, maxLength: 512}
-        detail: {type: [string, 'null'], maxLength: 4000}
-        traceId: {type: string, minLength: 16, maxLength: 64}
-        timestamp: {type: string, format: date-time}
-        path: {type: string, maxLength: 2048}
-        status: {type: integer, minimum: 400, maximum: 599}
-        reason: {type: string, maxLength: 64}
-        retryable: {type: boolean}
-        retryAfterSeconds: {type: [integer, 'null'], minimum: 1}
-        resource: {$ref: '#/components/schemas/ResourceReference'}
-    ResourceReference:
-      type: object
-      additionalProperties: false
-      required: [kind, id]
-      properties:
-        kind: {type: string, enum: [KNOWLEDGE_BASE, DOCUMENT, CHUNK, BUILD_JOB, ASSET, GENERATION]}
-        id: {type: string, minLength: 1, maxLength: 128}
-    KnowledgeBaseStatus: {type: string, enum: [DRAFT, ACTIVE, DISABLED]}
-    DocumentStatus: {type: string, enum: [UNPARSED, PARSED, CHUNKED, ENHANCED, VECTORIZED, BUILD_FAILED, DELETED]}
-    BuildStage: {type: string, enum: [PARSE, CHUNK, ENHANCE, EMBED]}
-    PurgeStatus: {type: string, enum: [NONE, PENDING, RUNNING, SUCCEEDED, FAILED]}
-    ParserConfig:
-      type: object
-      additionalProperties: false
-      required: [type, parseMethod, language, tableEnabled, formulaEnabled, imageMode]
-      properties:
-        type: {type: string, enum: [DOCLING, MINERU, DEEPDOC]}
-        parseMethod: {type: string, enum: [TEXT, OCR]}
-        language: {type: string, enum: [AUTO, ZH, EN, ZH_EN, JA]}
-        tableEnabled: {type: boolean}
-        formulaEnabled: {type: boolean}
-        imageMode: {type: string, enum: [IGNORE, EXTRACT_NO_OCR, EXTRACT_AND_OCR]}
-    ChunkingConfig:
-      type: object
-      additionalProperties: false
-      required: [type, chunkSize, chunkOverlap]
-      properties:
-        type: {type: string, enum: [FIXED, SEMANTIC, PARENT, HIERARCHICAL]}
-        chunkSize: {type: integer, minimum: 256, maximum: 1024}
-        chunkOverlap: {type: integer, minimum: 0, maximum: 256, description: 必须小于 chunkSize。}
-    EnhanceItemConfig:
-      type: object
-      additionalProperties: false
-      required: [enabled, language]
-      properties:
-        enabled: {type: boolean}
-        language: {type: string, enum: [AUTO, ZH, EN]}
-        maxLength: {type: integer, minimum: 50, maximum: 2000}
-        maxKeywords: {type: integer, minimum: 3, maximum: 10}
-        maxPairs: {type: integer, minimum: 1, maximum: 5}
-    EnhanceConfig:
-      type: object
-      additionalProperties: false
-      required: [summary, keywords, faq]
-      properties:
-        summary: {$ref: '#/components/schemas/EnhanceItemConfig'}
-        keywords: {$ref: '#/components/schemas/EnhanceItemConfig'}
-        faq: {$ref: '#/components/schemas/EnhanceItemConfig'}
-    EmbeddingConfig:
-      type: object
-      additionalProperties: false
-      required: [model]
-      properties: {model: {type: string, enum: [BGE_M3, TEXT_EMBEDDING_3_LARGE, VOYAGE_3, QWEN]}}
-    VectorStoreConfig:
-      type: object
-      additionalProperties: false
-      required: [backend, resourceId]
-      properties:
-        backend: {type: string, enum: [MILVUS, PGVECTOR], description: PGVECTOR 保留入口，当前 available=false。}
-        resourceId: {type: string, minLength: 1, maxLength: 128}
-    RerankConfig:
-      type: object
-      additionalProperties: false
-      required: [enabled, topN]
-      properties:
-        enabled: {type: boolean}
-        topN: {type: integer, minimum: 1, maximum: 50, description: 必须不大于 topK。}
-    RetrievalConfig:
-      type: object
-      additionalProperties: false
-      required: [strategy, topK, rerank]
-      properties:
-        strategy: {type: string, enum: [VECTOR, HYBRID, AGENTIC]}
-        topK: {type: integer, minimum: 1, maximum: 100}
-        rerank: {$ref: '#/components/schemas/RerankConfig'}
-    BusinessPipelineConfig:
-      type: object
-      additionalProperties: false
-      required: [parser, chunking, enhance, embedding, vectorStore, retrieval]
-      properties:
-        parser: {$ref: '#/components/schemas/ParserConfig'}
-        chunking: {$ref: '#/components/schemas/ChunkingConfig'}
-        enhance: {$ref: '#/components/schemas/EnhanceConfig'}
-        embedding: {$ref: '#/components/schemas/EmbeddingConfig'}
-        vectorStore: {$ref: '#/components/schemas/VectorStoreConfig'}
-        retrieval: {$ref: '#/components/schemas/RetrievalConfig'}
-    DocumentStageOverride:
-      type: object
-      additionalProperties: false
-      minProperties: 1
-      properties:
-        parser: {$ref: '#/components/schemas/ParserConfig'}
-        chunking: {$ref: '#/components/schemas/ChunkingConfig'}
-        enhance: {$ref: '#/components/schemas/EnhanceConfig'}
-    BatchDocumentStageConfigRequest:
-      type: object
-      additionalProperties: false
-      required: [documentIds, stageOverride]
-      properties:
-        documentIds: {type: array, minItems: 1, maxItems: 200, uniqueItems: true, items: {type: integer, format: int64, minimum: 1}}
-        stageOverride: {$ref: '#/components/schemas/DocumentStageOverride'}
-    KnowledgeTag:
-      type: object
-      additionalProperties: false
-      required: [tagId, name]
-      properties:
-        tagId: {type: string, minLength: 1, maxLength: 128}
-        name: {type: string, minLength: 1, maxLength: 64}
-    CreateKnowledgeTagRequest:
-      type: object
-      additionalProperties: false
-      required: [name]
-      properties:
-        name: {type: string, minLength: 1, maxLength: 64}
-    KnowledgeTagList:
-      type: array
-      items: {$ref: '#/components/schemas/KnowledgeTag'}
-    CreateKnowledgeBaseRequest:
-      type: object
-      additionalProperties: false
-      required: [directoryId, name, visibility, pipelineConfig]
-      properties:
-        directoryId: {type: integer, format: int64, minimum: 1}
-        name: {type: string, minLength: 1, maxLength: 255}
-        description: {type: [string, 'null'], maxLength: 512}
-        recommendedConfig: {type: boolean, default: true}
-        tags: {type: array, maxItems: 20, items: {$ref: '#/components/schemas/KnowledgeTag'}}
-        visibility: {type: string, enum: [PRIVATE, PUBLIC]}
-        pipelineConfig: {$ref: '#/components/schemas/BusinessPipelineConfig'}
-    UpdateKnowledgeBaseRequest:
-      type: object
-      additionalProperties: false
-      minProperties: 1
-      properties:
-        name: {type: string, minLength: 1, maxLength: 255}
-        description: {type: [string, 'null'], maxLength: 4000}
-        tags: {type: array, maxItems: 20, uniqueItems: true, items: {type: string, minLength: 1, maxLength: 64}}
-        visibility: {type: string, enum: [PRIVATE, PUBLIC]}
-    UpdatePipelineConfigRequest:
-      type: object
-      additionalProperties: false
-      minProperties: 1
-      description: P0 禁止修改 embedding 和 vectorStore。
-      properties:
-        parser: {$ref: '#/components/schemas/ParserConfig'}
-        chunking: {$ref: '#/components/schemas/ChunkingConfig'}
-        enhance: {$ref: '#/components/schemas/EnhanceConfig'}
-        retrieval: {$ref: '#/components/schemas/RetrievalConfig'}
-    EffectiveConfigSummary:
-      type: object
-      additionalProperties: false
-      required: [businessConfig, managedProfiles, embedding, vectorStore, configFingerprint]
-      properties:
-        businessConfig: {$ref: '#/components/schemas/BusinessPipelineConfig'}
-        managedProfiles: {type: object, additionalProperties: {type: string}}
-        embedding:
-          type: object
-          required: [model, dimension, fingerprint]
-          properties:
-            model: {type: string}
-            modelVersionLabel: {type: string}
-            dimension: {type: integer, minimum: 1}
-            fingerprint: {type: string}
-        vectorStore:
-          type: object
-          required: [backend, resourceId, resourceName, available]
-          properties:
-            backend: {type: string, enum: [MILVUS, PGVECTOR]}
-            resourceId: {type: string}
-            resourceName: {type: string}
-            available: {type: boolean}
-            metricLabel: {type: string}
-        configFingerprint: {type: string, minLength: 16, maxLength: 128}
-    KnowledgeBaseSummary:
-      type: object
-      required: [knowledgeBaseId, directoryId, name, visibility, status, recommendedConfig, tags, pipelineConfig, createdAt]
-      properties:
-        knowledgeBaseId: {type: string, minLength: 1}
-        directoryId: {type: string, minLength: 1}
-        name: {type: string}
-        description: {type: [string, 'null']}
-        visibility: {type: string, enum: [PRIVATE, PUBLIC]}
-        status: {$ref: '#/components/schemas/KnowledgeBaseStatus'}
-        recommendedConfig: {type: boolean}
-        tags: {type: array, items: {$ref: '#/components/schemas/KnowledgeTag'}}
-        pipelineConfig: {type: object, additionalProperties: true}
-        version: {type: integer, minimum: 1}
-        documentCount: {type: integer, minimum: 0}
-        liveDocumentCount: {type: integer, minimum: 0}
-        buildingDocumentCount: {type: integer, minimum: 0}
-        retrievalReady: {type: boolean}
-        vectorCollection: {type: [string, 'null']}
-        vectorDimension: {type: [integer, 'null'], minimum: 1}
-        lastBuildAt: {type: [string, 'null'], format: date-time}
-        createdAt: {type: string, format: date-time}
-        updatedAt: {type: [string, 'null'], format: date-time}
-    KnowledgeBaseStats:
-      type: object
-      required: [knowledgeBaseId, documentCount, chunkCount, vectorCount, retrievalReady, scopeStatus, documentStatusBreakdown, chunkEmbedStatusBreakdown]
-      properties:
-        knowledgeBaseId: {type: string, minLength: 1}
-        documentCount: {type: integer, minimum: 0}
-        liveDocumentCount: {type: integer, minimum: 0}
-        chunkCount: {type: integer, minimum: 0}
-        vectorCount: {type: integer, minimum: 0}
-        retrievalReady: {type: boolean}
-        scopeStatus: {type: string}
-        documentStatusBreakdown: {type: object, additionalProperties: {type: integer, minimum: 0}}
-        chunkEmbedStatusBreakdown: {type: object, additionalProperties: {type: integer, minimum: 0}}
-        activeGeneration: {}
-    KnowledgeBaseDetail:
-      allOf:
-        - {$ref: '#/components/schemas/KnowledgeBaseSummary'}
-        - type: object
-          required: [stats, contentSummary, build, capabilities]
-          properties:
-            stats: {type: object, additionalProperties: true}
-            contentSummary: {type: array, items: {type: string}}
-            build: {type: object, additionalProperties: true}
-            capabilities: {type: array, items: {type: object, additionalProperties: true}}
-    PipelineCapability:
-      type: object
-      additionalProperties: false
-      required: [value, label, available, editableFields]
-      properties:
-        value: {type: string}
-        label: {type: string}
-        available: {type: boolean}
-        reason: {type: string}
-        editableFields: {type: array, items: {type: string}}
-        defaultValue: {}
-        constraints: {type: object, additionalProperties: true}
-    PipelineOptions:
-      type: object
-      additionalProperties: false
-      required: [schemaVersion, parser, chunking, enhance, embedding, vectorStore, retrieval]
-      properties:
-        schemaVersion: {type: string}
-        parser: {type: array, items: {$ref: '#/components/schemas/PipelineCapability'}}
-        chunking: {type: array, items: {$ref: '#/components/schemas/PipelineCapability'}}
-        enhance: {type: array, items: {$ref: '#/components/schemas/PipelineCapability'}}
-        embedding: {type: array, items: {$ref: '#/components/schemas/PipelineCapability'}}
-        vectorStore: {type: array, items: {$ref: '#/components/schemas/PipelineCapability'}}
-        retrieval: {type: array, items: {$ref: '#/components/schemas/PipelineCapability'}}
-    PipelineUpdateResult:
-      type: object
-      required: [knowledgeBaseId, pipelineConfig, updatedAt]
-      properties:
-        knowledgeBaseId: {type: string}
-        pipelineConfig: {type: object, additionalProperties: true}
-        updatedAt: {type: string, format: date-time}
-    SourceAccessGrant:
-      type: object
-      additionalProperties: false
-      required: [grantId, accessUrl, expiresAt, audience, maxUses]
-      properties:
-        grantId: {type: string, minLength: 1, maxLength: 256}
-        accessUrl: {type: string, format: uri, maxLength: 4096, writeOnly: true}
-        expiresAt: {type: string, format: date-time}
-        audience: {type: string, const: grc-knowledge-engine}
-        maxUses: {type: integer, const: 1}
-    PageRange:
-      type: object
-      additionalProperties: false
-      required: [start, end]
-      properties:
-        start: {type: integer, minimum: 1}
-        end: {type: integer, minimum: 1}
-    CreateKnowledgeDocumentRequest:
-      type: object
-      additionalProperties: false
-      required: [fileName, sourceType, fileId, docType]
-      properties:
-        fileName: {type: string, minLength: 1, maxLength: 512}
-        sourceType: {type: string, minLength: 1}
-        fileId: {type: integer, format: int64}
-        docType: {type: string, minLength: 1}
-        sourceMeta: {type: object, additionalProperties: true}
-        stageOverrides: {type: object, additionalProperties: true}
-    KnowledgeDocumentCreateResult:
-      type: object
-      required: [documentId, jobId, status]
-      properties:
-        documentId: {type: string}
-        jobId: {type: string}
-        status: {type: string}
-    DocumentImportItem:
-      type: object
-      additionalProperties: false
-      required: [clientItemId, fileId, fileName, mediaType, byteSize, contentHash, sourceAccessGrant]
-      properties:
-        clientItemId: {type: string, minLength: 1, maxLength: 128}
-        fileId: {type: string, minLength: 1, maxLength: 256}
-        fileName: {type: string, minLength: 1, maxLength: 255}
-        mediaType: {type: string, minLength: 1, maxLength: 255}
-        byteSize: {type: integer, minimum: 1, maximum: 41943040}
-        contentHash: {type: string, pattern: '^sha256:[a-fA-F0-9]{64}$'}
-        sourceAccessGrant: {$ref: '#/components/schemas/SourceAccessGrant'}
-        pageRange: {oneOf: [{$ref: '#/components/schemas/PageRange'}, {type: 'null'}]}
-    DocumentImportRequest:
-      type: object
-      additionalProperties: false
-      required: [sourceType, items, duplicatePolicy, autoBuild]
-      properties:
-        sourceType: {type: string, enum: [FILE, CONFLUENCE, SHAREPOINT, ONEDRIVE, S3, AZURE_BLOB]}
-        items: {type: array, minItems: 1, maxItems: 200, items: {$ref: '#/components/schemas/DocumentImportItem'}}
-        duplicatePolicy: {type: string, enum: [REJECT, OVERWRITE]}
-        autoBuild: {type: boolean}
-        documentOverride: {oneOf: [{$ref: '#/components/schemas/DocumentStageOverride'}, {type: 'null'}]}
-    DocumentImportItemResult:
-      type: object
-      additionalProperties: false
-      required: [clientItemId, status]
-      properties:
-        clientItemId: {type: string}
-        documentId: {type: integer, format: int64, minimum: 1}
-        status: {type: string, enum: [ACCEPTED, REJECTED]}
-        reason: {type: string}
-        errorCode: {type: string}
-    DocumentImportResult:
-      type: object
-      additionalProperties: false
-      required: [operationId, accepted, rejected]
-      properties:
-        operationId: {type: string, format: uuid}
-        batchJobId: {type: integer, format: int64, minimum: 1}
-        accepted: {type: array, items: {$ref: '#/components/schemas/DocumentImportItemResult'}}
-        rejected: {type: array, items: {$ref: '#/components/schemas/DocumentImportItemResult'}}
-    BuildStageStatus:
-      type: object
-      additionalProperties: false
-      required: [stage, status, attempt]
-      properties:
-        stage: {$ref: '#/components/schemas/BuildStage'}
-        status: {type: string, enum: [PENDING, RUNNING, SUCCEEDED, FAILED, SKIPPED, CANCELLED]}
-        attempt: {type: integer, minimum: 0}
-        startedAt: {type: [string, 'null'], format: date-time}
-        finishedAt: {type: [string, 'null'], format: date-time}
-        errorCode: {type: [string, 'null']}
-    DocumentSummary:
-      type: object
-      required: [documentId, fileName, sourceType, status, retrievalReady]
-      properties:
-        documentId: {type: string, minLength: 1}
-        knowledgeBaseId: {type: string, minLength: 1}
-        kbId: {type: string, minLength: 1}
-        fileName: {type: string}
-        docType: {type: [string, 'null']}
-        parseStatus: {type: [string, 'null']}
-        parseState: {type: [string, 'null']}
-        chunkStatus: {type: [string, 'null']}
-        embeddingStatus: {type: [string, 'null']}
-        update: {type: object, additionalProperties: true}
-        meta: {type: object, additionalProperties: true}
-        sourceType: {type: string}
-        sourcePath: {type: [string, 'null']}
-        sourceUrl: {type: [string, 'null'], format: uri}
-        status: {type: string}
-        currentJobId: {type: [string, 'null']}
-        liveJobId: {type: [string, 'null']}
-        currentJobStatus: {type: [string, 'null']}
-        liveJobStatus: {type: [string, 'null']}
-        retrievalReady: {type: boolean}
-        createdAt: {type: [string, 'null'], format: date-time}
-        updatedAt: {type: [string, 'null'], format: date-time}
-    DocumentProjection:
-      type: object
-      additionalProperties: false
-      required: [projectionId, documentVersionId, state, keywords, inputSetHash, createdAt]
-      properties:
-        projectionId: {type: string, format: uuid}
-        documentVersionId: {type: string, format: uuid}
-        state: {type: string, enum: [READY, DISABLED, EMPTY, INVALIDATED]}
-        summary: {type: [string, 'null']}
-        keywords: {type: array, items: {type: string}}
-        inputSetHash: {type: string}
-        createdAt: {type: string, format: date-time}
-    DocumentDetail:
-      allOf:
-        - {$ref: '#/components/schemas/DocumentSummary'}
-        - type: object
-          required: [kbId]
-          properties:
-            kbId: {type: string, minLength: 1}
-    BoundingBox:
-      type: object
-      additionalProperties: false
-      required: [x, y, width, height]
-      properties:
-        x: {type: number}
-        y: {type: number}
-        width: {type: number, minimum: 0}
-        height: {type: number, minimum: 0}
-    AssetSummary:
-      type: object
-      additionalProperties: false
-      required: [assetId, assetType, sourceElementId, mediaType, descriptionStatus, availableRenditions, accessStatus]
-      properties:
-        assetId: {type: string, format: uuid}
-        assetType: {type: string, enum: [IMAGE, CHART, TABLE_RENDER, ILLUSTRATION, ATTACHMENT]}
-        sourceElementId: {type: string, format: uuid}
-        mediaType: {type: string}
-        width: {type: [integer, 'null'], minimum: 1}
-        height: {type: [integer, 'null'], minimum: 1}
-        pageIndex: {type: [integer, 'null'], minimum: 1}
-        bbox: {oneOf: [{$ref: '#/components/schemas/BoundingBox'}, {type: 'null'}]}
-        caption: {type: [string, 'null']}
-        descriptionStatus: {type: string, enum: [READY, SKIPPED, FAILED]}
-        availableRenditions: {type: array, items: {type: string, enum: [ORIGINAL, THUMBNAIL, PREVIEW]}}
-        accessStatus: {type: string, enum: [AVAILABLE, GONE, FORBIDDEN]}
-    DocumentParseView:
-      type: object
-      required: [knowledgeBaseId, documentId, pageCount, charCount, metadata, content, stats]
-      properties:
-        knowledgeBaseId: {type: string, minLength: 1}
-        documentId: {type: string, minLength: 1}
-        jobId: {type: [string, 'null']}
-        parseId: {type: [string, 'null']}
-        contentFormat: {type: [string, 'null']}
-        pageCount: {type: integer, minimum: 0}
-        charCount: {type: integer, minimum: 0}
-        metadata: {type: object, additionalProperties: true}
-        content: {}
-        stats: {type: object, additionalProperties: true}
-        createdAt: {type: [string, 'null'], format: date-time}
-    PageParseElement:
-      type: object
-      additionalProperties: false
-      required: [elementId, elementType, content, page]
-      properties:
-        elementId: {type: string, format: uuid}
-        elementType: {type: string, enum: [TITLE, PARAGRAPH, LIST, TABLE, FORMULA, IMAGE, CHART, HEADER, FOOTER, OTHER]}
-        content: {type: string}
-        page: {type: integer, minimum: 1}
-        bbox: {oneOf: [{$ref: '#/components/schemas/BoundingBox'}, {type: 'null'}]}
-        assetId: {type: [string, 'null'], format: uuid}
-    PageParseContent:
-      type: object
-      additionalProperties: false
-      required: [contentAction, elements]
-      properties:
-        markdown: {type: [string, 'null'], description: 体量允许时可内联返回；否则为 null 并通过 contentAction 获取。}
-        contentAction: {$ref: '#/components/schemas/ContentAction'}
-        elements: {type: array, items: {$ref: '#/components/schemas/PageParseElement'}}
-    PageSummaryAndTags:
-      type: object
-      additionalProperties: false
-      required: [summary, keywords]
-      properties:
-        summary: {type: [string, 'null']}
-        keywords: {type: array, items: {type: string, maxLength: 256}}
-    PageParseInfo:
-      type: object
-      additionalProperties: false
-      required: [documentVersionId, parserFingerprint, pageCount, hasPageLayout]
-      properties:
-        documentVersionId: {type: string, format: uuid}
-        parserFingerprint: {type: string, minLength: 1, maxLength: 512}
-        pageCount: {type: integer, minimum: 0}
-        hasPageLayout: {type: boolean}
-    DocumentPageWorkspace:
-      type: object
-      additionalProperties: false
-      required: [page, parseContent, chunks, summaryAndTags, parseInfo]
-      properties:
-        page: {type: integer, minimum: 1}
-        parseContent: {$ref: '#/components/schemas/PageParseContent'}
-        chunks:
-          type: array
-          description: 与该页有来源位置交集的 active DocumentVersion Leaf Chunk；父 Chunk 通过 parentContext 返回。
-          items: {$ref: '#/components/schemas/ChunkDetail'}
-        summaryAndTags: {$ref: '#/components/schemas/PageSummaryAndTags'}
-        parseInfo: {$ref: '#/components/schemas/PageParseInfo'}
-    ContentAction:
-      type: object
-      additionalProperties: false
-      required: [mediaType, contentHash, action]
-      properties:
-        mediaType: {type: string}
-        contentHash: {type: string}
-        action: {type: string}
-    OutlineItem:
-      type: object
-      additionalProperties: false
-      required: [title, level]
-      properties:
-        title: {type: string}
-        level: {type: integer, minimum: 1, maximum: 32}
-        elementId: {type: string, format: uuid}
-    ParentContext:
-      type: object
-      additionalProperties: false
-      required: [content, sectionPath]
-      properties:
-        content: {type: string}
-        sectionPath: {type: array, maxItems: 32, items: {type: string}}
-    NeighborChunk:
-      type: object
-      additionalProperties: false
-      required: [chunkId, sequence, content]
-      properties:
-        chunkId: {type: string, format: uuid}
-        sequence: {type: integer, minimum: 0}
-        content: {type: string}
-    ChunkDetail:
-      type: object
-      required: [chunkId, seq, content, tokenCount, charCount, positionMeta, metadata]
-      properties:
-        chunkId: {type: string, format: uuid}
-        knowledgeBaseId: {type: string}
-        documentId: {type: string}
-        jobId: {type: [string, 'null']}
-        seq: {type: integer, minimum: 0}
-        content: {type: string, minLength: 1, maxLength: 1000000}
-        tokenCount: {type: integer, minimum: 0}
-        charCount: {type: integer, minimum: 0}
-        embedStatus: {type: [string, 'null']}
-        parentId: {type: [string, 'null'], format: uuid}
-        positionMeta: {type: [object, 'null'], additionalProperties: true}
-        sourceSnippet: {type: [string, 'null']}
-        snippetStart: {type: [integer, 'null'], minimum: 0}
-        snippetEnd: {type: [integer, 'null'], minimum: 0}
-        metadata: {type: object, additionalProperties: true}
-        createdAt: {type: [string, 'null'], format: date-time}
-        updatedAt: {type: [string, 'null'], format: date-time}
-    UpdateChunkRequest:
-      type: object
-      additionalProperties: false
-      required: [content]
-      properties:
-        content: {type: string, minLength: 1, maxLength: 1000000}
-        metadata:
-          type: object
+        type:
+          type: string
+          title: Type
+        options:
           additionalProperties: true
-          description: 仅允许业务注释；documentVersionId、generationId、contentHash、页码、定位框等系统追溯字段不可覆盖。
-    ChunkMutationResult:
-      type: object
+          type: object
+          title: Options
       additionalProperties: false
-      required: [chunkId, content, newDocumentVersionId, jobId, rerunStages, tokenCount, droppedAssetRelations]
+      type: object
+      required:
+        - type
+      title: AdapterConfig
+    BatchDocumentsRequest:
       properties:
-        chunkId: {type: string, format: uuid}
-        content: {type: string, minLength: 1, maxLength: 1000000}
-        newDocumentVersionId: {type: string, format: uuid}
-        jobId: {type: integer, format: int64, minimum: 1}
-        rerunStages: {type: array, items: {$ref: '#/components/schemas/BuildStage'}}
-        tokenCount: {type: integer, minimum: 1}
-        droppedAssetRelations: {type: array, items: {type: string, format: uuid}}
-    EnhancementItem:
-      type: object
-      required: [artifactId, chunkId, chunkSeq, artifactType, content, metadata]
-      properties:
-        artifactId: {type: string, format: uuid}
-        chunkId: {type: string, format: uuid}
-        chunkSeq: {type: integer, minimum: 0}
-        chunkContent: {type: [string, 'null']}
-        artifactType: {type: string}
-        content: {}
-        embedStatus: {type: [string, 'null']}
-        metadata: {type: object, additionalProperties: true}
-        createdAt: {type: [string, 'null'], format: date-time}
-    StageRunRequest:
-      type: object
-      properties:
-        stageConfig: {type: object, additionalProperties: true}
-        persist: {type: boolean, default: false}
-    CreateBuildJobRequest:
-      type: object
-      additionalProperties: false
-      allOf:
-        - if:
-            properties: {scope: {const: SELECTED}}
-          then:
-            required: [documentIds]
-            properties: {documentIds: {minItems: 1}}
-      properties:
-        documentIds: {type: array, maxItems: 200, uniqueItems: true, items: {type: integer, format: int64, minimum: 1}}
-        scope: {type: string, enum: [SELECTED, ALL_FAILED, ALL], default: SELECTED}
-        runMode: {type: string, enum: [AUTO, STAGED], default: AUTO}
-        fromStage: {$ref: '#/components/schemas/BuildStage'}
-        documentOverride: {$ref: '#/components/schemas/DocumentStageOverride'}
-        pageRange: {$ref: '#/components/schemas/PageRange'}
-    BuildFailure:
-      type: object
-      additionalProperties: false
-      required: [code, reason, retryable]
-      properties:
-        code: {type: string}
-        reason: {type: string}
-        retryable: {type: boolean}
-        failedStage: {oneOf: [{$ref: '#/components/schemas/BuildStage'}, {type: 'null'}]}
-        detail: {type: string}
-    BuildJobSummary:
-      type: object
-      required: [jobId, knowledgeBaseId, generationId, status, totalDocuments, completedDocuments, failedDocuments, progress, createdAt]
-      properties:
-        jobId: {type: integer, format: int64, minimum: 1}
-        knowledgeBaseId: {type: integer, format: int64, minimum: 1}
-        generationId: {type: string, format: uuid}
-        status: {type: string, enum: [QUEUED, RUNNING, SUCCEEDED, PARTIAL, FAILED, CANCELLED]}
-        totalDocuments: {type: integer, minimum: 0}
-        completedDocuments: {type: integer, minimum: 0}
-        failedDocuments: {type: integer, minimum: 0}
-        progress: {type: number, minimum: 0, maximum: 1}
-        createdAt: {type: string, format: date-time}
-        finishedAt: {type: [string, 'null'], format: date-time}
-    BuildJob:
-      unevaluatedProperties: false
-      allOf:
-        - {$ref: '#/components/schemas/BuildJobSummary'}
-        - type: object
-          required: [documentVersionIds, stages]
-          properties:
-            documentVersionIds: {type: array, maxItems: 200, items: {type: string, format: uuid}}
-            stages: {type: array, items: {$ref: '#/components/schemas/BuildStageStatus'}}
-            latestFailure: {oneOf: [{$ref: '#/components/schemas/BuildFailure'}, {type: 'null'}]}
-    RetrievalFilters:
-      type: object
-      additionalProperties: false
-      properties:
-        mediaTypes: {type: array, maxItems: 20, items: {type: string}}
-        sourceTypes: {type: array, maxItems: 20, items: {type: string}}
-        tags: {type: array, maxItems: 20, items: {type: string}}
-    RetrievalOptions:
-      type: object
-      additionalProperties: false
-      properties:
-        hydrate: {type: boolean, default: true}
-        expandParent: {type: boolean, default: true}
-        includeMetadata: {type: boolean, default: true}
-    RetrievalRequest:
-      type: object
-      additionalProperties: false
-      required: [query, knowledgeBaseIds]
-      properties:
-        query: {type: string, minLength: 1, maxLength: 8000}
-        knowledgeBaseIds: {type: array, minItems: 1, maxItems: 5, uniqueItems: true, items: {type: integer, format: int64, minimum: 1}}
-        documentIds: {type: array, maxItems: 200, uniqueItems: true, items: {type: integer, format: int64, minimum: 1}}
-        topK: {type: integer, minimum: 1, maximum: 100, default: 10}
-        strategy: {type: string, enum: [VECTOR, HYBRID, AGENTIC]}
-        filters: {$ref: '#/components/schemas/RetrievalFilters'}
-        rerank: {$ref: '#/components/schemas/RerankConfig'}
-        options: {$ref: '#/components/schemas/RetrievalOptions'}
-    OpenRetrievalRequest:
-      type: object
-      additionalProperties: false
-      required: [query]
-      description: PAT 资源范围来自 scope；此 schema 故意不定义 knowledgeBaseIds/documentIds。
-      properties:
-        query: {type: string, minLength: 1, maxLength: 8000}
-        topK: {type: integer, minimum: 1, maximum: 100, default: 10}
-        strategy: {type: string, enum: [VECTOR, HYBRID, AGENTIC]}
-        filters: {$ref: '#/components/schemas/RetrievalFilters'}
-        rerank: {$ref: '#/components/schemas/RerankConfig'}
-        options: {$ref: '#/components/schemas/RetrievalOptions'}
-    Score:
-      type: object
-      additionalProperties: false
-      required: [value, type, comparableScope]
-      properties:
-        value: {type: number, description: 原始小数，不是百分比或置信度。}
-        type: {type: string, enum: [VECTOR_SIMILARITY, RERANK, RANK_FUSION]}
-        comparableScope: {type: string, enum: [REQUEST, SAME_FINGERPRINT_ONLY]}
-        sourceSimilarity: {type: number, description: 仅同 embedding fingerprint 范围可比较。}
-    EvidenceLocation:
-      type: object
-      additionalProperties: false
-      required: [sectionPath, bboxes]
-      properties:
-        sectionPath: {type: array, maxItems: 32, items: {type: string}}
-        pageRange: {oneOf: [{$ref: '#/components/schemas/PageRange'}, {type: 'null'}]}
-        bboxes: {type: array, items: {$ref: '#/components/schemas/BoundingBox'}}
-    AssetEvidence:
-      type: object
-      additionalProperties: false
-      required: [assetId, assetType, rendition, altText, accessStatus]
-      properties:
-        assetId: {type: string, format: uuid}
-        assetType: {type: string}
-        rendition: {type: string, enum: [ORIGINAL, THUMBNAIL, PREVIEW]}
-        altText: {type: string, maxLength: 4000}
-        accessStatus: {type: string, enum: [AVAILABLE, GONE, FORBIDDEN]}
-        accessAction: {type: [string, 'null']}
-    Evidence:
-      type: object
-      additionalProperties: false
-      required: [evidenceId, rank, knowledgeBase, document, hit, context, location, score, assets, citation]
-      properties:
-        evidenceId: {type: string, format: uuid}
-        rank: {type: integer, minimum: 1}
-        knowledgeBase: {$ref: '#/components/schemas/EvidenceKnowledgeBase'}
-        document: {$ref: '#/components/schemas/EvidenceDocument'}
-        hit: {$ref: '#/components/schemas/EvidenceHit'}
-        context: {$ref: '#/components/schemas/EvidenceContext'}
-        location: {$ref: '#/components/schemas/EvidenceLocation'}
-        score: {$ref: '#/components/schemas/Score'}
-        assets: {type: array, items: {$ref: '#/components/schemas/AssetEvidence'}}
-        citation: {$ref: '#/components/schemas/Citation'}
-    EvidenceKnowledgeBase:
-      type: object
-      additionalProperties: false
-      required: [id, name]
-      properties: {id: {type: integer, format: int64}, name: {type: string}}
-    EvidenceDocument:
-      type: object
-      additionalProperties: false
-      required: [id, versionId, name, mimeType]
-      properties:
-        id: {type: integer, format: int64}
-        versionId: {type: string, format: uuid}
-        name: {type: string}
-        mimeType: {type: string}
-    EvidenceHit:
-      type: object
-      additionalProperties: false
-      required: [chunkId, content, sequence]
-      properties:
-        chunkId: {type: string, format: uuid}
-        content: {type: string}
-        sequence: {type: integer, minimum: 0}
-    EvidenceContext:
-      type: object
-      additionalProperties: false
-      required: [neighbors]
-      properties:
-        parent: {oneOf: [{$ref: '#/components/schemas/ParentContext'}, {type: 'null'}]}
-        neighbors: {type: array, maxItems: 10, items: {$ref: '#/components/schemas/NeighborChunk'}}
-    Citation:
-      type: object
-      additionalProperties: false
-      required: [label]
-      properties:
-        label: {type: string, minLength: 1, maxLength: 512}
-        openOriginalAction: {type: [string, 'null']}
-    RetrievalResult:
-      type: object
-      required: [results, retrievalMeta]
-      properties:
-        results:
-          type: array
-          maxItems: 100
-          items: {type: object, additionalProperties: true}
-        retrievalMeta: {type: object, additionalProperties: true}
-    PurgeOperation:
-      type: object
-      additionalProperties: false
-      required: [visible, purgeStatus, operationId, resourceType, resourceId, startedAt]
-      properties:
-        visible: {type: boolean, const: false}
-        purgeStatus: {$ref: '#/components/schemas/PurgeStatus'}
-        operationId: {type: string, format: uuid}
-        resourceType: {type: string, enum: [KNOWLEDGE_BASE, DOCUMENT, CHUNK, GENERATION]}
-        resourceId: {type: string, minLength: 1, maxLength: 128}
-        startedAt: {type: string, format: date-time}
-        finishedAt: {type: [string, 'null'], format: date-time}
-        lastErrorCode: {type: [string, 'null']}
-        nextAttemptAt: {type: [string, 'null'], format: date-time}
-    CreateAccessUrlRequest:
-      type: object
-      additionalProperties: false
-      properties: {ttlSeconds: {type: integer, minimum: 30, maximum: 900, default: 300}}
-    AccessUrl:
-      type: object
-      additionalProperties: false
-      required: [url, mediaType, expiresAt, reusable]
-      properties:
-        url: {type: string, format: uri}
-        mediaType: {type: string}
-        fileName: {type: string}
-        expiresAt: {type: string, format: date-time}
-        reusable: {type: boolean, const: false}
-    CreateArtifactAccessUrlsRequest:
-      type: object
-      additionalProperties: false
-      required: [items]
-      properties:
-        items:
-          type: array
-          minItems: 1
-          maxItems: 100
+        stageConfig:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Stageconfig
+        sources:
           items:
-            type: object
-            additionalProperties: false
-            required: [assetId, rendition]
-            properties:
-              assetId: {type: string, format: uuid}
-              rendition: {type: string, enum: [ORIGINAL, THUMBNAIL, PREVIEW]}
-        ttlSeconds: {type: integer, minimum: 30, maximum: 900, default: 300}
-    ArtifactAccessUrlItem:
-      type: object
+            $ref: '#/components/schemas/SourceItem'
+          type: array
+          maxItems: 200
+          minItems: 1
+          title: Sources
       additionalProperties: false
-      required: [assetId, rendition, status]
-      properties:
-        assetId: {type: string, format: uuid}
-        rendition: {type: string}
-        status: {type: string, enum: [AVAILABLE, GONE, FORBIDDEN]}
-        mediaType: {type: string}
-        url: {type: string, format: uri}
-        expiresAt: {type: string, format: date-time}
-        errorCode: {type: string}
-    OpenKnowledgeBase:
       type: object
-      additionalProperties: false
-      required: [knowledgeBaseId, name, description, documentCount, embeddingModel, dimensions]
+      required:
+        - sources
+      title: BatchDocumentsRequest
+    BatchUpdateDocumentStageConfigRequest:
       properties:
-        knowledgeBaseId: {type: integer, format: int64}
-        name: {type: string}
-        description: {type: [string, 'null']}
-        documentCount: {type: integer, minimum: 0}
-        embeddingModel: {type: string}
-        dimensions: {type: integer, minimum: 1}
-        lastBuildAt: {type: [string, 'null'], format: date-time}
-    OpenDocumentUpdateRequest:
-      type: object
-      additionalProperties: false
-      required: [sourceType, item, duplicatePolicy]
-      properties:
-        sourceType: {type: string, const: FILE}
-        item: {$ref: '#/components/schemas/DocumentImportItem'}
-        duplicatePolicy: {type: string, enum: [REJECT, OVERWRITE]}
-        documentOverride: {oneOf: [{$ref: '#/components/schemas/DocumentStageOverride'}, {type: 'null'}]}
-    Health:
-      type: object
-      additionalProperties: false
-      required: [status, service, version, mode]
-      properties:
-        status: {type: string, const: ok}
-        service: {type: string, const: grc-knowledge-engine}
-        version: {type: string}
-        mode: {type: string, const: MILVUS_ONLY}
-    DependencyCheck:
-      type: object
-      additionalProperties: false
-      required: [name, status]
-      properties:
-        name: {type: string, enum: [POSTGRESQL, SERVICE_BUS, MILVUS, PARSER, OBJECT_STORE]}
-        status: {type: string, enum: [UP, DOWN]}
-    Readiness:
-      type: object
-      additionalProperties: false
-      required: [status, ready, checks]
-      properties:
-        status: {type: string, enum: [ready, not_ready]}
-        ready: {type: boolean}
-        checks: {type: array, items: {$ref: '#/components/schemas/DependencyCheck'}}
-    PageKnowledgeBase:
-      type: object
-      required: [items, total, page, pageSize]
-      properties:
-        items: {type: array, items: {$ref: '#/components/schemas/KnowledgeBaseSummary'}}
-        total: {type: integer, minimum: 0}
-        page: {type: integer, minimum: 1}
-        pageSize: {type: integer, minimum: 1, maximum: 100}
-    PageDocument:
-      type: object
-      required: [knowledgeBaseId, items, total, page, pageSize]
-      properties:
-        knowledgeBaseId: {type: string, minLength: 1}
-        items: {type: array, items: {$ref: '#/components/schemas/DocumentSummary'}}
-        total: {type: integer, minimum: 0}
-        page: {type: integer, minimum: 1}
-        pageSize: {type: integer, minimum: 1, maximum: 100}
-    PageChunk:
-      type: object
-      required: [knowledgeBaseId, documentId, stats, items, total, page, pageSize]
-      properties:
-        knowledgeBaseId: {type: string, minLength: 1}
-        documentId: {type: string, minLength: 1}
-        jobId: {type: [string, 'null']}
-        stats: {type: object, additionalProperties: true}
-        items: {type: array, items: {$ref: '#/components/schemas/ChunkDetail'}}
-        total: {type: integer, minimum: 0}
-        page: {type: integer, minimum: 1}
-        pageSize: {type: integer, minimum: 1, maximum: 100}
-    PageEnhancement:
-      type: object
-      required: [knowledgeBaseId, documentId, enhanceType, items, stats, total, page, pageSize]
-      properties:
-        knowledgeBaseId: {type: string, minLength: 1}
-        documentId: {type: string, minLength: 1}
-        jobId: {type: [string, 'null']}
-        enhanceType: {type: string}
-        items: {type: array, items: {$ref: '#/components/schemas/EnhancementItem'}}
-        stats: {type: object, additionalProperties: true}
-        total: {type: integer, minimum: 0}
-        page: {type: integer, minimum: 1}
-        pageSize: {type: integer, minimum: 1, maximum: 100}
-    PageBuildJob:
-      type: object
-      required: [records, total, page, pageSize]
-      properties:
-        records: {type: array, items: {$ref: '#/components/schemas/BuildJobSummary'}}
-        total: {type: integer, minimum: 0}
-        page: {type: integer, minimum: 1}
-        pageSize: {type: integer, minimum: 1, maximum: 100}
-    PipelineOptionsEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataPipelineOptions'}]}
-    KnowledgeTagEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataKnowledgeTag'}]}
-    KnowledgeTagListEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataKnowledgeTagList'}]}
-    KnowledgeBaseEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataKnowledgeBase'}]}
-    KnowledgeBasePageEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataKnowledgeBasePage'}]}
-    KnowledgeBaseStatsEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataKnowledgeBaseStats'}]}
-    PipelineUpdateEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataPipelineUpdate'}]}
-    DocumentStageConfigUpdateEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataDocumentStageConfigUpdate'}]}
-    DocumentImportEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataDocumentImport'}]}
-    KnowledgeDocumentCreateEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataKnowledgeDocumentCreate'}]}
-    DocumentPageEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataDocumentPage'}]}
-    DocumentEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataDocument'}]}
-    ParseViewEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataParseView'}]}
-    PageWorkspaceEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataPageWorkspace'}]}
-    ChunkPageEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataChunkPage'}]}
-    ChunkEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataChunk'}]}
-    ChunkMutationEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataChunkMutation'}]}
-    EnhancementPageEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataEnhancementPage'}]}
-    BuildJobEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataBuildJob'}]}
-    StageRunEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataStageRun'}]}
-    BuildJobPageEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataBuildJobPage'}]}
-    RetrievalEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataRetrieval'}]}
-    PurgeEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataPurge'}]}
-    AccessUrlEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataAccessUrl'}]}
-    ArtifactAccessUrlsEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataArtifactUrls'}]}
-    OpenKnowledgeBaseEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataOpenKnowledgeBase'}]}
-    HealthEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataHealth'}]}
-    ReadinessEnvelope: {allOf: [{$ref: '#/components/schemas/SuccessBase'}, {$ref: '#/components/schemas/DataReadiness'}]}
-    DataPipelineOptions: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/PipelineOptions'}}}
-    DataKnowledgeTag: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/KnowledgeTag'}}}
-    DataKnowledgeTagList: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/KnowledgeTagList'}}}
-    DataKnowledgeBase: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/KnowledgeBaseDetail'}}}
-    DataKnowledgeBasePage: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/PageKnowledgeBase'}}}
-    DataKnowledgeBaseStats: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/KnowledgeBaseStats'}}}
-    DataPipelineUpdate: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/PipelineUpdateResult'}}}
-    DataDocumentStageConfigUpdate:
-      type: object
-      required: [data]
-      properties:
-        data:
+        stageConfig:
+          additionalProperties: true
           type: object
-          required: [pipelineConfig, updatedAt]
-          properties:
-            pipelineConfig: {type: object, additionalProperties: true}
-            updatedAt: {type: string, format: date-time}
-    DataDocumentImport: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/DocumentImportResult'}}}
-    DataKnowledgeDocumentCreate: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/KnowledgeDocumentCreateResult'}}}
-    DataDocumentPage: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/PageDocument'}}}
-    DataDocument: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/DocumentDetail'}}}
-    DataParseView: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/DocumentParseView'}}}
-    DataPageWorkspace: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/DocumentPageWorkspace'}}}
-    DataChunkPage: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/PageChunk'}}}
-    DataChunk: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/ChunkDetail'}}}
-    DataChunkMutation: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/ChunkMutationResult'}}}
-    DataEnhancementPage: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/PageEnhancement'}}}
-    DataBuildJob: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/BuildJob'}}}
-    DataStageRun:
+          title: Stageconfig
+        docIds:
+          items:
+            type: integer
+          type: array
+          maxItems: 200
+          minItems: 1
+          title: Docids
+      additionalProperties: false
       type: object
-      required: [data]
+      required:
+        - stageConfig
+        - docIds
+      title: BatchUpdateDocumentStageConfigRequest
+    CreateKnowledgeBaseRequest:
       properties:
-        data:
+        directoryId:
+          type: integer
+          minimum: 1
+          title: Directoryid
+        name:
+          type: string
+          maxLength: 255
+          minLength: 1
+          title: Name
+        description:
+          anyOf:
+            - type: string
+              maxLength: 512
+            - type: 'null'
+          title: Description
+        visibility:
+          type: string
+          minLength: 1
+          title: Visibility
+        recommendedConfig:
+          type: boolean
+          title: Recommendedconfig
+          default: true
+        tags:
+          items:
+            $ref: '#/components/schemas/KnowledgeTagRequest'
+          type: array
+          maxItems: 20
+          title: Tags
+        pipelineConfig:
+          $ref: '#/components/schemas/PipelineConfig'
+        metadata:
+          additionalProperties: true
           type: object
-          properties:
-            pipelineJobId: {type: string}
-            previousJobId: {type: [string, 'null']}
-            isNewJob: {type: boolean}
-            stageStatus: {type: string}
-            runMode: {type: string}
-    DataBuildJobPage: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/PageBuildJob'}}}
-    DataRetrieval: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/RetrievalResult'}}}
-    DataPurge: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/PurgeOperation'}}}
-    DataAccessUrl: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/AccessUrl'}}}
-    DataArtifactUrls:
+          title: Metadata
+      additionalProperties: false
       type: object
-      required: [data]
+      required:
+        - directoryId
+        - name
+        - visibility
+        - pipelineConfig
+      title: CreateKnowledgeBaseRequest
+    CreateKnowledgeTagRequest:
       properties:
-        data:
+        name:
+          type: string
+          maxLength: 64
+          minLength: 1
+          title: Name
+      additionalProperties: false
+      type: object
+      required:
+        - name
+      title: CreateKnowledgeTagRequest
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    KnowledgeTagRequest:
+      properties:
+        tagId:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Tagid
+        name:
+          type: string
+          maxLength: 64
+          minLength: 1
+          title: Name
+      additionalProperties: false
+      type: object
+      required:
+        - name
+      title: KnowledgeTagRequest
+    PipelineConfig:
+      properties:
+        parser:
+          $ref: '#/components/schemas/AdapterConfig'
+        chunking:
+          $ref: '#/components/schemas/AdapterConfig'
+        enhance:
+          items:
+            $ref: '#/components/schemas/AdapterConfig'
+          type: array
+          title: Enhance
+        embedding:
+          $ref: '#/components/schemas/AdapterConfig'
+        vectorStore:
+          $ref: '#/components/schemas/AdapterConfig'
+      additionalProperties: false
+      type: object
+      required:
+        - parser
+        - chunking
+        - enhance
+        - embedding
+        - vectorStore
+      title: PipelineConfig
+    RegisterDocumentRequest:
+      properties:
+        fileName:
+          type: string
+          maxLength: 512
+          minLength: 1
+          title: Filename
+        sourceType:
+          type: string
+          minLength: 1
+          title: Sourcetype
+        fileId:
+          type: integer
+          title: Fileid
+        sourceMeta:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Sourcemeta
+        docType:
+          type: string
+          minLength: 1
+          title: Doctype
+        stageOverrides:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Stageoverrides
+      additionalProperties: false
+      type: object
+      required:
+        - fileName
+        - sourceType
+        - fileId
+        - docType
+      title: RegisterDocumentRequest
+    RetrievalOptions:
+      properties:
+        strategy:
+          type: string
+          title: Strategy
+          default: vector
+        options:
+          additionalProperties: true
           type: object
-          required: [items]
-          properties: {items: {type: array, items: {$ref: '#/components/schemas/ArtifactAccessUrlItem'}}}
-    DataOpenKnowledgeBase: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/OpenKnowledgeBase'}}}
-    DataHealth: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/Health'}}}
-    DataReadiness: {type: object, required: [data], properties: {data: {$ref: '#/components/schemas/Readiness'}}}
+          title: Options
+      additionalProperties: false
+      type: object
+      title: RetrievalOptions
+    RetrievalRequest:
+      properties:
+        query:
+          type: string
+          maxLength: 10000
+          minLength: 1
+          title: Query
+        knowledgeBaseIds:
+          items:
+            type: string
+          type: array
+          maxItems: 10
+          minItems: 1
+          title: Knowledgebaseids
+        topK:
+          type: integer
+          maximum: 100
+          minimum: 1
+          title: Topk
+          default: 10
+        retrieval:
+          $ref: '#/components/schemas/RetrievalOptions'
+        filters:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Filters
+        rerank:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Rerank
+      additionalProperties: false
+      type: object
+      required:
+        - query
+        - knowledgeBaseIds
+      title: RetrievalRequest
+    SourceItem:
+      properties:
+        documentId:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Documentid
+        type:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Type
+        fileId:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Fileid
+        fileName:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Filename
+        fileType:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Filetype
+        url:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Url
+        stageConfig:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Stageconfig
+      additionalProperties: false
+      type: object
+      title: SourceItem
+    StageRunRequest:
+      properties:
+        stageConfig:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Stageconfig
+        persist:
+          type: boolean
+          title: Persist
+          default: false
+      additionalProperties: false
+      type: object
+      title: StageRunRequest
+    UpdateChunkContentRequest:
+      properties:
+        content:
+          type: string
+          maxLength: 1000000
+          minLength: 1
+          title: Content
+        metadata:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Metadata
+      additionalProperties: false
+      type: object
+      required:
+        - content
+      title: UpdateChunkContentRequest
+    UpdateDocumentStageConfigRequest:
+      properties:
+        stageConfig:
+          additionalProperties: true
+          type: object
+          title: Stageconfig
+      additionalProperties: false
+      type: object
+      required:
+        - stageConfig
+      title: UpdateDocumentStageConfigRequest
+    UpdateKnowledgeBaseConfigRequest:
+      properties:
+        parser:
+          anyOf:
+            - $ref: '#/components/schemas/AdapterConfig'
+            - type: 'null'
+        chunking:
+          anyOf:
+            - $ref: '#/components/schemas/AdapterConfig'
+            - type: 'null'
+        enhance:
+          anyOf:
+            - items:
+                $ref: '#/components/schemas/AdapterConfig'
+              type: array
+            - type: 'null'
+          title: Enhance
+        embedding:
+          anyOf:
+            - $ref: '#/components/schemas/AdapterConfig'
+            - type: 'null'
+        vectorStore:
+          anyOf:
+            - $ref: '#/components/schemas/AdapterConfig'
+            - type: 'null'
+      additionalProperties: false
+      type: object
+      title: UpdateKnowledgeBaseConfigRequest
+    UpdateKnowledgeBaseRequest:
+      properties:
+        name:
+          anyOf:
+            - type: string
+              maxLength: 255
+              minLength: 1
+            - type: 'null'
+          title: Name
+        description:
+          anyOf:
+            - type: string
+              maxLength: 4000
+            - type: 'null'
+          title: Description
+        visibility:
+          anyOf:
+            - type: string
+              minLength: 1
+            - type: 'null'
+          title: Visibility
+      additionalProperties: false
+      type: object
+      title: UpdateKnowledgeBaseRequest
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: ValidationError
