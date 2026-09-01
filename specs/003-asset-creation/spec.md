@@ -40,6 +40,17 @@
 
 - Q: 凭据模型反转后 003 的改写口径？ → A: 按 U3 评审表改写（项目组线下对齐后用户裁定）：鉴权配置步仅声明凭据元数据（鉴权方式、变量名、注入位置、必填性；动态模式另含授权申请接口地址、令牌回写字段与所需凭据变量），创建者全程不接触密钥值；昨日「创建者侧真实鉴权探测」裁定收敛为订阅者侧执行（spec 007 FR-011/015/017）；门控凭据项收窄为「凭据元数据已声明且完整合法（schema 校验）」（FR-008/009/022、US4 整篇改写、实体合并为「资产凭据元数据声明」）。
 
+### Session 2026-09-01（M11 创建向导前后端接口澄清）
+
+- Q1: 前端通过哪个接口获取逐项质量门控结果？ → A: 由管理服务新增 `POST /mgmt/marketplace/assets/{assetId}/quality-gate`（建议 operationId：`runMarketplaceAssetQualityGate`）返回完整、按既定顺序的门控结果。响应 `items[]` 每项包含 `key`、`label`、`passed`、`condition`、可选的 `failReason` 与 `stepHint`；Agent 必须返回七项，MCP 必须返回六项。现有/拟有的 `precheck` 仅负责连通性、健康状态和接口合法性预检，不替代完整质量门控。
+- Q2: Agent 护栏策略模板列表和明细从哪里获得？ → A: 前端经管理服务的受控查询接口 `GET /mgmt/marketplace/guardrail-templates`（建议 operationId：`listMarketplaceGuardrailTemplates`）取得，仅返回启用模板与只读条目摘要（护栏、灵敏度、作用侧）。选择字段统一为 `platformGovernance.guardrailTemplateId`，为该接口返回的 int64 `id`；提交/重跑门控时后端须再次验证模板仍启用。模板数据的上游实现归属不在本 spec 假定，必须通过管理服务边界与已合并契约提供。
+- Q3: 首次保存前的一键 Health Check 如何调用？ → A: 已有 `assetId` 的草稿使用 `POST /mgmt/marketplace/assets/{assetId}/precheck`；尚未创建资产的向导配置使用新增 `POST /mgmt/marketplace/assets/health-probe`（建议 operationId：`probeMarketplaceAssetHealth`）。后者接收资产类型、服务地址、Health Check 地址、超时与重试配置，返回 `reachable`、`healthStatus`、`latencyMs`、`invalidInterfaces` 和安全的 `message`。预检/探测结果是质量门控的输入之一，但两者是不同动作。
+- Q4: `submit` 的含义及草稿提交序列？ → A: `submit=false` 仅创建或更新 `DRAFT`，不执行门控、不进入发布链路；`submit=true` 校验完整草稿、执行名称占用校验并触发质量门控提交。创建草稿使用 `POST /assets`，续填与提交既有草稿使用 `PUT /assets/{assetId}`，更新请求需支持可选 `submit` 字段。`publish` 只适用于已完成门控并已达到发布资格的资产，不可作为草稿提交命令。
+- Q5: 资产名称何时校验唯一及错误码？ → A: 草稿允许同名；仅在 `submit=true` 的创建/更新及非草稿资产改名时校验。重名返回 `ASSET-4003`（`DUPLICATE_NAME`）；逻辑删除资产不再占用名称。多个同名草稿同时提交时，以先完成占用者为准，后者被门控阻断。
+- Q6: Agent Card / MCP 工具清单由前端还是后端拉取？ → A: 只能由后端拉取与解析，前端不得直连目标服务。新增 `POST /mgmt/marketplace/assets/capability-preview`（建议 operationId：`previewMarketplaceAssetCapability`）返回只读 `manifestSnapshot`、`capabilityConfig`、`interfaceConfig` 与 `fetchedAt`；随后由创建/更新请求持久化。服务不可达、超时、文档格式不合法分别映射 `ASSET-9001`、`ASSET-9002`、`ASSET-4004`，错误详情不得泄漏凭据、请求头或内部地址。
+- Q7: 标签的 ID 来源及是否可创建？ → A: 使用既有 `GET /mgmt/marketplace/tags`；响应 `TagVO.id` 即提交至 `draftData.tagIds` 的 int64 标签 ID。M11 只支持选择活跃标签，不承接创建或维护标签。
+- 契约落点: 上述新增端点与可选字段属于非破坏性变更，先在 `contracts/openapi/grc-mgmt-service.yaml` 经契约门禁与人审合并，再开始实现；本次澄清的服务侧草案见 `grc-mgmt-service/specs/008-implement-marketplace/contracts/m11-asset-wizard-contract-addendum.md`。
+
 ### Session 2026-08-23（BA Lead peer review——Zeng Ziyang，grill-me 逐项复核）
 
 - 复核范围：上个 Session 的 11 条裁定 + Assumptions 4 条合理默认 + 附录 AC→FR 对照（原 AC-1~18 全量映射无丢失；注：Devin 侧曾补 AC-19 名称唯一创建校验，其语义已由本版 FR-003 以「提交门控时校验」口径覆盖）。
