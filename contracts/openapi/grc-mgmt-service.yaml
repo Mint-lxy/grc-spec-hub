@@ -2625,6 +2625,7 @@ components:
         docType: { type: string, minLength: 1, description: 文档类型 }
         sourceMeta: { type: object, additionalProperties: true, description: 来源元数据 }
         stageOverrides: { $ref: '#/components/schemas/KnowledgeStageConfigRequest', description: 阶段覆盖配置 }
+        runMode: { type: string, description: 构建模式，auto/manual }
 
     KnowledgeDocumentCreateResponse:
       type: object
