@@ -24,6 +24,7 @@
 | 68 | 【责任人：架构/开发】默认构建配置性能与并发适用性评估——2026-08-25 会议：大量文档统一用语义切分对 embedding 模型与构建 pipeline 的压力、平台并发构建能力有限；一期采用静态平台默认配置（spec 005 FR-010），按文档类型动态推荐/算子路由为 P1 扩展点；需评估一套通用、经济、高效的默认配置并压测验证 | 性能评估 | spec 005 FR-010/FR-038 | open |
 | 72 | 【责任人：BA+架构】完善子级目录创建与编辑规则——创建时分别配置「目录控制权限」与「知识库创建权限」两个角色，每个角色设置 2–3 名审批人；创建后仅允许修改目录名称，`Location` 与权限配置不可编辑；字段、角色及不可编辑约束需确认并同步相应 spec/契约（来源：2026-08-28 用户提供的会议待办）。**已关闭（2026-09-01 用户指令）** | 权限模型 | spec 005, spec 008, contracts/ | closed |
 | 74 | 【责任人：架构/开发+运维】梳理目录层级调整的运维 SOP——明确标准流程、风险、审批与影响范围；会议提出后台数据库操作，但不得覆盖 spec 000 AC-G8/watchlist #63「禁止人工直接操作数据库」的既有基线，需优先确认是否应通过受控管理接口、迁移任务或自动化作业实施（来源：2026-08-28 用户提供的会议待办） | 运维治理 | spec 000 AC-G8, spec 005, watchlist #63, sop/ | open |
+| 81 | 【责任人：架构/开发】Alice 知识库角色有效权限的落地机制——业务语义已由 2026-09-01 用户裁定为 `Owner ⊇ Contributor ⊇ Consumer`，Owner 无需单独申请 Contributor（spec 005 FR-009c）；待架构/开发确认 Alice 侧采用角色继承、权限并集或自动附加角色的实现方式，并走相应契约变更流程 | 架构决策 | spec 005 FR-009c, Alice, watchlist #73 | open |
 
 ## 环境与账号前置依赖
 
@@ -34,7 +35,7 @@
 | 26 | Azure 账号→SharePoint 方案落地（进行中）——2026-08-24 watchlist 质量复核未见最新检查点；下一步需补落地负责人、当前阶段与下一检查点 | 基础设施 | spec 005 AC-10, mcp-m365-server | `[待确认]` | in-progress |
 | 27 | Nexus Teams 创建 + 模型订阅 + 支持模型列表对齐 | 外部依赖 | spec 001/004, agent-service, eval-service | `[待确认]` | closed |
 | 28 | Nexus 缺少多模态/OCR 模型，需自行部署（用户指令 2026-08-14）——下一步需确认自部署模型方案、责任人、目标日期与是否影响 P0 交付 | 外部依赖 | parser-engine, knowledge-engine | `[待确认]` | open |
-| 73 | 确认 Alice 集成方案——统一确认角色默认分配、创建者默认权限、组织用户账号获取方式，以及 Add Documents 中 `Refresh Frequency` 与 `Schedule` 是否重复。2026-08-31 用户转述业务方 Emma 补充：知识库 Owner 无需向 Alice 单独申请 Contributor 权限；现有 spec 005 已赋予 Owner 覆盖 Contributor 的操作能力，仍待 BA 明确有效权限是否为 `Owner ⊇ Contributor ⊇ Consumer`，并由架构/开发确认 Alice 侧采用角色继承、权限并集还是自动附加角色 | 外部集成/权限模型 | spec 005 FR-019/FR-037c~FR-037f, spec 008, Alice | BA+架构/开发 | open |
+| 73 | 确认 Alice 集成方案——**已关闭（2026-09-01 用户裁定）**：知识库有效权限采用 `Owner ⊇ Contributor ⊇ Consumer`；Owner 无需向 Alice 单独申请 Contributor；公共目录建库的创建角色持有人未被指定为 Owner/Deputy 时仅保留读取、检索与详情只读权限；所有已登录用户默认获得 Viewer 最小视图，完全隐藏知识库不因该默认角色可发现；组织用户账号仍由 Alice 同步为只读视图；Add Documents 的定时同步仅保留 `Schedule`，移除重复的 `Refresh Frequency`。已回写 spec 005。Alice 侧具体采用角色继承、权限并集或自动附加角色的技术实现转 #81 跟踪 | 外部集成/权限模型 | spec 005 FR-009c/FR-013c/FR-019/FR-037c~FR-037f, spec 008 FR-050, Alice, watchlist #81 | BA+架构/开发 | closed |
 
 ## Spec 高优未决（来源：各 spec §4）
 
@@ -60,6 +61,7 @@
 | 37 | PRD §13.10 #5：P1 自助测评需求范围——已确认（2026-08-22 BA 裁定）：仅保留 P1 规划占位，当前 PRD/spec 不细化模板体系、数据集管理与对比报告范围 | P1 规划 | spec 004 | closed |
 | 38 | PRD §13.10 #6：临时文件上传（P1）的护栏检测时机——已确认（2026-08-22 BA 裁定）：仅保留 P1 规划占位，当前 PRD/spec 不裁定解析与检测时机 | P1 规划 | spec 001, PRD §9.5 | closed |
 | 39 | PRD §13.10 #7：库内重复文档识别（P1）相似度口径与处置形态——已确认（2026-08-22 BA 裁定）：仅保留 P1 规划占位，当前 PRD/spec 不裁定口径、阈值与处置形态 | P1 规划 | spec 005 | closed |
+| 82 | 【责任人：BA】PRD/用户旅程与 Spec 005 的构建参数重建口径漂移——PRD v1.2 §6 J4/§7 M4 与用户旅程 v1.2 仍表述「库级参数保存后触发全库重建」；2026-09-01 用户裁定已将 spec 005 FR-039 收敛为仅构建类参数变更触发重建、全库重建须确认、检索类参数即时生效。基础文档不得反写，待 BA 按 PRD 升版流程裁定并正向同步 | 基线漂移 | docs/prd/GRC-AI-Foundation-Platform-PRD-v1.2.md §6 J4/§7 M4, docs/user_journey/AI_Foundation_Platform_User_Journey_v1.2.md, spec 005 FR-039, watchlist #70 | open |
 | 40 | PRD §13.10 #9：导入通道定时同步（P1）凭据主体与「配置人离职中断」风险处置——已确认（2026-08-22 BA 裁定）：使用配置人个人出站凭据；配置人账号停用/离职/凭据失效时同步暂停并通知知识库 Owner/Deputy | P1 规划 | spec 005 | closed |
 | 41 | PRD §13.10 #14：申请人撤回订阅申请是否纳入——已确认（2026-08-22 BA 裁定）：P0 不纳入，待审批申请无申请人出边 | 产品决策 | spec 002, PRD §9.2 | closed |
 | 42 | PRD §13.10 #15：审批停滞兜底——已确认（2026-08-22 BA 裁定）：P0 不补系统催办或超时回落；在职但长期不处理由人工沟通解决，死锁回落仅覆盖账号失效 | 产品决策 | spec 002, PRD §9.2 | closed |
@@ -90,7 +92,7 @@
 | 69 | 【责任人：合规+BA】敏感信息局部打码 vs 护栏整段拦截的机制冲突——2026-08-25 上午会议：客户明文信息（电话/密码）严禁显示，员工姓名等内部信息是否脱敏无标准；现行护栏为整条拦截/全文零字留存（spec 006 FR-041/FR-042），与局部 PII 遮蔽需求存在逻辑冲突；会议暂缓决策，待咨询合规/董事后再定；参考 ChatGPT 实践：允许记住用户主动提供的个人信息 | 合规 | spec 006 FR-041/FR-042, watchlist #61 | open |
 | 70 | 【责任人：BA+开发】重建机制细则待续谈终态后回写 spec 005——2026-08-25 上午会议方向：向量模型与向量库绑定不可改；仅构建类参数（parser/chunk/增强）变更激活重建，检索类参数（top_k 等）即时生效不重建；支持单/多文档粒度重建；全库重建需二次确认（输入 confirm 文字），未确认则新配置仅用于后续上传文档；防止全库重建覆盖已调优文档配置。下午续谈后由用户裁定回写 FR-039（现行「保存即触发全库重建」口径待改）。**已关闭（2026-09-01 用户指令）** | spec 冲突 | spec 005 FR-039/US-8 | closed |
 | 71 | 【责任人：架构/开发】knowledge/parser/mgmt 契约与 spec 005 对齐差距一揽子（走 contract-change 流程）：①切片四策略专属参数全缺（仅通用 chunkSize/chunkOverlap）；②向量库缺索引类型/距离算法/用量展示；③重排序缺模型选择、topN 下限 1 与 spec 10–50 不符；④语言枚举缺德语、解析器枚举含已裁定不用的 DeepDoc（2026-08-23 裁定）；⑤visibility 仍为两档 [PRIVATE, PUBLIC]，未同步三档（spec 005 FR-011，2026-08-25 用户裁定）；⑥知识库删除契约为「立即不可恢复清理」与 spec 软删除+保留期语义相反；⑦两份契约 ParserConfig 互不一致；⑧`Description` 已裁定为建库必填（spec 005 FR-010，2026-08-30），但 knowledge/mgmt 的 CreateKnowledgeBaseRequest 均未列入 required，且契约现存 maxLength 512、更新接口 maxLength 4000 两套值，而业务字数限制尚 `[待确认]`，不得把现存值当业务基线 | 契约治理 | contracts/openapi/grc-knowledge-engine.yaml, contracts/openapi/grc-parser-engine.yaml, contracts/openapi/grc-mgmt-service.yaml, spec 005 FR-010/FR-011/FR-038/FR-042 | open |
-| 75 | 权限展示与申请入口已裁定并回写（2026-08-28 用户裁定）：Viewer 仅见 Name/Update 且不可进详情；Consumer 可见完整列表与详情但不可操作；Contributor/Owner 可见全部状态并可维护、默认 Documents Tab；无权限用户仅见可发现知识库 Information 页并在显著位置获得 Alice 申请入口；完全隐藏知识库仍不可发现。Viewer 的 Alice 映射另由 #73 跟踪，Owner 具体展示字段另由 #66 跟踪 | 权限交互 | spec 005 FR-037c~FR-037f, watchlist #66/#73 | closed |
+| 75 | 权限展示与申请入口已裁定并回写（2026-08-28 用户裁定）：Viewer 仅见 Name/Update 且不可进详情；Consumer 可见完整列表与详情但不可操作；Contributor/Owner 可见全部状态并可维护、默认 Documents Tab；完全隐藏知识库仍不可发现。**2026-09-01 用户裁定补充（#73 关闭）**：所有已登录用户对「公开可用」与「公开需申请」知识库默认具有 Viewer 最小视图，并在显著位置获得 Alice 申请入口；Viewer 的 Alice 技术映射转 #81 跟踪，Owner 具体展示字段另由 #66 跟踪 | 权限交互 | spec 005 FR-037c~FR-037f, watchlist #66/#81 | closed |
 | 76 | 【责任人：BA+UX】优化知识库创建与配置表单——`Description` 已裁定为必填（2026-08-30 用户裁定，已回写 spec 005 FR-010）；字数限制仍为 `[待确认]`，2026-08-28 会议建议的「不少于 15 字」不作为当前基线。剩余待办：确定字数限制；增加仅作用于当前知识库的默认 Retrieval 检索策略，并明确可配置项、默认值与保存权限 | 表单/检索配置 | spec 005 FR-010/FR-038 | open |
 | 77 | 【责任人：BA+UX+开发】调整知识库构建信息展示——移除 `Build Stage Status` 模块，改在 Information 页面静态说明 Chunk、Enhancer、Embedding 等构建流程；Pipeline 增加 Enhancer 阶段；失败时展示具体出错步骤并支持跳转至手动修复页面。Viewer 隐藏 Pipeline、Consumer 只读、Contributor/Owner 可查看全部状态的权限边界已于 2026-08-28 用户裁定并回写 spec 005 FR-037c~FR-037f；剩余待确认项为手动修复页面及入口细节。**已关闭（2026-09-01 用户指令）** | 构建交互 | spec 005 FR-025/FR-026/FR-037c~FR-037f/FR-038, grc-ai-portal | closed |
 | 78 | 【责任人：BA+UX】优化 Overview 页面 KPI——重新设计 KPI 展示内容，突出核心指标，整体保持稳重，并兼顾美观与性能；具体指标集合、计算口径、刷新频率与展示优先级均为 `[待确认]`（来源：2026-08-28 用户提供的会议待办） | KPI/交互 | spec 005, spec 008, grc-ai-portal | open |

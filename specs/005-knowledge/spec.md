@@ -48,7 +48,7 @@
 
 ### Session 2026-08-28（用户裁定）
 
-- Q: 知识库页面应如何按 Viewer、Consumer、Contributor、Owner 与无权限用户区分展示和操作？ → A: 采用四级有效权限加无权限视图：Viewer 仅可见文档列表的 Name 与 Update，隐藏全部操作按钮、Pipeline、Source、Trunk 等处理明细列，不可进入文档详情；Consumer 可见完整文档列表并进入详情只读查看，但不显示编辑、构建、删除按钮；Contributor 与 Owner（Deputy 按既有 Owner 等效权限）可见完整列表和全部状态信息，可执行上传、编辑、删除及 Auto/Manual 构建，进入知识库默认展示 Documents Tab；无权限用户仅可查看可发现知识库的 Information 页（含描述、Owner 信息等），不可见文档列表，并须在右上角或导航栏等显著位置获得「查看/申请权限」入口跳转 Alice。完全隐藏知识库仍遵循 FR-011 的不可发现边界。该裁定不改变 FR-039：Pipeline 配置保存仍仅限 Owner/Deputy；Viewer 的 Alice 角色映射与默认分配方式由 watchlist #73 继续跟踪。
+- Q: 知识库页面应如何按 Viewer、Consumer、Contributor、Owner 与无权限用户区分展示和操作？ → A: 采用四级有效权限加无权限视图：Viewer 仅可见文档列表的 Name 与 Update，隐藏全部操作按钮、Pipeline、Source、Trunk 等处理明细列，不可进入文档详情；Consumer 可见完整文档列表并进入详情只读查看，但不显示编辑、构建、删除按钮；Contributor 与 Owner（Deputy 按既有 Owner 等效权限）可见完整列表和全部状态信息，可执行上传、编辑、删除及 Auto/Manual 构建，进入知识库默认展示 Documents Tab；所有已登录用户默认获得 Viewer 有效权限：对「公开可用」与「公开需申请」知识库，展示仅含 Name 与 Update 的最小 Documents Tab 视图，不可进入详情、不可操作，并在显著位置提供「查看/申请权限」入口跳转 Alice；完全隐藏知识库仍遵循 FR-011 的不可发现边界。该裁定不改变 FR-039：Pipeline 配置保存仍仅限 Owner/Deputy；Viewer 与其他知识库角色在 Alice 侧的具体落地机制由 watchlist #81 继续跟踪。
 
 ### Session 2026-08-30（用户裁定）
 
@@ -61,6 +61,8 @@
 - Q: 公共目录子级目录创建与后续编辑规则如何定？ → A: 创建时分别配置「目录控制权限」与「知识库创建权限」两个角色，每个角色设置 2–3 名审批人；创建后仅可修改目录名称，`Location` 与权限配置不可编辑。watchlist #72 随之关闭。
 - Q: 构建参数变更的重建行为如何定？ → A: 向量化模型与向量库绑定后不可改；仅 parser、chunk、内容增强等构建类参数变更触发重建，检索类参数（如 top-k）即时生效；支持单/多文档重建；全库重建须输入确认文字，未确认时新配置仅用于后续上传文档，且不得覆盖已调优文档的文档级配置。watchlist #70 随之关闭。
 - Q: 知识库构建信息如何展示？ → A: 移除独立 `Build Stage Status` 模块；Information 页面静态说明 Chunk、Enhancer、Embedding 等构建流程；Pipeline 纳入 Enhancer 阶段；构建失败时展示具体出错步骤并提供进入手动修复页面的入口。既有 Viewer、Consumer、Contributor/Owner 的 Pipeline 可见性与操作边界不变。watchlist #77 随之关闭。
+- Q: 知识库 Owner、Contributor、Consumer 的有效权限关系如何定义？ → A: 采用 `Owner ⊇ Contributor ⊇ Consumer`；Owner 不需要向 Alice 单独申请 Contributor，Contributor 自动拥有 Consumer 的读取语义。知识库创建角色持有人未被指定为 Owner/Deputy 时，维持既有仅读取、检索和详情只读权限，不自动获得维护角色。所有已登录用户默认获得 Viewer 的最小视图；完全隐藏知识库不因该默认角色而可发现。watchlist #73 随之关闭。
+- Q: Add Documents 的定时同步配置是否同时保留 `Refresh Frequency` 与 `Schedule`？ → A: 仅保留 `Schedule` 作为唯一的定时配置字段，移除 `Refresh Frequency`。该能力仍属导入通道定时同步 P1 范围。watchlist #73 随之关闭。
 
 ---
 
@@ -379,6 +381,7 @@
 - **FR-008**: 系统 MUST 对无权限用户展示对应的 Alice 权限 ID（可一键复制）与申请跳转入口。
 - **FR-009**: 目录级角色（目录控制角色、知识库创建角色）的授予、回收、同级多人控制与角色交接 MUST 以 Alice 流程为主；平台 MUST 展示 Alice 权限 ID、申请跳转入口与同步后的当前权限状态，P0 不实现目录级完整审批闭环。知识库级维护角色（知识库 Owner、知识库 Contributor、知识库 Consumer）由该库的知识库 Owner 或知识库 Deputy 单级审批；批准后平台调用 Alice 接口完成角色写入（2026-08-22 BA 裁定：目录级 Alice 为主，库级保留平台内单级审批）。
 - **FR-009b**: 知识库 Owner 与知识库 Deputy 全部失效时，MUST 由上级目录控制角色在 Alice 侧为该库补员，平台同步后恢复库级审批归口（理由：与孤儿资产补员同构的兜底路径，防止库级治理死锁）。
+- **FR-009c**: 知识库维护角色的有效权限 MUST 按 `Owner ⊇ Contributor ⊇ Consumer` 计算：知识库 Owner 与 Deputy 自动拥有 Contributor 的导入、构建、编辑、删除等能力及 Consumer 的读取/检索能力；知识库 Contributor 自动拥有 Consumer 的读取/检索能力。业务语义不要求 Owner/Deputy 在 Alice 中另行申请 Contributor；Alice 侧实现方式由架构/开发另行确认（2026-09-01 用户裁定，watchlist #73 关闭）。
 
 **建库向导**
 
@@ -396,7 +399,7 @@
 **四通道文档导入**
 
 - **FR-018**: 系统 MUST 提供四个导入通道：本地上传（单文件上限 40MB，支持 ZIP 展开预览——单层展开、包内不超过 200 个文件、解包后总大小不超过 500MB）、Confluence、SharePoint/OneDrive、S3/Azure Blob。
-- **FR-019**: 系统 MUST 校验导入操作者具备该知识库的知识库 Contributor 及以上权限（我的目录为创建者本人或获得「可编辑」分享授权的用户）。
+- **FR-019**: 系统 MUST 校验导入操作者具备该知识库的知识库 Contributor 有效权限（包含 Owner/Deputy 按 FR-009c 内含的 Contributor 能力；我的目录为创建者本人或获得「可编辑」分享授权的用户）。
 - **FR-020**: 三个外部通道 MUST 分别经对应的平台原生工具拉取（Confluence MCP、SharePoint/OneDrive MCP、OSS MCP），使用导入操作人在密钥库配置的个人凭据，未配置时引导至配置页面。
 - **FR-021**: 系统 MUST 在导入前提供目录预览与勾选；白名单内的格式为：PDF、Word（doc/docx）、Excel（xls/xlsx）、PowerPoint（ppt/pptx）、纯文本、Markdown、HTML、CSV、图片（PNG/JPG，经 OCR）；白名单外的格式置灰不可选。ZIP 仅作为容器。
 - **FR-022**: 系统 MUST 在文件名与库内已有文档重名时要求确认是否覆盖。
@@ -430,7 +433,7 @@
 - **FR-037c**: 系统 MUST 对 Viewer 有效权限采用最小展示：Documents Tab 的文档列表仅展示 Name 与 Update，隐藏全部操作按钮及 Pipeline、Source、Trunk 等处理明细列；文档名称不可点击，Viewer 不可进入文档详情，也不可执行上传、编辑、删除或构建（2026-08-28 用户裁定）。
 - **FR-037d**: 系统 MUST 对 Consumer 有效权限展示完整文档列表并允许进入文档详情只读查看，同时隐藏编辑、构建与删除按钮，禁止任何内容或构建操作（2026-08-28 用户裁定）。
 - **FR-037e**: 系统 MUST 对 Contributor 与 Owner 有效权限展示完整文档列表及 Pipeline、Trunk 等全部状态信息，允许执行上传、编辑、删除及 Auto/Manual 构建；Contributor 或 Owner 进入知识库时 MUST 默认展示 Documents Tab。Deputy 沿用既有 Owner 等效权限；Pipeline 配置保存仍仅限 Owner/Deputy，遵循 FR-039（2026-08-28 用户裁定）。
-- **FR-037f**: 对可被当前用户发现但用户无任何有效权限的知识库，系统 MUST 仅展示 Information 页（至少包含描述与 Owner 信息），不得展示 Documents Tab，并 MUST 在右上角或导航栏等显著位置展示「查看/申请权限」入口以跳转 Alice。可见范围为「完全隐藏」的知识库仍遵循 FR-011，不向无权限用户暴露（2026-08-28 用户裁定）。
+- **FR-037f**: 系统 MUST 默认向所有已登录用户授予 Viewer 有效权限；对「公开可用」与「公开需申请」知识库，未拥有更高有效权限的用户 MUST 按 FR-037c 获得最小 Documents Tab 视图，并在显著位置展示「查看/申请权限」入口以跳转 Alice。Viewer 不等同 Consumer，不得进入文档详情或执行任何维护操作；「完全隐藏」知识库仍遵循 FR-011，不因默认 Viewer 权限向无更高权限用户暴露（2026-09-01 用户裁定，watchlist #73 关闭）。
 
 **构建参数**
 
@@ -497,7 +500,7 @@
 - **切片（Chunk）**: 文档经切片策略处理后的最小检索单元。关键属性：内容文本、词元数、向量、所属文档、排序位次。
 - **构建流水线（Build Pipeline）**: 文档从导入到可检索的处理过程。四个阶段：解析→切片→内容增强→向量化。同一知识库至多一条活跃流水线。
 - **知识侧角色（Knowledge Role）**: 五种既有治理角色——目录控制角色、知识库创建角色、知识库 Owner、知识库 Contributor、知识库 Consumer。目录级角色的授予、回收、同级多人控制与角色交接以 Alice 流程为主，平台展示权限 ID、申请入口与同步后的当前权限状态；知识库级维护角色由平台调用 Alice 创建，授予与回收由知识库 Owner 或知识库 Deputy 单级审批。
-- **知识库页面有效权限层级（Knowledge Page Access Level）**: 用于页面展示与交互判定的四级权限——Viewer、Consumer、Contributor、Owner；另有无权限状态。Viewer 低于 Consumer，仅可查看文档 Name 与 Update；Deputy 按 Owner 等效权限处理。Viewer 与 Alice 角色的映射及默认分配方式由 watchlist #73 跟踪，不改变本 spec 已确定的页面权限矩阵。
+- **知识库页面有效权限层级（Knowledge Page Access Level）**: 用于页面展示与交互判定的四级权限——Viewer、Consumer、Contributor、Owner。所有已登录用户默认获得 Viewer 最小视图；Consumer 具备读取/检索语义，Contributor 内含 Consumer，Owner 与 Deputy 内含 Contributor 与 Consumer。Viewer 仅可查看文档 Name 与 Update，不可进入详情或操作；完全隐藏知识库不因默认 Viewer 权限可发现。Alice 侧的具体角色落地机制由 watchlist #81 跟踪。
 - **分享授权（Share Grant）**: 我的目录知识库的平台内授权记录。关键属性：目标知识库、被分享者、授权级别（可查看/可编辑）、创建时间。由平台管理、不写入 Alice；被分享者账号被 Alice 停用即失效；创建者账号被停用时随知识库软删除同步失效。
 
 ---
@@ -534,7 +537,7 @@
 
 ## Non-Goals / Boundaries
 
-- **导入通道定时同步**（P1）：按设定频率自动抓取来源变更；使用配置人的个人凭据，配置人账号停用、离职或凭据失效时，同步任务暂停并通知知识库 Owner/Deputy 处理。
+- **导入通道定时同步**（P1）：按 `Schedule` 自动抓取来源变更，`Schedule` 为唯一的定时配置字段，不提供重复的 `Refresh Frequency`；使用配置人的个人凭据，配置人账号停用、离职或凭据失效时，同步任务暂停并通知知识库 Owner/Deputy 处理（2026-09-01 用户裁定，watchlist #73 关闭）。
 - **库内重复文档识别**（P1）：仅保留 P1 规划占位，当前 spec 不裁定相似度口径、阈值与处置形态。同名覆盖确认保留为 P0（属被确认的替换动作）。
 - **检索测试**（P1）：输入查询语句查看召回结果的调试能力。
 - **AI 生成库级内容摘要**（P1）：对全库内容自动生成摘要；P0 的 Overview「内容摘要」为静态元信息汇总。
