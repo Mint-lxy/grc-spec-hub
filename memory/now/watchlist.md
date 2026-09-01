@@ -94,6 +94,8 @@
 | 76 | 【责任人：BA+UX】优化知识库创建与配置表单——`Description` 已裁定为必填（2026-08-30 用户裁定，已回写 spec 005 FR-010）；字数限制仍为 `[待确认]`，2026-08-28 会议建议的「不少于 15 字」不作为当前基线。剩余待办：确定字数限制；增加仅作用于当前知识库的默认 Retrieval 检索策略，并明确可配置项、默认值与保存权限 | 表单/检索配置 | spec 005 FR-010/FR-038 | open |
 | 77 | 【责任人：BA+UX+开发】调整知识库构建信息展示——移除 `Build Stage Status` 模块，改在 Information 页面静态说明 Chunk、Enhancer、Embedding 等构建流程；Pipeline 增加 Enhancer 阶段；失败时展示具体出错步骤并支持跳转至手动修复页面。Viewer 隐藏 Pipeline、Consumer 只读、Contributor/Owner 可查看全部状态的权限边界已于 2026-08-28 用户裁定并回写 spec 005 FR-037c~FR-037f；剩余待确认项为手动修复页面及入口细节 | 构建交互 | spec 005 FR-025/FR-026/FR-037c~FR-037f/FR-038, grc-ai-portal | open |
 | 78 | 【责任人：BA+UX】优化 Overview 页面 KPI——重新设计 KPI 展示内容，突出核心指标，整体保持稳重，并兼顾美观与性能；具体指标集合、计算口径、刷新频率与展示优先级均为 `[待确认]`（来源：2026-08-28 用户提供的会议待办） | KPI/交互 | spec 005, spec 008, grc-ai-portal | open |
+| 79 | 一级导航信息架构冲突——**已关闭（2026-09-01 用户裁定）**：按 2026-08-26 会议决议采用新一级导航 Chat / Explore / Curate / Build / Govern；Agent/MCP 发现与订阅目录归 Explore；订阅者中心并入 Explore 页内（右上角 console 或页内入口，不再独立二级入口）；创作者中心归 Build（Build 同时承载上架入口、Dify 跳转、Agent Kit 预留）；Explore 引导 button 跳 Build 9/7 首期不做；已回写 spec 002 Clarifications（Session 2026-09-01）；遗留项——PRD §5.1/§5.2 升版对齐与 provider 审批 request 归 Build/Govern 未定论，转 #80 跟踪 | 基线冲突 | docs/prd/GRC-AI-Foundation-Platform-PRD-v1.2.md §5.1/§5.2, spec 002 Clarifications, 会议纪要 2026-08-26 平台导航与详情页设计, UI 0828, watchlist #80 | closed |
+| 80 | 【责任人：BA+UX】PRD 一级导航升版对齐 + provider 审批 request 归属——2026-09-01 用户裁定采用新一级导航（Chat/Explore/Curate/Build/Govern，详见 #79），PRD v1.2 §5.1/§5.2 仍为旧 IA，基线文档不直接反写，待走 PRD 升版流程对齐并同步受影响 spec/功能清单；遗留未定论：provider 审批 request 归 Build 还是 Govern（2026-08-26 会议未定） | 基线升版 | docs/prd/GRC-AI-Foundation-Platform-PRD-v1.2.md §5.1/§5.2, spec 002, watchlist #79 | open |
 
 ## 文档缺口
 
