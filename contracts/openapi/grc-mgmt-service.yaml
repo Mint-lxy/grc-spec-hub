@@ -500,6 +500,7 @@ paths:
       tags: [Knowledge Base]
       operationId: createKnowledgeDocument
       summary: 创建知识库文档
+      description: 向指定知识库创建/导入单份文档并可触发自动构建
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/CreateKnowledgeDocumentRequest' } } }
@@ -522,9 +523,10 @@ paths:
       tags: [Knowledge Base]
       operationId: importKnowledgeDocuments
       summary: 导入知识库文档
+      description: 批量导入多份文档到指定知识库并触发构建任务
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/CreateKnowledgeBuildJobRequest' } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeDocumentBatchImportRequest' } } }
       responses: { '200': { description: 导入成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBuildJobEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/build-jobs:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
@@ -2717,22 +2719,48 @@ components:
 
     CreateKnowledgeDocumentRequest:
       type: object
+      description: 在知识库中创建单份文档请求
       required: [fileName, sourceType, fileId, docType]
       properties:
-        fileName: { type: string, minLength: 1, description: 文件名 }
-        sourceType: { type: string, minLength: 1, description: 来源类型 }
-        fileId: { type: integer, format: int64, description: 文件 ID }
-        docType: { type: string, minLength: 1, description: 文档类型 }
-        sourceMeta: { type: object, additionalProperties: true, description: 来源元数据 }
-        stageOverrides: { $ref: '#/components/schemas/KnowledgeStageConfigRequest', description: 阶段覆盖配置 }
-        runMode: { type: string, description: 构建模式，auto/manual }
+        fileName: { type: string, minLength: 1, description: 文档文件名 }
+        sourceType: { type: string, minLength: 1, description: '来源类型: CONFLUENCE, SHAREPOINT, ONEDRIVE, BLOB, S3, LOCAL_UPLOAD, FILE' }
+        fileId: { type: integer, format: int64, description: 文件中心文件 ID }
+        docType: { type: string, minLength: 1, description: '文档类型，例如 pdf/docx' }
+        sourceMeta: { type: object, additionalProperties: true, description: 来源扩展元数据 }
+        stageOverrides: { $ref: '#/components/schemas/KnowledgeStageConfigRequest', description: 阶段级覆盖配置 }
+        runMode: { type: string, default: auto, description: '构建模式：auto (自动构建) / manual (仅创建不自动构建)' }
 
     KnowledgeDocumentCreateResponse:
       type: object
+      description: 知识库文档创建响应数据
       properties:
-        documentId: { type: string, description: 文档 ID }
-        jobId: { type: string, description: 任务 ID }
-        status: { type: string, description: 状态 }
+        documentId: { type: string, description: 创建成功的文档 ID }
+        jobId: { type: string, description: 关联的构建任务 ID }
+        status: { type: string, description: 当前状态 }
+
+    KnowledgeDocumentBatchImportRequest:
+      type: object
+      description: 批量导入文件请求入参
+      required: [sources]
+      properties:
+        stageConfig: { $ref: '#/components/schemas/KnowledgeStageConfigRequest', description: 批量构建默认的完整 pipeline 配置 }
+        sources:
+          type: array
+          minItems: 1
+          description: 构建来源列表
+          items: { $ref: '#/components/schemas/KnowledgeBatchImportSourceRequest' }
+
+    KnowledgeBatchImportSourceRequest:
+      type: object
+      description: 批量导入的文件来源信息
+      required: [type]
+      properties:
+        type: { type: string, minLength: 1, description: '来源类型: CONFLUENCE, SHAREPOINT, ONEDRIVE, BLOB, S3, LOCAL_UPLOAD, FILE' }
+        fileId: { type: string, description: 文件中心文件 ID }
+        fileName: { type: string, description: 文件名称 }
+        fileType: { type: string, description: 文件类型/格式 }
+        url: { type: string, format: uri, description: 外部资源 URL 地址 }
+        stageConfig: { $ref: '#/components/schemas/KnowledgeStageConfigRequest', description: 针对该单项来源的阶段覆盖配置 }
 
     KnowledgeBaseDocumentListItemResponse:
       type: object
@@ -2768,21 +2796,23 @@ components:
 
     KnowledgePipelineJobResponse:
       type: object
+      description: 批量构建任务中的单个文档管线任务
       properties:
         pipelineJobId: { type: string, description: 管线任务 ID }
-        documentId: { type: string, description: 文档 ID }
-        status: { type: string, description: 状态 }
+        documentId: { type: string, description: 关联文档 ID }
+        status: { type: string, description: 任务状态 }
         sourceType: { type: string, description: 来源类型 }
 
     KnowledgeDocumentBatchImportResponse:
       type: object
+      description: 知识库文件批量导入响应数据
       properties:
         batchJobId: { type: string, description: 批处理任务 ID }
-        knowledgeBaseId: { type: string, description: 知识库 ID }
-        type: { type: string, description: 类型 }
-        status: { type: string, description: 状态 }
-        totalDocs: { type: integer, description: 字段：totalDocs }
-        pipelineJobs: { type: array, items: { $ref: '#/components/schemas/KnowledgePipelineJobResponse' }, description: 字段：pipelineJobs }
+        knowledgeBaseId: { type: string, description: 目标知识库 ID }
+        type: { type: string, description: 任务/导入类型 }
+        status: { type: string, description: 批任务状态 }
+        totalDocs: { type: integer, description: 本次导入的文档总数 }
+        pipelineJobs: { type: array, items: { $ref: '#/components/schemas/KnowledgePipelineJobResponse' }, description: 生成的单项文档管线任务列表 }
 
     KnowledgeBatchBuildJobResponse:
       type: object
