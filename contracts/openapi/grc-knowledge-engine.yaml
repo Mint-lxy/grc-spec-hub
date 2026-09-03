@@ -143,6 +143,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/stats:
+    get:
+      tags:
+        - knowledge-bases
+      summary: Get Knowledge Base Summary Statistics
+      operationId: get_knowledge_base_summary_statistics_api_v1_knowledge_knowledge_bases_stats_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseSummaryStatisticsResponse'
   /api/v1/knowledge/knowledge-bases/pipeline-options:
     get:
       tags:
@@ -1618,6 +1631,52 @@ components:
       required:
         - name
       title: KnowledgeTagRequest
+    KnowledgeBaseSummaryStatisticsResponse:
+      properties:
+        knowledgeBaseCount:
+          type: integer
+          minimum: 0
+          title: Knowledgebasecount
+        availableDocumentCount:
+          type: integer
+          minimum: 0
+          title: Availabledocumentcount
+        chunkCount:
+          type: integer
+          minimum: 0
+          title: Chunkcount
+        readyKnowledgeBaseCount:
+          type: integer
+          minimum: 0
+          title: Readyknowledgebasecount
+        notReadyKnowledgeBaseCount:
+          type: integer
+          minimum: 0
+          title: Notreadyknowledgebasecount
+        notReadyReasonBreakdown:
+          properties:
+            DRAFT:
+              type: integer
+              minimum: 0
+            DISABLED:
+              type: integer
+              minimum: 0
+          additionalProperties: false
+          type: object
+          required:
+            - DRAFT
+            - DISABLED
+          title: Notreadyreasonbreakdown
+      additionalProperties: false
+      type: object
+      required:
+        - knowledgeBaseCount
+        - availableDocumentCount
+        - chunkCount
+        - readyKnowledgeBaseCount
+        - notReadyKnowledgeBaseCount
+        - notReadyReasonBreakdown
+      title: KnowledgeBaseSummaryStatisticsResponse
     PipelineConfig:
       properties:
         parser:
