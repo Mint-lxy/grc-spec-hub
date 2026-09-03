@@ -477,6 +477,19 @@ paths:
                         description: 响应数据
                         type: array
                         items: { $ref: '#/components/schemas/VectorStoreInstance' }
+  /mgmt/knowledge/knowledge-bases/stats:
+    get:
+      tags: [Knowledge Base]
+      operationId: getKnowledgeBaseAggregateStatistics
+      summary: 查询知识库聚合统计
+      description: 查询所有知识库、可用文档和切片的聚合统计，以及未就绪知识库的原因分布。
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseAggregateStatisticsEnvelope'
   /mgmt/knowledge/knowledge-bases/{kbId}:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     get:
@@ -2700,6 +2713,18 @@ components:
         documentStatusBreakdown: { type: object, additionalProperties: { type: integer }, description: 文档状态分布 }
         chunkEmbedStatusBreakdown: { type: object, additionalProperties: { type: integer }, description: 切片嵌入状态分布 }
 
+    KnowledgeBaseAggregateStatisticsResponse:
+      type: object
+      description: 所有知识库的聚合统计数据。
+      required: [knowledgeBaseCount, availableDocumentCount, chunkCount, readyKnowledgeBaseCount, notReadyKnowledgeBaseCount, notReadyReasonBreakdown]
+      properties:
+        knowledgeBaseCount: { type: integer, description: 知识库总数 }
+        availableDocumentCount: { type: integer, description: 可用文档总数 }
+        chunkCount: { type: integer, description: 文档切片总数 }
+        readyKnowledgeBaseCount: { type: integer, description: 已就绪知识库数量 }
+        notReadyKnowledgeBaseCount: { type: integer, description: 未就绪知识库数量 }
+        notReadyReasonBreakdown: { type: object, additionalProperties: { type: integer }, description: 按未就绪原因聚合的知识库数量，例如 DRAFT 或 DISABLED }
+
     KnowledgeStageComponentConfig:
       type: object
       required: [type]
@@ -3127,6 +3152,7 @@ components:
     KnowledgeBaseDetailEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseDetailResponse', description: 响应数据 } } }] }
     KnowledgeBaseConfigUpdateEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseConfigUpdateResponse', description: 响应数据 } } }] }
     KnowledgeBaseStatisticsEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseStatisticsResponse', description: 响应数据 } } }] }
+    KnowledgeBaseAggregateStatisticsEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseAggregateStatisticsResponse', description: 响应数据 } } }] }
     KnowledgeDocumentCreateEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentCreateResponse', description: 响应数据 } } }] }
     KnowledgeBaseDocumentPageEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseDocumentPageResponse', description: 响应数据 } } }] }
     KnowledgeBuildJobEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentBatchImportResponse', description: 响应数据 } } }] }
