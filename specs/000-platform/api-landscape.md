@@ -121,6 +121,7 @@
 | GET | /mgmt/knowledge/knowledge-bases | 查询知识库列表 | ?directoryId; ?keyword; ?status; ?retrievalReady; ?page; ?pageSize | KnowledgeBasePageEnvelope | 005 |
 | GET | /mgmt/knowledge/knowledge-bases/pipeline-options | 查询知识管线选项 | — | KnowledgePipelineOptionsEnvelope | 005 |
 | GET | /mgmt/knowledge/knowledge-bases/stats | 查询知识库聚合统计 | — | KnowledgeBaseAggregateStatisticsEnvelope | 005 |
+| GET | /mgmt/knowledge/knowledge-bases/default-pipeline-config | 查询知识库默认管线配置 | — | KnowledgePipelineDefaultConfigEnvelope | 005 |
 | GET | /mgmt/knowledge/knowledge-bases/{kbId} | 查询知识库详情 | Path: KnowledgeBaseId | KnowledgeBaseDetailEnvelope | 005 |
 | PATCH | /mgmt/knowledge/knowledge-bases/{kbId}/config | 更新知识库配置 | Path: KnowledgeBaseId; Body: UpdateKnowledgeBaseConfigRequest | KnowledgeBaseConfigUpdateEnvelope | 005 |
 | POST | /mgmt/knowledge/knowledge-bases/{kbId}/documents | 创建知识库文档 | Path: KnowledgeBaseId; Body: CreateKnowledgeDocumentRequest | KnowledgeDocumentCreateEnvelope | 005 |

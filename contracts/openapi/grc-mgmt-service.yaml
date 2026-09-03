@@ -490,6 +490,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseAggregateStatisticsEnvelope'
+  /mgmt/knowledge/knowledge-bases/default-pipeline-config:
+    get:
+      tags: [Knowledge Base]
+      operationId: getDefaultKnowledgePipelineConfig
+      summary: 查询知识库默认管线配置
+      description: 返回创建知识库时的默认解析、切片、增强、向量化和向量库存储配置。该接口无入参。
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgePipelineDefaultConfigEnvelope'
   /mgmt/knowledge/knowledge-bases/{kbId}:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     get:
@@ -2725,6 +2738,25 @@ components:
         notReadyKnowledgeBaseCount: { type: integer, description: 未就绪知识库数量 }
         notReadyReasonBreakdown: { type: object, additionalProperties: { type: integer }, description: 按未就绪原因聚合的知识库数量，例如 DRAFT 或 DISABLED }
 
+    KnowledgePipelineDefaultConfigResponse:
+      type: object
+      description: 创建知识库时使用的默认管线配置。
+      required: [parser, chunking, enhance, embedding, vectorStore]
+      properties:
+        parser: { $ref: '#/components/schemas/KnowledgePipelineComponent', description: 默认解析器配置 }
+        chunking: { $ref: '#/components/schemas/KnowledgePipelineComponent', description: 默认切片配置 }
+        enhance: { type: array, items: { $ref: '#/components/schemas/KnowledgePipelineComponent' }, description: 默认内容增强配置列表 }
+        embedding: { $ref: '#/components/schemas/KnowledgePipelineComponent', description: 默认向量化配置 }
+        vectorStore: { $ref: '#/components/schemas/KnowledgePipelineComponent', description: 默认向量库配置 }
+
+    KnowledgePipelineComponent:
+      type: object
+      description: 管线阶段组件配置。
+      required: [type, options]
+      properties:
+        type: { type: string, description: 组件类型 }
+        options: { type: object, additionalProperties: true, description: 组件参数 }
+
     KnowledgeStageComponentConfig:
       type: object
       required: [type]
@@ -3153,6 +3185,7 @@ components:
     KnowledgeBaseConfigUpdateEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseConfigUpdateResponse', description: 响应数据 } } }] }
     KnowledgeBaseStatisticsEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseStatisticsResponse', description: 响应数据 } } }] }
     KnowledgeBaseAggregateStatisticsEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseAggregateStatisticsResponse', description: 响应数据 } } }] }
+    KnowledgePipelineDefaultConfigEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgePipelineDefaultConfigResponse', description: 响应数据 } } }] }
     KnowledgeDocumentCreateEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentCreateResponse', description: 响应数据 } } }] }
     KnowledgeBaseDocumentPageEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseDocumentPageResponse', description: 响应数据 } } }] }
     KnowledgeBuildJobEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentBatchImportResponse', description: 响应数据 } } }] }
