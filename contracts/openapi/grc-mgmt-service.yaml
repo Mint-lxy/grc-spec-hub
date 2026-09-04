@@ -477,6 +477,32 @@ paths:
                         description: 响应数据
                         type: array
                         items: { $ref: '#/components/schemas/VectorStoreInstance' }
+  /mgmt/knowledge/knowledge-bases/stats:
+    get:
+      tags: [Knowledge Base]
+      operationId: getKnowledgeBaseAggregateStatistics
+      summary: 查询知识库聚合统计
+      description: 查询所有知识库、可用文档和切片的聚合统计，以及未就绪知识库的原因分布。
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseAggregateStatisticsEnvelope'
+  /mgmt/knowledge/knowledge-bases/default-pipeline-config:
+    get:
+      tags: [Knowledge Base]
+      operationId: getDefaultKnowledgePipelineConfig
+      summary: 查询知识库默认管线配置
+      description: 返回创建知识库时的默认解析、切片、增强、向量化和向量库存储配置。该接口无入参。
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgePipelineDefaultConfigEnvelope'
   /mgmt/knowledge/knowledge-bases/{kbId}:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     get:
@@ -500,6 +526,7 @@ paths:
       tags: [Knowledge Base]
       operationId: createKnowledgeDocument
       summary: 创建知识库文档
+      description: 向指定知识库创建/导入单份文档并可触发自动构建
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/CreateKnowledgeDocumentRequest' } } }
@@ -522,9 +549,10 @@ paths:
       tags: [Knowledge Base]
       operationId: importKnowledgeDocuments
       summary: 导入知识库文档
+      description: 批量导入多份文档到指定知识库并触发构建任务
       requestBody:
         required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/CreateKnowledgeBuildJobRequest' } } }
+        content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeDocumentBatchImportRequest' } } }
       responses: { '200': { description: 导入成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBuildJobEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/build-jobs:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
@@ -2698,6 +2726,37 @@ components:
         documentStatusBreakdown: { type: object, additionalProperties: { type: integer }, description: 文档状态分布 }
         chunkEmbedStatusBreakdown: { type: object, additionalProperties: { type: integer }, description: 切片嵌入状态分布 }
 
+    KnowledgeBaseAggregateStatisticsResponse:
+      type: object
+      description: 所有知识库的聚合统计数据。
+      required: [knowledgeBaseCount, availableDocumentCount, chunkCount, readyKnowledgeBaseCount, notReadyKnowledgeBaseCount, notReadyReasonBreakdown]
+      properties:
+        knowledgeBaseCount: { type: integer, description: 知识库总数 }
+        availableDocumentCount: { type: integer, description: 可用文档总数 }
+        chunkCount: { type: integer, description: 文档切片总数 }
+        readyKnowledgeBaseCount: { type: integer, description: 已就绪知识库数量 }
+        notReadyKnowledgeBaseCount: { type: integer, description: 未就绪知识库数量 }
+        notReadyReasonBreakdown: { type: object, additionalProperties: { type: integer }, description: 按未就绪原因聚合的知识库数量，例如 DRAFT 或 DISABLED }
+
+    KnowledgePipelineDefaultConfigResponse:
+      type: object
+      description: 创建知识库时使用的默认管线配置。
+      required: [parser, chunking, enhance, embedding, vectorStore]
+      properties:
+        parser: { $ref: '#/components/schemas/KnowledgePipelineComponent', description: 默认解析器配置 }
+        chunking: { $ref: '#/components/schemas/KnowledgePipelineComponent', description: 默认切片配置 }
+        enhance: { type: array, items: { $ref: '#/components/schemas/KnowledgePipelineComponent' }, description: 默认内容增强配置列表 }
+        embedding: { $ref: '#/components/schemas/KnowledgePipelineComponent', description: 默认向量化配置 }
+        vectorStore: { $ref: '#/components/schemas/KnowledgePipelineComponent', description: 默认向量库配置 }
+
+    KnowledgePipelineComponent:
+      type: object
+      description: 管线阶段组件配置。
+      required: [type, options]
+      properties:
+        type: { type: string, description: 组件类型 }
+        options: { type: object, additionalProperties: true, description: 组件参数 }
+
     KnowledgeStageComponentConfig:
       type: object
       required: [type]
@@ -2717,22 +2776,48 @@ components:
 
     CreateKnowledgeDocumentRequest:
       type: object
+      description: 在知识库中创建单份文档请求
       required: [fileName, sourceType, fileId, docType]
       properties:
-        fileName: { type: string, minLength: 1, description: 文件名 }
-        sourceType: { type: string, minLength: 1, description: 来源类型 }
-        fileId: { type: integer, format: int64, description: 文件 ID }
-        docType: { type: string, minLength: 1, description: 文档类型 }
-        sourceMeta: { type: object, additionalProperties: true, description: 来源元数据 }
-        stageOverrides: { $ref: '#/components/schemas/KnowledgeStageConfigRequest', description: 阶段覆盖配置 }
-        runMode: { type: string, description: 构建模式，auto/manual }
+        fileName: { type: string, minLength: 1, description: 文档文件名 }
+        sourceType: { type: string, minLength: 1, description: '来源类型: CONFLUENCE, SHAREPOINT, ONEDRIVE, BLOB, S3, LOCAL_UPLOAD, FILE' }
+        fileId: { type: integer, format: int64, description: 文件中心文件 ID }
+        docType: { type: string, minLength: 1, description: '文档类型，例如 pdf/docx' }
+        sourceMeta: { type: object, additionalProperties: true, description: 来源扩展元数据 }
+        stageOverrides: { $ref: '#/components/schemas/KnowledgeStageConfigRequest', description: 阶段级覆盖配置 }
+        runMode: { type: string, default: auto, description: '构建模式：auto (自动构建) / manual (仅创建不自动构建)' }
 
     KnowledgeDocumentCreateResponse:
       type: object
+      description: 知识库文档创建响应数据
       properties:
-        documentId: { type: string, description: 文档 ID }
-        jobId: { type: string, description: 任务 ID }
-        status: { type: string, description: 状态 }
+        documentId: { type: string, description: 创建成功的文档 ID }
+        jobId: { type: string, description: 关联的构建任务 ID }
+        status: { type: string, description: 当前状态 }
+
+    KnowledgeDocumentBatchImportRequest:
+      type: object
+      description: 批量导入文件请求入参
+      required: [sources]
+      properties:
+        stageConfig: { $ref: '#/components/schemas/KnowledgeStageConfigRequest', description: 批量构建默认的完整 pipeline 配置 }
+        sources:
+          type: array
+          minItems: 1
+          description: 构建来源列表
+          items: { $ref: '#/components/schemas/KnowledgeBatchImportSourceRequest' }
+
+    KnowledgeBatchImportSourceRequest:
+      type: object
+      description: 批量导入的文件来源信息
+      required: [type]
+      properties:
+        type: { type: string, minLength: 1, description: '来源类型: CONFLUENCE, SHAREPOINT, ONEDRIVE, BLOB, S3, LOCAL_UPLOAD, FILE' }
+        fileId: { type: string, description: 文件中心文件 ID }
+        fileName: { type: string, description: 文件名称 }
+        fileType: { type: string, description: 文件类型/格式 }
+        url: { type: string, format: uri, description: 外部资源 URL 地址 }
+        stageConfig: { $ref: '#/components/schemas/KnowledgeStageConfigRequest', description: 针对该单项来源的阶段覆盖配置 }
 
     KnowledgeBaseDocumentListItemResponse:
       type: object
@@ -2768,21 +2853,23 @@ components:
 
     KnowledgePipelineJobResponse:
       type: object
+      description: 批量构建任务中的单个文档管线任务
       properties:
         pipelineJobId: { type: string, description: 管线任务 ID }
-        documentId: { type: string, description: 文档 ID }
-        status: { type: string, description: 状态 }
+        documentId: { type: string, description: 关联文档 ID }
+        status: { type: string, description: 任务状态 }
         sourceType: { type: string, description: 来源类型 }
 
     KnowledgeDocumentBatchImportResponse:
       type: object
+      description: 知识库文件批量导入响应数据
       properties:
         batchJobId: { type: string, description: 批处理任务 ID }
-        knowledgeBaseId: { type: string, description: 知识库 ID }
-        type: { type: string, description: 类型 }
-        status: { type: string, description: 状态 }
-        totalDocs: { type: integer, description: 字段：totalDocs }
-        pipelineJobs: { type: array, items: { $ref: '#/components/schemas/KnowledgePipelineJobResponse' }, description: 字段：pipelineJobs }
+        knowledgeBaseId: { type: string, description: 目标知识库 ID }
+        type: { type: string, description: 任务/导入类型 }
+        status: { type: string, description: 批任务状态 }
+        totalDocs: { type: integer, description: 本次导入的文档总数 }
+        pipelineJobs: { type: array, items: { $ref: '#/components/schemas/KnowledgePipelineJobResponse' }, description: 生成的单项文档管线任务列表 }
 
     KnowledgeBatchBuildJobResponse:
       type: object
@@ -3097,6 +3184,8 @@ components:
     KnowledgeBaseDetailEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseDetailResponse', description: 响应数据 } } }] }
     KnowledgeBaseConfigUpdateEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseConfigUpdateResponse', description: 响应数据 } } }] }
     KnowledgeBaseStatisticsEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseStatisticsResponse', description: 响应数据 } } }] }
+    KnowledgeBaseAggregateStatisticsEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseAggregateStatisticsResponse', description: 响应数据 } } }] }
+    KnowledgePipelineDefaultConfigEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgePipelineDefaultConfigResponse', description: 响应数据 } } }] }
     KnowledgeDocumentCreateEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentCreateResponse', description: 响应数据 } } }] }
     KnowledgeBaseDocumentPageEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseDocumentPageResponse', description: 响应数据 } } }] }
     KnowledgeBuildJobEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentBatchImportResponse', description: 响应数据 } } }] }
