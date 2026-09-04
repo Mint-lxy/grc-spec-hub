@@ -89,18 +89,20 @@ paths:
           in: query
           required: false
           schema:
-            type: integer
-            minimum: 1
-            default: 1
+            anyOf:
+              - type: integer
+                minimum: 1
+              - type: 'null'
             title: Page
         - name: pageSize
           in: query
           required: false
           schema:
-            type: integer
-            maximum: 100
-            minimum: 1
-            default: 20
+            anyOf:
+              - type: integer
+                maximum: 100
+                minimum: 1
+              - type: 'null'
             title: Pagesize
       responses:
         '200':
@@ -147,15 +149,17 @@ paths:
     get:
       tags:
         - knowledge-bases
-      summary: Get Knowledge Base Summary Statistics
-      operationId: get_knowledge_base_summary_statistics_api_v1_knowledge_knowledge_bases_stats_get
+      summary: Knowledge Base Summary Statistics
+      operationId: knowledge_base_summary_statistics_api_v1_knowledge_knowledge_bases_stats_get
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/KnowledgeBaseSummaryStatisticsResponse'
+                additionalProperties: true
+                type: object
+                title: Response Knowledge Base Summary Statistics Api V1 Knowledge Knowledge Bases Stats Get
   /api/v1/knowledge/knowledge-bases/pipeline-options:
     get:
       tags:
@@ -478,18 +482,20 @@ paths:
           in: query
           required: false
           schema:
-            type: integer
-            minimum: 1
-            default: 1
+            anyOf:
+              - type: integer
+                minimum: 1
+              - type: 'null'
             title: Page
         - name: pageSize
           in: query
           required: false
           schema:
-            type: integer
-            maximum: 100
-            minimum: 1
-            default: 20
+            anyOf:
+              - type: integer
+                maximum: 100
+                minimum: 1
+              - type: 'null'
             title: Pagesize
         - name: status
           in: query
@@ -628,18 +634,20 @@ paths:
           in: query
           required: false
           schema:
-            type: integer
-            minimum: 1
-            default: 1
+            anyOf:
+              - type: integer
+                minimum: 1
+              - type: 'null'
             title: Page
         - name: pageSize
           in: query
           required: false
           schema:
-            type: integer
-            maximum: 100
-            minimum: 1
-            default: 20
+            anyOf:
+              - type: integer
+                maximum: 100
+                minimum: 1
+              - type: 'null'
             title: Pagesize
         - name: snippetContext
           in: query
@@ -701,18 +709,20 @@ paths:
           in: query
           required: false
           schema:
-            type: integer
-            minimum: 1
-            default: 1
+            anyOf:
+              - type: integer
+                minimum: 1
+              - type: 'null'
             title: Page
         - name: pageSize
           in: query
           required: false
           schema:
-            type: integer
-            maximum: 100
-            minimum: 1
-            default: 20
+            anyOf:
+              - type: integer
+                maximum: 100
+                minimum: 1
+              - type: 'null'
             title: Pagesize
       responses:
         '200':
@@ -983,18 +993,20 @@ paths:
           in: query
           required: false
           schema:
-            type: integer
-            minimum: 1
-            default: 1
+            anyOf:
+              - type: integer
+                minimum: 1
+              - type: 'null'
             title: Page
         - name: pageSize
           in: query
           required: false
           schema:
-            type: integer
-            maximum: 100
-            minimum: 1
-            default: 20
+            anyOf:
+              - type: integer
+                maximum: 100
+                minimum: 1
+              - type: 'null'
             title: Pagesize
       responses:
         '200':
@@ -1345,10 +1357,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /open/v1/knowledge/knowledge-bases/{knowledgeBaseId}:
+  /dify/v1/knowledge/knowledge-bases/{knowledgeBaseId}:
     get:
       summary: Get Open Knowledge Base Alias
-      operationId: get_open_knowledge_base_alias_open_v1_knowledge_knowledge_bases__knowledgeBaseId__get
+      operationId: get_open_knowledge_base_alias_dify_v1_knowledge_knowledge_bases__knowledgeBaseId__get
       parameters:
         - name: knowledgeBaseId
           in: path
@@ -1364,17 +1376,17 @@ paths:
               schema:
                 type: object
                 additionalProperties: true
-                title: Response Get Open Knowledge Base Alias Open V1 Knowledge Knowledge Bases  Knowledgebaseid  Get
+                title: Response Get Open Knowledge Base Alias Dify V1 Knowledge Knowledge Bases  Knowledgebaseid  Get
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /open/v1/knowledge/retrievals:
+  /dify/v1/knowledge/retrievals:
     post:
       summary: Retrieve Open Knowledge Alias
-      operationId: retrieve_open_knowledge_alias_open_v1_knowledge_retrievals_post
+      operationId: retrieve_open_knowledge_alias_dify_v1_knowledge_retrievals_post
       requestBody:
         content:
           application/json:
@@ -1389,17 +1401,17 @@ paths:
               schema:
                 additionalProperties: true
                 type: object
-                title: Response Retrieve Open Knowledge Alias Open V1 Knowledge Retrievals Post
+                title: Response Retrieve Open Knowledge Alias Dify V1 Knowledge Retrievals Post
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /open/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents:
+  /dify/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents:
     post:
       summary: Update Open Knowledge Document Alias
-      operationId: update_open_knowledge_document_alias_open_v1_knowledge_knowledge_bases__knowledgeBaseId__documents_post
+      operationId: update_open_knowledge_document_alias_dify_v1_knowledge_knowledge_bases__knowledgeBaseId__documents_post
       parameters:
         - name: knowledgeBaseId
           in: path
@@ -1421,7 +1433,90 @@ paths:
               schema:
                 type: object
                 additionalProperties: true
-                title: Response Update Open Knowledge Document Alias Open V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents Post
+                title: Response Update Open Knowledge Document Alias Dify V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /open/v1/knowledge/knowledge-bases/{knowledgeBaseId}:
+    get:
+      summary: Get General Open Knowledge Base
+      operationId: get_general_open_knowledge_base_open_v1_knowledge_knowledge_bases__knowledgeBaseId__get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get General Open Knowledge Base Open V1 Knowledge Knowledge Bases  Knowledgebaseid  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /open/v1/knowledge/retrievals:
+    post:
+      summary: Retrieve General Open Knowledge
+      operationId: retrieve_general_open_knowledge_open_v1_knowledge_retrievals_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RetrievalRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Retrieve General Open Knowledge Open V1 Knowledge Retrievals Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /open/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents:
+    post:
+      summary: Create General Open Document
+      operationId: create_general_open_document_open_v1_knowledge_knowledge_bases__knowledgeBaseId__documents_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDocumentRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Create General Open Document Open V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents Post
         '422':
           description: Validation Error
           content:
@@ -1631,52 +1726,6 @@ components:
       required:
         - name
       title: KnowledgeTagRequest
-    KnowledgeBaseSummaryStatisticsResponse:
-      properties:
-        knowledgeBaseCount:
-          type: integer
-          minimum: 0
-          title: Knowledgebasecount
-        availableDocumentCount:
-          type: integer
-          minimum: 0
-          title: Availabledocumentcount
-        chunkCount:
-          type: integer
-          minimum: 0
-          title: Chunkcount
-        readyKnowledgeBaseCount:
-          type: integer
-          minimum: 0
-          title: Readyknowledgebasecount
-        notReadyKnowledgeBaseCount:
-          type: integer
-          minimum: 0
-          title: Notreadyknowledgebasecount
-        notReadyReasonBreakdown:
-          properties:
-            DRAFT:
-              type: integer
-              minimum: 0
-            DISABLED:
-              type: integer
-              minimum: 0
-          additionalProperties: false
-          type: object
-          required:
-            - DRAFT
-            - DISABLED
-          title: Notreadyreasonbreakdown
-      additionalProperties: false
-      type: object
-      required:
-        - knowledgeBaseCount
-        - availableDocumentCount
-        - chunkCount
-        - readyKnowledgeBaseCount
-        - notReadyKnowledgeBaseCount
-        - notReadyReasonBreakdown
-      title: KnowledgeBaseSummaryStatisticsResponse
     PipelineConfig:
       properties:
         parser:
@@ -1951,11 +2000,6 @@ components:
         type:
           type: string
           title: Error Type
-        input:
-          title: Input
-        ctx:
-          type: object
-          title: Context
       type: object
       required:
         - loc
