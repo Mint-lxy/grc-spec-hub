@@ -1,6 +1,6 @@
 ---
 name: memory-sync
-description: 对齐 hub 记忆层（state/watchlist/decisions）与事实源（ADR/specs/service-map/manifest），发现漂移并生成修正建议。Use when: 定期记忆对齐、怀疑 memory 过期、ADR 或 spec 变更后需要同步 now/ 文件、watchlist 需要刷新。
+description: "对齐 hub 记忆层（state/watchlist/decisions）与事实源（ADR/specs/service-map/manifest），发现漂移并生成修正建议。Use when: 定期记忆对齐、怀疑 memory 过期、ADR 或 spec 变更后需要同步 now/ 文件、watchlist 需要刷新。"
 metadata:
   origin: hub
 ---
