@@ -104,6 +104,15 @@ paths:
                 minimum: 1
               - type: 'null'
             title: Pagesize
+        - name: sort
+          in: query
+          required: false
+          description: >-
+            单字段排序规则，格式为 field:asc 或 field:desc；仅支持
+            documentCount、chunkCount、vectorCount、coverage。
+          schema:
+            type: string
+            pattern: '^(documentCount|chunkCount|vectorCount|coverage):(asc|desc)$'
       responses:
         '200':
           description: Successful Response
