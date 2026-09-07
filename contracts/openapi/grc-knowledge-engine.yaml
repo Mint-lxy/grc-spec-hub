@@ -60,6 +60,14 @@ paths:
               - type: integer
               - type: 'null'
             title: Directoryid
+        - name: directoryType
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - $ref: '#/components/schemas/DirectoryType'
+              - type: 'null'
+            title: Directorytype
         - name: status
           in: query
           required: false
@@ -85,6 +93,14 @@ paths:
               - type: boolean
               - type: 'null'
             title: Retrievalready
+        - name: sort
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Sort
         - name: page
           in: query
           required: false
@@ -104,15 +120,6 @@ paths:
                 minimum: 1
               - type: 'null'
             title: Pagesize
-        - name: sort
-          in: query
-          required: false
-          description: >-
-            单字段排序规则，格式为 field:asc 或 field:desc；仅支持
-            documentCount、chunkCount、vectorCount、coverage。
-          schema:
-            type: string
-            pattern: '^(documentCount|chunkCount|vectorCount|coverage):(asc|desc)$'
       responses:
         '200':
           description: Successful Response
@@ -123,11 +130,7 @@ paths:
                 additionalProperties: true
                 title: Response List Knowledge Bases Api V1 Knowledge Knowledge Bases Get
         '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+          description: Invalid sort parameter
     post:
       tags:
         - knowledge-bases
@@ -324,6 +327,40 @@ paths:
                 type: object
                 additionalProperties: true
                 title: Response Disable Knowledge Base Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Offline Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/status:
+    patch:
+      tags:
+        - knowledge-bases
+      summary: Update Knowledge Base Status
+      operationId: update_knowledge_base_status_api_v1_knowledge_knowledge_bases__knowledgeBaseId__status_patch
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateKnowledgeBaseStatusRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Update Knowledge Base Status Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Status Patch
         '422':
           description: Validation Error
           content:
@@ -1632,9 +1669,7 @@ components:
             - type: 'null'
           title: Description
         visibility:
-          type: string
-          minLength: 1
-          title: Visibility
+          $ref: '#/components/schemas/KnowledgeBaseVisibility'
         recommendedConfig:
           type: boolean
           title: Recommendedconfig
@@ -1709,6 +1744,12 @@ components:
       additionalProperties: false
       type: object
       title: DifyRetrievalSetting
+    DirectoryType:
+      type: string
+      enum:
+        - PUBLIC
+        - PERSONAL
+      title: DirectoryType
     HTTPValidationError:
       properties:
         detail:
@@ -1718,6 +1759,20 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
+    KnowledgeBaseStatus:
+      type: string
+      enum:
+        - DRAFT
+        - ACTIVE
+        - DISABLED
+      title: KnowledgeBaseStatus
+    KnowledgeBaseVisibility:
+      type: string
+      enum:
+        - PRIVATE
+        - PUBLIC
+        - RESTRICTED
+      title: KnowledgeBaseVisibility
     KnowledgeTagRequest:
       properties:
         tagId:
@@ -1987,13 +2042,20 @@ components:
           title: Description
         visibility:
           anyOf:
-            - type: string
-              minLength: 1
+            - $ref: '#/components/schemas/KnowledgeBaseVisibility'
             - type: 'null'
-          title: Visibility
       additionalProperties: false
       type: object
       title: UpdateKnowledgeBaseRequest
+    UpdateKnowledgeBaseStatusRequest:
+      properties:
+        status:
+          $ref: '#/components/schemas/KnowledgeBaseStatus'
+      additionalProperties: false
+      type: object
+      required:
+        - status
+      title: UpdateKnowledgeBaseStatusRequest
     ValidationError:
       properties:
         loc:
