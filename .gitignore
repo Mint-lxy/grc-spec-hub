@@ -24,3 +24,6 @@ Thumbs.db
 .dev
 .devin/
 .cursor/
+
+# CodeBuddy 本地工作记忆（不入库）
+.codebuddy/
