@@ -551,6 +551,13 @@ paths:
         - { name: retrievalReady, in: query, required: false, description: 是否可检索, schema: { type: boolean } }
         - { name: page, in: query, required: false, description: 页码, schema: { type: integer, minimum: 1 } }
         - { name: pageSize, in: query, required: false, description: 每页条数, schema: { type: integer, minimum: 1 } }
+        - name: sort
+          in: query
+          required: false
+          description: 单字段排序，格式为 field:asc 或 field:desc；仅支持 chunkCount、updatedAt
+          schema:
+            type: string
+            pattern: '^(chunkCount|updatedAt):(asc|desc)$'
       responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBaseDocumentPageEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/documents/imports:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
@@ -622,6 +629,16 @@ paths:
       operationId: publishKnowledgeBase
       summary: 发布知识库
       responses: { '200': { description: 发布成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBaseDetailEnvelope' } } } } }
+  /mgmt/knowledge/knowledge-bases/{kbId}/status:
+    parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
+    patch:
+      tags: [Knowledge Base]
+      operationId: updateKnowledgeBaseStatus
+      summary: 更新知识库状态
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/UpdateKnowledgeBaseStatusRequest' } } }
+      responses: { '200': { description: 状态更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBaseDetailEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/offline:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     post:
@@ -2013,6 +2030,15 @@ components:
         name: { type: string, description: 知识库名称 }
         description: { type: string, description: 知识库描述 }
         metadata: { type: object, additionalProperties: true, description: 知识库扩展元数据 }
+    UpdateKnowledgeBaseStatusRequest:
+      type: object
+      required: [status]
+      description: 更新知识库生命周期状态。
+      properties:
+        status:
+          type: string
+          enum: [DRAFT, ACTIVE, DISABLED]
+          description: 目标状态
     BatchUpdateKnowledgeDocumentStageConfigRequest:
       type: object
       required: [documentIds, stageConfig]
@@ -2683,6 +2709,11 @@ components:
       properties:
         knowledgeBaseId: { type: string, description: 知识库 ID }
         directoryId: { type: integer, format: int64, description: 所属目录 ID }
+        directoryInfo:
+          type: object
+          description: 当前知识库所在目录信息
+          properties:
+            name: { type: string, description: 目录名称 }
         name: { type: string, description: 名称 }
         description: { type: string, description: 描述 }
         visibility: { type: string, description: 可见性 }
@@ -2869,6 +2900,7 @@ components:
         liveJobStatus: { type: string, description: 生效任务状态 }
         retrievalReady: { type: boolean, description: 是否可检索 }
         updatedAt: { type: string, format: date-time, description: 更新时间 }
+        chunkCount: { type: integer, minimum: 0, description: chunk 数 }
 
     KnowledgeBaseDocumentPageResponse:
       type: object
