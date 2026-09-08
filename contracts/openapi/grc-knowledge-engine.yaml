@@ -2027,6 +2027,10 @@ components:
       title: UpdateKnowledgeBaseConfigRequest
     UpdateKnowledgeBaseRequest:
       properties:
+        directoryId:
+          type: integer
+          minimum: 1
+          title: Directoryid
         name:
           anyOf:
             - type: string
@@ -2044,6 +2048,14 @@ components:
           anyOf:
             - $ref: '#/components/schemas/KnowledgeBaseVisibility'
             - type: 'null'
+        tags:
+          items:
+            $ref: '#/components/schemas/KnowledgeTagRequest'
+          type: array
+          maxItems: 20
+          title: Tags
+        pipelineConfig:
+          $ref: '#/components/schemas/UpdateKnowledgeBaseConfigRequest'
       additionalProperties: false
       type: object
       title: UpdateKnowledgeBaseRequest

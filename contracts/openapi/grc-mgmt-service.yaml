@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: GRC Management Service API
-  version: "2.1"
+  version: "2.2"
   description: >-
     grc-mgt-service 的对外契约，覆盖 chat、文件、知识库、marketplace、RBAC 与 vault 管理接口。
     其中 chat 会话子域
@@ -2883,17 +2883,21 @@ components:
         url: { type: string, format: uri, description: 外部资源 URL 地址 }
         stageConfig: { $ref: '#/components/schemas/KnowledgeStageConfigRequest', description: 针对该单项来源的阶段覆盖配置 }
 
+    DocumentBuildStageStatus:
+      type: string
+      description: 文档构建阶段状态。当前取值：WAITING（等待构建）、RUNNING（构建中）、SUCCESS（构建完成）、FAILED（构建失败）、SKIPPED（未配置增强部分时跳过构建）、CANCELED（前序流程失败时取消后续流程）。
+
     KnowledgeBaseDocumentListItemResponse:
       type: object
       properties:
         documentId: { type: string, description: 文档 ID }
         fileName: { type: string, description: 文件名 }
         docType: { type: string, description: 文档类型 }
-        parseStatus: { type: string, description: 字段：parseStatus }
+        parseStatus: { $ref: '#/components/schemas/DocumentBuildStageStatus', description: 解析阶段状态 }
         parseState: { type: string, description: 字段：parseState }
-        chunkStatus: { type: string, description: 字段：chunkStatus }
-        enhanceStatus: { type: string, description: 字段：enhanceStatus }
-        embeddingStatus: { type: string, description: 字段：embeddingStatus }
+        chunkStatus: { $ref: '#/components/schemas/DocumentBuildStageStatus', description: 切片阶段状态 }
+        enhanceStatus: { $ref: '#/components/schemas/DocumentBuildStageStatus', description: 增强阶段状态 }
+        embeddingStatus: { $ref: '#/components/schemas/DocumentBuildStageStatus', description: 向量化阶段状态 }
         update: { type: object, additionalProperties: true, description: 字段：update }
         meta: { type: object, additionalProperties: true, description: 字段：meta }
         sourceType: { type: string, enum: [CONFLUENCE, SHAREPOINT, ONEDRIVE, BLOB, S3, LOCAL_UPLOAD], description: 来源类型 }
