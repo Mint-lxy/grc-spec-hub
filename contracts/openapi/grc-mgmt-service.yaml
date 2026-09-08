@@ -2893,11 +2893,8 @@ components:
         documentId: { type: string, description: 文档 ID }
         fileName: { type: string, description: 文件名 }
         docType: { type: string, description: 文档类型 }
-        parseStatus: { $ref: '#/components/schemas/DocumentBuildStageStatus', description: 解析阶段状态 }
         parseState: { type: string, description: 字段：parseState }
-        chunkStatus: { $ref: '#/components/schemas/DocumentBuildStageStatus', description: 切片阶段状态 }
-        enhanceStatus: { $ref: '#/components/schemas/DocumentBuildStageStatus', description: 增强阶段状态 }
-        embeddingStatus: { $ref: '#/components/schemas/DocumentBuildStageStatus', description: 向量化阶段状态 }
+        buildStages: { $ref: '#/components/schemas/DocumentBuildStagesResponse', description: 文档构建阶段状态汇总 }
         update: { type: object, additionalProperties: true, description: 字段：update }
         meta: { type: object, additionalProperties: true, description: 字段：meta }
         sourceType: { type: string, enum: [CONFLUENCE, SHAREPOINT, ONEDRIVE, BLOB, S3, LOCAL_UPLOAD], description: 来源类型 }
@@ -2911,6 +2908,17 @@ components:
         retrievalReady: { type: boolean, description: 是否可检索 }
         updatedAt: { type: string, format: date-time, description: 更新时间 }
         chunkCount: { type: integer, minimum: 0, description: chunk 数 }
+        pageCount: { type: integer, minimum: 0, description: 页数 }
+        charCount: { type: integer, minimum: 0, description: 字符数 }
+        fileSize: { type: string, description: 文件大小，低于 1MB 使用 KB，达到或超过 1MB 使用 MB }
+
+    DocumentBuildStagesResponse:
+      type: object
+      properties:
+        parseStatus: { $ref: '#/components/schemas/DocumentBuildStageStatus', description: 解析阶段状态 }
+        chunkStatus: { $ref: '#/components/schemas/DocumentBuildStageStatus', description: 切片阶段状态 }
+        enhanceStatus: { $ref: '#/components/schemas/DocumentBuildStageStatus', description: 增强阶段状态 }
+        embeddingStatus: { $ref: '#/components/schemas/DocumentBuildStageStatus', description: 向量化阶段状态 }
 
     KnowledgeBaseDocumentPageResponse:
       type: object
