@@ -2025,11 +2025,21 @@ components:
         timestamp: { type: string, format: date-time, description: 响应时间戳 }
     UpdateKnowledgeBaseRequest:
       type: object
-      description: 更新知识库请求；字段由知识引擎按版本条件处理。
+      required: [directoryId, name, visibility, pipelineConfig, roleApprovers]
+      description: 更新知识库请求，与创建知识库请求保持一致的完整结构。
       properties:
-        name: { type: string, description: 知识库名称 }
-        description: { type: string, description: 知识库描述 }
-        metadata: { type: object, additionalProperties: true, description: 知识库扩展元数据 }
+        directoryId: { type: integer, format: int64, minimum: 1, description: 目录 ID }
+        name: { type: string, minLength: 1, maxLength: 255, description: 名称 }
+        description: { type: string, maxLength: 512, description: 描述 }
+        visibility: { type: string, enum: [PUBLIC, RESTRICTED, PRIVATE], minLength: 1, description: '可见性：PUBLIC, RESTRICTED, PRIVATE' }
+        recommendedConfig: { type: boolean, default: true, description: 是否使用推荐配置 }
+        roleApprovers: { $ref: '#/components/schemas/KnowledgeBaseRoleApprovers', description: 更新时记录的四类角色审批人 }
+        tags:
+          description: 标签列表
+          type: array
+          maxItems: 20
+          items: { $ref: '#/components/schemas/KnowledgeTagRequest' }
+        pipelineConfig: { $ref: '#/components/schemas/KnowledgePipelineConfigRequest', description: 管线配置 }
     UpdateKnowledgeBaseStatusRequest:
       type: object
       required: [status]
@@ -2906,6 +2916,7 @@ components:
         page: { type: integer, minimum: 1, description: 当前页码 }
         pageSize: { type: integer, minimum: 1, description: 每页数量 }
         total: { type: integer, format: int64, minimum: 0, description: 总数 }
+        needRefresh: { type: boolean, description: 当前返回结果中是否存在正在构建中的文档 }
 
     KnowledgePipelineJobResponse:
       type: object
