@@ -4,7 +4,7 @@
 
 **Created**: 2026-09-09
 
-**Status**: Draft（待人审）
+**Status**: Reviewed（2026-09-09 用户批准；部署、持久化、回滚与重装验收完成）
 
 **Input**: 在 Azure 中国云开发 AKS 上部署 Milvus 2.5.12，为
 `grc-knowledge-engine` 提供可持久化、可恢复、仅集群内访问的向量数据库。
