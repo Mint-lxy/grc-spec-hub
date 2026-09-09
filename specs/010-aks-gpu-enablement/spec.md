@@ -4,7 +4,7 @@
 
 **Created**: 2026-09-09
 
-**Status**: Draft（待人审）
+**Status**: Reviewed（2026-09-09 用户批准；实现、回滚与重装验收完成）
 
 **Input**: 在现有开发 AKS 的 `gpupool` 上采用自管 NVIDIA Device Plugin 的方案，
 使 `grc-parser-engine` 等 GPU 工作负载可以声明、调度并使用 GPU；不重建节点池。

@@ -14,12 +14,12 @@ manifest；集群实施必须完成驱动预检、运行时验收和回滚演练
 
 ## Phase 1: Setup
 
-- [ ] T001 [US1] 在开发 AKS 记录实施前基线：`gpupool` Ready、无
+- [x] T001 [US1] 在开发 AKS 记录实施前基线：`gpupool` Ready、无
   `nvidia.com/gpu`、无 NVIDIA Device Plugin，并将结果写入
   `grc-parser-engine/deploy/aks/gpu/README.md`
-- [ ] T002 [P] [US1] 在 AWS EC2 上锁定 NVIDIA Device Plugin `v0.18.0` 和最小
+- [x] T002 [P] [US1] 在 AWS EC2 上锁定 NVIDIA Device Plugin `v0.18.0` 和最小
   CUDA 测试镜像的源 digest/架构，目标命名写入 `docs/temp/部署镜像清单.md`
-- [ ] T003 [P] [US3] 记录 `gpupool` 当前 taint、节点和集群健康基线，写入
+- [x] T003 [P] [US3] 记录 `gpupool` 当前 taint、节点和集群健康基线，写入
   `grc-parser-engine/deploy/aks/gpu/README.md`
 
 ---
@@ -28,13 +28,13 @@ manifest；集群实施必须完成驱动预检、运行时验收和回滚演练
 
 **⚠️ CRITICAL**: 本阶段测试必须在 manifest 创建前运行并失败。
 
-- [ ] T004 [US1] 先创建
+- [x] T004 [US1] 先创建
   `grc-parser-engine/deploy/aks/gpu/tests/validate-gpu-manifests.ps1`，断言固定 ACR
   digest、禁止 `latest`/公网运行镜像、Namespace、nodeSelector、toleration、
   securityContext 和 hostPath
-- [ ] T005 [US1] 在 manifest 尚不存在时执行 `validate-gpu-manifests.ps1`，确认并记录
+- [x] T005 [US1] 在 manifest 尚不存在时执行 `validate-gpu-manifests.ps1`，确认并记录
   预期失败（红灯）
-- [ ] T006 [P] [US3] 在验证脚本中增加禁止 Secret、PVC、Service、Ingress 和非预期
+- [x] T006 [P] [US3] 在验证脚本中增加禁止 Secret、PVC、Service、Ingress 和非预期
   hostPath 的负向断言
 
 **Checkpoint**: 静态测试已建立且红灯，才能创建 manifest。
@@ -48,25 +48,25 @@ manifest；集群实施必须完成驱动预检、运行时验收和回滚演练
 **Independent Test**: 请求一个 `nvidia.com/gpu` 的一次性 Pod 在 `gpupool` 完成
 `nvidia-smi`，退出码为 0。
 
-- [ ] T007 [P] [US1] 将 Device Plugin `v0.18.0` 同步到
+- [x] T007 [P] [US1] 将 Device Plugin `v0.18.0` 同步到
   `XAGPMCNINFCTREG001/thirdparty/nvidia-k8s-device-plugin:0.18.0`，记录 ACR digest
-- [ ] T008 [P] [US1] 将固定 CUDA 测试镜像同步到
+- [x] T008 [P] [US1] 将固定 CUDA 测试镜像同步到
   `XAGPMCNINFCTREG001/thirdparty/`，记录 ACR digest
-- [ ] T009 [US1] 创建 `grc-parser-engine/deploy/aks/gpu/namespace.yaml`
-- [ ] T010 [US1] 创建
+- [x] T009 [US1] 创建 `grc-parser-engine/deploy/aks/gpu/namespace.yaml`
+- [x] T010 [US1] 创建
   `grc-parser-engine/deploy/aks/gpu/nvidia-device-plugin.yaml`，使用 ACR digest、
   `accelerator=nvidia`、`sku=gpu:NoSchedule` toleration 和最小安全上下文
-- [ ] T011 [US1] 创建 `grc-parser-engine/deploy/aks/gpu/gpu-smoke-test.yaml`，
+- [x] T011 [US1] 创建 `grc-parser-engine/deploy/aks/gpu/gpu-smoke-test.yaml`，
   请求一个 GPU，在 `gpupool` 执行 `nvidia-smi`
-- [ ] T012 [US1] 运行静态清单测试、`kubectl apply --dry-run=client` 和
+- [x] T012 [US1] 运行静态清单测试、`kubectl apply --dry-run=client` 和
   `kubectl apply --dry-run=server`，使测试转绿
-- [ ] T013 [US1] 使用临时受控诊断 Pod 在 GPU 节点执行宿主机 `nvidia-smi`，确认驱动
+- [x] T013 [US1] 使用临时受控诊断 Pod 在 GPU 节点执行宿主机 `nvidia-smi`，确认驱动
   可用后删除诊断 Pod
-- [ ] T014 [US1] 为现有 `gpupool` 添加 `sku=gpu:NoSchedule`，记录变更前后状态
-- [ ] T015 [US1] 部署 Namespace 和 Device Plugin，等待 DaemonSet rollout 成功
-- [ ] T016 [US1] 验证 `gpupool` 的 Capacity/Allocatable 出现
+- [x] T014 [US1] 为现有 `gpupool` 添加 `sku=gpu:NoSchedule`，记录变更前后状态
+- [x] T015 [US1] 部署 Namespace 和 Device Plugin，等待 DaemonSet rollout 成功
+- [x] T016 [US1] 验证 `gpupool` 的 Capacity/Allocatable 出现
   `nvidia.com/gpu: 1`
-- [ ] T017 [US1] 从 ACR 按 digest 部署一次性 GPU smoke Pod，验证 NVIDIA T4 和
+- [x] T017 [US1] 从 ACR 按 digest 部署一次性 GPU smoke Pod，验证 NVIDIA T4 和
   `nvidia-smi` 退出码 0，随后删除 smoke Pod
 
 **Checkpoint**: US1 独立验收通过，GPU 可被 Kubernetes 调度。
@@ -79,10 +79,10 @@ manifest；集群实施必须完成驱动预检、运行时验收和回滚演练
 
 **Independent Test**: 检查 taint、DaemonSet 落点和普通 Pod 调度行为。
 
-- [ ] T018 [US2] 验证 Device Plugin 仅有一个实例且运行在 `gpupool`
-- [ ] T019 [US2] 创建不带 GPU toleration 的临时普通测试 Pod，确认本次配置不会将其
+- [x] T018 [US2] 验证 Device Plugin 仅有一个实例且运行在 `gpupool`
+- [x] T019 [US2] 创建不带 GPU toleration 的临时普通测试 Pod，确认本次配置不会将其
   调度到 `gpupool`，随后删除测试 Pod
-- [ ] T020 [US2] 在 `grc-parser-engine/deploy/aks/gpu/README.md` 记录未来 parser
+- [x] T020 [US2] 在 `grc-parser-engine/deploy/aks/gpu/README.md` 记录未来 parser
   工作负载必须声明的 GPU limit、nodeSelector/affinity 和 toleration
 
 **Checkpoint**: US2 独立验收通过，GPU 节点隔离有效。
@@ -95,12 +95,12 @@ manifest；集群实施必须完成驱动预检、运行时验收和回滚演练
 
 **Independent Test**: 删除插件和 taint 后集群仍健康，再按同一工件恢复并重复 GPU 测试。
 
-- [ ] T021 [US3] 在 `grc-parser-engine/deploy/aks/gpu/README.md` 编写部署、诊断、升级、
+- [x] T021 [US3] 在 `grc-parser-engine/deploy/aks/gpu/README.md` 编写部署、诊断、升级、
   回滚和重装 Runbook
-- [ ] T022 [US3] 执行回滚：删除本功能 Namespace/DaemonSet，恢复实施前 taint，并验证
+- [x] T022 [US3] 执行回滚：删除本功能 Namespace/DaemonSet，恢复实施前 taint，并验证
   四个节点和系统组件保持健康
-- [ ] T023 [US3] 按 Runbook 重新添加 taint、部署插件并再次执行 GPU smoke test
-- [ ] T024 [US3] 验证 GPU 节点重获 `nvidia.com/gpu: 1`，集群无新增
+- [x] T023 [US3] 按 Runbook 重新添加 taint、部署插件并再次执行 GPU smoke test
+- [x] T024 [US3] 验证 GPU 节点重获 `nvidia.com/gpu: 1`，集群无新增
   CrashLoopBackOff，删除全部临时测试资源
 
 **Checkpoint**: US3 独立验收通过，部署与回滚均可重复。
@@ -109,15 +109,15 @@ manifest；集群实施必须完成驱动预检、运行时验收和回滚演练
 
 ## Phase 6: Documentation and Closure
 
-- [ ] T025 [P] 更新 `docs/temp/部署镜像清单.md`，补充 NVIDIA 两个镜像的源/目标
+- [x] T025 [P] 更新 `docs/temp/部署镜像清单.md`，补充 NVIDIA 两个镜像的源/目标
   digest、架构、许可证和 AKS 验证结果
-- [ ] T026 [P] 更新 `docs/temp/部署服务相关任务清单.md`，标记 GPU P0 完成并记录验收
-- [ ] T027 运行 `grc-parser-engine` 适用门禁、密钥扫描和 YAML/PowerShell 检查
-- [ ] T028 提交 `grc-parser-engine` 部署工件，提交信息引用
+- [x] T026 [P] 更新 `docs/temp/部署服务相关任务清单.md`，标记 GPU P0 完成并记录验收
+- [x] T027 运行 `grc-parser-engine` 适用门禁、密钥扫描和 YAML/PowerShell 检查
+- [x] T028 提交 `grc-parser-engine` 部署工件，提交信息引用
   `specs/010-aks-gpu-enablement`
-- [ ] T029 在 `grc-spec-hub/specs/010-aks-gpu-enablement/retro.md` 记录实施偏差、GPU
+- [x] T029 在 `grc-spec-hub/specs/010-aks-gpu-enablement/retro.md` 记录实施偏差、GPU
   运行事实和后续监控建议
-- [ ] T030 **更新 Project Memory**：更新 `memory/now/services/grc-parser-engine.md`、
+- [x] T030 **更新 Project Memory**：更新 `memory/now/services/grc-parser-engine.md`、
   `memory/now/state.md` 及必要的 watchlist，提交后等待人审
 
 ## Dependencies & Execution Order
