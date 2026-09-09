@@ -2850,7 +2850,6 @@ components:
         docType: { type: string, minLength: 1, description: '文档类型，例如 pdf/docx' }
         sourceMeta: { type: object, additionalProperties: true, description: 来源扩展元数据 }
         stageOverrides: { $ref: '#/components/schemas/KnowledgeStageConfigRequest', description: 阶段级覆盖配置；请求也兼容 stageConfig 别名 }
-        runMode: { type: string, default: manual, description: '构建模式：auto (自动构建) / manual (仅创建不自动构建)，默认模式：manual' }
 
     KnowledgeDocumentCreateResponse:
       type: object
