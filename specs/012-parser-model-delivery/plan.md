@@ -17,7 +17,9 @@
 6. 使用最终 verifier 容器执行完整 SHA256 校验，仅成功后写入 `.complete`。
 7. 使用 parser 镜像只读挂载 bundle，执行本地模型检查和离线 warmup。
 
-不使用 Blob 中转，不修改 parser 应用镜像，不删除 EC2 源模型和重复缓存。
+不使用 Blob 中转，不删除 EC2 源模型和重复缓存。实施中若真实 PDF验证发现 parser本地
+模型路径与下载脚本漂移，可在测试先行前提下做最小兼容修复；正式应用镜像发布仍不在本
+spec范围。
 
 ## Technical Context
 
@@ -56,7 +58,7 @@ AKS loader 60 分钟内完成；重复 loader 5 分钟内幂等完成
 
 | 服务 | 变更性质 | 说明 |
 |------|----------|------|
-| grc-parser-engine | 部署制品 | 新增模型 bundle 构建、PVC、loader、验证和 Runbook；不修改解析业务代码 |
+| grc-parser-engine | 部署制品与兼容修复 | 新增模型 bundle 构建、PVC、loader、验证和 Runbook；允许修复模型目录常量，不修改解析算法 |
 
 ## 契约影响（Contract Impact · 必填）
 

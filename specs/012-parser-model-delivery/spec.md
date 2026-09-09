@@ -4,7 +4,7 @@
 
 **Created**: 2026-09-09
 
-**Status**: Draft（待人审）
+**Status**: Implemented
 
 **Input**: 将 AWS EC2 上已下载的 Docling、MinerU 和 OFA 模型去重、固化并传输到
 Azure 中国云，使后续 `grc-parser-engine` Pod 通过独立持久卷只读挂载模型，而不是把
@@ -184,7 +184,8 @@ warmup，断言无网络下载且退出码为 0。
 ## 非目标 / 边界
 
 - 不部署 `grc-parser-engine` 长期运行服务。
-- 不修改 parser 业务代码或模型算法。
+- 除修复 Docling 本地模型目录常量与下载目标的既有漂移外，不修改 parser 业务逻辑或
+  模型算法。
 - 不使用 Azure Blob 中转；当前网络规则不允许自助上传。
 - 不删除 EC2 原始模型或重复缓存。
 - 不为生产多节点 parser 设计 RWX 存储；生产方案需独立评审。

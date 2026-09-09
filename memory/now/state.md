@@ -4,7 +4,7 @@
 > 更新于：2026-W36（digest 2026-W35）· 维持 ≤ 2 页
 
 ## 所处阶段
-项目启动，第 0 周奠基中。PRD v1.2（与用户旅程 v1.2 差异收敛版）为当前需求基线，业务需求已拆解为 9 个 feature spec 并完成 v1.0→v1.2 同步；新增 spec 010/011 承载 AKS GPU 与开发 Milvus 基础能力，服务拆分 ADR 已产出。
+项目启动，第 0 周奠基中。PRD v1.2（与用户旅程 v1.2 差异收敛版）为当前需求基线，业务需求已拆解为 9 个 feature spec 并完成 v1.0→v1.2 同步；新增 spec 010/011/012 承载 AKS GPU、开发 Milvus 与 parser模型制品基础能力，服务拆分 ADR 已产出。
 
 ## 本里程碑目标
 - M1：P0 核心交付——平台全链路跑通（目标日期待确认）
@@ -24,6 +24,11 @@
 - 环境与账号阻塞（2 项未闭环）：Alice admin 账号待申请（最晚 2026-08-19）、Azure→SharePoint 方案进行中；GitHub 账号已开通（2026-08-17）。
 
 ## 近期重要变化
+- 2026-09-10：**Parser 模型制品交付完成**——spec 012 从 EC2约 40 GiB下载目录提取
+  518 个 canonical文件（21,278,861,712 字节），以三个 digest固定的 ACR初始化镜像写入
+  `grc-parser/parser-models` 128 GiB Premium PVC。全量 SHA256、27.2秒幂等复跑、
+  错误摘要拒绝、只读挂载、Docling PDF、MinerU GPU和 OFA离线验证均通过；工件见
+  `grc-parser-engine@3484fcc`。正式 parser镜像 OFA依赖及生产多节点存储见 watchlist #87。
 - 2026-09-09：**开发 Milvus 部署完成**——spec 011 使用 Chart 4.2.49 部署
   Milvus 2.5.12 Standalone + Rocksmq、单副本 etcd/MinIO；三个 64 GiB Premium PVC，
   `milvuspool` 配置 `sku=milvus:NoSchedule`。认证轮换、CRUD/search、逐组件重建、
