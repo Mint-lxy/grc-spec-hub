@@ -25,6 +25,8 @@ tags:
     description: 历史凭据内部接口分组；当前实现以 Internal Vault API 为准。
   - name: File Management
     description: 文件上传会话、下载地址、文件详情、删除与结果文件登记。
+  - name: ZIP File Import
+    description: ZIP 检查、条目选择和正式文件导入。
   - name: MCP File Connector
     description: MCP 外部文件资源连接器 (Confluence/SharePoint/S3) 目录预览与知识库导入。
   - name: Internal File
@@ -342,6 +344,95 @@ paths:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/RegisterResultFileRequest' } } }
       responses: { '200': { description: 登记成功, content: { application/json: { schema: { $ref: '#/components/schemas/RegisterResultFileResponseEnvelope' } } } } }
+  /mgmt/file/zip/inspect:
+    post:
+      tags: [ZIP File Import]
+      operationId: inspectZipArchive
+      summary: 检查 ZIP 文件
+      description: >-
+        根据已完成上传并处于 ACTIVE 状态的 ZIP 文件 fileId 创建检查任务。服务端从对象存储流式读取 ZIP，
+        解析目录和文件树并返回 entryId。小文件可同步返回 READY；较大文件返回 PROCESSING，调用方应使用
+        查询任务接口轮询到 READY 后再确认选择。检查阶段只保存条目元数据，不创建 entry 中间对象。
+      requestBody:
+        required: true
+        description: 已通过文件三步上传流程完成确认的 ZIP 文件。
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InspectZipRequest' }
+            example: { fileId: f_01J2ABC_zip }
+      responses:
+        '200':
+          description: ZIP 检查同步完成
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ZipInspectResponseEnvelope' }
+        '202':
+          description: ZIP 检查任务已异步受理
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ZipInspectResponseEnvelope' }
+        '400': { description: fileId 为空、文件状态不合法或 ZIP 超出限制 }
+        '404': { description: ZIP 文件不存在或当前用户无权访问 }
+  /mgmt/file/zip/inspect/{taskId}:
+    parameters:
+      - name: taskId
+        in: path
+        required: true
+        description: ZIP 检查任务 ID，由检查接口返回。
+        schema: { type: string, minLength: 1 }
+    get:
+      tags: [ZIP File Import]
+      operationId: getZipInspectionTask
+      summary: 查询 ZIP 检查任务
+      description: 查询任务处理状态、进度、解压统计和递归条目树。只有任务所属用户可以查询。
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ZipInspectResponseEnvelope' }
+        '404': { description: 任务不存在或当前用户无权访问 }
+  /mgmt/file/zip/inspect/{taskId}/confirm:
+    parameters:
+      - name: taskId
+        in: path
+        required: true
+        description: 已完成检查且处于 READY 状态的任务 ID。
+        schema: { type: string, minLength: 1 }
+    post:
+      tags: [ZIP File Import]
+      operationId: confirmZipEntries
+      summary: 确认 ZIP 条目并导入正式文件
+      description: >-
+        校验任务归属、有效期、条目归属和可选择状态后，从原始 ZIP 流中按 relativePath 提取选中条目，
+        直接写入正式文件对象并返回新的 fileId。仅普通文件节点可确认，目录节点会被拒绝；每个 entryId
+        最多导入一次。Idempotency-Key 用于防止重复确认产生重复正式文件。
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          description: 确认请求幂等键；相同任务和相同幂等键重试时不得重复创建正式文件。
+          schema: { type: string, minLength: 1, maxLength: 128 }
+      requestBody:
+        required: true
+        description: 要导入的 ZIP 文件条目及正式文件业务归属。
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ConfirmZipEntriesRequest' }
+            example:
+              entryIds: [zip_entry_001, zip_entry_003]
+              bizType: KNOWLEDGE_SOURCE
+              bizRefId: kb_1001
+      responses:
+        '200':
+          description: 选中条目已导入正式文件
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ZipConfirmResponseEnvelope' }
+        '400': { description: 请求体为空、entryIds 为空或选择数量超过限制 }
+        '403': { description: 条目不属于该任务、提交目录节点或当前用户无权确认 }
+        '409': { description: 任务已确认、正在确认或已过期 }
+        '500': { description: ZIP 提取或正式对象写入失败 }
   /mgmt/knowledge/mcp/connectors/preview-tree:
     post:
       tags: [MCP File Connector]
@@ -518,7 +609,22 @@ paths:
       tags: [Knowledge Base]
       operationId: getKnowledgeBaseDetail
       summary: 查询知识库详情
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBaseDetailEnvelope' } } } } }
+      description: >-
+        根据知识库 ID 查询当前用户可访问的知识库完整详情。响应包含基本属性、标签、
+        管线配置、文档与向量统计、构建阶段状态以及可共享的知识库 API 能力。该接口不接收
+        query 参数和请求体；知识库不存在、当前用户无权访问或下游知识引擎查询失败时返回错误响应。
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/KnowledgeBaseDetailEnvelope' }
+        '400':
+          description: kbId 为空或格式不合法
+        '404':
+          description: 知识库不存在，或当前用户无权访问该知识库
+        '500':
+          description: 下游知识引擎查询失败
   /mgmt/knowledge/knowledge-bases/{kbId}/config:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     patch:
@@ -595,13 +701,6 @@ paths:
       operationId: getKnowledgeBaseStatistics
       summary: 查询知识库统计
       responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBaseStatisticsEnvelope' } } } } }
-  /mgmt/knowledge/knowledge-bases/{kbId}/enable:
-    parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
-    post:
-      tags: [Knowledge Base]
-      operationId: enableKnowledgeBase
-      summary: 启用知识库
-      responses: { '200': { description: 启用成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBaseDetailEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/delete:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     post:
@@ -622,13 +721,6 @@ paths:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/UpdateKnowledgeBaseRequest' } } }
       responses: { '200': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBaseDetailEnvelope' } } } } }
-  /mgmt/knowledge/knowledge-bases/{kbId}/publish:
-    parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
-    post:
-      tags: [Knowledge Base]
-      operationId: publishKnowledgeBase
-      summary: 发布知识库
-      responses: { '200': { description: 发布成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBaseDetailEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/status:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
     patch:
@@ -639,13 +731,6 @@ paths:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/UpdateKnowledgeBaseStatusRequest' } } }
       responses: { '200': { description: 状态更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBaseDetailEnvelope' } } } } }
-  /mgmt/knowledge/knowledge-bases/{kbId}/offline:
-    parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
-    post:
-      tags: [Knowledge Base]
-      operationId: offlineKnowledgeBase
-      summary: 下线知识库
-      responses: { '200': { description: 下线成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBaseDetailEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/stage-config:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
     patch:
@@ -745,10 +830,39 @@ paths:
     post:
       tags: [Knowledge Document & Job]
       operationId: runKnowledgeDocumentStage
-      summary: 执行文档阶段
+      summary: 执行文档单阶段
+      description: >-
+        触发指定文档的单个知识处理阶段。阶段类型由路径参数指定，支持 parse（解析）、
+        chunk（切片）、enhance（增强）和 embed（向量化）。请求体可选；未提供时使用服务端
+        当前生效的阶段配置。接口返回管线任务及本次阶段执行结果，不代表所有阶段已经完成，
+        后续应使用返回的 pipelineJobId 查询 `/mgmt/knowledge/jobs/{jobId}`。
       requestBody:
-        content: { application/json: { schema: { $ref: '#/components/schemas/StageRunRequest' } } }
-      responses: { '200': { description: 执行成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeStageRunEnvelope' } } } } }
+        required: false
+        description: >-
+          单阶段运行请求。请求体省略或为空时不提供运行时覆盖配置；persist 默认为 false。
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StageRunRequest' }
+            example:
+              stageConfig:
+                parser:
+                  type: default-parser
+                  options: {}
+              persist: true
+      responses:
+        '200':
+          description: 单阶段执行请求已受理并返回执行结果
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/KnowledgeStageRunEnvelope' }
+        '400':
+          description: stageType、请求体或阶段配置不合法
+        '404':
+          description: 文档不存在或当前用户无权访问该文档
+        '409':
+          description: 文档当前存在不可并行执行的构建任务
+        '500':
+          description: 知识引擎调用失败或阶段任务提交失败
   /mgmt/knowledge/jobs/{jobId}:
     parameters: [{ $ref: '#/components/parameters/JobId' }]
     get:
@@ -1372,7 +1486,14 @@ components:
     JobId: { name: jobId, in: path, required: true, description: 构建任务 ID, schema: { type: string } }
     OperationId: { name: operationId, in: path, required: true, description: 异步操作 ID, schema: { type: string } }
     ChunkId: { name: chunkId, in: path, required: true, description: 文档切片 ID, schema: { type: string } }
-    StageType: { name: stageType, in: path, required: true, description: 文档处理阶段类型，取值：parse，chunk，enhance，embed, schema: { type: string } }
+    StageType:
+      name: stageType
+      in: path
+      required: true
+      description: 文档处理阶段类型。parse=解析，chunk=切片，enhance=内容增强，embed=向量化。
+      schema:
+        type: string
+        enum: [parse, chunk, enhance, embed]
     AssetId: { name: assetId, in: path, required: true, description: 资产 ID, schema: { type: string } }
     FlowId: { name: flowId, in: path, required: true, description: 审批流 ID, schema: { type: string } }
     StepId: { name: stepId, in: path, required: true, description: 审批步骤 ID, schema: { type: string } }
@@ -2336,6 +2457,97 @@ components:
         fileId: { type: string, description: 文件 ID }
         deleted: { type: boolean, description: 是否已删除 }
 
+    InspectZipRequest:
+      type: object
+      description: 已完成对象存储上传确认的 ZIP 检查请求。
+      required: [fileId]
+      additionalProperties: false
+      properties:
+        fileId:
+          type: string
+          minLength: 1
+          description: 已上传完成且状态为 ACTIVE 的原始 ZIP 文件 ID。
+          example: f_01J2ABC_zip
+
+    ConfirmZipEntriesRequest:
+      type: object
+      description: 选择 ZIP 文件节点并导入正式文件的请求。
+      required: [entryIds]
+      additionalProperties: false
+      properties:
+        entryIds:
+          type: array
+          minItems: 1
+          maxItems: 200
+          description: 要导入的文件节点 entryId 列表；目录节点不可提交。
+          items: { type: string, minLength: 1 }
+        bizType:
+          type: string
+          default: KNOWLEDGE_SOURCE
+          description: 正式文件业务类型，默认 KNOWLEDGE_SOURCE。
+        bizRefId:
+          type: [string, 'null']
+          description: 正式文件关联的业务对象 ID，例如知识库 ID；可为空。
+
+    ZipInspectEntryResponse:
+      type: object
+      description: ZIP 目录树中的目录或文件节点。
+      required: [entryId, relativePath, fileName, size, directory, selectable, status, children]
+      properties:
+        entryId: { type: string, description: 服务端生成的条目 ID，客户端只能使用它提交选择 }
+        parentEntryId: { type: [string, 'null'], description: 父目录条目 ID；根节点为空 }
+        relativePath: { type: string, description: ZIP 内相对路径；服务端确认时据此定位原始条目 }
+        fileName: { type: string, description: 条目文件名或目录名 }
+        extension: { type: [string, 'null'], description: 文件扩展名；目录通常为空 }
+        contentType: { type: [string, 'null'], description: 根据文件名推断的 MIME 类型 }
+        size: { type: integer, format: int64, minimum: 0, description: 文件解压后的实际字节数；目录为 0 }
+        directory: { type: boolean, description: 是否为目录；true 时不可选择 }
+        selectable: { type: boolean, description: 是否允许提交确认；只有普通文件为 true }
+        status: { type: string, enum: [AVAILABLE, SELECTED, IMPORTED, EXPIRED], description: 条目当前状态 }
+        children:
+          type: array
+          description: 子目录和文件节点；文件节点为空数组。
+          items: { $ref: '#/components/schemas/ZipInspectEntryResponse' }
+
+    ZipInspectResponse:
+      type: object
+      description: ZIP 检查任务及递归目录树响应数据。
+      required: [taskId, status, progress, fileCount, totalUncompressedSize, expiresAt, tree]
+      properties:
+        taskId: { type: string, description: ZIP 检查任务 ID }
+        status: { type: string, enum: [PENDING, PROCESSING, READY, FAILED, EXPIRED, CANCELED, CONFIRMING, CONFIRMED], description: 检查任务状态 }
+        progress: { type: integer, minimum: 0, maximum: 100, description: 检查进度百分比；PROCESSING 时表示当前进度 }
+        fileCount: { type: integer, minimum: 0, description: 解析出的目录和文件节点数量 }
+        totalUncompressedSize: { type: integer, format: int64, minimum: 0, description: 实际解压总字节数 }
+        expiresAt: { type: string, format: date-time, description: 任务过期时间；过期后不可确认 }
+        tree:
+          type: array
+          description: 按 ZIP 目录层级组织的递归树。
+          items: { $ref: '#/components/schemas/ZipInspectEntryResponse' }
+
+    ZipConfirmFileResponse:
+      type: object
+      description: 单个 ZIP 条目导入后的正式文件结果。
+      required: [entryId, fileId, fileName, size, status]
+      properties:
+        entryId: { type: string, description: 原 ZIP 条目 ID }
+        fileId: { type: string, description: 新创建的正式文件 ID }
+        fileName: { type: string, description: 正式文件名 }
+        size: { type: integer, format: int64, minimum: 0, description: 正式文件大小（字节） }
+        status: { type: string, enum: [UPLOADED, FAILED], description: 当前导入结果状态 }
+
+    ZipConfirmResponse:
+      type: object
+      description: ZIP 条目确认导入结果。
+      required: [taskId, status, files]
+      properties:
+        taskId: { type: string, description: ZIP 检查任务 ID }
+        status: { type: string, enum: [CONFIRMED, FAILED], description: 确认任务状态 }
+        files:
+          type: array
+          description: 每个成功或失败的条目导入结果。
+          items: { $ref: '#/components/schemas/ZipConfirmFileResponse' }
+
     CreateUploadSessionResponseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/CreateUploadSessionResponse', description: 响应数据 } } }] }
     BatchCreateUploadSessionResponseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/BatchCreateUploadSessionResponse', description: 响应数据 } } }] }
     CompleteUploadResponseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/CompleteUploadResponse', description: 响应数据 } } }] }
@@ -2343,6 +2555,8 @@ components:
     RegisterResultFileResponseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/RegisterResultFileResponse', description: 响应数据 } } }] }
     FileDetailResponseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/FileDetailResponse', description: 响应数据 } } }] }
     DeleteFileResponseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/DeleteFileResponse', description: 响应数据 } } }] }
+    ZipInspectResponseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/ZipInspectResponse', description: 响应数据 } } }] }
+    ZipConfirmResponseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/ZipConfirmResponse', description: 响应数据 } } }] }
 
     McpConnectorTreeRequest:
       type: object
@@ -2752,25 +2966,105 @@ components:
 
     KnowledgeBaseStatsResponse:
       type: object
+      description: 知识库详情页统计快照。
       properties:
-        documentCount: { type: integer, description: 文档总数 }
-        chunkCount: { type: integer, description: 切片数 }
-        vectorCount: { type: integer, description: 向量数 }
-        readiness: { type: string, description: 就绪状态 }
-        liveDocumentCount: { type: integer, description: 已生效文档数 }
-        buildingDocumentCount: { type: integer, description: 构建中文档数 }
-        retrievalReady: { type: boolean, description: 是否可检索 }
+        documentCount: { type: integer, format: int32, description: 文档总数 }
+        chunkCount: { type: string, description: 切片总数；服务端以字符串返回以避免大数精度丢失 }
+        vectorCount: { type: string, description: 向量总数；服务端以字符串返回以避免大数精度丢失 }
+        readiness: { type: string, description: 当前知识库就绪状态 }
+        liveDocumentCount: { type: integer, format: int32, description: 已生效文档数 }
+        buildingDocumentCount: { type: integer, format: int32, description: 当前构建中文档数 }
+        retrievalReady: { type: boolean, description: 当前知识库是否可检索 }
+
+    KnowledgeBaseBuildDetailResponse:
+      type: object
+      description: 知识库详情页构建管线状态快照。
+      properties:
+        progress: { type: integer, minimum: 0, maximum: 100, description: 当前整体构建进度百分比 }
+        stages:
+          type: array
+          description: parser、chunking、enhance、embedding 等构建阶段的状态列表。
+          items: { $ref: '#/components/schemas/KnowledgeBaseBuildStageResponse' }
+
+    KnowledgeBaseBuildStageResponse:
+      type: object
+      description: 知识库构建管线中的单个阶段状态。
+      properties:
+        stage: { type: string, description: 阶段名称，例如 parser、chunking、enhance 或 embedding }
+        status: { type: string, description: 阶段状态，例如 PENDING、RUNNING、SUCCEEDED 或 FAILED }
+        summary: { type: [string, 'null'], description: 阶段状态摘要或脱敏失败原因 }
+
+    KnowledgeBaseCapabilityResponse:
+      type: object
+      description: 当前知识库对外可共享的 API 能力。
+      properties:
+        method: { type: string, description: HTTP 方法，例如 GET 或 POST }
+        name: { type: string, description: 能力名称 }
+        path: { type: string, description: 能力对应的 API 路径模板 }
+        description: { type: [string, 'null'], description: 能力说明 }
 
     KnowledgeBaseDetailResponse:
-      allOf:
-        - $ref: '#/components/schemas/KnowledgeBaseCreateResponse'
-        - type: object
-          properties:
-            stats: { $ref: '#/components/schemas/KnowledgeBaseStatsResponse', description: 统计信息 }
-            contentSummary: { type: array, items: { type: string }, description: 字段：contentSummary }
-            build: { type: object, additionalProperties: true, description: 字段：build }
-            capabilities: { type: array, items: { type: object, additionalProperties: true }, description: 字段：capabilities }
-            updatedAt: { type: string, format: date-time, description: 更新时间 }
+      type: object
+      description: >-
+        知识库详情响应数据。该对象用于详情页展示和后续知识库操作，字段可能由知识引擎
+        按当前构建状态补充或返回 null。统计信息和构建状态均为当前查询时点的快照。
+      properties:
+        knowledgeBaseId:
+          type: string
+          description: 知识库唯一标识，与请求路径中的 kbId 对应。
+        directoryId:
+          type: [string, 'null']
+          description: 所属知识目录 ID；未归属目录时为空。
+        name:
+          type: string
+          description: 知识库名称。
+        description:
+          type: [string, 'null']
+          description: 知识库描述。
+        visibility:
+          type: string
+          enum: [PUBLIC, RESTRICTED, PRIVATE]
+          description: >-
+            知识库可见性：PUBLIC=公开可用，RESTRICTED=公开但需申请，PRIVATE=完全隐藏。
+        status:
+          type: string
+          enum: [DRAFT, ACTIVE, DISABLED]
+          description: 知识库生命周期状态。
+        tags:
+          type: array
+          description: 知识库标签列表。
+          items: { $ref: '#/components/schemas/KnowledgeTagResponse' }
+        recommendedConfig:
+          type: boolean
+          description: 是否使用推荐的知识库构建管线配置。
+        pipelineConfig:
+          type: [object, 'null']
+          additionalProperties: true
+          description: >-
+            当前知识库生效的构建管线配置。具体属性由 parser、chunking、enhance、embedding
+            和 vectorStore 等阶段配置组成，服务端按配置版本返回。
+        stats:
+          $ref: '#/components/schemas/KnowledgeBaseStatsResponse'
+          description: 文档、切片、向量和检索就绪状态统计。
+        contentSummary:
+          type: array
+          description: 知识库内容摘要或内容概览条目列表。
+          items: { type: string }
+        build:
+          $ref: '#/components/schemas/KnowledgeBaseBuildDetailResponse'
+          description: 当前知识库构建进度和各阶段状态。
+        capabilities:
+          type: array
+          description: 当前知识库可共享的 API 能力列表。
+          items: { $ref: '#/components/schemas/KnowledgeBaseCapabilityResponse' }
+        createdAt:
+          type: string
+          format: date-time
+          description: 知识库创建时间。
+        updatedAt:
+          type: string
+          format: date-time
+          description: 知识库最近更新时间。
 
     KnowledgeBaseConfigUpdateResponse:
       type: object
@@ -3151,21 +3445,59 @@ components:
 
     StageRunRequest:
       type: object
+      description: >-
+        触发文档单阶段执行时的可选请求体。请求体可以省略；未提供阶段配置时使用文档或知识库当前生效配置。
+      additionalProperties: false
       properties:
-        stageConfig: { $ref: '#/components/schemas/KnowledgeStageConfigRequest', description: 阶段配置 }
-        persist: { type: boolean, description: 是否持久化 }
+        stageConfig:
+          $ref: '#/components/schemas/KnowledgeStageConfigRequest'
+          description: >-
+            本次运行的阶段配置覆盖。仅填写需要覆盖的阶段；parser 对应解析，chunking 对应切片，
+            enhance 对应增强配置列表。未填写的配置沿用已生效配置。
+        persist:
+          type: boolean
+          default: false
+          description: 是否将本次运行时阶段配置持久化为文档配置；默认 false，仅对本次执行生效。
 
     KnowledgeStageRunResponse:
       type: object
+      description: 文档单阶段执行结果。任务通常为异步执行，应使用 pipelineJobId 查询最终任务状态。
+      required: [pipelineJobId, isNewJob, stageStatus, runMode, docId, stageType, stages]
       properties:
-        pipelineJobId: { type: string, description: 管线任务 ID }
-        previousJobId: { type: string, description: 前序任务 ID }
-        isNewJob: { type: boolean, description: 是否新建任务 }
-        stageStatus: { type: string, description: 阶段状态 }
-        runMode: { type: string, description: 运行模式 }
-        docId: { type: integer, format: int64, description: doc ID }
-        stageType: { type: string, description: 阶段类型 }
-        stageConfig: { $ref: '#/components/schemas/KnowledgeJobStatusEnvelope', description: 阶段执行明细 }
+        pipelineJobId:
+          type: string
+          description: 本次管线执行任务 ID；用于查询 `/mgmt/knowledge/jobs/{jobId}` 的最终状态
+        previousJobId: { type: [string, 'null'], description: 被本次执行替代或复用的前序任务 ID；没有前序任务时为空 }
+        isNewJob: { type: boolean, description: 是否新建了管线任务；false 表示复用或合并已有任务 }
+        stageStatus: { type: string, description: 本次请求阶段的当前状态，例如 PENDING、RUNNING、SUCCEEDED、FAILED、CANCELED }
+        runMode: { type: string, description: 实际运行模式，例如 manual 或自动触发模式 }
+        docId: { type: integer, format: int64, description: 文档 ID }
+        stageType: { type: string, enum: [parse, chunk, enhance, embed], description: 实际执行的阶段类型 }
+        stages:
+          type: array
+          description: 本次管线中各阶段的执行状态列表。
+          items: { $ref: '#/components/schemas/KnowledgeJobStageResponse' }
+        finishedAt: { type: [string, 'null'], description: 阶段或任务完成时间；执行中时为空 }
+        errorMsg: { type: [string, 'null'], description: 阶段执行失败时的脱敏错误信息；成功或执行中时为空 }
+        executionResult:
+          type: [object, 'null']
+          additionalProperties: true
+          description: 阶段执行产生的结构化结果；具体属性由阶段类型决定。
+
+    KnowledgeJobStageResponse:
+      type: object
+      description: 管线任务中单个阶段的执行状态。
+      required: [stageType, seq, status, progress, isReused]
+      properties:
+        stageType: { type: string, enum: [parse, chunk, enhance, embed], description: 阶段类型 }
+        seq: { type: integer, description: 阶段在管线中的顺序号 }
+        status: { type: string, description: 阶段状态，例如 PENDING、RUNNING、SUCCEEDED、FAILED、CANCELED }
+        progress: { type: integer, minimum: 0, maximum: 100, description: 阶段执行进度百分比 }
+        isReused: { type: boolean, description: 是否复用了历史阶段结果 }
+        reusedFromJobId: { type: [string, 'null'], description: 历史结果来源任务 ID；未复用时为空 }
+        errorMsg: { type: [string, 'null'], description: 阶段失败时的脱敏错误信息 }
+        startedAt: { type: [string, 'null'], description: 阶段开始时间；尚未开始时为空 }
+        finishedAt: { type: [string, 'null'], description: 阶段完成时间；尚未完成时为空 }
 
     KnowledgeJobStatusResponse:
       type: object
