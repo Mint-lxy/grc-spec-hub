@@ -405,8 +405,9 @@ paths:
       summary: 确认 ZIP 条目并导入正式文件
       description: >-
         校验任务归属、有效期、条目归属和可选择状态后，从原始 ZIP 流中按 relativePath 提取选中条目，
-        直接写入正式文件对象并返回新的 fileId。仅普通文件节点可确认，目录节点会被拒绝；每个 entryId
-        最多导入一次。Idempotency-Key 用于防止重复确认产生重复正式文件。
+        直接写入正式文件对象，并将本次生成的全部文件组装为 LOCAL_UPLOAD sources，调用知识库门面
+        批量导入到 bizRefId 指定的知识库。仅普通文件节点可确认，目录节点会被拒绝；每个 entryId
+        最多导入一次。Idempotency-Key 用于防止重复确认产生重复正式文件和重复导入任务。
       parameters:
         - name: Idempotency-Key
           in: header
@@ -834,8 +835,7 @@ paths:
       description: >-
         触发指定文档的单个知识处理阶段。阶段类型由路径参数指定，支持 parse（解析）、
         chunk（切片）、enhance（增强）和 embed（向量化）。请求体可选；未提供时使用服务端
-        当前生效的阶段配置。接口返回管线任务及本次阶段执行结果，不代表所有阶段已经完成，
-        后续应使用返回的 pipelineJobId 查询 `/mgmt/knowledge/jobs/{jobId}`。
+        当前生效的阶段配置。接口返回管线任务及本次阶段执行结果，不代表所有阶段已经完成
       requestBody:
         required: false
         description: >-
@@ -2486,8 +2486,9 @@ components:
           default: KNOWLEDGE_SOURCE
           description: 正式文件业务类型，默认 KNOWLEDGE_SOURCE。
         bizRefId:
-          type: [string, 'null']
-          description: 正式文件关联的业务对象 ID，例如知识库 ID；可为空。
+          type: string
+          minLength: 1
+          description: 目标知识库 ID；confirm 会直接调用知识库门面将本次选中的文件批量导入该知识库。
 
     ZipInspectEntryResponse:
       type: object
@@ -2528,11 +2529,12 @@ components:
     ZipConfirmFileResponse:
       type: object
       description: 单个 ZIP 条目导入后的正式文件结果。
-      required: [entryId, fileId, fileName, size, status]
+      required: [entryId, fileId, fileName, fileType, size, status]
       properties:
         entryId: { type: string, description: 原 ZIP 条目 ID }
         fileId: { type: string, description: 新创建的正式文件 ID }
         fileName: { type: string, description: 正式文件名 }
+        fileType: { type: [string, 'null'], description: 文件类型，优先返回条目的 MIME 类型，例如 application/pdf；无法识别时为空 }
         size: { type: integer, format: int64, minimum: 0, description: 正式文件大小（字节） }
         status: { type: string, enum: [UPLOADED, FAILED], description: 当前导入结果状态 }
 
