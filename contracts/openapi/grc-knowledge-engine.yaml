@@ -1596,6 +1596,14 @@ paths:
                 additionalProperties: true
                 type: object
                 title: Response Readyz Readyz Get
+        '503':
+          description: One or more required runtime dependencies are unavailable
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Readyz Dependency Failure
 components:
   schemas:
     AdapterConfig:

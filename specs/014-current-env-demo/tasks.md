@@ -6,7 +6,7 @@
 
 ## Phase 1: Gate 0 与事实基线
 
-- [ ] T001 确认 `grc-ai-portal` 的准确仓库 URL、访问权限、目标分支
+- [x] T001 确认 `grc-ai-portal` 的准确仓库 URL、访问权限、目标分支
   `feature/release260911` 与演示 commit SHA
 - [ ] T002 [P] 记录 Auth/Mgmt/Gateway/Knowledge/Parser 当前分支、commit、构建命令和运行端口
 - [ ] T003 [P] 盘点 AKS 现有 Ingress/Application Gateway/内部入口能力，确认浏览器访问方案
@@ -14,9 +14,9 @@
 
 ## Phase 2: 契约判定与测试基线
 
-- [ ] T005 比对 Portal 请求、Gateway 路由及 Auth/Mgmt/Knowledge/Parser 已合并契约
-- [ ] T006 若 Gateway 空契约或 watchlist #71 覆盖演示字段，先完成 contract-change 与消费者确认
-- [ ] T007 [P] 在 `grc-knowledge-engine` 先写 deployed 持久队列和真实 readiness 失败测试
+- [x] T005 比对 Portal 请求、Gateway 路由及 Auth/Mgmt/Knowledge/Parser 已合并契约
+- [x] T006 若 Gateway 空契约或 watchlist #71 覆盖演示字段，先完成 contract-change 与消费者确认
+- [x] T007 [P] 在 `grc-knowledge-engine` 先写 deployed 持久队列和真实 readiness 失败测试
 - [ ] T008 [P] 在 `grc-api-gateway` 先写 Auth/Mgmt 路由、无 Token 拒绝和后端失败传播测试
 - [ ] T009 [P] 在 `grc-auth-service` 先写演示身份登录、verify/refresh 和无效身份拒绝测试
 - [ ] T010 [P] 在 `grc-mgmt-service` 先写上传会话、完成上传、创建文档及调用 Knowledge 的链路测试
@@ -25,7 +25,7 @@
 
 ## Phase 3: Knowledge 真实 deployed 运行时
 
-- [ ] T013 在 `grc-knowledge-engine` 将 deployed 模式接入 `AzureServiceBusQueue` 与 worker
+- [x] T013 在 `grc-knowledge-engine` 将 deployed 模式接入 `AzureServiceBusQueue` 与 worker
 - [ ] T014 在 `grc-knowledge-engine` 补齐并实际消费 PostgreSQL、Redis、Service Bus、Blob、
   Milvus、Parser 配置
 - [ ] T015 在 `grc-knowledge-engine` 增加占位 Secret 拒绝和真实依赖 readiness

@@ -1,11 +1,51 @@
-# 契约骨架（占位）—— 提供方：grc-api-gateway。正式内容 [待确认]，按 contracts/POLICY.md 走契约变更流程填充。
 openapi: 3.1.0
 info:
   title: GRC API Gateway API
-  version: "0.1"
-  description: "[待确认] 统一 API 网关：路由、限流、鉴权转发、护栏检测代理、凭据解析、审计记录、流式输出缓冲与回放。"
+  version: "0.2"
+  description: |
+    GRC Portal 的统一入口。本版本先发布当前环境知识库演示所需的 Auth/Mgmt
+    透明代理路径；请求与响应语义复用对应提供方契约。
 servers:
-  - url: https://api.grc.internal/v1
-paths: {}
+  - url: https://api.grc.internal
+security:
+  - bearerAuth: []
+paths:
+  /api/auth/login:
+    $ref: './grc-auth-service.yaml#/paths/~1login'
+  /api/auth/verify:
+    $ref: './grc-auth-service.yaml#/paths/~1verify'
+  /api/auth/refresh:
+    $ref: './grc-auth-service.yaml#/paths/~1refresh'
+  /api/auth/logout:
+    $ref: './grc-auth-service.yaml#/paths/~1logout'
+  /api/mgmt/file/files/upload-sessions:
+    $ref: './grc-mgmt-service.yaml#/paths/~1mgmt~1file~1files~1upload-sessions'
+  /api/mgmt/file/files/upload-sessions/batch:
+    $ref: './grc-mgmt-service.yaml#/paths/~1mgmt~1file~1files~1upload-sessions~1batch'
+  /api/mgmt/file/files/upload-sessions/{sessionId}/complete:
+    $ref: './grc-mgmt-service.yaml#/paths/~1mgmt~1file~1files~1upload-sessions~1{sessionId}~1complete'
+  /api/mgmt/knowledge/directories/tree:
+    $ref: './grc-mgmt-service.yaml#/paths/~1mgmt~1knowledge~1directories~1tree'
+  /api/mgmt/knowledge/knowledge-bases:
+    $ref: './grc-mgmt-service.yaml#/paths/~1mgmt~1knowledge~1knowledge-bases'
+  /api/mgmt/knowledge/knowledge-bases/default-pipeline-config:
+    $ref: './grc-mgmt-service.yaml#/paths/~1mgmt~1knowledge~1knowledge-bases~1default-pipeline-config'
+  /api/mgmt/knowledge/knowledge-bases/pipeline-options:
+    $ref: './grc-mgmt-service.yaml#/paths/~1mgmt~1knowledge~1knowledge-bases~1pipeline-options'
+  /api/mgmt/knowledge/knowledge-bases/{kbId}:
+    $ref: './grc-mgmt-service.yaml#/paths/~1mgmt~1knowledge~1knowledge-bases~1{kbId}'
+  /api/mgmt/knowledge/knowledge-bases/{kbId}/documents:
+    $ref: './grc-mgmt-service.yaml#/paths/~1mgmt~1knowledge~1knowledge-bases~1{kbId}~1documents'
+  /api/mgmt/knowledge/knowledge-bases/{kbId}/documents/imports:
+    $ref: './grc-mgmt-service.yaml#/paths/~1mgmt~1knowledge~1knowledge-bases~1{kbId}~1documents~1imports'
+  /api/mgmt/knowledge/knowledge-bases/{kbId}/build-jobs:
+    $ref: './grc-mgmt-service.yaml#/paths/~1mgmt~1knowledge~1knowledge-bases~1{kbId}~1build-jobs'
+  /api/mgmt/knowledge/jobs/{jobId}:
+    $ref: './grc-mgmt-service.yaml#/paths/~1mgmt~1knowledge~1jobs~1{jobId}'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas: {}
