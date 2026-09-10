@@ -2229,12 +2229,12 @@ components:
 
     CreateUploadSessionRequest:
       type: object
-      required: [bizType, fileName, contentType, size]
+      required: [bizType, bizRefId, fileName, size]
       properties:
         bizType: { type: string, minLength: 1, description: 业务类型 }
-        bizRefId: { type: string, description: 业务引用 ID }
+        bizRefId: { type: string, minLength: 1, description: 业务引用 ID }
         fileName: { type: string, minLength: 1, description: 文件名 }
-        contentType: { type: string, minLength: 1, description: 文件 MIME 类型 }
+        contentType: { type: string, description: 文件 MIME 类型 }
         size: { type: integer, format: int64, minimum: 1, description: 文件大小（字节） }
 
     BatchCreateUploadSessionRequest:
@@ -2252,6 +2252,7 @@ components:
       properties:
         method: { type: string, description: HTTP 方法 }
         url: { type: string, format: uri, description: 访问 URL }
+        proxyUrl: { type: string, description: 代理访问 URL；可为空 }
         headers: { type: object, additionalProperties: { type: string }, description: 请求头 }
         formFields: { type: object, additionalProperties: { type: string }, description: 表单字段 }
         expireAt: { type: string, format: date-time, description: 过期时间 }
@@ -2848,8 +2849,7 @@ components:
         fileId: { type: integer, format: int64, description: 文件中心文件 ID }
         docType: { type: string, minLength: 1, description: '文档类型，例如 pdf/docx' }
         sourceMeta: { type: object, additionalProperties: true, description: 来源扩展元数据 }
-        stageOverrides: { $ref: '#/components/schemas/KnowledgeStageConfigRequest', description: 阶段级覆盖配置 }
-        runMode: { type: string, default: auto, description: '构建模式：auto (自动构建) / manual (仅创建不自动构建)' }
+        stageOverrides: { $ref: '#/components/schemas/KnowledgeStageConfigRequest', description: 阶段级覆盖配置；请求也兼容 stageConfig 别名 }
 
     KnowledgeDocumentCreateResponse:
       type: object
@@ -2899,7 +2899,7 @@ components:
         meta: { type: object, additionalProperties: true, description: 字段：meta }
         sourceType: { type: string, enum: [CONFLUENCE, SHAREPOINT, ONEDRIVE, BLOB, S3, LOCAL_UPLOAD], description: 来源类型 }
         sourcePath: { type: string, description: 来源路径 }
-        sourceUrl: { type: string, format: uri, description: 来源 URL }
+        sourceUrl: { type: string, description: 来源 URL 或来源路径 }
         status: { type: string, description: 状态 }
         currentJobId: { type: string, description: 当前任务 ID }
         liveJobId: { type: string, description: 生效任务 ID }
@@ -2911,6 +2911,7 @@ components:
         pageCount: { type: integer, minimum: 0, description: 页数 }
         charCount: { type: integer, minimum: 0, description: 字符数 }
         fileSize: { type: string, description: 文件大小，低于 1MB 使用 KB，达到或超过 1MB 使用 MB }
+        stageConfig: { type: object, additionalProperties: true, description: 文档阶段配置 }
 
     DocumentBuildStagesResponse:
       type: object
@@ -2919,6 +2920,7 @@ components:
         chunkStatus: { $ref: '#/components/schemas/DocumentBuildStageStatus', description: 切片阶段状态 }
         enhanceStatus: { $ref: '#/components/schemas/DocumentBuildStageStatus', description: 增强阶段状态 }
         embeddingStatus: { $ref: '#/components/schemas/DocumentBuildStageStatus', description: 向量化阶段状态 }
+        errorMsg: { type: string, description: 构建阶段错误信息 }
 
     KnowledgeBaseDocumentPageResponse:
       type: object
