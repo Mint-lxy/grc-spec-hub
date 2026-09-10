@@ -4,14 +4,14 @@
 > 更新于：2026-W36（digest 2026-W35）· 维持 ≤ 2 页
 
 ## 所处阶段
-项目启动，第 0 周奠基中。PRD v1.2（与用户旅程 v1.2 差异收敛版）为当前需求基线，业务需求已拆解为 9 个 feature spec 并完成 v1.0→v1.2 同步；新增 spec 010 承载 AKS GPU 基础能力，服务拆分 ADR 已产出。
+项目启动，第 0 周奠基中。PRD v1.2（与用户旅程 v1.2 差异收敛版）为当前需求基线，业务需求已拆解为 9 个 feature spec 并完成 v1.0→v1.2 同步；新增 spec 010/011/012 承载 AKS GPU、开发 Milvus 与 parser模型制品基础能力，服务拆分 ADR 已产出。
 
 ## 本里程碑目标
 - M1：P0 核心交付——平台全链路跑通（目标日期待确认）
 - 9 月 MVP 节奏（2026-08-25 Qianqian 推动）：9/7 知识库开放接口供 defi 场景外部调用（INT 端到端首次业务测试）、9/14 与 9 月底分段交付；INT 先行、SSO 与完整权限体系上生产前必须补齐
 
 ## 进行中的 specs
-- **001–009 共 9 个业务 feature spec 全部 Reviewed（需求面冻结）**：006-guardrail 与 008-admin 于 2026-08-25 经 grill-me 终审升 Reviewed（`b37e029`/`9670628`，用户授权）；基础设施 spec 010 于 2026-09-09 完成实现、回滚与重装验收
+- **001–009 共 9 个业务 feature spec 全部 Reviewed（需求面冻结）**：006-guardrail 与 008-admin 于 2026-08-25 经 grill-me 终审升 Reviewed（`b37e029`/`9670628`，用户授权）；基础设施 spec 010/011 于 2026-09-09 完成实现、持久化、回滚与重装验收
 - 002/003/004/005/006/007/008/009 可直接进 plan；001 进 plan 前置为 watchlist #45/#50（紧急，Zhang Hao）
 
 ## 当前风险
@@ -24,6 +24,16 @@
 - 环境与账号阻塞（2 项未闭环）：Alice admin 账号待申请（最晚 2026-08-19）、Azure→SharePoint 方案进行中；GitHub 账号已开通（2026-08-17）。
 
 ## 近期重要变化
+- 2026-09-10：**Parser 模型制品交付完成**——spec 012 从 EC2约 40 GiB下载目录提取
+  518 个 canonical文件（21,278,861,712 字节），以三个 digest固定的 ACR初始化镜像写入
+  `grc-parser/parser-models` 128 GiB Premium PVC。全量 SHA256、27.2秒幂等复跑、
+  错误摘要拒绝、只读挂载、Docling PDF、MinerU GPU和 OFA离线验证均通过；工件见
+  `grc-parser-engine@3484fcc`。正式 parser镜像 OFA依赖及生产多节点存储见 watchlist #87。
+- 2026-09-09：**开发 Milvus 部署完成**——spec 011 使用 Chart 4.2.49 部署
+  Milvus 2.5.12 Standalone + Rocksmq、单副本 etcd/MinIO；三个 64 GiB Premium PVC，
+  `milvuspool` 配置 `sku=milvus:NoSchedule`。认证轮换、CRUD/search、逐组件重建、
+  Helm rollback、卸载保留 PVC和重装恢复均通过；工件见 knowledge-engine
+  `8593554`。生产 HA/备份/监控与许可证审查见 watchlist #86。
 - 2026-09-09：**开发 AKS GPU 能力启用**——spec 010 采用现有 `gpupool` + 自管
   NVIDIA Device Plugin v0.18.0；节点配置 `sku=gpu:NoSchedule`，已上报
   `nvidia.com/gpu: 1`，Tesla T4 smoke test、隔离测试、回滚和重装均通过；

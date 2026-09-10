@@ -1,5 +1,5 @@
 <!-- 自动区块：由 memory-digest 管线维护，人工修改会被覆盖 -->
-# grc-knowledge-engine 状态卡（更新于 2026-W35）
+# grc-knowledge-engine 状态卡（更新于 2026-W37）
 
 ## 职责与边界
 知识引擎：目录树管理、知识库 CRUD 与状态机、四通道文档导入、四阶段构建管线（解析/切片/增强/向量化）、向量检索、开放接口（PAT 认证）。不做文档解析（→ grc-parser-engine）、不做认证（→ grc-auth-service）。
@@ -23,4 +23,10 @@
 - 技术栈：Python / FastAPI
 - AI API 调用统一经 grc-ai-sdk（grc-python-sdk），不直接调用 provider API（ADR-003）
 - 向量数据库：Milvus
+- 开发 AKS 已部署 Milvus 2.5.12 Standalone + Rocksmq、单副本 etcd、单副本 MinIO；
+  三个 64 GiB Premium PVC，均运行于带 `sku=milvus:NoSchedule` 的 `milvuspool`。
+- 集群内地址为 `http://milvus.milvus.svc.cluster.local:19530`；认证已开启，
+  `MILVUS_TOKEN` 必须通过 Secret 注入，禁止写入 Git。
+- 部署工件见 `grc-knowledge-engine/deploy/aks/milvus/`（spec 011，
+  commit `8593554`）；生产不得直接复用单节点拓扑。
 <!-- /人工区块 -->
