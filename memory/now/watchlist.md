@@ -37,6 +37,7 @@
 | 27 | Nexus Teams 创建 + 模型订阅 + 支持模型列表对齐 | 外部依赖 | spec 001/004, agent-service, eval-service | `[待确认]` | closed |
 | 28 | Nexus 缺少多模态/OCR 模型，需自行部署（用户指令 2026-08-14）——下一步需确认自部署模型方案、责任人、目标日期与是否影响 P0 交付 | 外部依赖 | parser-engine, knowledge-engine | `[待确认]` | open |
 | 73 | 确认 Alice 集成方案——**已关闭（2026-09-01 用户裁定）**：知识库有效权限采用 `Owner ⊇ Contributor ⊇ Consumer`；Owner 无需向 Alice 单独申请 Contributor；公共目录建库的创建角色持有人未被指定为 Owner/Deputy 时仅保留读取、检索与详情只读权限；所有已登录用户默认获得 Viewer 最小视图，完全隐藏知识库不因该默认角色可发现；组织用户账号仍由 Alice 同步为只读视图；Add Documents 的定时同步仅保留 `Schedule`，移除重复的 `Refresh Frequency`。已回写 spec 005。Alice 侧具体采用角色继承、权限并集或自动附加角色的技术实现转 #81 跟踪 | 外部集成/权限模型 | spec 005 FR-009c/FR-013c/FR-019/FR-037c~FR-037f, spec 008 FR-050, Alice, watchlist #81 | BA+架构/开发 | closed |
+| 85 | 【责任人：parser-engine+运维】开发 AKS 已通过 spec 010 启用自管 NVIDIA Device Plugin；生产部署前需完成 NVIDIA Device Plugin/CUDA 镜像许可证审查，并决定是否另立 GPU 指标/DCGM 监控 spec | 基础设施/许可证/可观测性 | spec 010, grc-parser-engine | parser-engine+运维 | open |
 
 ## Spec 高优未决（来源：各 spec §4）
 

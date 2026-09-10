@@ -4,14 +4,14 @@
 > 更新于：2026-W36（digest 2026-W35）· 维持 ≤ 2 页
 
 ## 所处阶段
-项目启动，第 0 周奠基中。PRD v1.2（与用户旅程 v1.2 差异收敛版）为当前需求基线，specs 已拆解为 9 个 feature spec 并完成 v1.0→v1.2 同步，服务拆分 ADR 已产出。
+项目启动，第 0 周奠基中。PRD v1.2（与用户旅程 v1.2 差异收敛版）为当前需求基线，业务需求已拆解为 9 个 feature spec 并完成 v1.0→v1.2 同步；新增 spec 010 承载 AKS GPU 基础能力，服务拆分 ADR 已产出。
 
 ## 本里程碑目标
 - M1：P0 核心交付——平台全链路跑通（目标日期待确认）
 - 9 月 MVP 节奏（2026-08-25 Qianqian 推动）：9/7 知识库开放接口供 defi 场景外部调用（INT 端到端首次业务测试）、9/14 与 9 月底分段交付；INT 先行、SSO 与完整权限体系上生产前必须补齐
 
 ## 进行中的 specs
-- **9 个 feature spec 全部 Reviewed（需求面冻结）**：006-guardrail 与 008-admin 于 2026-08-25 经 grill-me 终审升 Reviewed（`b37e029`/`9670628`，用户授权）
+- **001–009 共 9 个业务 feature spec 全部 Reviewed（需求面冻结）**：006-guardrail 与 008-admin 于 2026-08-25 经 grill-me 终审升 Reviewed（`b37e029`/`9670628`，用户授权）；基础设施 spec 010 于 2026-09-09 完成实现、回滚与重装验收
 - 002/003/004/005/006/007/008/009 可直接进 plan；001 进 plan 前置为 watchlist #45/#50（紧急，Zhang Hao）
 
 ## 当前风险
@@ -24,6 +24,11 @@
 - 环境与账号阻塞（2 项未闭环）：Alice admin 账号待申请（最晚 2026-08-19）、Azure→SharePoint 方案进行中；GitHub 账号已开通（2026-08-17）。
 
 ## 近期重要变化
+- 2026-09-09：**开发 AKS GPU 能力启用**——spec 010 采用现有 `gpupool` + 自管
+  NVIDIA Device Plugin v0.18.0；节点配置 `sku=gpu:NoSchedule`，已上报
+  `nvidia.com/gpu: 1`，Tesla T4 smoke test、隔离测试、回滚和重装均通过；
+  `grc-parser-engine` 部署工件见 `513d51d`。生产复用前仍需重新验收，GPU 监控和
+  NVIDIA 镜像许可证见 watchlist #85。
 - 2026-08-28：**知识库会议待办登记与 spec 005 权限回写**——知识库页面角色权限 FR-037c~f 入 spec（`2e72686`，Viewer/Consumer/Contributor-Owner/无权限四档交互边界）；watchlist #75 关闭，新增 #76（建库表单与检索策略）/#77（构建信息展示）/#78（Overview KPI）open（`c6f697f`）。
 - 2026-08-27：**mgmt 契约大改写（流程存疑）**——`7c62373` 重写 grc-mgmt-service.yaml（+1849/-992）：vault 内部 API 换成 `tokens/verify` + `credentials/{id}/resolve`；auth-service `a23cf4e` 同分钟联动，mgmt-service 已实现新端点；python-sdk 未跟随（见「当前风险」）。
 - 2026-08-24~28：**服务仓库 release260831 冲刺**——ai-portal 落地 Marketplace M1/M3~M9 前端与知识库概览/设置（对齐 005 三档可见性）；mgmt-service 落地 Chat 子域（001）+ Marketplace 后端 + MCP 管理面；knowledge-engine/parser-engine 打通解析链路上传与状态回传；mcp-server 转 monorepo（conf/sharepoint/oss）；agent-service 补 SSE thinking 事件。均在 feature/release260831，未合并 main（详见 digests/2026-W35.md）。

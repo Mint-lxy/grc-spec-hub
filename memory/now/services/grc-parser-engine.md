@@ -1,5 +1,5 @@
 <!-- 自动区块：由 memory-digest 管线维护，人工修改会被覆盖 -->
-# grc-parser-engine 状态卡（更新于 2026-W35）
+# grc-parser-engine 状态卡（更新于 2026-W37）
 
 ## 职责与边界
 文档解析（GPU 优化）：Docling/MinerU 解析器执行，接收知识引擎调度。不做向量化（→ grc-knowledge-engine）。
@@ -20,4 +20,9 @@
 <!-- 人工区块：owner 手工维护 -->
 ## 给 agent 的特别提醒
 - 技术栈：Python / FastAPI（GPU 优化部署）
+- 开发 AKS 已采用自管 NVIDIA Device Plugin v0.18.0；`gpupool` 使用
+  `sku=gpu:NoSchedule`，可分配 `nvidia.com/gpu: 1`。
+- parser 部署必须声明 GPU limit、`gpupool` 调度约束和对应 toleration；部署工件见
+  `grc-parser-engine/deploy/aks/gpu/`（spec 010，commit `513d51d`）。
+- 生产环境不得直接照搬开发配置，须重新验收驱动、镜像 digest、taint 和 GPU smoke。
 <!-- /人工区块 -->
