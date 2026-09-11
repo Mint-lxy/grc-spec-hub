@@ -17,7 +17,7 @@
 - [x] T005 比对 Portal 请求、Gateway 路由及 Auth/Mgmt/Knowledge/Parser 已合并契约
 - [x] T006 若 Gateway 空契约或 watchlist #71 覆盖演示字段，先完成 contract-change 与消费者确认
 - [x] T007 [P] 在 `grc-knowledge-engine` 先写 deployed 持久队列和真实 readiness 失败测试
-- [ ] T008 [P] 在 `grc-api-gateway` 先写 Auth/Mgmt 路由、无 Token 拒绝和后端失败传播测试
+- [x] T008 [P] 在 `grc-api-gateway` 先写 Auth/Mgmt 路由、无 Token 拒绝和后端失败传播测试
 - [ ] T009 [P] 在 `grc-auth-service` 先写演示身份登录、verify/refresh 和无效身份拒绝测试
 - [ ] T010 [P] 在 `grc-mgmt-service` 先写上传会话、完成上传、创建文档及调用 Knowledge 的链路测试
 - [ ] T011 [P] 获取 Portal 后先写关闭 Mock、真实 API origin 和失败态可见测试
