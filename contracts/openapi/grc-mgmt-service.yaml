@@ -783,6 +783,7 @@ paths:
       summary: 查询文档切片列表
       parameters:
         - { name: jobId, in: query, description: 任务 ID, required: false, schema: { type: integer, format: int64 } }
+        - { name: keyword, in: query, description: 按切片内容关键词过滤, required: false, schema: { type: string } }
         - { name: page, in: query, description: 当前页码, required: false, schema: { type: integer, minimum: 1 } }
         - { name: pageSize, in: query, description: 每页数量, required: false, schema: { type: integer, minimum: 1 } }
         - { name: snippetContext, in: query, description: 片段上下文长度, required: false, schema: { type: integer, minimum: 0 } }
