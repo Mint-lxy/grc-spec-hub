@@ -12,6 +12,11 @@ AI 平台前端门户（SPA），提供管理、配置、对话、测评等全�
 - 侧栏品牌区（圆标 + grc/ AI Agent Portal + CONFIDENTIAL）与 QQ 头像 Popover 用户菜单已落地；折叠展开在侧栏/主内容交界边线；一期导航未改
 
 ## 近期重要变化（最近 4 周）
+- W37: spec 014 当前环境演示完成：从 EC2 恢复
+  `feature/release260911@0cd6ab0`，以 AKS Gateway/Blob origin 和
+  `NEXT_PUBLIC_USE_MOCK=false` 重建镜像；AKS Deployment Ready，Internal LoadBalancer
+  为 `172.27.104.8`，浏览器等价 bootstrap + 知识库 API 链路通过。部署工件
+  `97c36ce`。
 - W36: Curate（知识管理）M2 目录管理 Phase A 落地：Knowledge Library 侧栏视觉对齐原型（头部/+Directory/+Knowledge base 按钮/搜索框/目录行样式）；新增顶部 Public Knowledge/My knowledge 范围切换标签，替代原先树内"公共目录/我的目录"虚拟根行；知识库以叶子节点形式懒加载并内联展示在目录树内（复用 `listKnowledgeBases`，未新增契约）；叶子目录（无子目录但有直属知识库）现可展开查看知识库列表。Phase B（创建目录审批人配置、一级目录冷启动）仍受 hub 契约阻塞，待发起 `/contract-change`。现有目录 CRUD 与知识库详情/设置/权限行为零回归。
 - W36: Curate（知识管理）重构 M1 落地：入口改为「每次进入 Curate 先展示 Overview（Banner/KPI/Build Pipeline/Documents by Domain 演示数据），经 CTA/滚轮/触摸/滚动进入既有 Owner Knowledge Library」；Header 新增仅 Curate 显示的开发期角色选择器（默认 Owner，通过通用 `HeaderSlotProvider`/`useHeaderSlot` 插槽注入，不违反 ADR-0001 components 不依赖 features 的边界）；`KnowledgeWorkspace` 原有目录树/知识库创建/详情/设置/权限能力零改动、零回归；无新跨服务契约。真实聚合数据（M4）与 SSO/Alice 多角色授权（M5）列入后续子规格，见 `specs/005-knowledge/sub-specs/roadmap.md`。
 - W35: Marketplace 前端里程碑基本铺满（spec 002，feature/release260831）：M1 资产频道与列表可见性（`e7df1bf`）、M3 订阅申请+M4 审批工作台（`038894c`）、M5 订阅者中心（`b90a540`）、M6 凭据状态+M7 创作者中心（`af0c9cc`）、M8 生命周期联动+M9 发现增强（`3867951`）
