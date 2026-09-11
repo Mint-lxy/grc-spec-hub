@@ -19,7 +19,7 @@
 - [x] T007 [P] 在 `grc-knowledge-engine` 先写 deployed 持久队列和真实 readiness 失败测试
 - [x] T008 [P] 在 `grc-api-gateway` 先写 Auth/Mgmt 路由、无 Token 拒绝和后端失败传播测试
 - [x] T009 [P] 在 `grc-auth-service` 先写演示身份登录、verify/refresh 和无效身份拒绝测试
-- [ ] T010 [P] 在 `grc-mgmt-service` 先写上传会话、完成上传、创建文档及调用 Knowledge 的链路测试
+- [x] T010 [P] 在 `grc-mgmt-service` 先写上传会话、完成上传、创建文档及调用 Knowledge 的链路测试
 - [ ] T011 [P] 获取 Portal 后先写关闭 Mock、真实 API origin 和失败态可见测试
 - [ ] T012 定义固定 PDF/DOCX、演示账号、预期状态与失败场景的端到端 smoke/E2E 脚本
 

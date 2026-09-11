@@ -503,9 +503,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
-                title: Response Create Document Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents Post
+                $ref: '#/components/schemas/DocumentRegistrationEnvelope'
         '422':
           description: Validation Error
           content:
@@ -551,6 +549,14 @@ paths:
               - type: string
               - type: 'null'
             title: Status
+        - name: sort
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Sort
       responses:
         '200':
           description: Successful Response
@@ -561,11 +567,7 @@ paths:
                 additionalProperties: true
                 title: Response List Documents Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents Get
         '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
+          description: Invalid sort parameter
   /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/parse:
     get:
       tags:
@@ -676,6 +678,15 @@ paths:
               - type: integer
               - type: 'null'
             title: Jobid
+        - name: keyword
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+                maxLength: 255
+              - type: 'null'
+            title: Keyword
         - name: page
           in: query
           required: false
@@ -718,12 +729,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/enhance/{enhanceType}:
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/enhance:
     get:
       tags:
         - enhance
       summary: List Enhancements
-      operationId: list_enhancements_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__enhance__enhanceType__get
+      operationId: list_enhancements_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__enhance_get
       parameters:
         - name: knowledgeBaseId
           in: path
@@ -737,12 +748,6 @@ paths:
           schema:
             type: integer
             title: Documentid
-        - name: enhanceType
-          in: path
-          required: true
-          schema:
-            type: string
-            title: Enhancetype
         - name: jobId
           in: query
           required: false
@@ -751,25 +756,6 @@ paths:
               - type: integer
               - type: 'null'
             title: Jobid
-        - name: page
-          in: query
-          required: false
-          schema:
-            anyOf:
-              - type: integer
-                minimum: 1
-              - type: 'null'
-            title: Page
-        - name: pageSize
-          in: query
-          required: false
-          schema:
-            anyOf:
-              - type: integer
-                maximum: 100
-                minimum: 1
-              - type: 'null'
-            title: Pagesize
       responses:
         '200':
           description: Successful Response
@@ -778,7 +764,7 @@ paths:
               schema:
                 type: object
                 additionalProperties: true
-                title: Response List Enhancements Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Enhance  Enhancetype  Get
+                title: Response List Enhancements Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Enhance Get
         '422':
           description: Validation Error
           content:
@@ -1086,16 +1072,44 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/BatchDocumentsRequest'
+              $ref: '#/components/schemas/CreateBuildJobRequest'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                type: object
+                $ref: '#/components/schemas/BuildJobEnvelope'
+        '409':
+          description: A document already has an active build job
+          content:
+            application/problem+json:
+              schema:
                 additionalProperties: true
-                title: Response Create Build Job Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Build Jobs Post
+                properties:
+                  code:
+                    title: Code
+                    type: string
+                  message:
+                    title: Message
+                    type: string
+                  traceId:
+                    title: Traceid
+                    type: string
+                  timestamp:
+                    title: Timestamp
+                    type: string
+                  path:
+                    title: Path
+                    type: string
+                required:
+                  - code
+                  - message
+                  - traceId
+                  - timestamp
+                  - path
+                title: ProblemDetail
+                type: object
         '422':
           description: Validation Error
           content:
@@ -1553,7 +1567,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegisterDocumentRequest'
+              $ref: '#/components/schemas/OpenRegisterDocumentRequest'
       responses:
         '200':
           description: Successful Response
@@ -1596,14 +1610,6 @@ paths:
                 additionalProperties: true
                 type: object
                 title: Response Readyz Readyz Get
-        '503':
-          description: One or more required runtime dependencies are unavailable
-          content:
-            application/json:
-              schema:
-                additionalProperties: true
-                type: object
-                title: Response Readyz Dependency Failure
 components:
   schemas:
     AdapterConfig:
@@ -1615,7 +1621,7 @@ components:
           additionalProperties: true
           type: object
           title: Options
-      additionalProperties: false
+      additionalProperties: true
       type: object
       required:
         - type
@@ -1635,7 +1641,7 @@ components:
           maxItems: 200
           minItems: 1
           title: Sources
-      additionalProperties: false
+      additionalProperties: true
       type: object
       required:
         - sources
@@ -1653,12 +1659,102 @@ components:
           maxItems: 200
           minItems: 1
           title: Docids
-      additionalProperties: false
+      additionalProperties: true
       type: object
       required:
         - stageConfig
         - docIds
       title: BatchUpdateDocumentStageConfigRequest
+    BuildJobData:
+      properties:
+        batchJobId:
+          type: string
+          title: Batchjobid
+        knowledgeBaseId:
+          type: string
+          title: Knowledgebaseid
+        type:
+          type: string
+          const: BATCH_BUILD
+          title: Type
+        status:
+          type: string
+          enum:
+            - PENDING
+            - RUNNING
+          title: Status
+        totalDocs:
+          type: integer
+          minimum: 1
+          title: Totaldocs
+        pipelineJobs:
+          items:
+            $ref: '#/components/schemas/PipelineJobSummary'
+          type: array
+          title: Pipelinejobs
+      additionalProperties: true
+      type: object
+      required:
+        - batchJobId
+        - knowledgeBaseId
+        - type
+        - status
+        - totalDocs
+        - pipelineJobs
+      title: BuildJobData
+    BuildJobEnvelope:
+      properties:
+        code:
+          type: string
+          const: '0'
+          title: Code
+        message:
+          type: string
+          title: Message
+        traceId:
+          type: string
+          title: Traceid
+        timestamp:
+          type: string
+          title: Timestamp
+        data:
+          $ref: '#/components/schemas/BuildJobData'
+      additionalProperties: true
+      type: object
+      required:
+        - code
+        - message
+        - traceId
+        - timestamp
+        - data
+      title: BuildJobEnvelope
+    CreateBuildJobRequest:
+      properties:
+        stageConfig:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Stageconfig
+        sources:
+          items:
+            $ref: '#/components/schemas/SourceItem'
+          type: array
+          maxItems: 200
+          minItems: 1
+          title: Sources
+        runMode:
+          type: string
+          enum:
+            - auto
+            - manual
+          title: Runmode
+          default: auto
+      additionalProperties: true
+      type: object
+      required:
+        - sources
+      title: CreateBuildJobRequest
     CreateKnowledgeBaseRequest:
       properties:
         directoryId:
@@ -1694,7 +1790,7 @@ components:
           additionalProperties: true
           type: object
           title: Metadata
-      additionalProperties: false
+      additionalProperties: true
       type: object
       required:
         - directoryId
@@ -1709,7 +1805,7 @@ components:
           maxLength: 64
           minLength: 1
           title: Name
-      additionalProperties: false
+      additionalProperties: true
       type: object
       required:
         - name
@@ -1728,7 +1824,7 @@ components:
           title: Query
         retrieval_setting:
           $ref: '#/components/schemas/DifyRetrievalSetting'
-      additionalProperties: false
+      additionalProperties: true
       type: object
       required:
         - knowledge_id
@@ -1749,7 +1845,7 @@ components:
               minimum: 0
             - type: 'null'
           title: Score Threshold
-      additionalProperties: false
+      additionalProperties: true
       type: object
       title: DifyRetrievalSetting
     DirectoryType:
@@ -1758,6 +1854,47 @@ components:
         - PUBLIC
         - PERSONAL
       title: DirectoryType
+    DocumentRegistrationData:
+      properties:
+        documentId:
+          type: string
+          title: Documentid
+        status:
+          type: string
+          const: PENDING
+          title: Status
+      additionalProperties: true
+      type: object
+      required:
+        - documentId
+        - status
+      title: DocumentRegistrationData
+    DocumentRegistrationEnvelope:
+      properties:
+        code:
+          type: string
+          const: '0'
+          title: Code
+        message:
+          type: string
+          title: Message
+        traceId:
+          type: string
+          title: Traceid
+        timestamp:
+          type: string
+          title: Timestamp
+        data:
+          $ref: '#/components/schemas/DocumentRegistrationData'
+      additionalProperties: true
+      type: object
+      required:
+        - code
+        - message
+        - traceId
+        - timestamp
+        - data
+      title: DocumentRegistrationEnvelope
     HTTPValidationError:
       properties:
         detail:
@@ -1793,36 +1930,12 @@ components:
           maxLength: 64
           minLength: 1
           title: Name
-      additionalProperties: false
+      additionalProperties: true
       type: object
       required:
         - name
       title: KnowledgeTagRequest
-    PipelineConfig:
-      properties:
-        parser:
-          $ref: '#/components/schemas/AdapterConfig'
-        chunking:
-          $ref: '#/components/schemas/AdapterConfig'
-        enhance:
-          items:
-            $ref: '#/components/schemas/AdapterConfig'
-          type: array
-          title: Enhance
-        embedding:
-          $ref: '#/components/schemas/AdapterConfig'
-        vectorStore:
-          $ref: '#/components/schemas/AdapterConfig'
-      additionalProperties: false
-      type: object
-      required:
-        - parser
-        - chunking
-        - enhance
-        - embedding
-        - vectorStore
-      title: PipelineConfig
-    RegisterDocumentRequest:
+    OpenRegisterDocumentRequest:
       properties:
         fileName:
           type: string
@@ -1859,7 +1972,94 @@ components:
             - manual
           title: Runmode
           default: auto
-      additionalProperties: false
+      additionalProperties: true
+      type: object
+      required:
+        - fileName
+        - sourceType
+        - fileId
+        - docType
+      title: OpenRegisterDocumentRequest
+    PipelineConfig:
+      properties:
+        parser:
+          $ref: '#/components/schemas/AdapterConfig'
+        chunking:
+          $ref: '#/components/schemas/AdapterConfig'
+        enhance:
+          items:
+            $ref: '#/components/schemas/AdapterConfig'
+          type: array
+          title: Enhance
+        embedding:
+          $ref: '#/components/schemas/AdapterConfig'
+        vectorStore:
+          $ref: '#/components/schemas/AdapterConfig'
+      additionalProperties: true
+      type: object
+      required:
+        - parser
+        - chunking
+        - enhance
+        - embedding
+        - vectorStore
+      title: PipelineConfig
+    PipelineJobSummary:
+      properties:
+        pipelineJobId:
+          type: string
+          title: Pipelinejobid
+        documentId:
+          type: string
+          title: Documentid
+        sourceType:
+          type: string
+          title: Sourcetype
+        status:
+          type: string
+          enum:
+            - PENDING
+            - PAUSED
+          title: Status
+      additionalProperties: true
+      type: object
+      required:
+        - pipelineJobId
+        - documentId
+        - sourceType
+        - status
+      title: PipelineJobSummary
+    RegisterDocumentRequest:
+      properties:
+        fileName:
+          type: string
+          maxLength: 512
+          minLength: 1
+          title: Filename
+        sourceType:
+          type: string
+          minLength: 1
+          title: Sourcetype
+        fileId:
+          type: integer
+          title: Fileid
+        sourceMeta:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Sourcemeta
+        docType:
+          type: string
+          minLength: 1
+          title: Doctype
+        stageOverrides:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Stageoverrides
+      additionalProperties: true
       type: object
       required:
         - fileName
@@ -1877,7 +2077,7 @@ components:
           additionalProperties: true
           type: object
           title: Options
-      additionalProperties: false
+      additionalProperties: true
       type: object
       title: RetrievalOptions
     RetrievalRequest:
@@ -1914,7 +2114,7 @@ components:
               type: object
             - type: 'null'
           title: Rerank
-      additionalProperties: false
+      additionalProperties: true
       type: object
       required:
         - query
@@ -1958,7 +2158,7 @@ components:
               type: object
             - type: 'null'
           title: Stageconfig
-      additionalProperties: false
+      additionalProperties: true
       type: object
       title: SourceItem
     StageRunRequest:
@@ -1973,7 +2173,7 @@ components:
           type: boolean
           title: Persist
           default: false
-      additionalProperties: false
+      additionalProperties: true
       type: object
       title: StageRunRequest
     UpdateChunkContentRequest:
@@ -1989,7 +2189,7 @@ components:
               type: object
             - type: 'null'
           title: Metadata
-      additionalProperties: false
+      additionalProperties: true
       type: object
       required:
         - content
@@ -2000,7 +2200,7 @@ components:
           additionalProperties: true
           type: object
           title: Stageconfig
-      additionalProperties: false
+      additionalProperties: true
       type: object
       required:
         - stageConfig
@@ -2030,7 +2230,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/AdapterConfig'
             - type: 'null'
-      additionalProperties: false
+      additionalProperties: true
       type: object
       title: UpdateKnowledgeBaseConfigRequest
     UpdateKnowledgeBaseRequest:
@@ -2057,14 +2257,18 @@ components:
             - $ref: '#/components/schemas/KnowledgeBaseVisibility'
             - type: 'null'
         tags:
-          items:
-            $ref: '#/components/schemas/KnowledgeTagRequest'
-          type: array
-          maxItems: 20
+          anyOf:
+            - items:
+                $ref: '#/components/schemas/KnowledgeTagRequest'
+              type: array
+              maxItems: 20
+            - type: 'null'
           title: Tags
         pipelineConfig:
-          $ref: '#/components/schemas/UpdateKnowledgeBaseConfigRequest'
-      additionalProperties: false
+          anyOf:
+            - $ref: '#/components/schemas/UpdateKnowledgeBaseConfigRequest'
+            - type: 'null'
+      additionalProperties: true
       type: object
       title: UpdateKnowledgeBaseRequest
     UpdateKnowledgeBaseStatusRequest:
@@ -2091,6 +2295,11 @@ components:
         type:
           type: string
           title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
       type: object
       required:
         - loc
