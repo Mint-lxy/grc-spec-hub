@@ -2173,9 +2173,9 @@ components:
           description: 目标状态
     BatchUpdateKnowledgeDocumentStageConfigRequest:
       type: object
-      required: [documentIds, stageConfig]
+      required: [docIds, stageConfig]
       properties:
-        documentIds: { type: array, minItems: 1, items: { type: string }, description: 待更新文档 ID 列表 }
+        docIds: { type: array, minItems: 1, items: { type: string }, description: 待更新文档 ID 列表 }
         stageConfig: { $ref: '#/components/schemas/KnowledgeStageConfigRequest', description: 批量应用的阶段配置 }
     KnowledgePipelineOptionsResponse:
       type: object
