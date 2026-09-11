@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 460" font-family="Microsoft YaHei,PingFang SC,sans-serif">
+<rect width="760" height="460" fill="#f4f4f2"/>
+<rect x="0" y="0" width="760" height="48" fill="#000"/>
+<text x="24" y="30" fill="#fff" font-size="14">Mercedes-Benz · Curate</text>
+<circle cx="700" cy="24" r="13" fill="none" stroke="#4DA8EE" stroke-width="1.6"/>
+<text x="700" y="29" fill="#4DA8EE" font-size="13" text-anchor="middle">?</text>
+<rect x="480" y="60" width="256" height="360" rx="10" fill="#fff" stroke="#e6e6e3"/>
+<text x="504" y="92" font-size="14" font-weight="700" fill="#1a1a1a">Curate 帮助</text>
+<rect x="504" y="106" width="120" height="22" rx="11" fill="#e8f1fa"/><text x="564" y="121" font-size="11" fill="#0078D6" text-anchor="middle">按角色:Owner</text>
+<g font-size="12" fill="#4a4a4a">
+<text x="504" y="152">· 我能做什么?</text>
+<text x="504" y="176">· 如何添加文档并构建?</text>
+<text x="504" y="200">· 权限与 Alice 是什么?</text>
+<text x="504" y="224">· 受限库如何申请访问?</text>
+<text x="504" y="248">· 重新观看新手引导</text>
+</g>
+<rect x="504" y="270" width="208" height="120" rx="8" fill="#f7f7f6"/>
+<text x="524" y="300" font-size="12" font-weight="700" fill="#1a1a1a">图文说明 / 30s 视频</text>
+<text x="524" y="324" font-size="11" fill="#6a6a6a">Parse→Chunk→Enhancer→</text>
+<text x="524" y="342" font-size="11" fill="#6a6a6a">Embedding 四段管线图解</text>
+<rect x="24" y="72" width="430" height="348" rx="10" fill="#fff" stroke="#e6e6e3"/>
+<circle cx="239" cy="170" r="30" fill="#f0f4f8"/>
+<text x="239" y="178" font-size="26" text-anchor="middle" fill="#0078D6">📄</text>
+<text x="239" y="232" font-size="14" font-weight="700" fill="#1a1a1a" text-anchor="middle">还没有文档</text>
+<text x="239" y="256" font-size="12" fill="#6a6a6a" text-anchor="middle">导入文档后,系统将自动完成解析、分块与向量化</text>
+<rect x="159" y="278" width="160" height="32" rx="6" fill="#0078D6"/>
+<text x="239" y="299" font-size="12.5" fill="#fff" text-anchor="middle">Add documents →</text>
+<text x="239" y="336" font-size="11" fill="#0078D6" text-anchor="middle">了解四段管线(图文)</text>
+</svg>

@@ -1,0 +1,1522 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GRC AI 平台 · 测试进度与生产环境上线矩阵（2026-09-11 更新）</title>
+<style>
+  :root{
+    --navy:#16324f; --blue:#2563a8; --blue-soft:#eaf3fb; --light:#eef5fb;
+    --line:#d8e0e8; --text:#1d2935; --muted:#5f6d7a;
+    --green:#1f7a58; --amber:#a36200; --red:#b42318; --purple:#6941c6;
+    --test:#2563a8; --prod:#1f7a58;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#f5f7fa;color:var(--text);
+    font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif;line-height:1.65;}
+  main{width:min(1280px,calc(100% - 48px));margin:0 auto 64px;}
+  .hero{background:linear-gradient(135deg,#102a43,#245b91);color:#fff;
+    padding:52px max(24px,calc((100vw - 1280px)/2));margin-bottom:28px;}
+  .hero-inner{max-width:1280px;margin:auto;}
+  h1{font-size:34px;line-height:1.28;margin:0 0 12px;letter-spacing:.02em;}
+  h2{font-size:23px;color:var(--navy);margin:40px 0 14px;padding-left:12px;border-left:5px solid var(--blue);}
+  h3{font-size:17px;color:var(--navy);margin:20px 0 8px;}
+  h4{font-size:15px;color:var(--navy);margin:16px 0 6px;}
+  p{margin:8px 0 12px;}
+  .subtitle{font-size:17px;opacity:.94;margin:0;}
+  .meta{margin-top:18px;font-size:13.5px;opacity:.84;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:10px;
+    padding:20px 22px;margin:16px 0;box-shadow:0 1px 2px rgba(16,42,67,.04);}
+  .statement{background:#eaf3fb;border-left:5px solid var(--blue);padding:18px 20px;
+    border-radius:4px;font-size:16.5px;}
+  .warn{background:#fff8e8;border-left:5px solid #d99518;padding:15px 18px;border-radius:4px;}
+  .danger{background:#fff0ee;border-left:5px solid var(--red);padding:15px 18px;border-radius:4px;}
+  .ok{background:#edf8f3;border-left:5px solid var(--green);padding:15px 18px;border-radius:4px;}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px;background:#fff;}
+  th,td{border:1px solid var(--line);padding:9px 10px;vertical-align:top;text-align:left;}
+  th{background:#eaf2f9;color:var(--navy);font-weight:700;}
+  tbody tr:nth-child(even) td{background:#fbfdff;}
+  ul{margin:8px 0 12px;padding-left:22px;}
+  li{margin:4px 0;}
+  .small{font-size:12.5px;color:var(--muted);}
+  .tiny{font-size:11.5px;color:var(--muted);line-height:1.45;}
+  .tag{display:inline-block;border-radius:999px;padding:1px 8px;font-size:11.5px;
+    font-weight:700;white-space:nowrap;}
+  .tag-fixed{color:#195d41;background:#ddf5e7;}
+  .tag-build{color:#8b5200;background:#fff1d6;}
+  .tag-gate{color:#5b36ac;background:#eee9ff;}
+  .tag-test{color:#174a80;background:#dfeefc;}
+  .tag-prod{color:#9c1c14;background:#ffe3df;}
+  .tag-na{color:#5f6d7a;background:#eceff2;}
+
+  /* ---- 日历 ---- */
+  .cal{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:14px 0;}
+  .cal .head{background:#eaf2f9;color:var(--navy);font-weight:700;text-align:center;
+    padding:7px;border-radius:6px;font-size:13px;}
+  .cal .d{background:#fff;border:1px solid var(--line);border-radius:6px;
+    padding:8px 9px;min-height:64px;font-size:12.5px;}
+  .cal .d b{display:block;font-size:13.5px;color:var(--navy);}
+  .cal .d.off{background:#f2f4f7;border-style:dashed;color:#98a2b3;}
+  .cal .d.off b{color:#98a2b3;}
+  .cal .d.t{border:2px solid var(--test);background:#f2f8fe;}
+  .cal .d.p{border:2px solid var(--prod);background:#f1faf5;}
+  .cal .d.m{border:2px solid #6941c6;background:#f7f4ff;}
+
+  /* ---- 甘特矩阵 ---- */
+  .gantt{font-size:12.5px;}
+  .gantt th{text-align:center;padding:6px 4px;}
+  .gantt th.grp-t{background:#dfeefc;color:#174a80;}
+  .gantt th.grp-p{background:#ddf5e7;color:#195d41;}
+  .gantt td.c{text-align:center;padding:7px 4px;}
+  .gantt td.mod{font-weight:700;color:var(--navy);white-space:nowrap;}
+  .dot{display:inline-block;width:22px;height:22px;line-height:22px;border-radius:50%;
+    font-size:12px;font-weight:700;color:#fff;}
+  .dot-t{background:var(--test);}
+  .dot-p{background:var(--prod);}
+  .dot-g{background:#6941c6;}
+  .gantt td.mile{background:#f7f9fc;}
+
+  /* ---- 节点卡 ---- */
+  .node{border:1px solid var(--line);border-radius:10px;background:#fff;
+    margin:14px 0;overflow:hidden;box-shadow:0 1px 2px rgba(16,42,67,.04);}
+  .node-h{display:flex;align-items:center;gap:14px;padding:13px 18px;background:#f7f9fc;
+    border-bottom:1px solid var(--line);flex-wrap:wrap;}
+  .node-d{font-size:19px;font-weight:800;color:var(--navy);letter-spacing:.02em;}
+  .node-t{font-size:14px;font-weight:700;color:var(--blue);}
+  .node-t.prod{color:var(--prod);}
+  .node-b{padding:16px 18px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .src{font-size:11.5px;color:#7a8794;background:#f4f6f8;border-radius:4px;
+    padding:1px 6px;display:inline-block;margin-left:4px;}
+  .mod-chip{display:inline-block;background:#eaf2f9;color:#174a80;border-radius:5px;
+    padding:2px 8px;font-size:12px;font-weight:700;margin:2px 4px 2px 0;}
+  .mod-chip.p{background:#e8f7ef;color:#195d41;}
+  .foot{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+    font-size:12.5px;color:var(--muted);}
+
+  /* ---- 一体化时间轴：单一时间轴 · 左测试 / 右生产 ---- */
+  .tl-col{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    box-shadow:0 1px 2px rgba(16,42,67,.04);}
+  .tl-head{padding:14px 18px;font-weight:800;font-size:17px;color:var(--navy);display:flex;
+    align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    background:linear-gradient(90deg,#eaf3fb 0%,#eaf3fb 49.9%,#edf8f3 50.1%,#edf8f3 100%);}
+  .tl-head .tl-side{font-size:12.5px;font-weight:700;color:#41556a;}
+  .tl-body{padding:20px 22px 12px;display:flex;flex-direction:column;gap:14px;}
+  .tl-row{display:grid;grid-template-columns:1fr 96px 1fr;align-items:stretch;}
+  .tl-row > *{min-width:0;}
+  .tl-mid{position:relative;display:flex;flex-direction:column;align-items:center;padding-top:12px;}
+  .tl-mid::before{content:"";position:absolute;left:50%;top:-14px;bottom:-14px;width:3px;
+    margin-left:-1.5px;background:#dfe7ef;border-radius:2px;}
+  .tl-mid::after{content:"";position:absolute;top:19px;height:2px;width:48px;background:#dfe7ef;}
+  .tl-row.r-test .tl-mid::after{right:50%;}
+  .tl-row.r-prod .tl-mid::after{left:50%;}
+  .tl-row:first-child .tl-mid::before{top:0;}
+  .tl-row:last-child .tl-mid::before{bottom:0;}
+  .tl-card{background:#fbfdff;border:1px solid #e4edf6;border-radius:9px;padding:12px 14px;}
+  .tl-card.p{background:#fbfefc;border-color:#e2f0e8;}
+  .tl-dot{position:relative;z-index:1;width:15px;height:15px;border-radius:50%;background:var(--test);
+    border:3px solid #fff;box-shadow:0 0 0 2px var(--test);}
+  .tl-row.r-prod .tl-dot{background:var(--prod);box-shadow:0 0 0 2px var(--prod);}
+  .tl-mid.gate .tl-dot{width:21px;height:21px;margin-top:-3px;background:#6941c6;
+    box-shadow:0 0 0 3px #6941c6;}
+  .tl-date{position:relative;z-index:1;font-size:12.5px;font-weight:800;color:var(--navy);
+    background:#fff;padding:0 3px;margin-top:6px;white-space:nowrap;}
+  .tl-wd{position:relative;z-index:1;font-size:10.5px;color:var(--muted);
+    background:#fff;padding:0 4px;white-space:nowrap;}
+  .tl-code{display:inline-block;background:#eaf2f9;color:#174a80;border-radius:4px;
+    padding:0 6px;font-size:11.5px;font-weight:800;margin-right:6px;vertical-align:1px;}
+  .tl-code.p{background:#e8f7ef;color:#195d41;}
+  .tl-switch{grid-column:1/-1;position:relative;display:flex;justify-content:center;padding:8px 0;}
+  .tl-switch::before{content:"";position:absolute;left:50%;top:-14px;bottom:-14px;width:3px;
+    margin-left:-1.5px;background:linear-gradient(#cfe0f2,#cfe8db);border-radius:2px;}
+  .tl-switch span{position:relative;z-index:1;background:#fff;border:1px dashed #b8c6d4;
+    border-radius:999px;padding:3px 14px;font-size:12.5px;font-weight:700;color:var(--navy);}
+  .rhythm-p{font-size:13px;color:#2c3a48;margin:7px 0 6px;line-height:1.6;}
+  .tl-card h4{margin:10px 0 4px;}
+  .tl-card ul{font-size:13px;margin:6px 0 8px;padding-left:18px;}
+  .tl-card li{margin:3px 0;}
+  .tl-card .grid2{gap:12px;margin-top:8px;}
+  .tl-card .warn,.tl-card .danger,.tl-card .ok{padding:10px 12px;font-size:12.5px;margin-top:8px;}
+  .tl-card .tag{margin-left:6px;vertical-align:2px;}
+  .rhythm-title{font-size:14.5px;font-weight:700;margin:0 0 2px;}
+  .rhythm-legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;}
+  .rhythm-legend span{display:inline-flex;align-items:center;gap:6px;}
+  .rhythm-legend i{display:inline-block;width:11px;height:11px;border-radius:50%;}
+  details.frg{border:1px solid #e4edf6;border-radius:9px;background:#fbfdff;margin:10px 0;padding:0 14px}details.frg>summary{cursor:pointer;padding:12px 2px;font-weight:800;color:var(--navy);font-size:14.5px}details.frg>summary:hover{color:#0056a8}details.frg[open]>summary{border-bottom:1px dashed #dfe7ef;margin-bottom:8px}.frg-note{font-size:12.5px;color:#41556a;padding:2px 2px 8px}.frg table{margin:2px 0 10px}.frg th{background:#f3f8fc}.prod-a{color:#195d41;font-weight:800}.prod-b{color:#8a5200;font-weight:800}.frq{font-size:11.5px;color:var(--muted);font-weight:600}.frg td.c{text-align:center;color:#5f6d7a}
+
+  @media (max-width:900px){
+    .tl-body{padding:16px 12px 8px;gap:10px;}
+    .tl-row{grid-template-columns:1fr 56px 1fr;}
+    .tl-mid::after{width:28px;}
+    .tl-date{font-size:11px;}
+    .tl-card{padding:10px 11px;}
+    main{width:min(100% - 28px,1280px);}
+    .hero{padding:36px 18px;} h1{font-size:26px;}
+    .grid2,.grid3{grid-template-columns:1fr;}
+    .cal{grid-template-columns:repeat(2,1fr);}
+    table{font-size:11.5px;} th,td{padding:6px;}
+    .gantt{font-size:11px;}
+  }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="hero-inner">
+    <h1>GRC AI 平台 · 测试进度与生产环境上线矩阵</h1>
+    <p class="subtitle">以 <strong>10/16 测试完成 + 核心功能上生产</strong>、<strong>10/30 其余模块上生产并全量验收</strong>为双锚点，按工作日重排九模块交付节奏</p>
+    <p class="meta">版本 v2.4（T1 / T3 节点日期按 Excel「上线排期」原值对齐：9/14→9/11、9/24→9/21；功能点明细内联到时间轴节点） ｜ 日期 2026-09-11 ｜ 生产口径：核心功能相关（005 / 002 / 001）10/16 上生产，其余全部 10/30 上生产；功能点级明细已内联到第二节时间轴各节点（351 行） ｜ 排期口径：工作日（已扣除 2026-09-25 中秋、2026-10-01 ~ 10-07 国庆）；001 Conversation 测试节点按 Excel 最新「上线排期」= 10/10（周六）落位 ｜ 数据源：《工作簿1.xlsx》2026-09-11 10:50 版 ｜ 适用对象：项目领导、产品、业务、架构、开发与测试团队</p>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ 一、调整结论 ============ -->
+<section>
+  <h2>一、本次时间轴重排结论</h2>
+  <div class="statement">
+    时间轴仍为<strong>单轴双支</strong>：中央为<strong>一条连续时间轴</strong>（9/11 → 10/30），<strong>左支为测试环境进度</strong>（9/11 → 10/16，共 7 个测试节点）、<strong>右支为生产环境上线</strong>（<strong>10/16 核心功能批 + 10/30 其余模块批，共 2 个节点</strong>），自上而下按时间连续推进，10/16 测试收口当日核心功能同步切换生产。全流程按<strong>工作日</strong>排布，9/11 至 10/30 共 <strong>30 个工作日</strong>；<strong>10/16 为第 20 个工作日</strong>，<strong>10/30 为第 30 个工作日</strong>。
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>保持不变的部分</h3>
+      <ul>
+        <li><strong>Knowledge 9/11、9/18</strong> —— 既定节点，不动（9/11 按 Excel「上线排期」原值 <code>9.11</code> 对齐）。</li>
+        <li><strong>Marketplace 9/21</strong> —— 既定节点，不动（9/21 按 Excel「上线排期」原值 <code>9.21</code> 对齐）。</li>
+        <li>总目标仍为 <strong>10/30 完成生产上线与上线验收</strong>（不是"开发完成"）。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>本次重排的部分</h3>
+      <ul>
+        <li><strong>001 Conversation 测试节点落位 10/10</strong>：按《工作簿1.xlsx》2026-09-11 更新版「上线排期」= <strong>1010</strong>（原 <code>1023</code>）排入，撤销上一版「顺延至 10/14」的处理。10/10 为<strong>周六</strong>，与本文「按工作日排期」的基准不一致，已列入第八节待确认。</li>
+        <li>原 <strong>10/23 开发冻结</strong> → 测试侧收口提前至 <strong>10/16（周五）</strong>。</li>
+        <li><strong>生产侧由「生产准备 + 3 批次 + 验收」简化为两档</strong>：核心功能相关（005 Knowledge、002 Marketplace、001 Conversation）<strong>10/16 上生产</strong>；其余全部（003 / 004 / 006 / 007 / 008 / 009）<strong>10/30 上生产并完成全量验收</strong>。原 10/19 生产准备、10/20 / 10/23 / 10/28 三批次方案撤销。</li>
+        <li>其余测试节点参考《工作簿1.xlsx · 上线排期》与两份 9/9 说明重新分摊；Excel 2026-09-11 版除 001 Conversation 外，其余模块排期与上一版一致。</li>
+        <li><strong>T1 / T3 节点日期向 Excel 原值对齐</strong>：Knowledge 第一批 9/14 → <strong>9/11</strong>（Excel <code>9.11</code>）、Marketplace 9/24 → <strong>9/21</strong>（Excel <code>9.21</code>）；时间轴中轴、工作日日历（三）、矩阵（四）、来源对照（五）、未排期建议（七）与待确认（八）已同步。对齐后 T1 = 9/11（周五，第 1 个工作日）、T3 = 9/21（周一）。</li>
+        <li><strong>生产上线时间细化到功能点级</strong>：按《工作簿1.xlsx》<strong>相同颗粒度</strong>为 <strong>351 行</strong>需求明细逐行标注生产上线时间（核心批 168 行 → 10/16，其余批 183 行 → 10/30），逐行明细已内联到<strong>第二节时间轴</strong>的各节点卡片。</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="ok">
+    <strong>排期方法：</strong>以既有两条时间线（《九模块倒排与上线说明》《各模块排期合理性详解》）与《工作簿1.xlsx》的「上线排期」列为输入，保留已锁定节点，其余按 <em>依赖顺序 + 工作日容量</em> 重新分摊到 7 个测试节点；生产侧按 <em>核心功能 / 其余模块</em> 两档口径排布为 <strong>10/16</strong> 与 <strong>10/30</strong> 两个节点（10/30 同步完成全量验收）。
+  </div>
+</section>
+
+<!-- ============ 二、一体化时间轴与节点详解 ============ -->
+<section>
+  <h2>二、一体化时间轴与节点详解：测试环境（左支） → 生产环境（右支）</h2>
+  <p class="small">两条时间轴已合并为<strong>一条</strong>：中央为连续时间轴（9/11 → 10/30，第 1 → 第 30 个工作日），<strong>左支挂测试环境 7 个节点</strong>、<strong>右支挂生产环境 2 个节点</strong>（<strong>10/16 核心功能批</strong>、<strong>10/30 其余模块批 + 全量验收</strong>），自上而下按时间连续推进。左支展开节点交付内容与覆盖 FR（模块级来源见第五节；功能点明细已内联在本节各节点卡片内，展开即可查看），右支展开上线模块、上线理由与前置条件。</p>
+
+  <div class="tl-col">
+    <div class="tl-head">
+      <span>一体化时间轴 · 9/11（第 1 个工作日）→ 10/30（第 30 个工作日）</span>
+      <span class="tl-side">左支 = 测试环境 · 7 节点 ｜ 右支 = 生产环境 · 核心批 10/16 + 其余批 10/30</span>
+    </div>
+    <div class="tl-body">
+
+      <!-- T1 -->
+      <div class="tl-row r-test">
+        <div class="tl-card">
+          <div class="rhythm-title"><span class="tl-code">T1</span>Knowledge 第一批：目录体系与建库<span class="tag tag-fixed">既定节点 · 不改</span></div>
+          <div class="mod-chip">005 Knowledge</div>
+          <p class="rhythm-p">公共目录 / 我的目录层级、目录级角色、知识库创建向导、可见范围与叶子目录约束、建库校验。PAT 认证随本节点开放接口一并前置。</p>
+          <p class="tiny">覆盖：005 FR-001~017（目录 FR-001~009b、建库 FR-010~017） ｜ 007 FR-001~004（PAT 随 Knowledge 开放接口前置）</p>
+          <details class="frg">
+            <summary>功能点颗粒度 <span class="frq">· 24 行 · 005 Knowledge / 007 Credential</span></summary>
+            <table>
+              <thead><tr><th style="width:150px;">模块</th><th style="width:82px;">编号</th><th>功能名称（Excel 原文）</th><th style="width:92px;">Excel 排期</th></tr></thead>
+              <tbody>
+                <tr><td>005 Knowledge</td><td>FR-001</td><td>公共目录与我的目录两个根节点</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-002</td><td>各节点展示知识库数量</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-003</td><td>目录控制角色持有人创建子目录、重命名、删除</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-004</td><td>已含知识库的目录下创建子目录时</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-005</td><td>当且仅当该目录及其所有子目录下知识库数量为零（软删除</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-006</td><td>我的目录创建者本人直接执行全部子目录维护</td><td class="c">—</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-007</td><td>父级目录的目录控制角色自动拥有全部子级目录的控制权限</td><td class="c">—</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-008</td><td>对无权限用户展示对应 Alice 权限 ID（可一键</td><td class="c">—</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-009b</td><td>知识库 Owner 与 Deputy 全部失效时</td><td class="c">—</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-009</td><td>目录级角色（目录控制、知识库创建）的授予/回收/同级</td><td class="c">—</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-010</td><td>基础信息（存放路径/名称/可见范围/描述/标签）→</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-011</td><td>可见范围为卡片可发现性控制：「公开」卡片全员可见（无</td><td class="c">—</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-012</td><td>知识库只能创建在叶子目录</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-013c</td><td>创建角色持有人未自任 Owner/Deputy 时</td><td class="c">—</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-013b</td><td>调 Alice 创建角色失败（不可用/超时/拒绝）时</td><td class="c">—</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-013</td><td>公共目录建库校验知识库创建角色</td><td class="c">—</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-014</td><td>我的目录建库无需授权、不调用 Alice、无 Ali</td><td class="c">—</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-015</td><td>新建知识库初始状态为「草稿」</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-016</td><td>禁止知识库在既有目录间移动、禁止复制（子树内下沉分层</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-017</td><td>建库向导中仅展示默认实例与本人已获授权的平台资源实例</td><td class="c">9.11</td></tr>
+                <tr><td>007 Credential</td><td>FR-001</td><td>PAT MUST 是外部系统调用本平台全部开放接口的</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-002</td><td>创建 PAT MUST 填写名称、有效期（默认 90</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-003</td><td>令牌明文 MUST 仅在创建成功时完整显示一次</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-004</td><td>失效 MUST 分两类来源：对象侧——某项授权失效（</td><td class="c">1009</td></tr>
+              </tbody>
+            </table>
+          </details>
+        </div>
+        <div class="tl-mid"><span class="tl-dot"></span><span class="tl-date">9/11</span><span class="tl-wd">周五</span></div>
+        <div class="tl-gap"></div>
+      </div>
+
+      <!-- T2 -->
+      <div class="tl-row r-test">
+        <div class="tl-card">
+          <div class="rhythm-title"><span class="tl-code">T2</span>Knowledge 第二批：导入、构建管线与检索<span class="tag tag-fixed">既定节点 · 不改</span></div>
+          <div class="mod-chip">005 Knowledge</div>
+          <p class="rhythm-p">本地上传 / ZIP / Confluence / SharePoint / OSS 导入通道、预览勾选、白名单与重名校验、四阶段构建管线与失败处置、知识库状态机、文档详情、库级参数与删除、开放接口、挂载检索、重命名与唯一性、Overview。</p>
+          <p class="tiny">覆盖：005 FR-018~057（导入 FR-018~024、构建 FR-025~036、详情 FR-037~037f、参数 FR-038~040、删除 FR-041~044、开放接口 FR-045~047、挂载检索 FR-048~054、重命名 FR-055~055b、Overview FR-056~056b、批量参数 FR-057~057b）</p>
+          <details class="frg">
+            <summary>功能点颗粒度 <span class="frq">· 52 行 · 005 Knowledge</span></summary>
+            <table>
+              <thead><tr><th style="width:150px;">模块</th><th style="width:82px;">编号</th><th>功能名称（Excel 原文）</th><th style="width:92px;">Excel 排期</th></tr></thead>
+              <tbody>
+                <tr><td>005 Knowledge</td><td>FR-018</td><td>本地上传（单文件 ≤40MB</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-019</td><td>导入操作者须具备该库知识库 Contributor</td><td class="c">—</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-020</td><td>三个外部通道分别经平台原生工具（Confluence</td><td class="c">—</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-021</td><td>导入前提供目录预览与勾选</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-022</td><td>文件名与库内已有文档重名时要求确认是否覆盖（被确认的</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-023</td><td>单次导入 ≤200 份、单库文档 ≤5000 份、单</td><td class="c">—</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-024</td><td>导入后文件初始状态为「未解析」</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-025</td><td>解析→切片→内容增强→向量化</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-026</td><td>失败立即弹窗说明原因（9 类：格式不支持/文件损坏/</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-027b</td><td>不同知识库构建可并行</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-027</td><td>同一知识库任一时刻至多一条构建流水线</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-028</td><td>全库重建期间知识库保持「可用」</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-029</td><td>单文档单阶段超时 10 分钟</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-030</td><td>构建完成或失败通知发给触发者与知识库 Owner</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-031</td><td>草稿→可用→已停用</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-032b</td><td>「已停用」仅收敛消费面（挂载/检索/开放接口）</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-032</td><td>知识库 Owner（我的目录为创建者本人）手动停用（</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-033</td><td>「可用」状态删除最后一份已向量化文档时自动回「草稿」</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-034</td><td>按检索时刻的知识库状态与权限执行检索</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-035</td><td>未解析→已解析→已切片→已增强→已向量化</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-036</td><td>仅「已向量化」的文档参与检索</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-037e</td><td>对 Contributor 与 Owner 有效权限</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-037f</td><td>对可被当前用户发现但用户无任何有效权限的知识库</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-037d</td><td>对 Consumer 有效权限展示完整文档列表并允许</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-037</td><td>文件详情展示：源文件分页预览、解析后 Markdow</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-037c</td><td>对 Viewer 有效权限采用最小展示：Docume</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-038</td><td>解析器二选一（Docling/MinerU：OCR</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-039</td><td>库级参数为全库默认</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-040</td><td>向量化模型与向量数据库（类型与实例）锁定在库级</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-041</td><td>知识库 Owner（我的目录为创建者本人）删除知识库</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-042</td><td>软删除后卡片对全部用户不可见、不参与挂载与检索</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-043</td><td>知识库 Owner 与 Contributor 可删</td><td class="c">9.14</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-044</td><td>创建者账号被 Alice 停用时</td><td class="c">9.14</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-045c</td><td>写入文档遵循与 UI 导入同一套校验（白名单、≤40</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-045b</td><td>同名冲突处置参数（自动覆盖或返回错误）</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-045</td><td>三个开放接口：读取元数据、检索、更新内容</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-046</td><td>读取元数据与检索需知识库 Consumer 及以上</td><td class="c">9.14</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-047</td><td>我的目录库：创建者与「可查看/可编辑」分享者可调用读</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-048</td><td>仅 Chat 会话挂载知识库</td><td class="c">9.14</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-049</td><td>目录树浏览、名称搜索、按库多选、按文档单选</td><td class="c">9.14</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-050</td><td>单会话挂载知识库上限 5 个</td><td class="c">9.14</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-051b</td><td>「检索知识库」开放接口允许调用方自定义 top-k</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-051</td><td>每库各取相似度前 5 条切片</td><td class="c">9.14</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-052</td><td>回答附带引用来源标签</td><td class="c">9.14</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-053</td><td>命中的图片、插图、图表或表格类证据内嵌渲染并标注来源</td><td class="c">9.14</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-054</td><td>平台管理员创建公共目录一级节点并指定一级目录控制角色</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-055b</td><td>同一目录内知识库名称唯一</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-055</td><td>知识库 Owner 可重命名（我的目录仅创建者本人）</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-056b</td><td>Overview 页展示描述、标签、构建统计（阶段分</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-056</td><td>文档数、切片数、向量数与就绪度（已向量化文档数/未删</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-057b</td><td>保存后受影响文件从最早受影响阶段起重跑（解析器→解析</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-057</td><td>批量选择多份文件并批量修改文档级参数</td><td class="c">9.11</td></tr>
+              </tbody>
+            </table>
+          </details>
+        </div>
+        <div class="tl-mid"><span class="tl-dot"></span><span class="tl-date">9/18</span><span class="tl-wd">周五</span></div>
+        <div class="tl-gap"></div>
+      </div>
+
+      <!-- T3 -->
+      <div class="tl-row r-test">
+        <div class="tl-card">
+          <div class="rhythm-title"><span class="tl-code">T3</span>Marketplace 全模块<span class="tag tag-fixed">既定节点 · 不改</span></div>
+          <div class="mod-chip">002 Marketplace</div>
+          <p class="rhythm-p">Agent / MCP 双频道与热门、搜索与卡片、收藏、资产详情五页签、订阅申请与多级并行审批、订阅记录与状态机、创作者中心与待我审批、订阅取消与下架联动。</p>
+          <div class="warn"><strong>既有例外仍成立：</strong>9/21 订阅流程暂不发送站内订阅通知，通知能力于 <strong>9/28</strong> 补齐。</div>
+          <p class="tiny">覆盖：002 FR-001~034（FR-011 订阅申请单页表单在原 Excel 中未排期，见第五节）</p>
+          <details class="frg">
+            <summary>功能点颗粒度 <span class="frq">· 34 行 · 002 Marketplace</span></summary>
+            <table>
+              <thead><tr><th style="width:150px;">模块</th><th style="width:82px;">编号</th><th>功能名称（Excel 原文）</th><th style="width:92px;">Excel 排期</th></tr></thead>
+              <tbody>
+                <tr><td>002 Marketplace</td><td>FR-001</td><td>Marketplace 提供 Agent 与 MCP</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-002</td><td>热门按近 30 天新增且当前仍有效的「已通过」订阅数</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-003</td><td>按名称、业务标签与简介子串不区分大小写匹配并高亮</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-004</td><td>列表与搜索仅展示「已发布」且上架时点质量门控全部通过</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-005</td><td>卡片展示名称、类型、业务标签与状态</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-006</td><td>可在 Marketplace 与「我的资产」抽屉收藏</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-007</td><td>基本信息/接入配置/测评信息/发布记录/凭据状态五页</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-008</td><td>基本信息/接入配置/工具能力/凭据状态四页签</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-009</td><td>P0 中 MCP 不提供「去使用」（不是对话对象）</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-010</td><td>已下架资产对非负责人展示占位页（名称、「已下架」状态</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-011</td><td>单页表单：顶部资产说明摘要（名称/类型/Owner）</td><td class="c">—</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-012</td><td>同一申请人对同一资产至多一条在途（待审批）申请</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-013</td><td>各级审批人计算时排除申请人本人</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-014</td><td>提交前校验必填与格式</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-015</td><td>孤儿资产（全部 Owner 与 Deputy 账号失</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-016</td><td>Owner 与 Deputy 对自己的资产免订阅可用</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-017</td><td>申请提交后全部级同时收到待办、级间无顺序</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-018</td><td>整单驳回（终态）后其余各级未处理待办立即清除、已处理</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-019</td><td>某级无有效审批人（离职/停用</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-020</td><td>在途申请锁定提交时的审批链快照并按快照走完</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-021</td><td>「重新申请」一律新建记录（以原申请内容预填）</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-022</td><td>「已取消」记录标注取消来源（主动退订/Owner 取</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-023</td><td>使用条款的版本号、确认人与确认时间随订阅记录持久化</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-024</td><td>顶部四状态统计卡（已通过/待审批/被驳回/已取消）点</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-025</td><td>去使用（仅 Agent）、配置个人凭据（平台外调用）</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-026</td><td>顶部四统计卡（已创建资产/待审批订阅申请/已下架资产</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-027</td><td>订阅管理（查看/审批/驳回/取消他人订阅并必填理由）</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-028</td><td>仅可见资产基本信息与待其审批的订阅申请</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-029</td><td>出站调用被平台停用时</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-030</td><td>待审批 → 已通过 / 被驳回（终态）/ 已取消（终</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-031</td><td>触发为 Owner 取消/订阅者退订/资产下架/资产</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-032</td><td>资产下架时全部待审批申请自动转「已取消」</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-033</td><td>资产重新上架不恢复原订阅</td><td class="c">9.21</td></tr>
+                <tr><td>002 Marketplace</td><td>FR-034</td><td>账号被 Alice 停用时</td><td class="c">9.21</td></tr>
+              </tbody>
+            </table>
+          </details>
+        </div>
+        <div class="tl-mid"><span class="tl-dot"></span><span class="tl-date">9/21</span><span class="tl-wd">周一</span></div>
+        <div class="tl-gap"></div>
+      </div>
+      <!-- T4 -->
+      <div class="tl-row r-test">
+        <div class="tl-card">
+          <div class="rhythm-title"><span class="tl-code">T4</span>可被下游消费的最小能力<span class="tag tag-build">底座就绪</span></div>
+          <div class="grid2">
+            <div>
+              <h4>本节点交付</h4>
+              <ul>
+                <li><strong>008 Admin</strong>：平台资源注册表、模型设置、原生工具登记、目录冷启动（FR-004~039、070~076）</li>
+                <li><strong>007 Credential</strong>：静态资产个人凭据（FR-010~017）</li>
+                <li><strong>006 Guardrail</strong>：默认模板、查询与选择、门控校验（FR-010~012）</li>
+                <li><strong>003 Asset Creation</strong>：草稿创建与续填（FR-001~021）</li>
+                <li><strong>009 Notification</strong>：通知基础设施 + Knowledge / 订阅通知（FR-001~003）</li>
+              </ul>
+            </div>
+            <div>
+              <h4>为什么必须前置</h4>
+              <ul>
+                <li>Knowledge 的支撑后台、目录与模型依赖 008；</li>
+                <li>资产创建需要可选择的启用护栏模板，故 006 最小能力须前置；</li>
+                <li>资产调用不允许共享身份兜底，静态个人凭据必须在资产使用前就绪；</li>
+                <li>先让创建者准备资产信息，降低 10/9 集中录入风险。</li>
+              </ul>
+            </div>
+          </div>
+          <details class="frg">
+            <summary>功能点颗粒度 <span class="frq">· 69 行 · 003 Asset Creation / 006 Guardrail / 007 Credential / 008 Admin / 009 Notification</span></summary>
+            <table>
+              <thead><tr><th style="width:150px;">模块</th><th style="width:82px;">编号</th><th>功能名称（Excel 原文）</th><th style="width:92px;">Excel 排期</th></tr></thead>
+              <tbody>
+                <tr><td>003 Asset Creation</td><td>FR-001</td><td>全员默认创建 Agent 与 MCP 资产</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-002</td><td>高代码 Agent 创建的前置条件 MUST 为：该</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-003</td><td>资产名称 MUST 全平台唯一——校验时点为提交（门</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-004</td><td>向导未提交的资产 MUST 处于「草稿」状态并在服务</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-005</td><td>Agent 创建向导 MUST 为六步：基础信息 →</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-006</td><td>基础信息 MUST 含：资产名称、业务标签、简介、能</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-007</td><td>接入配置 MUST 含：服务地址、Health Ch</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-008</td><td>鉴权配置 MUST 支持两种模式且仅声明凭据元数据</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-009</td><td>资产侧 MUST NOT 保存任何密钥值——资产的全</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-010</td><td>能力声明 MUST 拉取 Agent Card 并声</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-011</td><td>护栏策略模板 MUST 从启用状态的模板中选择恰好一</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-012</td><td>MCP 创建向导 MUST 为五步：基础信息 → 链</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-013</td><td>链接配置 MUST 含：服务地址、协议、托管方式、H</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-014</td><td>MCP 能力声明 MUST 拉取工具清单</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-015</td><td>MCP 鉴权配置 MUST 支持静态凭据与动态凭据</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-016</td><td>MCP 向导 MUST NOT 出现护栏策略模板选择</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-017</td><td>订阅申请表单 MUST 支持下载 YAML 模板、上</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-018</td><td>使用条款 MUST 为资产的独立必填配置、与表单定义</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-019</td><td>订阅审批人链 MUST 可视化配置为并行多级：可增删</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-020</td><td>审批人可以不是资产负责人</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-021</td><td>向导末步 MUST 填写本次发布说明</td><td class="c">925~1023</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-010</td><td>平台管理员 MUST 可从启用模板中指定全局唯一的平</td><td class="c">1009</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-011</td><td>当前默认模板 MUST NOT 可直接停用——须先指</td><td class="c">1009</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-012</td><td>平台默认护栏策略模板 MUST 随平台部署内置（内容</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-010</td><td>个人凭据 MUST 按人持有</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-011</td><td>资产调用凭据 MUST 按资产的鉴权模式分两种形态</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-012</td><td>平台原生工具凭据 MUST 全员可选（三类通道鉴权方</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-013</td><td>个人模型凭据 MUST 不按调用点划分——同一条凭据</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-014</td><td>保存个人模型凭据后 MUST 自动执行一次全量可用性</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-015</td><td>密文字段 MUST 默认掩码显示、可切换明文（切换动</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-016</td><td>交互 MUST 为单页配置（资源选择器 + 动态认证</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-017</td><td>凭据编辑范围 MUST 遵循不可变优先矩阵：PAT</td><td class="c">1009</td></tr>
+                <tr><td>008 Admin</td><td>FR-004</td><td>出站调用停用生效后</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-005</td><td>出站调用停用 MUST 与资产状态正交：资产下架、重</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-006</td><td>出站调用停用与恢复 MUST 留痕</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-007</td><td>孤儿资产补员 MUST 仅对当前仍为孤儿资产的行可提</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-008</td><td>孤儿资产补员 MUST 同次指定新 Owner 与至</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-009</td><td>孤儿资产原负责人的 Alice 账号恢复时</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-010</td><td>发布准入测评模板维护 MUST 仅平台管理员可用</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-011</td><td>发布准入测评模板 MUST 包含三类测评问题集：提示</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-012</td><td>管理员修改发布准入测评模板的问题集或阈值后</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-013</td><td>发布准入测评的裁判模型 MUST 来自随部署内置的模</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-014</td><td>测评阻断开关 MUST 为单一总开关</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-015</td><td>测评阻断开关 MUST NOT 作用于 MCP 发布</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-020</td><td>平台原生工具维护 MUST 仅平台管理员可用</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-021</td><td>平台管理员 MUST 可维护平台原生工具的服务地址</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-022</td><td>平台原生工具 MUST 仅作为知识库外部导入通道</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-023</td><td>平台原生工具 MUST 不上 Marketplace</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-024</td><td>平台原生工具停用后</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-030</td><td>平台资源注册表 MUST 仅平台管理员可用</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-031</td><td>P0 资源类型 MUST 包含 Milvus 实例与</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-032</td><td>可用范围 MUST 为三种：默认可用、授权可用、平台</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-033</td><td>每类 P0 向量数据库（Milvus、PGVecto</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-034</td><td>平台资源注册表 MUST 随部署内置默认 Milvu</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-035</td><td>授权可用资源的逐人授予与回收 MUST 不经 Ali</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-036</td><td>用户侧向量库实例选择器 MUST 仅展示默认可用实例</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-037</td><td>实例类平台资源 MUST 支持连接与凭据一键探测</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-038</td><td>模型类平台资源 MUST NOT 在平台资源注册表中</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-039</td><td>平台资源凭据 MUST NOT 作为用户资产调用的兜</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-070</td><td>模型设置 MUST 仅平台管理员可用</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-071</td><td>模型 MUST 分为四类：对话、多模态、重排序、向量</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-072</td><td>每个既有模型条目 MUST 可在线配置平台默认凭据引</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-073</td><td>模型清单 MUST 随部署内置至少一个启用的默认对话</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-074</td><td>P0 模型设置 MUST NOT 提供运行期新增、编</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-075</td><td>模型删除/停用的在用引用校验不作为 P0 后台在线能</td><td class="c">925</td></tr>
+                <tr><td>008 Admin</td><td>FR-076</td><td>新增模型不作为 P0 后台在线动作</td><td class="c">925</td></tr>
+                <tr><td>009 Notification</td><td>FR-001</td><td>顶栏铃铛未读角标 + 通知列表作为 P0 通知入口</td><td class="c">925~1023</td></tr>
+                <tr><td>009 Notification</td><td>FR-002</td><td>通知 MUST 保留 90 天（自产生时刻起算）</td><td class="c">925~1023</td></tr>
+                <tr><td>009 Notification</td><td>FR-003</td><td>P0 MUST NOT 提供分类筛选、批量选择已读</td><td class="c">925~1023</td></tr>
+              </tbody>
+            </table>
+          </details>
+        </div>
+        <div class="tl-mid"><span class="tl-dot"></span><span class="tl-date">9/28</span><span class="tl-wd">周一</span></div>
+        <div class="tl-gap"></div>
+      </div>
+
+      <!-- T5 -->
+      <div class="tl-row r-test">
+        <div class="tl-card">
+          <div class="rhythm-title"><span class="tl-code">T5</span>端到端闭环联调检查<span class="tag tag-gate">核心闭环 Gate</span></div>
+          <div class="grid2">
+            <div>
+              <h4>必须通过的业务结果</h4>
+              <ul>
+                <li>资产提交 + 质量门控（003 FR-022~026）硬阻断生效</li>
+                <li>首次发布全链路可用（004 FR-001~020）</li>
+                <li>完整 Guardrail 模板管理与运行时输入/输出拦截（006 FR-002~004、020~051）</li>
+                <li>模型 / 导入凭据与解析规则（007 FR-020~042）</li>
+                <li>Admin 治理中心与测评治理（008 FR-001~003）</li>
+                <li>首发、测评、凭据、停用类通知（009 FR-010~035）</li>
+              </ul>
+            </div>
+            <div>
+              <h4>排期风险提示</h4>
+              <div class="danger">
+                <strong>9/28 → 10/9 实际只有 5 个工作日</strong>（9/28、9/29、9/30、10/8、10/9），国庆假期占掉 10/1–10/7。这是全计划最紧的一段，建议：<br>
+                ① 9/28 前完成跨服务接口冻结；<br>
+                ② 10/8–10/9 只做联调与 Gate 验证，不再合入新功能；<br>
+                ③ 明确 Gate 失败时的降级规则（哪些模块可延后到 10/16）。
+              </div>
+            </div>
+          </div>
+          <details class="frg">
+            <summary>功能点颗粒度 <span class="frq">· 71 行 · 003 Asset Creation / 004 Publish / 006 Guardrail / 007 Credential / 008 Admin / 009 Notification</span></summary>
+            <table>
+              <thead><tr><th style="width:150px;">模块</th><th style="width:82px;">编号</th><th>功能名称（Excel 原文）</th><th style="width:92px;">Excel 排期</th></tr></thead>
+              <tbody>
+                <tr><td>003 Asset Creation</td><td>FR-022</td><td>质量门控 MUST 按资产类型参数化、硬阻断</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-023</td><td>门控负责人项的判定口径 MUST 为「已指定不少于一</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-024</td><td>任一门控项未通过 MUST 阻断进入发布下一步</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-025</td><td>门控结果 MUST 为上架时点快照：上架后的热改类配</td><td class="c">925~1023</td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-026</td><td>门控全部通过 MUST 是状态机流转前提：Agent</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-001</td><td>实现资产生命周期六态：草稿 → 待发布 →（质量门控</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-002</td><td>各状态的可见范围 MUST 为：草稿/待发布/待测评</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-003</td><td>发布流程中质量门控 MUST 硬阻断：未全部通过则阻</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-004</td><td>质量门控与发布准入测评的结果 MUST 均为上架时点</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-005</td><td>发布准入测评 MUST 在 Agent 的首发、含版</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-006</td><td>测评执行 MUST 双锁定：被测对象锁定为待上架的本</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-007</td><td>通过判定 MUST 为：三类测评（提示词注入/意图偏</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-008</td><td>测评 MUST 在发布流程页内执行并展示执行进度、样</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-009</td><td>测评未通过时 MUST 按测评阻断开关处理：开关开启</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-010</td><td>测评执行失败（被测服务不可达、超时等基础设施原因）M</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-011</td><td>详情页 MUST 展示测评执行时间并明确标注测评结果</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-012</td><td>准入测评的裁判模型 MUST 复用模型清单中的对话类</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-013</td><td>保证任一时刻只有一个活版本对外服务</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-014</td><td>未发布修订 MUST 是资产的一份可选数据属性（非状</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-015</td><td>修订载荷 MUST 仅限版本类配置与使用条款</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-016</td><td>变更两分 MUST 按下表归属（分类原则：字段是否进</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-017</td><td>热改类配置的写入 MUST 做版本校验——提交时携带</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-018</td><td>轻发布（修订仅含使用条款）MUST：发布后生效、写入</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-019</td><td>版本发布（修订含任一版本类字段）MUST：重跑质量门</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-020</td><td>Owner 执行版本发布或重新上架时 MUST 显式</td><td class="c">925~1023</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-002</td><td>模板 MUST 由若干护栏条目组成</td><td class="c">1009</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-003</td><td>模板 MUST 支持创建、启用、停用与「另存为新模板</td><td class="c">1009</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-004</td><td>模板不可原地修改（FR-003）——规则变更 MUS</td><td class="c">1009</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-020</td><td>Owner 创建 Agent 时 MUST 从启用状</td><td class="c">1009</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-021</td><td>Owner MUST 可只读查看启用模板的条目明细（</td><td class="c">1009</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-022</td><td>上架后 Owner MUST 可在资产控制台改绑其他</td><td class="c">1009</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-030</td><td>质量门控第七项（仅 Agent）MUST 为「所绑护</td><td class="c">1009</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-031</td><td>存量在架资产 MUST NOT 受模板停用影响</td><td class="c">1009</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-040</td><td>平台网关 MUST 是护栏的唯一执行点</td><td class="c">1009</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-041</td><td>命中即拦截 MUST 为唯二处置形态：输入侧命中直接</td><td class="c">1009</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-042</td><td>输出侧检测 MUST 按上游响应形态执行双路径：流式</td><td class="c">1009</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-043</td><td>中止生成时 MUST 停止读取上游后续内容</td><td class="c">1009</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-044</td><td>临时文件内容 MUST 视同用户输入、纳入输入侧护栏</td><td class="c">1009</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-045</td><td>回答呈现与延迟口径随双路径区分：非流式响应在全文生成</td><td class="c">1009</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-050</td><td>资产 Agent 会话 MUST 适用该 Agent</td><td class="c">1009</td></tr>
+                <tr><td>006 Guardrail</td><td>FR-051</td><td>外部接入的 MCP MUST NOT 单独绑定护栏</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-020</td><td>模型类调用 MUST 按触发人解析、个人凭据优先、平</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-021</td><td>个人凭据真实调用发生鉴权/权限类失败时</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-022</td><td>适用域边界 MUST 显式成立：模型类资源是平台自有</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-030</td><td>资产调用（平台内透传会话与平台外 PAT 开放接口）</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-031</td><td>平台外资产调用（PAT 开放接口）MUST 先校验持</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-032</td><td>管理员按资产维度停用出站调用后</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-033</td><td>每次调用 MUST 审计记录实际使用的凭据主体</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-034</td><td>资产侧 MUST NOT 保存任何密钥值——创建者只</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-040</td><td>P0 开放接口 MUST 共四类：资产调用（外部系统</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-041</td><td>知识库三类接口的权限要求 MUST 为：读取元数据与</td><td class="c">1009</td></tr>
+                <tr><td>007 Credential</td><td>FR-042</td><td>平台原生工具 MUST NOT 出现在开放接口之列（</td><td class="c">1009</td></tr>
+                <tr><td>008 Admin</td><td>FR-001</td><td>治理中心 MUST 仅平台管理员可用</td><td class="c">1009</td></tr>
+                <tr><td>008 Admin</td><td>FR-002</td><td>治理中心 MUST 提供资产详情入口</td><td class="c">1009</td></tr>
+                <tr><td>008 Admin</td><td>FR-003</td><td>平台管理员 MUST 可按资产维度停用出站调用</td><td class="c">1009</td></tr>
+                <tr><td>009 Notification</td><td>FR-010</td><td>订阅申请已提交 MUST 通知该申请当前待办的全部审</td><td class="c">925~1023</td></tr>
+                <tr><td>009 Notification</td><td>FR-011</td><td>订阅审批结果（通过或驳回）MUST 通知申请人</td><td class="c">925~1023</td></tr>
+                <tr><td>009 Notification</td><td>FR-012</td><td>订阅被 Owner 取消 MUST 通知被取消方并附</td><td class="c">925~1023</td></tr>
+                <tr><td>009 Notification</td><td>FR-020</td><td>资产发布新版本 MUST 在版本上架替换的同一时刻通</td><td class="c">925~1023</td></tr>
+                <tr><td>009 Notification</td><td>FR-021</td><td>使用条款升版（轻发布生效时）MUST 通知全部存量订</td><td class="c">925~1023</td></tr>
+                <tr><td>009 Notification</td><td>FR-022</td><td>资产被下架 MUST 通知全部已通过订阅者并附下架原</td><td class="c">925~1023</td></tr>
+                <tr><td>009 Notification</td><td>FR-023</td><td>资产删除 MUST NOT 触发任何通知</td><td class="c">925~1023</td></tr>
+                <tr><td>009 Notification</td><td>FR-024</td><td>孤儿资产补员 MUST 通知新指定的全部负责人（Ow</td><td class="c">925~1023</td></tr>
+                <tr><td>009 Notification</td><td>FR-025</td><td>出站调用停用与恢复 MUST 通知该资产全体负责人</td><td class="c">925~1023</td></tr>
+                <tr><td>009 Notification</td><td>FR-026</td><td>Health Check 连续失败（达阈值</td><td class="c">925~1023</td></tr>
+                <tr><td>009 Notification</td><td>FR-030</td><td>发布准入测评完成 MUST 按阶段通知治理集合（首发</td><td class="c">925~1023</td></tr>
+                <tr><td>009 Notification</td><td>FR-031</td><td>知识库构建完成或失败 MUST 通知触发者与知识库</td><td class="c">925~1023</td></tr>
+                <tr><td>009 Notification</td><td>FR-032</td><td>个人模型凭据调用失败已回落平台默认凭据 MUST 通</td><td class="c">925~1023</td></tr>
+                <tr><td>009 Notification</td><td>FR-033</td><td>2026-08-23/24 裁定的新增事件合并为一类</td><td class="c">925~1023</td></tr>
+                <tr><td>009 Notification</td><td>FR-034</td><td>（已撤销——轻发布于 2026-08-24 回归仅使</td><td class="c">925~1023</td></tr>
+                <tr><td>009 Notification</td><td>FR-035</td><td>（保留编号占位——原「发布失败」条目已并入 FR-0</td><td class="c">925~1023</td></tr>
+              </tbody>
+            </table>
+          </details>
+        </div>
+        <div class="tl-mid"><span class="tl-dot"></span><span class="tl-date">10/9</span><span class="tl-wd">周五</span></div>
+        <div class="tl-gap"></div>
+      </div>
+
+      <!-- T6 -->
+      <div class="tl-row r-test">
+        <div class="tl-card">
+          <div class="rhythm-title"><span class="tl-code">T6</span>Conversation 整模块<span class="tag tag-test">按 Excel 最新口径 · 10/10</span></div>
+          <div class="mod-chip">001 Conversation</div>
+          <p class="rhythm-p">Chat / RAG 对话、知识库挂载与多库检索归并、引用来源与图片内嵌、已订阅 Agent 透传会话、历史会话管理、我的资产抽屉、资产不可用处理、护栏命中展示与错误提示。</p>
+          <p class="rhythm-p"><strong>为什么落在 10/10：</strong>《工作簿1.xlsx》2026-09-11 版已把 001 Conversation 的「上线排期」由 <code>1023</code> 改为 <code>1010</code>，本节点即按该口径落位，不再顺延。</p>
+          <div class="warn"><strong>口径冲突提示：</strong>10/10 为<strong>周六</strong>，与「按工作日排期」的基准不一致；且 10/9 Gate 与 10/10 仅隔 1 天，Gate 未过时该节点无法成立。若维持 10/10，需确认其为周末加班窗口；否则建议顺延至 <strong>10/12（周一）</strong>，详见第八节第 3 项。</div>
+          <p class="tiny">覆盖：001 FR-001~036、NG-1（NG-2~NG-4 未排期）</p>
+          <details class="frg">
+            <summary>功能点颗粒度 <span class="frq">· 38 行 · 001 Conversation</span></summary>
+            <table>
+              <thead><tr><th style="width:150px;">模块</th><th style="width:82px;">编号</th><th>功能名称（Excel 原文）</th><th style="width:92px;">Excel 排期</th></tr></thead>
+              <tbody>
+                <tr><td>001 Conversation</td><td>FR-001</td><td>未选择资产时</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-002</td><td>Chat 的 P0 能力有且仅有模型对话与挂载知识库</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-003</td><td>Chat 绑定平台默认护栏策略模板</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-004</td><td>无消息时欢迎页+输入框</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-005</td><td>仅 Chat 会话提供模型选择下拉</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-006</td><td>仅 Chat 会话提供</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-007</td><td>以可折叠的有序步骤列表展示思考过程</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-008</td><td>回答操作含复制全文与重新生成</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-009</td><td>输入区下方常驻展示 AI 生成内容免责提示与平台级用</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-010</td><td>仅 Chat 会话可挂载知识库</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-011</td><td>可选范围为状态「可用」且用户持有知识库 Consum</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-012</td><td>按目录树浏览、按名称搜索、按知识库多选、按文档单选</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-013</td><td>多库检索归并</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-014</td><td>回答末尾展示引用来源标签</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-015</td><td>命中的图片/插图/图表类证据在回答中内嵌渲染并标注来</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-016</td><td>检索按检索时刻的知识库状态与权限判定</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-017</td><td>经资产详情页「去使用」或对话工作台资产 Agent</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-018</td><td>透传会话中 Chat 不在场、不可挂载知识库</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-019</td><td>会话固定绑定唯一对话对象（Chat 或某一资产 Ag</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-020</td><td>平台以资产级服务凭据发起调用</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-021</td><td>每轮透传请求携带当前消息与平台侧会话 ID</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-022</td><td>不要求资产支持流式输出：平台缓冲完整响应</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-023</td><td>回答全文先经输出侧护栏检测</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-024</td><td>输入命中直接拦截拒答</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-025</td><td>中止生成时对已生成部分同样先检测后回放</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-026</td><td>回答生成期间禁用发送入口并提示「正在生成中」</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-027c</td><td>流式输出过程 MUST 控制内容渲染刷新频率以避免屏</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-027b</td><td>回答中的结构化内容 MUST 基于 Markdown</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-027</td><td>护栏命中（输入或输出侧）时页面展示命中的护栏类型与处</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-028</td><td>会话服务端持久化 90 天（自最后一条消息起算）</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-029</td><td>达 500 上限时「新建会话」入口禁用并提示</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-030</td><td>首轮问答完成后由模型（快速小模型）生成摘要标题</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-031</td><td>删除后用户侧立即不可见且不可恢复</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-032</td><td>资产已下架/订阅失效（退订或被 Owner 取消）/</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-033</td><td>分已订阅与收藏两区</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-034</td><td>已下架资产条目置灰不可进入对话</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-035</td><td>按原因展示三类文案：已被下架 / 出站调用已被平台停</td><td class="c">1010</td></tr>
+                <tr><td>001 Conversation</td><td>FR-036</td><td>Chat 侧生成失败（模型/检索/网络）展示明确错误</td><td class="c">1010</td></tr>
+              </tbody>
+            </table>
+          </details>
+        </div>
+        <div class="tl-mid"><span class="tl-dot"></span><span class="tl-date">10/10</span><span class="tl-wd">周六</span></div>
+        <div class="tl-gap"></div>
+      </div>
+
+      <!-- T7 -->
+      <div class="tl-row r-test">
+        <div class="tl-card">
+          <div class="rhythm-title"><span class="tl-code">T7</span>全模块测试完成（第 20 个工作日）<span class="tag tag-gate">★ 里程碑</span></div>
+          <div class="mod-chip">004 Publish</div><div class="mod-chip">009 Notification</div>
+          <div class="mod-chip">008 Admin</div><div class="mod-chip">006 Guardrail</div><div class="mod-chip">003 Asset Creation</div>
+          <p class="rhythm-p">补齐完整生命周期能力，九个模块 P0 全部在测试环境完成并达到可验收状态：</p>
+          <ul>
+            <li><strong>004 Publish</strong>：资产版本、条款轻发布、下架 / 重新上架 / 删除、状态机全部边（FR-021~045）</li>
+            <li><strong>009 Notification</strong>：版本、条款、下架、补员、Health Check 等完整 P0 事件（FR-030~035）</li>
+            <li><strong>005 Knowledge</strong>：分享与分享授权（FR-058~061，原 Excel 未排期，见第五节）</li>
+          </ul>
+          <details class="frg">
+            <summary>功能点颗粒度 <span class="frq">· 32 行 · 004 Publish / 005 Knowledge</span></summary>
+            <table>
+              <thead><tr><th style="width:150px;">模块</th><th style="width:82px;">编号</th><th>功能名称（Excel 原文）</th><th style="width:92px;">Excel 排期</th></tr></thead>
+              <tbody>
+                <tr><td>004 Publish</td><td>FR-021</td><td>一切版本替换 MUST 通知全部订阅者：已申报强治理</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-022</td><td>发布语义 MUST 按发布完成时刻的资产状态判定：从</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-023</td><td>发布记录 MUST 保留完整版本历史、各版本的发布说</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-024</td><td>发布互斥（发布优先）MUST 覆盖三类冲突：①资产处</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-025</td><td>发布进行中该发布任务的可操作主体 MUST 可执行「</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-026</td><td>下架 MUST 是平台上唯一的撤下动作</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-027</td><td>下架 MUST 经弹窗二次确认（轻量提醒</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-028</td><td>下架的连带处置 MUST 为：全部「已通过」订阅转「</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-029</td><td>平台运行时 MUST 即时感知下架状态：一切经平台流</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-030</td><td>已下架资产的界面语义 MUST 为：Marketpl</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-031</td><td>下架 MUST NOT 触碰未发布修订——Owner</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-032</td><td>重新上架 MUST 是一次版本发布：已下架资产编辑修</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-033</td><td>修订为空时的重新上架 MUST 按当前在架配置发起一</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-034</td><td>重新上架 MUST NOT 恢复订阅：「已取消」是终</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-035</td><td>出站调用停用与资产状态 MUST 正交：二者可同时成</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-036</td><td>Owner 或 Deputy MUST 可删除处于「</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-037</td><td>删除 MUST 为系统软删除（终态）：资产对全部用户</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-038</td><td>删除生效时 MUST 使全部订阅者针对该资产的个人凭</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-039</td><td>发布前质量门控 MUST 校验负责人项：已指定不少于</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-040</td><td>资产的唯一身份 MUST 恒为资产 ID（订阅、PA</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-041</td><td>「发布进行中」MUST 定义为发布任务（publis</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-042</td><td>版本发布失败（质量门控未全部通过</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-043</td><td>Owner 或 Deputy MUST 可一键放弃未</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-044</td><td>资产删除 MUST NOT 触发任何通知——「已发布</td><td class="c">925~1023</td></tr>
+                <tr><td>004 Publish</td><td>FR-045</td><td>发布链路全部动作的执行主体 MUST 统一为 Own</td><td class="c">925~1023</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-058c</td><td>「可查看」分享者可打开详情页只读视图（Documen</td><td class="c">9.11</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-058d</td><td>分享对象仅逐人指定（按 Alice 用户目录搜索选择</td><td class="c">—</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-058</td><td>创建者将知识库平台内分享：「可查看」（Consume</td><td class="c">—</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-058b</td><td>分享与撤销即时生效、不发通知</td><td class="c">—</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-059</td><td>被分享者在「我的知识库 &gt; 分享给我的」子分区看到被</td><td class="c">—</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-060</td><td>被分享者账号被 Alice 停用时</td><td class="c">—</td></tr>
+                <tr><td>005 Knowledge</td><td>FR-061</td><td>我的目录库的管控动作（停用/重新启用、删除、子目录维</td><td class="c">—</td></tr>
+              </tbody>
+            </table>
+          </details>
+          <p class="tiny"><strong>未列入以上号段的行（共 31 行）：</strong>001 / 002 / 005 的 NG 项（本期不做）、006 FR-001、008 FR-050~054 与 FR-060~063、前端横向任务 4 行——其生产上线时间见右支 P2 明细。</p>
+        </div>
+        <div class="tl-mid gate"><span class="tl-dot"></span><span class="tl-date">10/16</span><span class="tl-wd">周五</span></div>
+        <div class="tl-gap"></div>
+      </div>
+
+      <!-- 测试 → 生产：接力 -->
+      <div class="tl-row">
+        <div class="tl-switch"><span>★ 10/16 测试环境收口（第 20 个工作日） → 当日核心功能（005 / 002 / 001）切换生产；其余模块 10/30 上线</span></div>
+      </div>
+
+      <!-- P1 核心批 -->
+      <div class="tl-row r-prod">
+        <div class="tl-gap"></div>
+        <div class="tl-mid"><span class="tl-dot"></span><span class="tl-date">10/16</span><span class="tl-wd">周五</span></div>
+        <div class="tl-card p">
+          <div class="rhythm-title"><span class="tl-code p">P1 核心批</span>核心功能上生产<span class="tag tag-prod">与测试收口同日</span></div>
+          <div class="mod-chip">005 Knowledge</div><div class="mod-chip">002 Marketplace</div><div class="mod-chip">001 Conversation</div>
+          <p class="rhythm-p"><strong>上线内容：</strong>005 Knowledge、002 Marketplace、001 Conversation 三个核心功能全部上生产，共 <strong>168 行</strong>功能点，逐行明细见下方「功能点明细（生产上线时间）」。</p>
+          <p class="rhythm-p"><strong>为什么是这三个：</strong>按生产口径，核心功能相关模块统一 10/16 上生产；三者测试节点最靠前（005 于 9/18、002 于 9/21、001 于 10/10 收口），到 10/16 已有充分验证窗口。</p>
+          <p class="tiny"><strong>前置条件：</strong>10/16 测试完成里程碑达成；生产环境资源、配置、凭据与目录冷启动就位</p>
+          <details class="frg">
+            <summary>功能点明细（生产上线时间） <span class="frq">· 168 行 · 全部 10/16</span></summary>
+            <table>
+              <thead><tr><th style="width:150px;">模块</th><th style="width:82px;">编号</th><th>功能名称（Excel 原文）</th><th style="width:92px;">Excel 排期</th><th style="width:150px;">生产上线时间</th></tr></thead>
+              <tbody>
+                <tr><td>001 Conversation</td><td>NG-1</td><td>文件参与当前会话、不入知识库、会话结束即失效</td><td class="c">1023</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-001</td><td>未选择资产时</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-002</td><td>Chat 的 P0 能力有且仅有模型对话与挂载知识库</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>NG-2</td><td>回答下方追问建议</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>NG-3</td><td>用户偏好记录与应用</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-003</td><td>Chat 绑定平台默认护栏策略模板</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-004</td><td>无消息时欢迎页+输入框</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>NG-4</td><td>选中引用后侧栏联动展示关联文档</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-005</td><td>仅 Chat 会话提供模型选择下拉</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-006</td><td>仅 Chat 会话提供</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-007</td><td>以可折叠的有序步骤列表展示思考过程</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-008</td><td>回答操作含复制全文与重新生成</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-009</td><td>输入区下方常驻展示 AI 生成内容免责提示与平台级用</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-010</td><td>仅 Chat 会话可挂载知识库</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-011</td><td>可选范围为状态「可用」且用户持有知识库 Consum</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-012</td><td>按目录树浏览、按名称搜索、按知识库多选、按文档单选</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-013</td><td>多库检索归并</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-014</td><td>回答末尾展示引用来源标签</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-015</td><td>命中的图片/插图/图表类证据在回答中内嵌渲染并标注来</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-016</td><td>检索按检索时刻的知识库状态与权限判定</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-017</td><td>经资产详情页「去使用」或对话工作台资产 Agent</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-018</td><td>透传会话中 Chat 不在场、不可挂载知识库</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-019</td><td>会话固定绑定唯一对话对象（Chat 或某一资产 Ag</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-020</td><td>平台以资产级服务凭据发起调用</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-021</td><td>每轮透传请求携带当前消息与平台侧会话 ID</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-022</td><td>不要求资产支持流式输出：平台缓冲完整响应</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-023</td><td>回答全文先经输出侧护栏检测</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-024</td><td>输入命中直接拦截拒答</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-025</td><td>中止生成时对已生成部分同样先检测后回放</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-026</td><td>回答生成期间禁用发送入口并提示「正在生成中」</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-027b</td><td>回答中的结构化内容 MUST 基于 Markdown</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-027</td><td>护栏命中（输入或输出侧）时页面展示命中的护栏类型与处</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-027c</td><td>流式输出过程 MUST 控制内容渲染刷新频率以避免屏</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-028</td><td>会话服务端持久化 90 天（自最后一条消息起算）</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-029</td><td>达 500 上限时「新建会话」入口禁用并提示</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-030</td><td>首轮问答完成后由模型（快速小模型）生成摘要标题</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-031</td><td>删除后用户侧立即不可见且不可恢复</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-032</td><td>资产已下架/订阅失效（退订或被 Owner 取消）/</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-033</td><td>分已订阅与收藏两区</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-034</td><td>已下架资产条目置灰不可进入对话</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-035</td><td>按原因展示三类文案：已被下架 / 出站调用已被平台停</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>001 Conversation</td><td>FR-036</td><td>Chat 侧生成失败（模型/检索/网络）展示明确错误</td><td class="c">1010</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>NG-1</td><td>MCP 使用记录页签（P1 规划）</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-001</td><td>Marketplace 提供 Agent 与 MCP</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-002</td><td>热门按近 30 天新增且当前仍有效的「已通过」订阅数</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>NG-2</td><td>平台级用量统计（P1 规划）</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>NG-3</td><td>Dify 接入资产的订阅链路随 P1 展开</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-003</td><td>按名称、业务标签与简介子串不区分大小写匹配并高亮</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-004</td><td>列表与搜索仅展示「已发布」且上架时点质量门控全部通过</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>NG-4</td><td>2026-08-22 BA 裁定不承接</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>NG-5</td><td>PRD §12.4</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-005</td><td>卡片展示名称、类型、业务标签与状态</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-006</td><td>可在 Marketplace 与「我的资产」抽屉收藏</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-007</td><td>基本信息/接入配置/测评信息/发布记录/凭据状态五页</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-008</td><td>基本信息/接入配置/工具能力/凭据状态四页签</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-009</td><td>P0 中 MCP 不提供「去使用」（不是对话对象）</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-010</td><td>已下架资产对非负责人展示占位页（名称、「已下架」状态</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-011</td><td>单页表单：顶部资产说明摘要（名称/类型/Owner）</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-012</td><td>同一申请人对同一资产至多一条在途（待审批）申请</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-013</td><td>各级审批人计算时排除申请人本人</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-014</td><td>提交前校验必填与格式</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-015</td><td>孤儿资产（全部 Owner 与 Deputy 账号失</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-016</td><td>Owner 与 Deputy 对自己的资产免订阅可用</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-017</td><td>申请提交后全部级同时收到待办、级间无顺序</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-018</td><td>整单驳回（终态）后其余各级未处理待办立即清除、已处理</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-019</td><td>某级无有效审批人（离职/停用</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-020</td><td>在途申请锁定提交时的审批链快照并按快照走完</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-021</td><td>「重新申请」一律新建记录（以原申请内容预填）</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-022</td><td>「已取消」记录标注取消来源（主动退订/Owner 取</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-023</td><td>使用条款的版本号、确认人与确认时间随订阅记录持久化</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-024</td><td>顶部四状态统计卡（已通过/待审批/被驳回/已取消）点</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-025</td><td>去使用（仅 Agent）、配置个人凭据（平台外调用）</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-026</td><td>顶部四统计卡（已创建资产/待审批订阅申请/已下架资产</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-027</td><td>订阅管理（查看/审批/驳回/取消他人订阅并必填理由）</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-028</td><td>仅可见资产基本信息与待其审批的订阅申请</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-029</td><td>出站调用被平台停用时</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-030</td><td>待审批 → 已通过 / 被驳回（终态）/ 已取消（终</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-031</td><td>触发为 Owner 取消/订阅者退订/资产下架/资产</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-032</td><td>资产下架时全部待审批申请自动转「已取消」</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-033</td><td>资产重新上架不恢复原订阅</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>002 Marketplace</td><td>FR-034</td><td>账号被 Alice 停用时</td><td class="c">9.21</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>NG-1</td><td>按频率自动抓取来源变更</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-001</td><td>公共目录与我的目录两个根节点</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>NG-2</td><td>仅保留 P1 规划占位</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-002</td><td>各节点展示知识库数量</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>NG-3</td><td>输入查询语句查看召回结果的调试能力</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-003</td><td>目录控制角色持有人创建子目录、重命名、删除</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>NG-4</td><td>P0 的 Overview「内容摘要」为静态元信息汇</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-004</td><td>已含知识库的目录下创建子目录时</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>NG-5</td><td>P0 仅架构预留灵活性</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-005</td><td>当且仅当该目录及其所有子目录下知识库数量为零（软删除</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>NG-6</td><td>其实例经平台资源注册表登记与授权后可用</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-006</td><td>我的目录创建者本人直接执行全部子目录维护</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-007</td><td>父级目录的目录控制角色自动拥有全部子级目录的控制权限</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>NG-7</td><td>复制会把受控语料带出 Alice 授权面</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>NG-8</td><td>表格、SQL 模板、指标定义类结构化数据资产暂不承接</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-008</td><td>对无权限用户展示对应 Alice 权限 ID（可一键</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-009b</td><td>知识库 Owner 与 Deputy 全部失效时</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-009</td><td>目录级角色（目录控制、知识库创建）的授予/回收/同级</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-010</td><td>基础信息（存放路径/名称/可见范围/描述/标签）→</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-011</td><td>可见范围为卡片可发现性控制：「公开」卡片全员可见（无</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-012</td><td>知识库只能创建在叶子目录</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-013c</td><td>创建角色持有人未自任 Owner/Deputy 时</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-013</td><td>公共目录建库校验知识库创建角色</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-013b</td><td>调 Alice 创建角色失败（不可用/超时/拒绝）时</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-014</td><td>我的目录建库无需授权、不调用 Alice、无 Ali</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-015</td><td>新建知识库初始状态为「草稿」</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-016</td><td>禁止知识库在既有目录间移动、禁止复制（子树内下沉分层</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-017</td><td>建库向导中仅展示默认实例与本人已获授权的平台资源实例</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-018</td><td>本地上传（单文件 ≤40MB</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-019</td><td>导入操作者须具备该库知识库 Contributor</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-020</td><td>三个外部通道分别经平台原生工具（Confluence</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-021</td><td>导入前提供目录预览与勾选</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-022</td><td>文件名与库内已有文档重名时要求确认是否覆盖（被确认的</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-023</td><td>单次导入 ≤200 份、单库文档 ≤5000 份、单</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-024</td><td>导入后文件初始状态为「未解析」</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-025</td><td>解析→切片→内容增强→向量化</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-026</td><td>失败立即弹窗说明原因（9 类：格式不支持/文件损坏/</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-027</td><td>同一知识库任一时刻至多一条构建流水线</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-027b</td><td>不同知识库构建可并行</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-028</td><td>全库重建期间知识库保持「可用」</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-029</td><td>单文档单阶段超时 10 分钟</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-030</td><td>构建完成或失败通知发给触发者与知识库 Owner</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-031</td><td>草稿→可用→已停用</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-032</td><td>知识库 Owner（我的目录为创建者本人）手动停用（</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-032b</td><td>「已停用」仅收敛消费面（挂载/检索/开放接口）</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-033</td><td>「可用」状态删除最后一份已向量化文档时自动回「草稿」</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-034</td><td>按检索时刻的知识库状态与权限执行检索</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-035</td><td>未解析→已解析→已切片→已增强→已向量化</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-036</td><td>仅「已向量化」的文档参与检索</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-037f</td><td>对可被当前用户发现但用户无任何有效权限的知识库</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-037c</td><td>对 Viewer 有效权限采用最小展示：Docume</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-037d</td><td>对 Consumer 有效权限展示完整文档列表并允许</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-037e</td><td>对 Contributor 与 Owner 有效权限</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-037</td><td>文件详情展示：源文件分页预览、解析后 Markdow</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-038</td><td>解析器二选一（Docling/MinerU：OCR</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-039</td><td>库级参数为全库默认</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-040</td><td>向量化模型与向量数据库（类型与实例）锁定在库级</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-041</td><td>知识库 Owner（我的目录为创建者本人）删除知识库</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-042</td><td>软删除后卡片对全部用户不可见、不参与挂载与检索</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-043</td><td>知识库 Owner 与 Contributor 可删</td><td class="c">9.14</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-044</td><td>创建者账号被 Alice 停用时</td><td class="c">9.14</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-045b</td><td>同名冲突处置参数（自动覆盖或返回错误）</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-045</td><td>三个开放接口：读取元数据、检索、更新内容</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-045c</td><td>写入文档遵循与 UI 导入同一套校验（白名单、≤40</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-046</td><td>读取元数据与检索需知识库 Consumer 及以上</td><td class="c">9.14</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-047</td><td>我的目录库：创建者与「可查看/可编辑」分享者可调用读</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-048</td><td>仅 Chat 会话挂载知识库</td><td class="c">9.14</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-049</td><td>目录树浏览、名称搜索、按库多选、按文档单选</td><td class="c">9.14</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-050</td><td>单会话挂载知识库上限 5 个</td><td class="c">9.14</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-051b</td><td>「检索知识库」开放接口允许调用方自定义 top-k</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-051</td><td>每库各取相似度前 5 条切片</td><td class="c">9.14</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-052</td><td>回答附带引用来源标签</td><td class="c">9.14</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-053</td><td>命中的图片、插图、图表或表格类证据内嵌渲染并标注来源</td><td class="c">9.14</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-054</td><td>平台管理员创建公共目录一级节点并指定一级目录控制角色</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-055b</td><td>同一目录内知识库名称唯一</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-055</td><td>知识库 Owner 可重命名（我的目录仅创建者本人）</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-056</td><td>文档数、切片数、向量数与就绪度（已向量化文档数/未删</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-056b</td><td>Overview 页展示描述、标签、构建统计（阶段分</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-057b</td><td>保存后受影响文件从最早受影响阶段起重跑（解析器→解析</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-057</td><td>批量选择多份文件并批量修改文档级参数</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-058</td><td>创建者将知识库平台内分享：「可查看」（Consume</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-058b</td><td>分享与撤销即时生效、不发通知</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-058d</td><td>分享对象仅逐人指定（按 Alice 用户目录搜索选择</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-058c</td><td>「可查看」分享者可打开详情页只读视图（Documen</td><td class="c">9.11</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-059</td><td>被分享者在「我的知识库 &gt; 分享给我的」子分区看到被</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-060</td><td>被分享者账号被 Alice 停用时</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+                <tr><td>005 Knowledge</td><td>FR-061</td><td>我的目录库的管控动作（停用/重新启用、删除、子目录维</td><td class="c">—</td><td><span class="prod-a">10/16（核心批）</span></td></tr>
+              </tbody>
+            </table>
+          </details>
+        </div>
+      </div>
+
+      <!-- P2 其余批 -->
+      <div class="tl-row r-prod">
+        <div class="tl-gap"></div>
+        <div class="tl-mid gate"><span class="tl-dot"></span><span class="tl-date">10/30</span><span class="tl-wd">周五</span></div>
+        <div class="tl-card p">
+          <div class="rhythm-title"><span class="tl-code p">P2 其余批</span>其余模块上生产 + 全量验收<span class="tag tag-gate">收官</span></div>
+          <div class="mod-chip">003 Asset Creation</div><div class="mod-chip">004 Publish</div><div class="mod-chip">006 Guardrail</div>
+          <div class="mod-chip">007 Credential</div><div class="mod-chip">008 Admin</div><div class="mod-chip">009 Notification</div>
+          <p class="rhythm-p"><strong>上线内容：</strong>003 Asset Creation、004 Publish、006 Guardrail、007 Credential、008 Admin、009 Notification 全部上生产，连同前端横向任务共 <strong>183 行</strong>功能点，逐行明细见下方「功能点明细（生产上线时间）」。</p>
+          <p class="rhythm-p"><strong>同日完成全量验收：</strong>全链路回归、缺陷收敛、权限与审计核验、通知送达核验、性能与异常路径验证。</p>
+          <p class="tiny"><strong>前置条件：</strong>P1 核心批生产运行稳定；其余模块测试完成；10/19–10/29 共 9 个工作日用于生产准备、分批验证与回归</p>
+          <details class="frg">
+            <summary>功能点明细（生产上线时间） <span class="frq">· 183 行 · 全部 10/30</span></summary>
+            <table>
+              <thead><tr><th style="width:150px;">模块</th><th style="width:82px;">编号</th><th>功能名称（Excel 原文）</th><th style="width:92px;">Excel 排期</th><th style="width:150px;">生产上线时间</th></tr></thead>
+              <tbody>
+                <tr><td>003 Asset Creation</td><td>FR-001</td><td>全员默认创建 Agent 与 MCP 资产</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-002</td><td>高代码 Agent 创建的前置条件 MUST 为：该</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-003</td><td>资产名称 MUST 全平台唯一——校验时点为提交（门</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-004</td><td>向导未提交的资产 MUST 处于「草稿」状态并在服务</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-005</td><td>Agent 创建向导 MUST 为六步：基础信息 →</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-006</td><td>基础信息 MUST 含：资产名称、业务标签、简介、能</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-007</td><td>接入配置 MUST 含：服务地址、Health Ch</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-008</td><td>鉴权配置 MUST 支持两种模式且仅声明凭据元数据</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-009</td><td>资产侧 MUST NOT 保存任何密钥值——资产的全</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-010</td><td>能力声明 MUST 拉取 Agent Card 并声</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-011</td><td>护栏策略模板 MUST 从启用状态的模板中选择恰好一</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-012</td><td>MCP 创建向导 MUST 为五步：基础信息 → 链</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-013</td><td>链接配置 MUST 含：服务地址、协议、托管方式、H</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-014</td><td>MCP 能力声明 MUST 拉取工具清单</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-015</td><td>MCP 鉴权配置 MUST 支持静态凭据与动态凭据</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-016</td><td>MCP 向导 MUST NOT 出现护栏策略模板选择</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-017</td><td>订阅申请表单 MUST 支持下载 YAML 模板、上</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-018</td><td>使用条款 MUST 为资产的独立必填配置、与表单定义</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-019</td><td>订阅审批人链 MUST 可视化配置为并行多级：可增删</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-020</td><td>审批人可以不是资产负责人</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-021</td><td>向导末步 MUST 填写本次发布说明</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-022</td><td>质量门控 MUST 按资产类型参数化、硬阻断</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-023</td><td>门控负责人项的判定口径 MUST 为「已指定不少于一</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-024</td><td>任一门控项未通过 MUST 阻断进入发布下一步</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-025</td><td>门控结果 MUST 为上架时点快照：上架后的热改类配</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>003 Asset Creation</td><td>FR-026</td><td>门控全部通过 MUST 是状态机流转前提：Agent</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-001</td><td>实现资产生命周期六态：草稿 → 待发布 →（质量门控</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-002</td><td>各状态的可见范围 MUST 为：草稿/待发布/待测评</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-003</td><td>发布流程中质量门控 MUST 硬阻断：未全部通过则阻</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-004</td><td>质量门控与发布准入测评的结果 MUST 均为上架时点</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-005</td><td>发布准入测评 MUST 在 Agent 的首发、含版</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-006</td><td>测评执行 MUST 双锁定：被测对象锁定为待上架的本</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-007</td><td>通过判定 MUST 为：三类测评（提示词注入/意图偏</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-008</td><td>测评 MUST 在发布流程页内执行并展示执行进度、样</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-009</td><td>测评未通过时 MUST 按测评阻断开关处理：开关开启</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-010</td><td>测评执行失败（被测服务不可达、超时等基础设施原因）M</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-011</td><td>详情页 MUST 展示测评执行时间并明确标注测评结果</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-012</td><td>准入测评的裁判模型 MUST 复用模型清单中的对话类</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-013</td><td>保证任一时刻只有一个活版本对外服务</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-014</td><td>未发布修订 MUST 是资产的一份可选数据属性（非状</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-015</td><td>修订载荷 MUST 仅限版本类配置与使用条款</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-016</td><td>变更两分 MUST 按下表归属（分类原则：字段是否进</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-017</td><td>热改类配置的写入 MUST 做版本校验——提交时携带</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-018</td><td>轻发布（修订仅含使用条款）MUST：发布后生效、写入</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-019</td><td>版本发布（修订含任一版本类字段）MUST：重跑质量门</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-020</td><td>Owner 执行版本发布或重新上架时 MUST 显式</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-021</td><td>一切版本替换 MUST 通知全部订阅者：已申报强治理</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-022</td><td>发布语义 MUST 按发布完成时刻的资产状态判定：从</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-023</td><td>发布记录 MUST 保留完整版本历史、各版本的发布说</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-024</td><td>发布互斥（发布优先）MUST 覆盖三类冲突：①资产处</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-025</td><td>发布进行中该发布任务的可操作主体 MUST 可执行「</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-026</td><td>下架 MUST 是平台上唯一的撤下动作</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-027</td><td>下架 MUST 经弹窗二次确认（轻量提醒</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-028</td><td>下架的连带处置 MUST 为：全部「已通过」订阅转「</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-029</td><td>平台运行时 MUST 即时感知下架状态：一切经平台流</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-030</td><td>已下架资产的界面语义 MUST 为：Marketpl</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-031</td><td>下架 MUST NOT 触碰未发布修订——Owner</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-032</td><td>重新上架 MUST 是一次版本发布：已下架资产编辑修</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-033</td><td>修订为空时的重新上架 MUST 按当前在架配置发起一</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-034</td><td>重新上架 MUST NOT 恢复订阅：「已取消」是终</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-035</td><td>出站调用停用与资产状态 MUST 正交：二者可同时成</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-036</td><td>Owner 或 Deputy MUST 可删除处于「</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-037</td><td>删除 MUST 为系统软删除（终态）：资产对全部用户</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-038</td><td>删除生效时 MUST 使全部订阅者针对该资产的个人凭</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-039</td><td>发布前质量门控 MUST 校验负责人项：已指定不少于</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-040</td><td>资产的唯一身份 MUST 恒为资产 ID（订阅、PA</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-041</td><td>「发布进行中」MUST 定义为发布任务（publis</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-042</td><td>版本发布失败（质量门控未全部通过</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-043</td><td>Owner 或 Deputy MUST 可一键放弃未</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-044</td><td>资产删除 MUST NOT 触发任何通知——「已发布</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>004 Publish</td><td>FR-045</td><td>发布链路全部动作的执行主体 MUST 统一为 Own</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-001</td><td>护栏策略模板管理 MUST 仅平台管理员可用</td><td class="c">—</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-002</td><td>模板 MUST 由若干护栏条目组成</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-003</td><td>模板 MUST 支持创建、启用、停用与「另存为新模板</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-004</td><td>模板不可原地修改（FR-003）——规则变更 MUS</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-010</td><td>平台管理员 MUST 可从启用模板中指定全局唯一的平</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-011</td><td>当前默认模板 MUST NOT 可直接停用——须先指</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-012</td><td>平台默认护栏策略模板 MUST 随平台部署内置（内容</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-020</td><td>Owner 创建 Agent 时 MUST 从启用状</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-021</td><td>Owner MUST 可只读查看启用模板的条目明细（</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-022</td><td>上架后 Owner MUST 可在资产控制台改绑其他</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-030</td><td>质量门控第七项（仅 Agent）MUST 为「所绑护</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-031</td><td>存量在架资产 MUST NOT 受模板停用影响</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-040</td><td>平台网关 MUST 是护栏的唯一执行点</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-041</td><td>命中即拦截 MUST 为唯二处置形态：输入侧命中直接</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-042</td><td>输出侧检测 MUST 按上游响应形态执行双路径：流式</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-043</td><td>中止生成时 MUST 停止读取上游后续内容</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-044</td><td>临时文件内容 MUST 视同用户输入、纳入输入侧护栏</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-045</td><td>回答呈现与延迟口径随双路径区分：非流式响应在全文生成</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-050</td><td>资产 Agent 会话 MUST 适用该 Agent</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>006 Guardrail</td><td>FR-051</td><td>外部接入的 MCP MUST NOT 单独绑定护栏</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-001</td><td>PAT MUST 是外部系统调用本平台全部开放接口的</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-002</td><td>创建 PAT MUST 填写名称、有效期（默认 90</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-003</td><td>令牌明文 MUST 仅在创建成功时完整显示一次</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-004</td><td>失效 MUST 分两类来源：对象侧——某项授权失效（</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-010</td><td>个人凭据 MUST 按人持有</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-011</td><td>资产调用凭据 MUST 按资产的鉴权模式分两种形态</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-012</td><td>平台原生工具凭据 MUST 全员可选（三类通道鉴权方</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-013</td><td>个人模型凭据 MUST 不按调用点划分——同一条凭据</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-014</td><td>保存个人模型凭据后 MUST 自动执行一次全量可用性</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-015</td><td>密文字段 MUST 默认掩码显示、可切换明文（切换动</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-016</td><td>交互 MUST 为单页配置（资源选择器 + 动态认证</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-017</td><td>凭据编辑范围 MUST 遵循不可变优先矩阵：PAT</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-020</td><td>模型类调用 MUST 按触发人解析、个人凭据优先、平</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-021</td><td>个人凭据真实调用发生鉴权/权限类失败时</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-022</td><td>适用域边界 MUST 显式成立：模型类资源是平台自有</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-030</td><td>资产调用（平台内透传会话与平台外 PAT 开放接口）</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-031</td><td>平台外资产调用（PAT 开放接口）MUST 先校验持</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-032</td><td>管理员按资产维度停用出站调用后</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-033</td><td>每次调用 MUST 审计记录实际使用的凭据主体</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-034</td><td>资产侧 MUST NOT 保存任何密钥值——创建者只</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-040</td><td>P0 开放接口 MUST 共四类：资产调用（外部系统</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-041</td><td>知识库三类接口的权限要求 MUST 为：读取元数据与</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>007 Credential</td><td>FR-042</td><td>平台原生工具 MUST NOT 出现在开放接口之列（</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-001</td><td>治理中心 MUST 仅平台管理员可用</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-002</td><td>治理中心 MUST 提供资产详情入口</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-003</td><td>平台管理员 MUST 可按资产维度停用出站调用</td><td class="c">1009</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-004</td><td>出站调用停用生效后</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-005</td><td>出站调用停用 MUST 与资产状态正交：资产下架、重</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-006</td><td>出站调用停用与恢复 MUST 留痕</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-007</td><td>孤儿资产补员 MUST 仅对当前仍为孤儿资产的行可提</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-008</td><td>孤儿资产补员 MUST 同次指定新 Owner 与至</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-009</td><td>孤儿资产原负责人的 Alice 账号恢复时</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-010</td><td>发布准入测评模板维护 MUST 仅平台管理员可用</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-011</td><td>发布准入测评模板 MUST 包含三类测评问题集：提示</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-012</td><td>管理员修改发布准入测评模板的问题集或阈值后</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-013</td><td>发布准入测评的裁判模型 MUST 来自随部署内置的模</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-014</td><td>测评阻断开关 MUST 为单一总开关</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-015</td><td>测评阻断开关 MUST NOT 作用于 MCP 发布</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-020</td><td>平台原生工具维护 MUST 仅平台管理员可用</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-021</td><td>平台管理员 MUST 可维护平台原生工具的服务地址</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-022</td><td>平台原生工具 MUST 仅作为知识库外部导入通道</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-023</td><td>平台原生工具 MUST 不上 Marketplace</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-024</td><td>平台原生工具停用后</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-030</td><td>平台资源注册表 MUST 仅平台管理员可用</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-031</td><td>P0 资源类型 MUST 包含 Milvus 实例与</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-032</td><td>可用范围 MUST 为三种：默认可用、授权可用、平台</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-033</td><td>每类 P0 向量数据库（Milvus、PGVecto</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-034</td><td>平台资源注册表 MUST 随部署内置默认 Milvu</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-035</td><td>授权可用资源的逐人授予与回收 MUST 不经 Ali</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-036</td><td>用户侧向量库实例选择器 MUST 仅展示默认可用实例</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-037</td><td>实例类平台资源 MUST 支持连接与凭据一键探测</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-038</td><td>模型类平台资源 MUST NOT 在平台资源注册表中</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-039</td><td>平台资源凭据 MUST NOT 作为用户资产调用的兜</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-050</td><td>用户视图 MUST 从 Alice 同步并只读展示用</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-051</td><td>角色映射配置 MUST 仅平台管理员可用</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-052</td><td>未显式配置映射的 Alice 角色 MUST 享有基</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-053</td><td>当用户具备多个 Alice 角色时</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-054</td><td>Alice 账号状态为停用时</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-060</td><td>公共目录冷启动 MUST 仅平台管理员可用</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-061</td><td>创建一级目录时</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-062</td><td>一级目录创建后的其余层级目录维护、目录角色授予与知识</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-063</td><td>公共目录冷启动涉及 Alice 角色创建或授予失败时</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-070</td><td>模型设置 MUST 仅平台管理员可用</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-071</td><td>模型 MUST 分为四类：对话、多模态、重排序、向量</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-072</td><td>每个既有模型条目 MUST 可在线配置平台默认凭据引</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-073</td><td>模型清单 MUST 随部署内置至少一个启用的默认对话</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-074</td><td>P0 模型设置 MUST NOT 提供运行期新增、编</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-075</td><td>模型删除/停用的在用引用校验不作为 P0 后台在线能</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>008 Admin</td><td>FR-076</td><td>新增模型不作为 P0 后台在线动作</td><td class="c">925</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-001</td><td>顶栏铃铛未读角标 + 通知列表作为 P0 通知入口</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-002</td><td>通知 MUST 保留 90 天（自产生时刻起算）</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-003</td><td>P0 MUST NOT 提供分类筛选、批量选择已读</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-010</td><td>订阅申请已提交 MUST 通知该申请当前待办的全部审</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-011</td><td>订阅审批结果（通过或驳回）MUST 通知申请人</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-012</td><td>订阅被 Owner 取消 MUST 通知被取消方并附</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-020</td><td>资产发布新版本 MUST 在版本上架替换的同一时刻通</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-021</td><td>使用条款升版（轻发布生效时）MUST 通知全部存量订</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-022</td><td>资产被下架 MUST 通知全部已通过订阅者并附下架原</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-023</td><td>资产删除 MUST NOT 触发任何通知</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-024</td><td>孤儿资产补员 MUST 通知新指定的全部负责人（Ow</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-025</td><td>出站调用停用与恢复 MUST 通知该资产全体负责人</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-026</td><td>Health Check 连续失败（达阈值</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-030</td><td>发布准入测评完成 MUST 按阶段通知治理集合（首发</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-031</td><td>知识库构建完成或失败 MUST 通知触发者与知识库</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-032</td><td>个人模型凭据调用失败已回落平台默认凭据 MUST 通</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-033</td><td>2026-08-23/24 裁定的新增事件合并为一类</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-034</td><td>（已撤销——轻发布于 2026-08-24 回归仅使</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>009 Notification</td><td>FR-035</td><td>（保留编号占位——原「发布失败」条目已并入 FR-0</td><td class="c">925~1023</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>前端 UI/UX</td><td></td><td>设计资源消费：css-token迁移</td><td class="c">—</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>前端 UI/UX</td><td></td><td>设计资源消费：组件库对齐</td><td class="c">—</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>前端 UI/UX</td><td></td><td>设计资源消费：图标库实现</td><td class="c">—</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+                <tr><td>前端 UI/UX</td><td></td><td>设计资源消费：页面底座对齐</td><td class="c">—</td><td><span class="prod-b">10/30（其余批）</span></td></tr>
+              </tbody>
+            </table>
+          </details>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rhythm-legend">
+    <span><i style="background:var(--test)"></i> 左支 · 测试节点</span>
+    <span><i style="background:var(--prod)"></i> 右支 · 生产档位</span>
+    <span><i style="background:#6941c6"></i> 里程碑</span>
+    <span>中央轴线 = 一条连续时间轴（9/11 → 10/30）</span>
+    <span>★ 10/16 测试环境完成 + 核心功能上生产</span>
+    <span>★ 10/30 其余模块上线 + 全量验收</span>
+  </div>
+
+  <div class="warn">
+    <strong>关于 10/16 同日切生产：</strong>核心功能（005 / 002 / 001）在测试收口当日即切换生产，<strong>没有独立的生产准备窗口</strong>（原 10/19 生产准备节点已撤销）。需提前约定：生产环境资源与配置在 10/16 前就位、切换当日的回滚预案、以及核心功能测试未达标时是否顺延至 10/30 与其余模块同批。
+  </div>
+</section>
+
+<!-- ============ 三、工作日日历 ============ -->
+<section>
+  <h2>三、工作日日历（9/11 – 10/30）与两个里程碑</h2>
+  <p class="small">蓝色边框 = 测试环境节点；紫色 = 里程碑（含生产切换）；灰色虚线 = 周末或法定假期。为呈现 001 Conversation 的 <strong>10/10（周六）</strong>节点，日历增列「周六」列。</p>
+
+  <div class="cal">
+    <div class="head">周一</div><div class="head">周二</div><div class="head">周三</div><div class="head">周四</div><div class="head">周五</div><div class="head">周六</div>
+
+    <div class="d"><b>9/7</b><span class="tiny">已过</span></div>
+    <div class="d"><b>9/8</b><span class="tiny">已过</span></div>
+    <div class="d"><b>9/9</b><span class="tiny">已过</span></div>
+    <div class="d"><b>9/10</b><span class="tiny">已过</span></div>
+    <div class="d t"><b>9/11</b><span class="tiny">T1 Knowledge ①<br>首批收口</span></div>
+    <div class="d off"><b>9/12</b><span class="tiny">周末 · 休</span></div>
+
+    <div class="d"><b>9/14</b><span class="tiny">开发</span></div>
+    <div class="d"><b>9/15</b><span class="tiny">开发</span></div>
+    <div class="d"><b>9/16</b><span class="tiny">开发</span></div>
+    <div class="d"><b>9/17</b><span class="tiny">开发</span></div>
+    <div class="d t"><b>9/18</b><span class="tiny">T2 Knowledge ②</span></div>
+    <div class="d off"><b>9/19</b><span class="tiny">周末 · 休</span></div>
+
+    <div class="d t"><b>9/21</b><span class="tiny">T3 Marketplace</span></div>
+    <div class="d"><b>9/22</b><span class="tiny">开发</span></div>
+    <div class="d"><b>9/23</b><span class="tiny">开发</span></div>
+    <div class="d"><b>9/24</b><span class="tiny">开发</span></div>
+    <div class="d off"><b>9/25</b><span class="tiny">中秋 · 休</span></div>
+    <div class="d off"><b>9/26</b><span class="tiny">周末 · 休</span></div>
+
+    <div class="d t"><b>9/28</b><span class="tiny">T4 底座就绪</span></div>
+    <div class="d"><b>9/29</b><span class="tiny">开发</span></div>
+    <div class="d"><b>9/30</b><span class="tiny">国庆前收口</span></div>
+    <div class="d off"><b>10/1</b><span class="tiny">国庆 · 休</span></div>
+    <div class="d off"><b>10/2</b><span class="tiny">国庆 · 休</span></div>
+    <div class="d off"><b>10/3</b><span class="tiny">国庆 · 休</span></div>
+
+    <div class="d off"><b>10/5</b><span class="tiny">国庆 · 休</span></div>
+    <div class="d off"><b>10/6</b><span class="tiny">国庆 · 休</span></div>
+    <div class="d off"><b>10/7</b><span class="tiny">国庆 · 休</span></div>
+    <div class="d"><b>10/8</b><span class="tiny">开发</span></div>
+    <div class="d t"><b>10/9</b><span class="tiny">T5 核心闭环 Gate</span></div>
+    <div class="d t"><b>10/10</b><span class="tiny">T6 Conversation<br>（周六 · 口径待确认）</span></div>
+
+    <div class="d"><b>10/12</b><span class="tiny">开发</span></div>
+    <div class="d"><b>10/13</b><span class="tiny">开发</span></div>
+    <div class="d"><b>10/14</b><span class="tiny">开发 / 联调</span></div>
+    <div class="d"><b>10/15</b><span class="tiny">联调</span></div>
+    <div class="d m"><b>10/16</b><span class="tiny">★ 测试完成 + 核心功能上生产</span></div>
+    <div class="d off"><b>10/17</b><span class="tiny">周末 · 休</span></div>
+
+    <div class="d"><b>10/19</b><span class="tiny">核心批生产验证</span></div>
+    <div class="d"><b>10/20</b><span class="tiny">其余模块生产准备</span></div>
+    <div class="d"><b>10/21</b><span class="tiny">其余模块生产准备</span></div>
+    <div class="d"><b>10/22</b><span class="tiny">其余模块生产准备</span></div>
+    <div class="d"><b>10/23</b><span class="tiny">其余模块生产准备</span></div>
+    <div class="d off"><b>10/24</b><span class="tiny">周末 · 休</span></div>
+
+    <div class="d"><b>10/26</b><span class="tiny">其余模块上线准备</span></div>
+    <div class="d"><b>10/27</b><span class="tiny">回归</span></div>
+    <div class="d"><b>10/28</b><span class="tiny">回归</span></div>
+    <div class="d"><b>10/29</b><span class="tiny">全量回归</span></div>
+    <div class="d m"><b>10/30</b><span class="tiny">★ 其余模块上线 + 全量验收</span></div>
+    <div class="d off"><b>10/31</b><span class="tiny">周末 · 休</span></div>
+  </div>
+
+  <div class="grid3">
+    <div class="card">
+      <h4>测试环境节点（时间轴左支）</h4>
+      <p class="small">T1 9/11 ｜ T2 9/18 ｜ T3 9/21 ｜ T4 9/28 ｜ T5 10/9 ｜ T6 <strong>10/10（周六）</strong> ｜ T7 10/16<br>
+      测试侧在 10/16 前用掉 <strong>20 个工作日</strong>（其中 9/28→10/9 之间被国庆吃掉一整周，实际只有 5 个工作日）；T6 落在 10/10（周六），不计入工作日口径。</p>
+    </div>
+    <div class="card">
+      <h4>生产环境档位（时间轴右支）</h4>
+      <p class="small">P1 <strong>10/16 核心批</strong>（005 / 002 / 001）｜ P2 <strong>10/30 其余批</strong>（003 / 004 / 006 / 007 / 008 / 009）+ 全量验收<br>
+      10/16 之后 <strong>9 个工作日</strong>（10/19–10/29）用于核心批生产验证、其余模块生产准备与全量回归。</p>
+    </div>
+    <div class="card">
+      <h4>两个里程碑定义</h4>
+      <p class="small"><strong>10/16</strong>：九个模块的 P0 功能在测试环境完成并达到可验收状态；<strong>同日核心功能（005 / 002 / 001）切换生产</strong>。<br>
+      <strong>10/30</strong>：其余模块全部上生产，并通过全量上线验收（可用性、权限、审计、通知、异常路径）。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 四、矩阵总览 ============ -->
+<section>
+  <h2>四、模块 × 测试进度 / 生产上线时间 矩阵（总览）</h2>
+  <table class="gantt">
+    <thead>
+      <tr>
+        <th rowspan="2" style="min-width:150px;">模块</th>
+        <th colspan="7" class="grp-t">测试环境进度（左）</th>
+        <th colspan="2" class="grp-p">生产上线时间（右）</th>
+      </tr>
+      <tr>
+        <th>9/11</th><th>9/18</th><th>9/21</th><th>9/28</th><th>10/9</th><th>10/10</th><th>10/16<br><span class="tiny">测试完成</span></th>
+        <th>10/16<br><span class="tiny">核心批</span></th><th>10/30<br><span class="tiny">其余批</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="mod">005 Knowledge<br><span class="tiny">61 FR</span></td>
+        <td class="c mile"><span class="dot dot-t">①</span></td>
+        <td class="c mile"><span class="dot dot-t">②</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td>
+        <td class="c"><span class="dot dot-p">A</span></td>
+        <td class="c mile">—</td>
+      </tr>
+      <tr>
+        <td class="mod">002 Marketplace<br><span class="tiny">34 FR</span></td>
+        <td class="c">—</td><td class="c">—</td>
+        <td class="c mile"><span class="dot dot-t">③</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td>
+        <td class="c"><span class="dot dot-p">A</span></td>
+        <td class="c mile">—</td>
+      </tr>
+      <tr>
+        <td class="mod">008 Admin<br><span class="tiny">46 条</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c">—</td>
+        <td class="c mile"><span class="dot dot-t">④</span></td>
+        <td class="c"><span class="dot dot-t">⑤</span></td>
+        <td class="c">—</td><td class="c">—</td>
+        <td class="c">—</td>
+        <td class="c"><span class="dot dot-p">B</span></td>
+      </tr>
+      <tr>
+        <td class="mod">007 Credential<br><span class="tiny">23 FR</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c">—</td>
+        <td class="c mile"><span class="dot dot-t">④</span></td>
+        <td class="c"><span class="dot dot-t">⑤</span></td>
+        <td class="c">—</td><td class="c">—</td>
+        <td class="c">—</td>
+        <td class="c"><span class="dot dot-p">B</span></td>
+      </tr>
+      <tr>
+        <td class="mod">006 Guardrail<br><span class="tiny">20 条</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c">—</td>
+        <td class="c mile"><span class="dot dot-t">④</span></td>
+        <td class="c"><span class="dot dot-t">⑤</span></td>
+        <td class="c">—</td><td class="c">—</td>
+        <td class="c">—</td>
+        <td class="c"><span class="dot dot-p">B</span></td>
+      </tr>
+      <tr>
+        <td class="mod">003 Asset Creation<br><span class="tiny">26 FR</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c">—</td>
+        <td class="c mile"><span class="dot dot-t">④</span></td>
+        <td class="c"><span class="dot dot-t">⑤</span></td>
+        <td class="c">—</td><td class="c">—</td>
+        <td class="c">—</td>
+        <td class="c"><span class="dot dot-p">B</span></td>
+      </tr>
+      <tr>
+        <td class="mod">004 Publish<br><span class="tiny">45 FR</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td>
+        <td class="c mile"><span class="dot dot-t">⑤</span></td>
+        <td class="c">—</td>
+        <td class="c"><span class="dot dot-t">⑦</span></td>
+        <td class="c">—</td>
+        <td class="c"><span class="dot dot-p">B</span></td>
+      </tr>
+      <tr>
+        <td class="mod">009 Notification<br><span class="tiny">19 FR</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c">—</td>
+        <td class="c mile"><span class="dot dot-t">④</span></td>
+        <td class="c"><span class="dot dot-t">⑤</span></td>
+        <td class="c">—</td>
+        <td class="c"><span class="dot dot-t">⑦</span></td>
+        <td class="c">—</td>
+        <td class="c"><span class="dot dot-p">B</span></td>
+      </tr>
+      <tr>
+        <td class="mod">001 Conversation<br><span class="tiny">39 FR</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td>
+        <td class="c mile"><span class="dot dot-t">⑥</span></td>
+        <td class="c">—</td>
+        <td class="c"><span class="dot dot-p">A</span></td>
+        <td class="c mile">—</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="small">
+    <span class="dot dot-t" style="width:16px;height:16px;line-height:16px;font-size:10px;">①</span>–<span class="dot dot-t" style="width:16px;height:16px;line-height:16px;font-size:10px;">⑦</span> = 测试环境节点（⑥ 为 10/10 周六）；
+    <span class="dot dot-p" style="width:16px;height:16px;line-height:16px;font-size:10px;">A</span> = 10/16 核心批（005 / 002 / 001）；
+    <span class="dot dot-p" style="width:16px;height:16px;line-height:16px;font-size:10px;">B</span> = 10/30 其余批（003 / 004 / 006 / 007 / 008 / 009）。
+    浅灰底列 = 里程碑。
+  </p>
+
+  <div class="warn">
+    <strong>注意：</strong>10/9 Gate 之后到 10/16 里程碑之间只有 <strong>4 个工作日</strong>（10/12–10/16，10/10 为周六不计入），却要完成 004 资产生命周期、009 完整生命周期通知与全量联调；Conversation 已前移至 10/10 单独收口。这是本次排期风险最集中的区间，建议将"资产生命周期"的 004 FR-021~045 与 009 完整生命周期通知的研发前置到 9/28–10/9 期间并行开工。
+  </div>
+</section>
+
+<!-- ============ 五、来源对照 ============ -->
+<section>
+  <h2>五、模块内容支撑与来源对照</h2>
+  <table>
+    <thead>
+      <tr><th style="width:150px;">模块</th><th style="width:200px;">测试环境节点</th><th style="width:160px;">生产上线时间</th><th>内容支撑（spec 范围）</th><th style="width:190px;">来源</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>005 Knowledge</strong><br><span class="tiny">61 FR</span></td>
+        <td>9/11 → 9/18</td>
+        <td>10/16 核心批</td>
+        <td>目录体系 FR-001~009b；建库 FR-010~017；导入 FR-018~024；构建 FR-025~036；详情 FR-037~037f；参数 FR-038~040；删除 FR-041~044；开放接口 FR-045~047；挂载检索 FR-048~054；重命名 FR-055~055b；Overview FR-056~056b；批量参数 FR-057~057b；分享 FR-058~061</td>
+        <td><span class="src">spec 005</span><br><span class="src">Excel 排期 9.11 / 9.14</span><br><span class="src">既定节点</span></td>
+      </tr>
+      <tr>
+        <td><strong>002 Marketplace</strong><br><span class="tiny">34 FR</span></td>
+        <td>9/21</td>
+        <td>10/16 核心批</td>
+        <td>频道与热门 FR-001~002；搜索 FR-003~005；收藏 FR-006；详情五页签 FR-007~010；订阅申请 FR-011~023；订阅管理 FR-024~029；订阅状态机 FR-030~034</td>
+        <td><span class="src">spec 002</span><br><span class="src">Excel 排期 9.21</span><br><span class="src">既定节点</span></td>
+      </tr>
+      <tr>
+        <td><strong>008 Admin</strong><br><span class="tiny">46 条</span></td>
+        <td>9/28 → 10/9</td>
+        <td>10/30 其余批<br><span class="tiny">（底座 + 治理中心）</span></td>
+        <td>治理中心 FR-001~003；平台资源注册表 FR-004~015；模型设置 FR-020~024；原生工具 FR-030~039；角色映射 FR-050~054；目录与冷启动 FR-060~063；平台配置 FR-070~076</td>
+        <td><span class="src">spec 008</span><br><span class="src">Excel 排期 925 / 1009</span></td>
+      </tr>
+      <tr>
+        <td><strong>007 Credential</strong><br><span class="tiny">23 FR</span></td>
+        <td>9/28 → 10/9<br><span class="tiny">（PAT 随 9/11 前置）</span></td>
+        <td>10/30 其余批</td>
+        <td>PAT 与入站认证 FR-001~004；静态个人凭据 FR-010~017；模型与导入凭据 FR-020~022；解析规则 FR-030~034；凭据状态与失效处置 FR-040~042</td>
+        <td><span class="src">spec 007</span><br><span class="src">Excel 排期 1009</span><br><span class="src">《九模块倒排》PAT 9/11 前置</span></td>
+      </tr>
+      <tr>
+        <td><strong>006 Guardrail</strong><br><span class="tiny">20 条</span></td>
+        <td>9/28 → 10/9</td>
+        <td>10/30 其余批</td>
+        <td>模板管理与查询选择 FR-002~004、FR-010~012；运行时输入/输出检测 FR-020~022；拦截与撤回处置 FR-030~031；模板与资产适用关系 FR-040~045；审计与配置 FR-050~051</td>
+        <td><span class="src">spec 006</span><br><span class="src">Excel 排期 1009</span><br><span class="src">《九模块倒排》9/28 模板最小能力</span></td>
+      </tr>
+      <tr>
+        <td><strong>003 Asset Creation</strong><br><span class="tiny">26 FR</span></td>
+        <td>9/28 → 10/9</td>
+        <td>10/30 其余批</td>
+        <td>创建资格与草稿 FR-001~004；Agent 六步向导 FR-005~011；MCP 五步向导 FR-012~016；订阅表单 / 条款 / 审批链配置 FR-017~021；质量门控 FR-022~026</td>
+        <td><span class="src">spec 003</span><br><span class="src">Excel 排期 925~1023（原为区间）</span></td>
+      </tr>
+      <tr>
+        <td><strong>004 Publish</strong><br><span class="tiny">45 FR</span></td>
+        <td>10/9 → 10/16</td>
+        <td>10/30 其余批<br><span class="tiny">（首发 + 生命周期）</span></td>
+        <td>生命周期六态与可见范围 FR-001~002；发布流程与准入测评 FR-003~020；版本与未发布修订 FR-021~030；下架 / 重新上架 / 删除 FR-031~040；发布记录与命名唯一性 FR-040~045</td>
+        <td><span class="src">spec 004</span><br><span class="src">Excel 排期 925~1023（原为区间）</span></td>
+      </tr>
+      <tr>
+        <td><strong>009 Notification</strong><br><span class="tiny">19 FR</span></td>
+        <td>9/28 → 10/9 → 10/16</td>
+        <td>10/30 其余批</td>
+        <td>通知基础设施与知识库 / 订阅通知 FR-001~003；发布、测评、凭据、停用类 FR-010~026；完整生命周期事件 FR-030~035</td>
+        <td><span class="src">spec 009</span><br><span class="src">Excel 排期 925~1023（原为区间）</span></td>
+      </tr>
+      <tr>
+        <td><strong>001 Conversation</strong><br><span class="tiny">39 FR</span></td>
+        <td>10/10（周六）</td>
+        <td>10/16 核心批</td>
+        <td>Chat 基础与模型选择 FR-001~009；知识库挂载与多库归并 FR-010~016；Agent 透传 FR-017~023；护栏与生成控制 FR-024~027c；会话管理 FR-028~031；我的资产抽屉与不可用处理 FR-032~036</td>
+        <td><span class="src">spec 001</span><br><span class="src">Excel 排期 1010（2026-09-11 更新，原 1023）</span><br><span class="src">《九模块倒排》10/10</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 六、功能点级生产上线时间明细 ============ -->
+<section>
+  <h2>六、功能点级生产上线时间明细（351 行 · 模块级索引）</h2>
+  <p class="small">逐行明细<strong>已直接内联在第二节时间轴的节点卡片内</strong>：左支 7 个测试节点卡片各自展开「<strong>功能点颗粒度</strong>」即可看到该节点覆盖的功能点（合计 320 行）；右支 P1 / P2 生产档位卡片展开「<strong>功能点明细（生产上线时间）</strong>」即可看到该档位全部功能点（168 行 / 183 行，合计 351 行，无遗漏、无重复）。生产口径：核心功能相关（005 / 002 / 001）→ <strong>10/16</strong>；其余全部 → <strong>10/30</strong>。</p>
+  <table>
+    <thead><tr><th style="width:160px;">模块</th><th style="width:66px;">行数</th><th style="width:176px;">Excel「上线排期」</th><th style="width:160px;">生产上线时间</th><th>时间轴位置（测试节点 ｜ 生产档位）</th></tr></thead>
+    <tbody>
+      <tr><td>001 Conversation</td><td class="c">42</td><td>1010 / 1023（3 行未填）</td><td><span class="prod-a">10/16（核心批）</span></td><td>T6 ｜ P1</td></tr>
+      <tr><td>002 Marketplace</td><td class="c">39</td><td>9.21（6 行未填）</td><td><span class="prod-a">10/16（核心批）</span></td><td>T3 ｜ P1</td></tr>
+      <tr><td>003 Asset Creation</td><td class="c">26</td><td>925~1023</td><td><span class="prod-b">10/30（其余批）</span></td><td>T4 / T5 ｜ P2</td></tr>
+      <tr><td>004 Publish</td><td class="c">45</td><td>925~1023</td><td><span class="prod-b">10/30（其余批）</span></td><td>T5 / T7 ｜ P2</td></tr>
+      <tr><td>005 Knowledge</td><td class="c">87</td><td>9.11 / 9.14（27 行未填）</td><td><span class="prod-a">10/16（核心批）</span></td><td>T1 / T2 / T7 ｜ P1</td></tr>
+      <tr><td>006 Guardrail</td><td class="c">20</td><td>1009（1 行未填）</td><td><span class="prod-b">10/30（其余批）</span></td><td>T4 / T5 ｜ P2</td></tr>
+      <tr><td>007 Credential</td><td class="c">23</td><td>1009</td><td><span class="prod-b">10/30（其余批）</span></td><td>T1 / T4 / T5 ｜ P2</td></tr>
+      <tr><td>008 Admin</td><td class="c">46</td><td>1009 / 925</td><td><span class="prod-b">10/30（其余批）</span></td><td>T4 / T5 ｜ P2</td></tr>
+      <tr><td>009 Notification</td><td class="c">19</td><td>925~1023</td><td><span class="prod-b">10/30（其余批）</span></td><td>T4 / T5 ｜ P2</td></tr>
+      <tr><td>前端 UI/UX</td><td class="c">4</td><td>未填（4 行未填）</td><td><span class="prod-b">10/30（其余批）</span></td><td>横向任务 ｜ P2</td></tr>
+      <tr><td><strong>合计</strong></td><td class="c"><strong>351</strong></td><td class="c">—</td><td><span class="prod-a">10/16</span> 168 行 ＋ <span class="prod-b">10/30</span> 183 行</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <div class="grid2">
+    <div class="warn"><strong>注意 1：</strong>判定依据是<strong>模块归属</strong>，不是 Excel「上线排期」的先后。因此 008（<code>925</code>）与 006 / 007（<code>1009</code>）虽然排期早于 001 的 <code>1010</code>，仍归入 <strong>10/30 其余批</strong>。</div>
+    <div class="warn"><strong>注意 2：</strong>003 / 004 / 009 在 Excel 中是区间排期 <code>925~1023</code>（共 90 行），生产侧不按区间细分，统一归 <strong>10/30</strong>。</div>
+  </div>
+  <p class="tiny"><strong>未列入任何测试节点号段的行共 31 行</strong>（001 / 002 / 005 的 NG 项、006 FR-001、008 FR-050~054 与 FR-060~063、前端横向任务 4 行）：按「本期不做 / 横向任务」处理，其生产上线时间见 P2 明细。</p>
+</section><!-- ============ 七、口径与假设 ============ -->
+<section>
+  <h2>七、排期口径、假设与未排期项</h2>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>排期口径</h3>
+      <ul>
+        <li><strong>按工作日排</strong>：周一至周五，自动跳过周末。</li>
+        <li><strong>已扣除假期</strong>：2026-09-25（中秋）、2026-10-01 ~ 10-07（国庆）。</li>
+        <li><strong>未计入调休补班</strong>：若实际存在周末补班，按同一方法平移。</li>
+        <li><strong>例外</strong>：001 Conversation 的 T6 节点按 Excel「上线排期」原值落在 <strong>10/10（周六）</strong>，未做工作日顺延，是否按周末窗口执行需确认。</li>
+        <li><strong>工作日总数</strong>：9/11 – 10/30 共 30 个；10/16 = 第 20 个，10/30 = 第 30 个。</li>
+        <li><strong>生产上线时间</strong>：按<strong>模块归属</strong>两档——核心功能相关（005 / 002 / 001）10/16，其余全部（003 / 004 / 006 / 007 / 008 / 009 + 前端横向）10/30；同一模块内所有需求行统一同批，不逐行拆分。逐行明细见第二节时间轴节点卡片。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>两个里程碑的定义</h3>
+      <ul>
+        <li><strong>10/16（测试完成 + 核心功能上生产）</strong>：九模块 P0 功能在测试环境完成并达到可验收状态；<strong>同日核心功能（005 / 002 / 001）切换生产</strong>。</li>
+        <li><strong>10/30（其余模块上生产 + 全量验收）</strong>：其余模块（003 / 004 / 006 / 007 / 008 / 009）全部上生产，并通过全量上线验收（可用性、权限、审计、通知、异常路径）。</li>
+        <li>两个日期均为<strong>硬里程碑</strong>，测试节点可按风险前后微调，里程碑不动。</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>未排期项处理（共 41 条，Excel「上线排期」为空）</h3>
+  <table>
+    <thead><tr><th style="width:170px;">归属</th><th style="width:70px;">条数</th><th>明细</th><th style="width:250px;">处理建议</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>005 Knowledge</td><td>27</td>
+        <td>我的目录权限与分享：FR-006、007、008、009、009b、011、013、013b、013c、014、019、020、023、058、058b、058d、059、060、061；NG-1~NG-8</td>
+        <td>NG 类本期不做；FR-058~061（分享）建议归入 <strong>10/16</strong>；FR-006~023 中依赖 Alice 权限与分享能力的项，建议明确"本期不做"或归入后续 Release。</td>
+      </tr>
+      <tr>
+        <td>002 Marketplace</td><td>6</td>
+        <td>FR-011（订阅申请单页表单）；NG-1~NG-5</td>
+        <td>FR-011 是订阅链路必经环节，<strong>必须补排期</strong>，建议并入 <strong>9/21</strong>；NG 类本期不做。</td>
+      </tr>
+      <tr>
+        <td>001 Conversation</td><td>3</td>
+        <td>NG-2（追问建议）、NG-3（用户偏好）、NG-4（引用侧栏联动）</td>
+        <td>本期不做，不进时间轴。</td>
+      </tr>
+      <tr>
+        <td>006 Guardrail</td><td>1</td>
+        <td>FR-001（模板管理仅平台管理员可用）</td>
+        <td>属模板管理权限约束，建议并入 <strong>10/9</strong>（与 006 其余项同批）。</td>
+      </tr>
+      <tr>
+        <td>前端 UI/UX</td><td>4</td>
+        <td>设计资源消费：图标库、页面底座对齐、css-token 迁移、组件库对齐</td>
+        <td>非业务 FR，建议作为横向任务随最近节点（<strong>9/28</strong>）消化，不单独占用里程碑。</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="warn">
+    <strong>关于 003 / 004 / 009 的区间排期：</strong>Excel 中这三个模块的「上线排期」写的是区间 <code>925~1023</code>（共 90 条 FR，未细分）。本矩阵已按 <em>依赖顺序 + 能力成熟度</em> 将其拆分为 <strong>9/28 → 10/9 → 10/16</strong> 三个测试节点，并在生产侧统一归入 <strong>10/30 其余批</strong>。此拆分为本次重排的核心产出，需确认。
+  </div>
+</section>
+
+<!-- ============ 八、待确认 ============ -->
+<section>
+  <h2>八、需要确认的事项</h2>
+  <table>
+    <thead><tr><th style="width:60px;">#</th><th style="width:280px;">事项</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>假期口径</td><td>中秋 9/25、国庆 10/1–10/7 是否为实际放假安排？是否存在周末调休补班需计入？</td></tr>
+      <tr><td>2</td><td>003 / 004 / 009 区间拆分</td><td>将 Excel 的 <code>925~1023</code> 区间拆为 9/28 / 10/9 / 10/16 三节点的方案是否认可？</td></tr>
+      <tr><td>3</td><td>Conversation 落在 10/10（周六）</td><td>Excel 最新「上线排期」= <code>1010</code>，本时间轴按原值排入。10/10 为周六，且与 10/9 Gate 仅隔 1 天：是否按周末加班窗口执行？还是顺延至 10/12（周一）？</td></tr>
+      <tr><td>4</td><td>10/16 核心批与测试收口同日 <span class="tag tag-fixed">已确认</span></td><td>已确认按<strong>核心功能相关</strong>口径排布（10/16 核心批：005 / 002 / 001；10/30 其余批：003 / 004 / 006 / 007 / 008 / 009），原 10/19 生产准备与三批次方案撤销。仍需落实：生产资源与配置须在 10/16 前就位；约定切换当日回滚预案；核心功能未达标时是否顺延至 10/30。</td></tr>
+      <tr><td>5</td><td>10/9 Gate 失败处置</td><td>Gate 未通过时，哪些模块可延后到 10/16，哪些必须就地解决？</td></tr>
+      <tr><td>6</td><td>未排期 FR 补齐</td><td>002 FR-011、006 FR-001、005 FR-058~061 是否按建议补入 9/21 / 10/9 / 10/16？005 的 Alice 权限类 FR-006~023 是否本期不做？</td></tr>
+      <tr><td>7</td><td>责任人补齐</td><td>是否在本时间轴中补 BE / FE / 测试 / 环境 / Alice / Security 责任人与最晚到位日？（当前仅为范围与依赖排期，非资源承诺排期）</td></tr>
+      <tr><td>8</td><td>非功能节点</td><td>权限 + SSO 集成、生产环境资源、域名、Security 测试、上线审批是否需在时间轴中单列节点？</td></tr>
+      <tr><td>9</td><td>「Conversation 之前的全部功能 10/16 上」口径裁定 <span class="tag tag-fixed">已确认</span></td><td>原话「Conversation 之前的全部功能都会在 10/16 上」按<strong>模块归属</strong>理解：核心功能相关（005 / 002 / 001）10/16 上生产，其余全部 10/30 上生产；<strong>不按</strong> Excel 排期先后理解——即 008（<code>925</code>）、006 / 007（<code>1009</code>）虽排期早于 001 的 <code>1010</code>，仍归 <strong>10/30 其余批</strong>。逐行明细见第二节时间轴节点卡片。</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="foot">
+  <p><strong>来源说明：</strong>本时间轴的事实来源为 ①《工作簿1.xlsx》「上线排期」列（352 行需求明细，覆盖 001–009 九个模块；版本 2026-09-11 10:50，001 Conversation 由 <code>1023</code> 更新为 <code>1010</code>）；②《Release1-九模块倒排与上线说明-2026-09-09》；③《Release1-各模块排期合理性详解-2026-09-09》；④ <code>specs/001~009</code>（需求事实源，含 FR 编号与验收要点）。</p>
+  <p>GRC AI 平台 · 测试与生产时间轴（矩阵版） ｜ 版本 v2.4（T1 / T3 节点日期按 Excel「上线排期」原值对齐：9/14 → 9/11、9/24 → 9/21；功能点明细内联到时间轴各节点；第六节为模块级索引） ｜ 生成日期 2026-09-10，更新 2026-09-11 ｜ 本文件为排期讨论稿，非资源承诺排期。</p>
+</div>
+
+</main>
+</body>
+</html>

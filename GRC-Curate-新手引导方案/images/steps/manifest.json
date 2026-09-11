@@ -1,0 +1,102 @@
+[
+  {
+    "file": "a-1",
+    "cap": "任务 1 · 浏览知识库目录"
+  },
+  {
+    "file": "a-2",
+    "cap": "任务 2 · 打开一个 Ready 库,看懂管线"
+  },
+  {
+    "file": "a-3",
+    "cap": "任务 3 · 给知识库添加文档"
+  },
+  {
+    "file": "a-4",
+    "cap": "任务 4 · 执行一次一键构建"
+  },
+  {
+    "file": "a-5",
+    "cap": "任务 5 · 查看权限与设置"
+  },
+  {
+    "file": "b-1",
+    "cap": "① 目录树(.kb-side)"
+  },
+  {
+    "file": "b-2",
+    "cap": "② 库列表(#kb-detail)"
+  },
+  {
+    "file": "b-3",
+    "cap": "③ 四段管线"
+  },
+  {
+    "file": "b-4",
+    "cap": "④ Add documents"
+  },
+  {
+    "file": "b-5",
+    "cap": "⑤ One-click build"
+  },
+  {
+    "file": "b-6",
+    "cap": "⑥ 文件详情(fd-overlay)"
+  },
+  {
+    "file": "b-c1",
+    "cap": "① 库/目录浏览"
+  },
+  {
+    "file": "b-c2",
+    "cap": "② Information 页签"
+  },
+  {
+    "file": "b-c3",
+    "cap": "③ 受限库 No-access"
+  },
+  {
+    "file": "b-c4",
+    "cap": "④ 检索测试"
+  },
+  {
+    "file": "c-1",
+    "cap": "① burn 首屏,锚定到库"
+  },
+  {
+    "file": "c-2",
+    "cap": "② 进入库列表"
+  },
+  {
+    "file": "c-3",
+    "cap": "③ 打开示例库 · 管线动画"
+  },
+  {
+    "file": "c-4",
+    "cap": "④ 打开文件详情"
+  },
+  {
+    "file": "c-5",
+    "cap": "⑤ 收尾 toast · 结束"
+  },
+  {
+    "file": "d-1",
+    "cap": "① \"?\" 帮助浮层"
+  },
+  {
+    "file": "d-2",
+    "cap": "② 空态引导卡"
+  },
+  {
+    "file": "d-3",
+    "cap": "③ 首见提示(data-tip)"
+  },
+  {
+    "file": "e-1",
+    "cap": "① 平台导览卡"
+  },
+  {
+    "file": "e-2",
+    "cap": "② ?guide=curate 自动起播"
+  }
+]

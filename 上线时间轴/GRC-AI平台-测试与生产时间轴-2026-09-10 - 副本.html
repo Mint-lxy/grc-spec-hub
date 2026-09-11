@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GRC AI 平台 · 测试进度与生产环境上线矩阵（2026-09-10）</title>
+<style>
+  :root{
+    --navy:#16324f; --blue:#2563a8; --blue-soft:#eaf3fb; --light:#eef5fb;
+    --line:#d8e0e8; --text:#1d2935; --muted:#5f6d7a;
+    --green:#1f7a58; --amber:#a36200; --red:#b42318; --purple:#6941c6;
+    --test:#2563a8; --prod:#1f7a58;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:#f5f7fa;color:var(--text);
+    font-family:"Microsoft YaHei","PingFang SC",Arial,sans-serif;line-height:1.65;}
+  main{width:min(1280px,calc(100% - 48px));margin:0 auto 64px;}
+  .hero{background:linear-gradient(135deg,#102a43,#245b91);color:#fff;
+    padding:52px max(24px,calc((100vw - 1280px)/2));margin-bottom:28px;}
+  .hero-inner{max-width:1280px;margin:auto;}
+  h1{font-size:34px;line-height:1.28;margin:0 0 12px;letter-spacing:.02em;}
+  h2{font-size:23px;color:var(--navy);margin:40px 0 14px;padding-left:12px;border-left:5px solid var(--blue);}
+  h3{font-size:17px;color:var(--navy);margin:20px 0 8px;}
+  h4{font-size:15px;color:var(--navy);margin:16px 0 6px;}
+  p{margin:8px 0 12px;}
+  .subtitle{font-size:17px;opacity:.94;margin:0;}
+  .meta{margin-top:18px;font-size:13.5px;opacity:.84;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:10px;
+    padding:20px 22px;margin:16px 0;box-shadow:0 1px 2px rgba(16,42,67,.04);}
+  .statement{background:#eaf3fb;border-left:5px solid var(--blue);padding:18px 20px;
+    border-radius:4px;font-size:16.5px;}
+  .warn{background:#fff8e8;border-left:5px solid #d99518;padding:15px 18px;border-radius:4px;}
+  .danger{background:#fff0ee;border-left:5px solid var(--red);padding:15px 18px;border-radius:4px;}
+  .ok{background:#edf8f3;border-left:5px solid var(--green);padding:15px 18px;border-radius:4px;}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px;background:#fff;}
+  th,td{border:1px solid var(--line);padding:9px 10px;vertical-align:top;text-align:left;}
+  th{background:#eaf2f9;color:var(--navy);font-weight:700;}
+  tbody tr:nth-child(even) td{background:#fbfdff;}
+  ul{margin:8px 0 12px;padding-left:22px;}
+  li{margin:4px 0;}
+  .small{font-size:12.5px;color:var(--muted);}
+  .tiny{font-size:11.5px;color:var(--muted);line-height:1.45;}
+  .tag{display:inline-block;border-radius:999px;padding:1px 8px;font-size:11.5px;
+    font-weight:700;white-space:nowrap;}
+  .tag-fixed{color:#195d41;background:#ddf5e7;}
+  .tag-build{color:#8b5200;background:#fff1d6;}
+  .tag-gate{color:#5b36ac;background:#eee9ff;}
+  .tag-test{color:#174a80;background:#dfeefc;}
+  .tag-prod{color:#9c1c14;background:#ffe3df;}
+  .tag-na{color:#5f6d7a;background:#eceff2;}
+
+  /* ---- 日历 ---- */
+  .cal{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:14px 0;}
+  .cal .head{background:#eaf2f9;color:var(--navy);font-weight:700;text-align:center;
+    padding:7px;border-radius:6px;font-size:13px;}
+  .cal .d{background:#fff;border:1px solid var(--line);border-radius:6px;
+    padding:8px 9px;min-height:64px;font-size:12.5px;}
+  .cal .d b{display:block;font-size:13.5px;color:var(--navy);}
+  .cal .d.off{background:#f2f4f7;border-style:dashed;color:#98a2b3;}
+  .cal .d.off b{color:#98a2b3;}
+  .cal .d.t{border:2px solid var(--test);background:#f2f8fe;}
+  .cal .d.p{border:2px solid var(--prod);background:#f1faf5;}
+  .cal .d.m{border:2px solid #6941c6;background:#f7f4ff;}
+
+  /* ---- 甘特矩阵 ---- */
+  .gantt{font-size:12.5px;}
+  .gantt th{text-align:center;padding:6px 4px;}
+  .gantt th.grp-t{background:#dfeefc;color:#174a80;}
+  .gantt th.grp-p{background:#ddf5e7;color:#195d41;}
+  .gantt td.c{text-align:center;padding:7px 4px;}
+  .gantt td.mod{font-weight:700;color:var(--navy);white-space:nowrap;}
+  .dot{display:inline-block;width:22px;height:22px;line-height:22px;border-radius:50%;
+    font-size:12px;font-weight:700;color:#fff;}
+  .dot-t{background:var(--test);}
+  .dot-p{background:var(--prod);}
+  .dot-g{background:#6941c6;}
+  .gantt td.mile{background:#f7f9fc;}
+
+  /* ---- 节点卡 ---- */
+  .node{border:1px solid var(--line);border-radius:10px;background:#fff;
+    margin:14px 0;overflow:hidden;box-shadow:0 1px 2px rgba(16,42,67,.04);}
+  .node-h{display:flex;align-items:center;gap:14px;padding:13px 18px;background:#f7f9fc;
+    border-bottom:1px solid var(--line);flex-wrap:wrap;}
+  .node-d{font-size:19px;font-weight:800;color:var(--navy);letter-spacing:.02em;}
+  .node-t{font-size:14px;font-weight:700;color:var(--blue);}
+  .node-t.prod{color:var(--prod);}
+  .node-b{padding:16px 18px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .src{font-size:11.5px;color:#7a8794;background:#f4f6f8;border-radius:4px;
+    padding:1px 6px;display:inline-block;margin-left:4px;}
+  .mod-chip{display:inline-block;background:#eaf2f9;color:#174a80;border-radius:5px;
+    padding:2px 8px;font-size:12px;font-weight:700;margin:2px 4px 2px 0;}
+  .mod-chip.p{background:#e8f7ef;color:#195d41;}
+  .foot{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+    font-size:12.5px;color:var(--muted);}
+
+  /* ---- 一体化时间轴：单一时间轴 · 左测试 / 右生产 ---- */
+  .tl-col{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    box-shadow:0 1px 2px rgba(16,42,67,.04);}
+  .tl-head{padding:14px 18px;font-weight:800;font-size:17px;color:var(--navy);display:flex;
+    align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    background:linear-gradient(90deg,#eaf3fb 0%,#eaf3fb 49.9%,#edf8f3 50.1%,#edf8f3 100%);}
+  .tl-head .tl-side{font-size:12.5px;font-weight:700;color:#41556a;}
+  .tl-body{padding:20px 22px 12px;display:flex;flex-direction:column;gap:14px;}
+  .tl-row{display:grid;grid-template-columns:1fr 96px 1fr;align-items:stretch;}
+  .tl-row > *{min-width:0;}
+  .tl-mid{position:relative;display:flex;flex-direction:column;align-items:center;padding-top:12px;}
+  .tl-mid::before{content:"";position:absolute;left:50%;top:-14px;bottom:-14px;width:3px;
+    margin-left:-1.5px;background:#dfe7ef;border-radius:2px;}
+  .tl-mid::after{content:"";position:absolute;top:19px;height:2px;width:48px;background:#dfe7ef;}
+  .tl-row.r-test .tl-mid::after{right:50%;}
+  .tl-row.r-prod .tl-mid::after{left:50%;}
+  .tl-row:first-child .tl-mid::before{top:0;}
+  .tl-row:last-child .tl-mid::before{bottom:0;}
+  .tl-card{background:#fbfdff;border:1px solid #e4edf6;border-radius:9px;padding:12px 14px;}
+  .tl-card.p{background:#fbfefc;border-color:#e2f0e8;}
+  .tl-dot{position:relative;z-index:1;width:15px;height:15px;border-radius:50%;background:var(--test);
+    border:3px solid #fff;box-shadow:0 0 0 2px var(--test);}
+  .tl-row.r-prod .tl-dot{background:var(--prod);box-shadow:0 0 0 2px var(--prod);}
+  .tl-mid.gate .tl-dot{width:21px;height:21px;margin-top:-3px;background:#6941c6;
+    box-shadow:0 0 0 3px #6941c6;}
+  .tl-date{position:relative;z-index:1;font-size:12.5px;font-weight:800;color:var(--navy);
+    background:#fff;padding:0 3px;margin-top:6px;white-space:nowrap;}
+  .tl-wd{position:relative;z-index:1;font-size:10.5px;color:var(--muted);
+    background:#fff;padding:0 4px;white-space:nowrap;}
+  .tl-code{display:inline-block;background:#eaf2f9;color:#174a80;border-radius:4px;
+    padding:0 6px;font-size:11.5px;font-weight:800;margin-right:6px;vertical-align:1px;}
+  .tl-code.p{background:#e8f7ef;color:#195d41;}
+  .tl-switch{grid-column:1/-1;position:relative;display:flex;justify-content:center;padding:8px 0;}
+  .tl-switch::before{content:"";position:absolute;left:50%;top:-14px;bottom:-14px;width:3px;
+    margin-left:-1.5px;background:linear-gradient(#cfe0f2,#cfe8db);border-radius:2px;}
+  .tl-switch span{position:relative;z-index:1;background:#fff;border:1px dashed #b8c6d4;
+    border-radius:999px;padding:3px 14px;font-size:12.5px;font-weight:700;color:var(--navy);}
+  .rhythm-p{font-size:13px;color:#2c3a48;margin:7px 0 6px;line-height:1.6;}
+  .tl-card h4{margin:10px 0 4px;}
+  .tl-card ul{font-size:13px;margin:6px 0 8px;padding-left:18px;}
+  .tl-card li{margin:3px 0;}
+  .tl-card .grid2{gap:12px;margin-top:8px;}
+  .tl-card .warn,.tl-card .danger,.tl-card .ok{padding:10px 12px;font-size:12.5px;margin-top:8px;}
+  .tl-card .tag{margin-left:6px;vertical-align:2px;}
+  .rhythm-title{font-size:14.5px;font-weight:700;margin:0 0 2px;}
+  .rhythm-legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;}
+  .rhythm-legend span{display:inline-flex;align-items:center;gap:6px;}
+  .rhythm-legend i{display:inline-block;width:11px;height:11px;border-radius:50%;}
+
+  @media (max-width:900px){
+    .tl-body{padding:16px 12px 8px;gap:10px;}
+    .tl-row{grid-template-columns:1fr 56px 1fr;}
+    .tl-mid::after{width:28px;}
+    .tl-date{font-size:11px;}
+    .tl-card{padding:10px 11px;}
+    main{width:min(100% - 28px,1280px);}
+    .hero{padding:36px 18px;} h1{font-size:26px;}
+    .grid2,.grid3{grid-template-columns:1fr;}
+    .cal{grid-template-columns:repeat(2,1fr);}
+    table{font-size:11.5px;} th,td{padding:6px;}
+    .gantt{font-size:11px;}
+  }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="hero-inner">
+    <h1>GRC AI 平台 · 测试进度与生产环境上线矩阵</h1>
+    <p class="subtitle">以 <strong>10/16 测试环境完成</strong>、<strong>10/30 生产环境上线并验收</strong>为双锚点，按工作日重排九模块交付节奏</p>
+    <p class="meta">版本 v2.0（矩阵重排版） ｜ 日期 2026-09-10 ｜ 排期口径：工作日（已扣除 2026-09-25 中秋、2026-10-01 ~ 10-07 国庆） ｜ 适用对象：项目领导、产品、业务、架构、开发与测试团队</p>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ 一、调整结论 ============ -->
+<section>
+  <h2>一、本次时间轴重排结论</h2>
+  <div class="statement">
+    时间轴改为<strong>单轴双支</strong>：中央为<strong>一条连续时间轴</strong>（9/14 → 10/30），<strong>左支为测试环境进度</strong>（9/14 → 10/16，共 7 个测试节点）、<strong>右支为生产环境上线</strong>（10/19 → 10/30，生产准备 + 3 个上线批次 + 全量验收），自上而下按时间连续推进，10/16 测试收口后由生产环境接力。全流程按<strong>工作日</strong>排布，9/11 至 10/30 共 <strong>30 个工作日</strong>；<strong>10/16 为第 20 个工作日</strong>，<strong>10/30 为第 30 个工作日</strong>。
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>保持不变的部分</h3>
+      <ul>
+        <li><strong>Knowledge 9/14、9/18</strong> —— 既定节点，不动。</li>
+        <li><strong>Marketplace 9/24</strong> —— 既定节点，不动。</li>
+        <li>总目标仍为 <strong>10/30 完成生产上线与上线验收</strong>（不是"开发完成"）。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>本次重排的部分</h3>
+      <ul>
+        <li>原 <strong>10/10 Conversation</strong>（周六）→ 按工作日顺延至 <strong>10/14（周三）</strong>。</li>
+        <li>原 <strong>10/23 开发冻结</strong> → 测试侧收口提前至 <strong>10/16（周五）</strong>。</li>
+        <li>原 <strong>10/24–10/29 发布准备窗口</strong> → 改为 <strong>10/19–10/30 生产分批上线窗口</strong>。</li>
+        <li>其余节点参考《工作簿1.xlsx · 上线排期》与两份 9/9 说明重新分摊。</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="ok">
+    <strong>排期方法：</strong>以既有两条时间线（《九模块倒排与上线说明》《各模块排期合理性详解》）与《工作簿1.xlsx》的「上线排期」列为输入，保留已锁定节点，其余按 <em>依赖顺序 + 工作日容量</em> 重新分摊到 7 个测试节点与 3 个生产上线批次（另含 10/19 生产准备与 10/29–10/30 全量验收）。
+  </div>
+</section>
+
+<!-- ============ 二、一体化时间轴与节点详解 ============ -->
+<section>
+  <h2>二、一体化时间轴与节点详解：测试环境（左支） → 生产环境（右支）</h2>
+  <p class="small">两条时间轴已合并为<strong>一条</strong>：中央为连续时间轴（9/14 → 10/30，第 2 → 第 30 个工作日），<strong>左支挂测试环境 7 个节点</strong>、<strong>右支挂生产环境 5 个节点</strong>（生产准备 + 3 个上线批次 + 全量验收），自上而下按时间连续推进，10/16 测试收口后由生产环境接力。左支展开节点交付内容与覆盖 FR（模块级来源见第五节），右支展开上线模块、分批理由与前置条件。</p>
+
+  <div class="tl-col">
+    <div class="tl-head">
+      <span>一体化时间轴 · 9/14（第 2 个工作日）→ 10/30（第 30 个工作日）</span>
+      <span class="tl-side">左支 = 测试环境 · 7 节点 ｜ 右支 = 生产环境 · 准备 + 3 批次 + 验收</span>
+    </div>
+    <div class="tl-body">
+
+      <!-- T1 -->
+      <div class="tl-row r-test">
+        <div class="tl-card">
+          <div class="rhythm-title"><span class="tl-code">T1</span>Knowledge 第一批：目录体系与建库<span class="tag tag-fixed">既定节点 · 不改</span></div>
+          <div class="mod-chip">005 Knowledge</div>
+          <p class="rhythm-p">公共目录 / 我的目录层级、目录级角色、知识库创建向导、可见范围与叶子目录约束、建库校验。PAT 认证随本节点开放接口一并前置。</p>
+          <p class="tiny">覆盖：005 FR-001~017（目录 FR-001~009b、建库 FR-010~017） ｜ 007 FR-001~004（PAT 随 Knowledge 开放接口前置）</p>
+        </div>
+        <div class="tl-mid"><span class="tl-dot"></span><span class="tl-date">9/14</span><span class="tl-wd">周一</span></div>
+        <div class="tl-gap"></div>
+      </div>
+
+      <!-- T2 -->
+      <div class="tl-row r-test">
+        <div class="tl-card">
+          <div class="rhythm-title"><span class="tl-code">T2</span>Knowledge 第二批：导入、构建管线与检索<span class="tag tag-fixed">既定节点 · 不改</span></div>
+          <div class="mod-chip">005 Knowledge</div>
+          <p class="rhythm-p">本地上传 / ZIP / Confluence / SharePoint / OSS 导入通道、预览勾选、白名单与重名校验、四阶段构建管线与失败处置、知识库状态机、文档详情、库级参数与删除、开放接口、挂载检索、重命名与唯一性、Overview。</p>
+          <p class="tiny">覆盖：005 FR-018~057（导入 FR-018~024、构建 FR-025~036、详情 FR-037~037f、参数 FR-038~040、删除 FR-041~044、开放接口 FR-045~047、挂载检索 FR-048~054、重命名 FR-055~055b、Overview FR-056~056b、批量参数 FR-057~057b）</p>
+        </div>
+        <div class="tl-mid"><span class="tl-dot"></span><span class="tl-date">9/18</span><span class="tl-wd">周五</span></div>
+        <div class="tl-gap"></div>
+      </div>
+
+      <!-- T3 -->
+      <div class="tl-row r-test">
+        <div class="tl-card">
+          <div class="rhythm-title"><span class="tl-code">T3</span>Marketplace 全模块<span class="tag tag-fixed">既定节点 · 不改</span></div>
+          <div class="mod-chip">002 Marketplace</div>
+          <p class="rhythm-p">Agent / MCP 双频道与热门、搜索与卡片、收藏、资产详情五页签、订阅申请与多级并行审批、订阅记录与状态机、创作者中心与待我审批、订阅取消与下架联动。</p>
+          <div class="warn"><strong>既有例外仍成立：</strong>9/24 订阅流程暂不发送站内订阅通知，通知能力于 <strong>9/28</strong> 补齐。</div>
+          <p class="tiny">覆盖：002 FR-001~034（FR-011 订阅申请单页表单在原 Excel 中未排期，见第五节）</p>
+        </div>
+        <div class="tl-mid"><span class="tl-dot"></span><span class="tl-date">9/24</span><span class="tl-wd">周四</span></div>
+        <div class="tl-gap"></div>
+      </div>
+      <!-- T4 -->
+      <div class="tl-row r-test">
+        <div class="tl-card">
+          <div class="rhythm-title"><span class="tl-code">T4</span>可被下游消费的最小能力<span class="tag tag-build">底座就绪</span></div>
+          <div class="grid2">
+            <div>
+              <h4>本节点交付</h4>
+              <ul>
+                <li><strong>008 Admin</strong>：平台资源注册表、模型设置、原生工具登记、目录冷启动（FR-004~039、070~076）</li>
+                <li><strong>007 Credential</strong>：静态资产个人凭据（FR-010~017）</li>
+                <li><strong>006 Guardrail</strong>：默认模板、查询与选择、门控校验（FR-010~012）</li>
+                <li><strong>003 Asset Creation</strong>：草稿创建与续填（FR-001~021）</li>
+                <li><strong>009 Notification</strong>：通知基础设施 + Knowledge / 订阅通知（FR-001~003）</li>
+              </ul>
+            </div>
+            <div>
+              <h4>为什么必须前置</h4>
+              <ul>
+                <li>Knowledge 的支撑后台、目录与模型依赖 008；</li>
+                <li>资产创建需要可选择的启用护栏模板，故 006 最小能力须前置；</li>
+                <li>资产调用不允许共享身份兜底，静态个人凭据必须在资产使用前就绪；</li>
+                <li>先让创建者准备资产信息，降低 10/9 集中录入风险。</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="tl-mid"><span class="tl-dot"></span><span class="tl-date">9/28</span><span class="tl-wd">周一</span></div>
+        <div class="tl-gap"></div>
+      </div>
+
+      <!-- T5 -->
+      <div class="tl-row r-test">
+        <div class="tl-card">
+          <div class="rhythm-title"><span class="tl-code">T5</span>端到端闭环联调检查<span class="tag tag-gate">核心闭环 Gate</span></div>
+          <div class="grid2">
+            <div>
+              <h4>必须通过的业务结果</h4>
+              <ul>
+                <li>资产提交 + 质量门控（003 FR-022~026）硬阻断生效</li>
+                <li>首次发布全链路可用（004 FR-001~020）</li>
+                <li>完整 Guardrail 模板管理与运行时输入/输出拦截（006 FR-002~004、020~051）</li>
+                <li>模型 / 导入凭据与解析规则（007 FR-020~042）</li>
+                <li>Admin 治理中心与测评治理（008 FR-001~003）</li>
+                <li>首发、测评、凭据、停用类通知（009 FR-010~035）</li>
+              </ul>
+            </div>
+            <div>
+              <h4>排期风险提示</h4>
+              <div class="danger">
+                <strong>9/28 → 10/9 实际只有 5 个工作日</strong>（9/28、9/29、9/30、10/8、10/9），国庆假期占掉 10/1–10/7。这是全计划最紧的一段，建议：<br>
+                ① 9/28 前完成跨服务接口冻结；<br>
+                ② 10/8–10/9 只做联调与 Gate 验证，不再合入新功能；<br>
+                ③ 明确 Gate 失败时的降级规则（哪些模块可延后到 10/16）。
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tl-mid"><span class="tl-dot"></span><span class="tl-date">10/9</span><span class="tl-wd">周五</span></div>
+        <div class="tl-gap"></div>
+      </div>
+
+      <!-- T6 -->
+      <div class="tl-row r-test">
+        <div class="tl-card">
+          <div class="rhythm-title"><span class="tl-code">T6</span>Conversation 整模块<span class="tag tag-test">由 10/10 顺延</span></div>
+          <div class="mod-chip">001 Conversation</div>
+          <p class="rhythm-p">Chat / RAG 对话、知识库挂载与多库检索归并、引用来源与图片内嵌、已订阅 Agent 透传会话、历史会话管理、我的资产抽屉、资产不可用处理、护栏命中展示与错误提示。</p>
+          <p class="rhythm-p"><strong>为什么从 10/10 移到 10/14：</strong>原 10/10 是<strong>周六</strong>，不符合工作日口径；且 10/9 Gate 与 10/10 仅隔 1 天，Gate 未过时 10/10 无法成立。顺延至 10/14 后，既保留 Gate 之后的缓冲，也仍在 10/16 里程碑之前。</p>
+          <p class="tiny">覆盖：001 FR-001~036、NG-1（NG-2~NG-4 未排期）</p>
+        </div>
+        <div class="tl-mid"><span class="tl-dot"></span><span class="tl-date">10/14</span><span class="tl-wd">周三</span></div>
+        <div class="tl-gap"></div>
+      </div>
+
+      <!-- T7 -->
+      <div class="tl-row r-test">
+        <div class="tl-card">
+          <div class="rhythm-title"><span class="tl-code">T7</span>全模块测试完成（第 20 个工作日）<span class="tag tag-gate">★ 里程碑</span></div>
+          <div class="mod-chip">004 Publish</div><div class="mod-chip">009 Notification</div>
+          <div class="mod-chip">008 Admin</div><div class="mod-chip">006 Guardrail</div><div class="mod-chip">003 Asset Creation</div>
+          <p class="rhythm-p">补齐完整生命周期能力，九个模块 P0 全部在测试环境完成并达到可验收状态：</p>
+          <ul>
+            <li><strong>004 Publish</strong>：资产版本、条款轻发布、下架 / 重新上架 / 删除、状态机全部边（FR-021~045）</li>
+            <li><strong>009 Notification</strong>：版本、条款、下架、补员、Health Check 等完整 P0 事件（FR-030~035）</li>
+            <li><strong>005 Knowledge</strong>：分享与分享授权（FR-058~061，原 Excel 未排期，见第五节）</li>
+          </ul>
+        </div>
+        <div class="tl-mid gate"><span class="tl-dot"></span><span class="tl-date">10/16</span><span class="tl-wd">周五</span></div>
+        <div class="tl-gap"></div>
+      </div>
+
+      <!-- 测试 → 生产：接力 -->
+      <div class="tl-row">
+        <div class="tl-switch"><span>★ 10/16 测试环境收口（第 20 个工作日） → 10/19 生产环境接力</span></div>
+      </div>
+
+      <!-- 生产准备 -->
+      <div class="tl-row r-prod">
+        <div class="tl-gap"></div>
+        <div class="tl-mid"><span class="tl-dot"></span><span class="tl-date">10/19</span><span class="tl-wd">周一</span></div>
+        <div class="tl-card p">
+          <div class="rhythm-title"><span class="tl-code p">生产准备</span>生产环境准备<span class="tag tag-prod">准备窗口</span></div>
+          <p class="rhythm-p">生产环境资源就位、配置与凭据下发、数据初始化（目录冷启动）、部署演练与回滚预案。</p>
+          <p class="tiny"><strong>前置条件：</strong>10/16 测试收口；环境与 Alice 权限到位</p>
+        </div>
+      </div>
+      <!-- 批次一 -->
+      <div class="tl-row r-prod">
+        <div class="tl-gap"></div>
+        <div class="tl-mid"><span class="tl-dot"></span><span class="tl-date">10/20</span><span class="tl-wd">周二</span></div>
+        <div class="tl-card p">
+          <div class="rhythm-title"><span class="tl-code p">批次 A</span>Knowledge + Marketplace + Credential + Admin 底座<span class="tag tag-prod">最小可用面</span></div>
+          <div class="mod-chip">005 Knowledge</div><div class="mod-chip">002 Marketplace</div>
+          <div class="mod-chip">007 Credential</div><div class="mod-chip">008 Admin 底座</div>
+          <p class="rhythm-p"><strong>上线内容：</strong>005 Knowledge、002 Marketplace、007 Credential、008 Admin 底座（资源 / 模型 / 原生工具 / 目录）。</p>
+          <p class="rhythm-p"><strong>为什么先上：</strong>三者为已锁定节点最早完成、依赖最少的模块，先上线可最快形成「知识库 + 资产发现」的最小可用面。</p>
+          <p class="tiny"><strong>前置条件：</strong>批次 A 全模块测试通过；知识库数据可迁移</p>
+        </div>
+      </div>
+
+      <!-- 批次二 -->
+      <div class="tl-row r-prod">
+        <div class="tl-gap"></div>
+        <div class="tl-mid"><span class="tl-dot"></span><span class="tl-date">10/23</span><span class="tl-wd">周五</span></div>
+        <div class="tl-card p">
+          <div class="rhythm-title"><span class="tl-code p">批次 B</span>资产创建 + 首发 Publish + Guardrail 运行时 + Admin 治理中心<span class="tag tag-prod">核心闭环</span></div>
+          <div class="mod-chip">003 Asset Creation</div><div class="mod-chip">004 Publish 首发路径</div>
+          <div class="mod-chip">006 Guardrail 运行时</div><div class="mod-chip">008 Admin 治理中心</div><div class="mod-chip">009 Notification</div>
+          <p class="rhythm-p"><strong>上线内容：</strong>003 Asset Creation、004 Publish 首发路径、006 Guardrail 运行时、008 Admin 治理中心、009 Notification 发布 / 测评 / 凭据 / 停用类。</p>
+          <p class="rhythm-p"><strong>为什么整体上：</strong>这是「资产从创建到可用」的核心闭环，必须整体上线，不能拆散。</p>
+          <p class="tiny"><strong>前置条件：</strong>10/9 Gate 已通过；批次一生产验证无阻断缺陷</p>
+        </div>
+      </div>
+
+      <!-- 批次三 -->
+      <div class="tl-row r-prod">
+        <div class="tl-gap"></div>
+        <div class="tl-mid"><span class="tl-dot"></span><span class="tl-date">10/28</span><span class="tl-wd">周三</span></div>
+        <div class="tl-card p">
+          <div class="rhythm-title"><span class="tl-code p">批次 C</span>Conversation + 完整资产生命周期<span class="tag tag-prod">运营闭环</span></div>
+          <div class="mod-chip">001 Conversation</div><div class="mod-chip">004 Publish 完整生命周期</div>
+          <div class="mod-chip">009 Notification 完整生命周期</div>
+          <p class="rhythm-p"><strong>上线内容：</strong>001 Conversation、004 Publish 完整生命周期（版本 / 条款 / 下架 / 重上架 / 删除）、009 Notification 完整生命周期通知。</p>
+          <p class="rhythm-p"><strong>为什么放最后：</strong>Conversation 依赖前两批全部能力；生命周期治理与完整通知属于运营闭环，放在最后一批风险最小。</p>
+          <p class="tiny"><strong>前置条件：</strong>批次二生产验证通过；护栏运行时已在生产生效</p>
+        </div>
+      </div>
+
+      <!-- 全量验收 -->
+      <div class="tl-row r-prod">
+        <div class="tl-gap"></div>
+        <div class="tl-mid gate"><span class="tl-dot"></span><span class="tl-date">10/29–30</span><span class="tl-wd">周四–周五</span></div>
+        <div class="tl-card p">
+          <div class="rhythm-title"><span class="tl-code p">里程碑</span>全量验收 → 10/30 完成上线验收<span class="tag tag-gate">上线验收</span></div>
+          <p class="rhythm-p">全链路回归、缺陷收敛、权限与审计核验、通知送达核验、性能与异常路径验证。</p>
+          <p class="tiny"><strong>前置条件：</strong>三批全部上线</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rhythm-legend">
+    <span><i style="background:var(--test)"></i> 左支 · 测试节点</span>
+    <span><i style="background:var(--prod)"></i> 右支 · 生产批次</span>
+    <span><i style="background:#6941c6"></i> 里程碑</span>
+    <span>中央轴线 = 一条连续时间轴（9/14 → 10/30）</span>
+    <span>★ 10/16 测试环境完成</span>
+    <span>★ 10/30 生产上线验收</span>
+  </div>
+
+  <div class="warn">
+    <strong>生产批次为建议方案：</strong>上述分批是基于「依赖成熟度 + 风险最小化」给出的建议。若要求「九模块 10/30 一次性上线」，则 10/19–10/29 全部为准备窗口，10/30 单日切换，风险集中且回滚粒度粗，需另行确认。
+  </div>
+</section>
+
+<!-- ============ 三、工作日日历 ============ -->
+<section>
+  <h2>三、工作日日历（9/11 – 10/30）与两个里程碑</h2>
+  <p class="small">蓝色边框 = 测试环境节点；绿色边框 = 生产环境批次；紫色 = 里程碑；灰色虚线 = 周末或法定假期（不排期）。</p>
+
+  <div class="cal">
+    <div class="head">周一</div><div class="head">周二</div><div class="head">周三</div><div class="head">周四</div><div class="head">周五</div>
+
+    <div class="d"><b>9/7</b><span class="tiny">已过</span></div>
+    <div class="d"><b>9/8</b><span class="tiny">已过</span></div>
+    <div class="d"><b>9/9</b><span class="tiny">已过</span></div>
+    <div class="d"><b>9/10</b><span class="tiny">已过</span></div>
+    <div class="d"><b>9/11</b><span class="tiny">Knowledge 首批收口</span></div>
+
+    <div class="d t"><b>9/14</b><span class="tiny">T1 Knowledge ①</span></div>
+    <div class="d"><b>9/15</b><span class="tiny">开发</span></div>
+    <div class="d"><b>9/16</b><span class="tiny">开发</span></div>
+    <div class="d"><b>9/17</b><span class="tiny">开发</span></div>
+    <div class="d t"><b>9/18</b><span class="tiny">T2 Knowledge ②</span></div>
+
+    <div class="d"><b>9/21</b><span class="tiny">开发</span></div>
+    <div class="d"><b>9/22</b><span class="tiny">开发</span></div>
+    <div class="d"><b>9/23</b><span class="tiny">开发</span></div>
+    <div class="d t"><b>9/24</b><span class="tiny">T3 Marketplace</span></div>
+    <div class="d off"><b>9/25</b><span class="tiny">中秋 · 休</span></div>
+
+    <div class="d t"><b>9/28</b><span class="tiny">T4 底座就绪</span></div>
+    <div class="d"><b>9/29</b><span class="tiny">开发</span></div>
+    <div class="d"><b>9/30</b><span class="tiny">国庆前收口</span></div>
+    <div class="d off"><b>10/1</b><span class="tiny">国庆 · 休</span></div>
+    <div class="d off"><b>10/2</b><span class="tiny">国庆 · 休</span></div>
+
+    <div class="d off"><b>10/5</b><span class="tiny">国庆 · 休</span></div>
+    <div class="d off"><b>10/6</b><span class="tiny">国庆 · 休</span></div>
+    <div class="d off"><b>10/7</b><span class="tiny">国庆 · 休</span></div>
+    <div class="d"><b>10/8</b><span class="tiny">开发</span></div>
+    <div class="d t"><b>10/9</b><span class="tiny">T5 核心闭环 Gate</span></div>
+
+    <div class="d"><b>10/12</b><span class="tiny">开发</span></div>
+    <div class="d"><b>10/13</b><span class="tiny">开发</span></div>
+    <div class="d t"><b>10/14</b><span class="tiny">T6 Conversation</span></div>
+    <div class="d"><b>10/15</b><span class="tiny">联调</span></div>
+    <div class="d m"><b>10/16</b><span class="tiny">★ 里程碑：测试完成</span></div>
+
+    <div class="d"><b>10/19</b><span class="tiny">生产环境准备</span></div>
+    <div class="d p"><b>10/20</b><span class="tiny">P1 生产批次一</span></div>
+    <div class="d"><b>10/21</b><span class="tiny">生产验证</span></div>
+    <div class="d"><b>10/22</b><span class="tiny">生产验证</span></div>
+    <div class="d p"><b>10/23</b><span class="tiny">P2 生产批次二</span></div>
+
+    <div class="d"><b>10/26</b><span class="tiny">生产验证</span></div>
+    <div class="d"><b>10/27</b><span class="tiny">回归</span></div>
+    <div class="d p"><b>10/28</b><span class="tiny">P3 生产批次三</span></div>
+    <div class="d"><b>10/29</b><span class="tiny">全量回归</span></div>
+    <div class="d m"><b>10/30</b><span class="tiny">★ 里程碑：生产上线验收</span></div>
+  </div>
+
+  <div class="grid3">
+    <div class="card">
+      <h4>测试环境节点（时间轴左支）</h4>
+      <p class="small">T1 9/14 ｜ T2 9/18 ｜ T3 9/24 ｜ T4 9/28 ｜ T5 10/9 ｜ T6 10/14 ｜ T7 10/16<br>
+      测试侧在 10/16 前用掉 <strong>20 个工作日</strong>（其中 9/28→10/9 之间被国庆吃掉一整周，实际只有 5 个工作日）。</p>
+    </div>
+    <div class="card">
+      <h4>生产环境批次（时间轴右支）</h4>
+      <p class="small">P1 10/20 ｜ P2 10/23 ｜ P3 10/28 ｜ P4 10/30<br>
+      10/16 之后 <strong>10 个工作日</strong>用于生产准备、分批上线、全量回归与验收。</p>
+    </div>
+    <div class="card">
+      <h4>两个里程碑定义</h4>
+      <p class="small"><strong>10/16</strong>：九个模块的 P0 功能在测试环境完成并达到可验收状态。<br>
+      <strong>10/30</strong>：生产环境全部上线完成，并通过上线验收（可用性、权限、审计、通知、异常路径）。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 四、矩阵总览 ============ -->
+<section>
+  <h2>四、模块 × 测试进度 / 生产环境 矩阵（总览）</h2>
+  <table class="gantt">
+    <thead>
+      <tr>
+        <th rowspan="2" style="min-width:150px;">模块</th>
+        <th colspan="7" class="grp-t">测试环境进度（左）</th>
+        <th colspan="4" class="grp-p">生产环境（右）</th>
+      </tr>
+      <tr>
+        <th>9/14</th><th>9/18</th><th>9/24</th><th>9/28</th><th>10/9</th><th>10/14</th><th>10/16</th>
+        <th>10/20</th><th>10/23</th><th>10/28</th><th>10/30</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="mod">005 Knowledge<br><span class="tiny">61 FR</span></td>
+        <td class="c mile"><span class="dot dot-t">①</span></td>
+        <td class="c mile"><span class="dot dot-t">②</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td>
+        <td class="c"><span class="dot dot-p">A</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c mile">—</td>
+      </tr>
+      <tr>
+        <td class="mod">002 Marketplace<br><span class="tiny">34 FR</span></td>
+        <td class="c">—</td><td class="c">—</td>
+        <td class="c mile"><span class="dot dot-t">③</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td>
+        <td class="c"><span class="dot dot-p">A</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c mile">—</td>
+      </tr>
+      <tr>
+        <td class="mod">008 Admin<br><span class="tiny">46 条</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c">—</td>
+        <td class="c mile"><span class="dot dot-t">④</span></td>
+        <td class="c"><span class="dot dot-t">⑤</span></td>
+        <td class="c">—</td><td class="c">—</td>
+        <td class="c"><span class="dot dot-p">A</span></td>
+        <td class="c"><span class="dot dot-p">B</span></td>
+        <td class="c">—</td><td class="c mile">—</td>
+      </tr>
+      <tr>
+        <td class="mod">007 Credential<br><span class="tiny">23 FR</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c">—</td>
+        <td class="c mile"><span class="dot dot-t">④</span></td>
+        <td class="c"><span class="dot dot-t">⑤</span></td>
+        <td class="c">—</td><td class="c">—</td>
+        <td class="c"><span class="dot dot-p">A</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c mile">—</td>
+      </tr>
+      <tr>
+        <td class="mod">006 Guardrail<br><span class="tiny">20 条</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c">—</td>
+        <td class="c mile"><span class="dot dot-t">④</span></td>
+        <td class="c"><span class="dot dot-t">⑤</span></td>
+        <td class="c">—</td><td class="c">—</td>
+        <td class="c">—</td>
+        <td class="c"><span class="dot dot-p">B</span></td>
+        <td class="c">—</td><td class="c mile">—</td>
+      </tr>
+      <tr>
+        <td class="mod">003 Asset Creation<br><span class="tiny">26 FR</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c">—</td>
+        <td class="c mile"><span class="dot dot-t">④</span></td>
+        <td class="c"><span class="dot dot-t">⑤</span></td>
+        <td class="c">—</td><td class="c">—</td>
+        <td class="c">—</td>
+        <td class="c"><span class="dot dot-p">B</span></td>
+        <td class="c">—</td><td class="c mile">—</td>
+      </tr>
+      <tr>
+        <td class="mod">004 Publish<br><span class="tiny">45 FR</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td>
+        <td class="c mile"><span class="dot dot-t">⑤</span></td>
+        <td class="c">—</td>
+        <td class="c"><span class="dot dot-t">⑦</span></td>
+        <td class="c">—</td>
+        <td class="c"><span class="dot dot-p">B</span></td>
+        <td class="c"><span class="dot dot-p">C</span></td>
+        <td class="c mile">—</td>
+      </tr>
+      <tr>
+        <td class="mod">009 Notification<br><span class="tiny">19 FR</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c">—</td>
+        <td class="c mile"><span class="dot dot-t">④</span></td>
+        <td class="c"><span class="dot dot-t">⑤</span></td>
+        <td class="c">—</td>
+        <td class="c"><span class="dot dot-t">⑦</span></td>
+        <td class="c">—</td>
+        <td class="c"><span class="dot dot-p">B</span></td>
+        <td class="c"><span class="dot dot-p">C</span></td>
+        <td class="c mile">—</td>
+      </tr>
+      <tr>
+        <td class="mod">001 Conversation<br><span class="tiny">39 FR</span></td>
+        <td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">—</td>
+        <td class="c mile"><span class="dot dot-t">⑥</span></td>
+        <td class="c">—</td>
+        <td class="c">—</td><td class="c">—</td>
+        <td class="c"><span class="dot dot-p">C</span></td>
+        <td class="c mile">—</td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="small">
+    <span class="dot dot-t" style="width:16px;height:16px;line-height:16px;font-size:10px;">①</span>–<span class="dot dot-t" style="width:16px;height:16px;line-height:16px;font-size:10px;">⑦</span> = 测试环境节点；
+    <span class="dot dot-p" style="width:16px;height:16px;line-height:16px;font-size:10px;">A</span>/<span class="dot dot-p" style="width:16px;height:16px;line-height:16px;font-size:10px;">B</span>/<span class="dot dot-p" style="width:16px;height:16px;line-height:16px;font-size:10px;">C</span> = 生产上线批次一/二/三。
+    浅蓝底列 = 测试节点所在周，浅灰底列 = 里程碑。
+  </p>
+
+  <div class="warn">
+    <strong>注意：</strong>10/9 之后到 10/16 之间只有 <strong>5 个工作日</strong>（10/12–10/16），却要同时完成 Conversation 整模块、资产生命周期、完整通知与全量联调。这是本次排期风险最集中的区间，建议将"资产生命周期"的 004 FR-021~045 与 009 完整生命周期通知的研发前置到 9/28–10/9 期间并行开工。
+  </div>
+</section>
+
+<!-- ============ 五、来源对照 ============ -->
+<section>
+  <h2>五、模块内容支撑与来源对照</h2>
+  <table>
+    <thead>
+      <tr><th style="width:150px;">模块</th><th style="width:200px;">测试环境节点</th><th style="width:150px;">生产环境</th><th>内容支撑（spec 范围）</th><th style="width:190px;">来源</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>005 Knowledge</strong><br><span class="tiny">61 FR</span></td>
+        <td>9/14 → 9/18</td>
+        <td>10/20 批次一</td>
+        <td>目录体系 FR-001~009b；建库 FR-010~017；导入 FR-018~024；构建 FR-025~036；详情 FR-037~037f；参数 FR-038~040；删除 FR-041~044；开放接口 FR-045~047；挂载检索 FR-048~054；重命名 FR-055~055b；Overview FR-056~056b；批量参数 FR-057~057b；分享 FR-058~061</td>
+        <td><span class="src">spec 005</span><br><span class="src">Excel 排期 9.11 / 9.14</span><br><span class="src">既定节点</span></td>
+      </tr>
+      <tr>
+        <td><strong>002 Marketplace</strong><br><span class="tiny">34 FR</span></td>
+        <td>9/24</td>
+        <td>10/20 批次一</td>
+        <td>频道与热门 FR-001~002；搜索 FR-003~005；收藏 FR-006；详情五页签 FR-007~010；订阅申请 FR-011~023；订阅管理 FR-024~029；订阅状态机 FR-030~034</td>
+        <td><span class="src">spec 002</span><br><span class="src">Excel 排期 9.21</span><br><span class="src">既定节点</span></td>
+      </tr>
+      <tr>
+        <td><strong>008 Admin</strong><br><span class="tiny">46 条</span></td>
+        <td>9/28 → 10/9</td>
+        <td>10/20 批次一（底座）<br>10/23 批次二（治理中心）</td>
+        <td>治理中心 FR-001~003；平台资源注册表 FR-004~015；模型设置 FR-020~024；原生工具 FR-030~039；角色映射 FR-050~054；目录与冷启动 FR-060~063；平台配置 FR-070~076</td>
+        <td><span class="src">spec 008</span><br><span class="src">Excel 排期 925 / 1009</span></td>
+      </tr>
+      <tr>
+        <td><strong>007 Credential</strong><br><span class="tiny">23 FR</span></td>
+        <td>9/28 → 10/9<br><span class="tiny">（PAT 随 9/14 前置）</span></td>
+        <td>10/20 批次一</td>
+        <td>PAT 与入站认证 FR-001~004；静态个人凭据 FR-010~017；模型与导入凭据 FR-020~022；解析规则 FR-030~034；凭据状态与失效处置 FR-040~042</td>
+        <td><span class="src">spec 007</span><br><span class="src">Excel 排期 1009</span><br><span class="src">《九模块倒排》PAT 9/14 前置</span></td>
+      </tr>
+      <tr>
+        <td><strong>006 Guardrail</strong><br><span class="tiny">20 条</span></td>
+        <td>9/28 → 10/9</td>
+        <td>10/23 批次二</td>
+        <td>模板管理与查询选择 FR-002~004、FR-010~012；运行时输入/输出检测 FR-020~022；拦截与撤回处置 FR-030~031；模板与资产适用关系 FR-040~045；审计与配置 FR-050~051</td>
+        <td><span class="src">spec 006</span><br><span class="src">Excel 排期 1009</span><br><span class="src">《九模块倒排》9/28 模板最小能力</span></td>
+      </tr>
+      <tr>
+        <td><strong>003 Asset Creation</strong><br><span class="tiny">26 FR</span></td>
+        <td>9/28 → 10/9</td>
+        <td>10/23 批次二</td>
+        <td>创建资格与草稿 FR-001~004；Agent 六步向导 FR-005~011；MCP 五步向导 FR-012~016；订阅表单 / 条款 / 审批链配置 FR-017~021；质量门控 FR-022~026</td>
+        <td><span class="src">spec 003</span><br><span class="src">Excel 排期 925~1023（原为区间）</span></td>
+      </tr>
+      <tr>
+        <td><strong>004 Publish</strong><br><span class="tiny">45 FR</span></td>
+        <td>10/9 → 10/16</td>
+        <td>10/23 批次二（首发）<br>10/28 批次三（生命周期）</td>
+        <td>生命周期六态与可见范围 FR-001~002；发布流程与准入测评 FR-003~020；版本与未发布修订 FR-021~030；下架 / 重新上架 / 删除 FR-031~040；发布记录与命名唯一性 FR-040~045</td>
+        <td><span class="src">spec 004</span><br><span class="src">Excel 排期 925~1023（原为区间）</span></td>
+      </tr>
+      <tr>
+        <td><strong>009 Notification</strong><br><span class="tiny">19 FR</span></td>
+        <td>9/28 → 10/9 → 10/16</td>
+        <td>10/23 批次二<br>10/28 批次三</td>
+        <td>通知基础设施与知识库 / 订阅通知 FR-001~003；发布、测评、凭据、停用类 FR-010~026；完整生命周期事件 FR-030~035</td>
+        <td><span class="src">spec 009</span><br><span class="src">Excel 排期 925~1023（原为区间）</span></td>
+      </tr>
+      <tr>
+        <td><strong>001 Conversation</strong><br><span class="tiny">39 FR</span></td>
+        <td>10/14</td>
+        <td>10/28 批次三</td>
+        <td>Chat 基础与模型选择 FR-001~009；知识库挂载与多库归并 FR-010~016；Agent 透传 FR-017~023；护栏与生成控制 FR-024~027c；会话管理 FR-028~031；我的资产抽屉与不可用处理 FR-032~036</td>
+        <td><span class="src">spec 001</span><br><span class="src">Excel 排期 1023</span><br><span class="src">《九模块倒排》10/10</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ 六、口径与假设 ============ -->
+<section>
+  <h2>六、排期口径、假设与未排期项</h2>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>排期口径</h3>
+      <ul>
+        <li><strong>按工作日排</strong>：周一至周五，自动跳过周末。</li>
+        <li><strong>已扣除假期</strong>：2026-09-25（中秋）、2026-10-01 ~ 10-07（国庆）。</li>
+        <li><strong>未计入调休补班</strong>：若实际存在周末补班，按同一方法平移。</li>
+        <li><strong>工作日总数</strong>：9/11 – 10/30 共 30 个；10/16 = 第 20 个，10/30 = 第 30 个。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>两个里程碑的定义</h3>
+      <ul>
+        <li><strong>10/16（测试完成）</strong>：九模块 P0 功能在测试环境完成，达到可验收状态；不含生产环境工作。</li>
+        <li><strong>10/30（生产完成）</strong>：生产环境全部上线，并通过上线验收（可用性、权限、审计、通知、异常路径）。</li>
+        <li>两个日期均为<strong>硬里程碑</strong>，测试节点可按风险前后微调，里程碑不动。</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>未排期项处理（共 41 条，Excel「上线排期」为空）</h3>
+  <table>
+    <thead><tr><th style="width:170px;">归属</th><th style="width:70px;">条数</th><th>明细</th><th style="width:250px;">处理建议</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>005 Knowledge</td><td>27</td>
+        <td>我的目录权限与分享：FR-006、007、008、009、009b、011、013、013b、013c、014、019、020、023、058、058b、058d、059、060、061；NG-1~NG-8</td>
+        <td>NG 类本期不做；FR-058~061（分享）建议归入 <strong>10/16</strong>；FR-006~023 中依赖 Alice 权限与分享能力的项，建议明确"本期不做"或归入后续 Release。</td>
+      </tr>
+      <tr>
+        <td>002 Marketplace</td><td>6</td>
+        <td>FR-011（订阅申请单页表单）；NG-1~NG-5</td>
+        <td>FR-011 是订阅链路必经环节，<strong>必须补排期</strong>，建议并入 <strong>9/24</strong>；NG 类本期不做。</td>
+      </tr>
+      <tr>
+        <td>001 Conversation</td><td>3</td>
+        <td>NG-2（追问建议）、NG-3（用户偏好）、NG-4（引用侧栏联动）</td>
+        <td>本期不做，不进时间轴。</td>
+      </tr>
+      <tr>
+        <td>006 Guardrail</td><td>1</td>
+        <td>FR-001（模板管理仅平台管理员可用）</td>
+        <td>属模板管理权限约束，建议并入 <strong>10/9</strong>（与 006 其余项同批）。</td>
+      </tr>
+      <tr>
+        <td>前端 UI/UX</td><td>4</td>
+        <td>设计资源消费：图标库、页面底座对齐、css-token 迁移、组件库对齐</td>
+        <td>非业务 FR，建议作为横向任务随最近节点（<strong>9/28</strong>）消化，不单独占用里程碑。</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="warn">
+    <strong>关于 003 / 004 / 009 的区间排期：</strong>Excel 中这三个模块的「上线排期」写的是区间 <code>925~1023</code>（共 90 条 FR，未细分）。本矩阵已按 <em>依赖顺序 + 能力成熟度</em> 将其拆分为 <strong>9/28 → 10/9 → 10/16</strong> 三个测试节点，并在生产侧拆入批次二 / 批次三。此拆分为本次重排的核心产出，需确认。
+  </div>
+</section>
+
+<!-- ============ 七、待确认 ============ -->
+<section>
+  <h2>七、需要确认的事项</h2>
+  <table>
+    <thead><tr><th style="width:60px;">#</th><th style="width:280px;">事项</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>假期口径</td><td>中秋 9/25、国庆 10/1–10/7 是否为实际放假安排？是否存在周末调休补班需计入？</td></tr>
+      <tr><td>2</td><td>003 / 004 / 009 区间拆分</td><td>将 Excel 的 <code>925~1023</code> 区间拆为 9/28 / 10/9 / 10/16 三节点的方案是否认可？</td></tr>
+      <tr><td>3</td><td>Conversation 顺延</td><td>由 10/10（周六）顺延至 10/14（周三）是否认可？</td></tr>
+      <tr><td>4</td><td>生产分批</td><td>是否采用批次一 10/20 / 批次二 10/23 / 批次三 10/28 的分批上线？还是九模块 10/30 一次性上线？</td></tr>
+      <tr><td>5</td><td>10/9 Gate 失败处置</td><td>Gate 未通过时，哪些模块可延后到 10/16，哪些必须就地解决？</td></tr>
+      <tr><td>6</td><td>未排期 FR 补齐</td><td>002 FR-011、006 FR-001、005 FR-058~061 是否按建议补入 9/24 / 10/9 / 10/16？005 的 Alice 权限类 FR-006~023 是否本期不做？</td></tr>
+      <tr><td>7</td><td>责任人补齐</td><td>是否在本时间轴中补 BE / FE / 测试 / 环境 / Alice / Security 责任人与最晚到位日？（当前仅为范围与依赖排期，非资源承诺排期）</td></tr>
+      <tr><td>8</td><td>非功能节点</td><td>权限 + SSO 集成、生产环境资源、域名、Security 测试、上线审批是否需在时间轴中单列节点？</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="foot">
+  <p><strong>来源说明：</strong>本时间轴的事实来源为 ①《工作簿1.xlsx》「上线排期」列（352 行需求明细，覆盖 001–009 九个模块）；②《Release1-九模块倒排与上线说明-2026-09-09》；③《Release1-各模块排期合理性详解-2026-09-09》；④ <code>specs/001~009</code>（需求事实源，含 FR 编号与验收要点）。</p>
+  <p>GRC AI 平台 · 测试与生产时间轴（矩阵版） ｜ 生成日期 2026-09-10 ｜ 本文件为排期讨论稿，非资源承诺排期。</p>
+</div>
+
+</main>
+</body>
+</html>

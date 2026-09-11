@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Curate 新手快速引导方案 · GRC AI Agent Portal</title>
+<style>
+:root{--accent:#0078D6;--bright:#4DA8EE;--muted:#6a6a6a;--ok:#2ea36b;--ink:#1a1a1a;--line:#e6e6e3}
+*{box-sizing:border-box}body{margin:0;font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;color:var(--ink);background:#f4f4f2;line-height:1.7}
+.hero{background:#000;color:#fff;padding:56px 24px 44px}
+.hero .inner{max-width:960px;margin:0 auto}
+.kicker{letter-spacing:.18em;font-size:12px;color:var(--bright);text-transform:uppercase}
+.hero h1{margin:10px 0 6px;font-size:34px}
+.hero p{color:#c9c9c7;max-width:720px;margin:0}
+.wrap{max-width:960px;margin:-24px auto 64px;padding:0 24px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px 32px;margin-bottom:20px}
+h2{font-size:22px;margin:0 0 12px;border-left:4px solid var(--accent);padding-left:10px}
+h3{font-size:16.5px;margin:20px 0 8px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:10px 0}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:#f0f4f8}
+code{background:#f0f0ee;border-radius:5px;padding:1px 6px;font-size:12.5px}
+pre{background:#0e0e0e;color:#e8e8e8;border-radius:10px;padding:14px 16px;overflow:auto;font-size:12.5px}
+.tag{display:inline-block;font-size:11.5px;border:1px solid var(--accent);color:var(--accent);border-radius:999px;padding:1px 10px;margin-right:6px}
+.tag.rec{background:var(--accent);color:#fff}
+.fig{margin:14px 0 4px;text-align:center}
+.fig img{max-width:100%;border:1px solid var(--line);border-radius:10px;background:#fafafa}
+.fig .cap{font-size:12px;color:var(--muted);margin-top:6px}
+ul.tight{margin:6px 0;padding-left:20px}ul.tight li{margin:4px 0}
+.note{background:#f6f9fc;border:1px solid #dbe7f2;border-radius:10px;padding:12px 16px;font-size:13.5px}
+.toc a{color:var(--accent);text-decoration:none;margin-right:14px;font-size:13.5px}
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:10px 0 6px}
+.steps figure{margin:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fafafa}
+.steps img{width:100%;display:block}
+.steps figcaption{font-size:12px;color:var(--muted);padding:6px 10px}
+.steps-h{font-size:14px;margin:16px 0 4px;color:var(--muted)}
+footer{color:var(--muted);font-size:12px;text-align:center;padding:24px}
+</style>
+</head>
+<body>
+<header class="hero"><div class="inner">
+  <div class="kicker">GRC · AI Foundation Platform · Curate</div>
+  <h1>Curate 新手快速引导方案</h1>
+  <p>knowledge.html · 评审稿 v1 · 2026-09-09 · 推荐:方案 B(分角色聚光引导)+ 方案 D(常驻帮助)兜底</p>
+</div></header>
+<div class="wrap">
+
+<div class="card toc"><h2>目录</h2>
+<a href="#s0">0 一页速览</a><a href="#s1">1 系统现状</a><a href="#s2">2 目标</a><a href="#s3">3 方案 A–E</a><a href="#s4">4 对比</a><a href="#s5">5 推荐</a><a href="#s6">6 落地蓝图</a><a href="#s7">7 风险</a><a href="#s8">8 附录</a>
+</div>
+
+<div class="card" id="s0"><h2>0. 一页速览</h2>
+<ul class="tight">
+<li><span class="tag rec">推荐</span>方案 B(分角色聚光引导)+ 方案 D(常驻帮助/空态提示)兜底。</li>
+<li><span class="tag">轻量首选</span>方案 A(首次任务清单);<span class="tag">演示期</span>方案 C(自动演示);<span class="tag">二期</span>方案 E(平台级学习路径)。</li>
+<li>核心理由:Curate 是操作型模块,四种角色能力差异大;聚光引导与系统既有 <code>body.role-*</code> 权限机制天然对齐,可直接演示"谁能做什么"。</li>
+</ul></div>
+
+<div class="card" id="s1"><h2>1. 系统现状(影响引导设计的事实)</h2>
+<h3>1.1 页面结构与首屏行为</h3>
+<ul class="tight">
+<li>knowledge.html 为原生 JS 单页(state + renderMain 重绘),与 index/marketplace/build/govern 共享 shell。</li>
+<li>Screen1 Overview 在用户下滚或点 "Browse library" 后被 <code>burnOverview()</code> 永久移除并锚定到库 —— <b>引导不得依赖首屏常驻元素,应在 catalog 就位后启动。</b></li>
+<li>Screen2 知识库:<code>#scope-tabs</code>(Public/My)、<code>#kb-side</code> 目录树、<code>#kb-detail</code> 列表/详情;KB 内 tabs = Information / Documents。</li>
+</ul>
+<h3>1.2 角色与权限模型</h3>
+<table><tr><th>角色</th><th>默认页签</th><th>关键能力</th><th>典型阻塞</th></tr>
+<tr><td>Owner</td><td>Documents</td><td>+目录/+KB、Add documents、Configure、One-click build、Settings、Permissions</td><td>—</td></tr>
+<tr><td>Contributor</td><td>Documents</td><td>上传/配置/构建/删除文档</td><td>无 Settings 入口</td></tr>
+<tr><td>Consumer</td><td>Information</td><td>只读文档与元数据、检索</td><td>不能编辑</td></tr>
+<tr><td>Viewer</td><td>Information</td><td>只读;受限库渲染 No-access(Alice ID 申请)</td><td>受限库被拦</td></tr></table>
+<h3>1.3 可复用交互原语</h3>
+<p>全屏浮层 <code>kb-modal-overlay</code> / <code>fd-overlay</code> / <code>soon-overlay</code>(<code>.open</code> 切换)、toast <code>#msg-wrap</code>、<code>popconfirm</code>、<code>data-tip</code>、空态内建 CTA、localStorage。</p>
+<h3>1.4 设计 token</h3>
+<p><code>--accent:#0078D6</code> · <code>--accent-bright:#4DA8EE</code> · <code>--muted:#9a9a9a</code> · <code>--ok:#2ea36b</code>;黑壳顶栏 + 浅色内容卡;嵌入 MB 字体。</p>
+<div class="fig"><img src="images/shot-2-catalog.png" alt="catalog 截图(待补)"><div class="cap">图 1-1 库页实景(截图标注,见附录 A)</div></div>
+</div>
+
+<div class="card" id="s2"><h2>2. 新手定义与引导目标</h2>
+<ul class="tight">
+<li><b>新手</b>:首次进入 Curate 的演示用户(默认 Owner)与未来真实平台新成员。</li>
+<li><b>目标</b>:① 60 秒明白 Curate 做什么、自己角色能做什么;② 走完最小闭环(浏览/选库 → 看懂 Documents 与四段管线 → 编辑角色完成上传/构建,只读角色完成阅读/权限申请);③ 不打扰有经验用户。</li>
+<li><b>原则</b>:只看一次(localStorage)、可跳过(Esc/Skip)、可重播、角色适配、移动端降级可用。</li>
+</ul></div>
+
+<div class="card" id="s3"><h2>3. 方案清单(按成本从低到高)</h2>
+<h3>方案 A · 首次任务清单(Welcome Checklist)</h3>
+<ul class="tight">
+<li><b>形态</b>:落地弹一次全屏欢迎卡,3~5 个真实可点任务;"去完成"直接调现成函数(<code>goList(null)</code>、<code>openKb(...)</code>、<code>openNewKbModal()</code>、<code>openUploadSourceMenu</code>);完成打勾 + 进度条,全部完成 toast;localStorage 记忆,可重播。</li>
+<li><b>Owner 示例任务</b>:浏览库 → 打开 Ready 库看管线 → 添加文档 → 一键构建 → 查看权限/设置。</li>
+<li><b>契合点</b>:"空态 CTA/通知"的结构化升级,无需 DOM 镂空定位,改动集中。</li>
+<li><b>优劣</b>:✅ 成本最低、带进度与成就感、能驱动真实操作;❌ 不演示每一步。</li>
+<li><b>工作量</b>:S(1 overlay + 30~50 行 JS + 少量 CSS)。</li>
+</ul>
+<div class="fig"><img src="images/scheme-a.svg" alt="方案A示意"><div class="cap">图 3-A 任务清单欢迎卡示意</div></div>
+<h4 class="steps-h">分步示意(5 个任务依次激活)</h4>
+<div class="steps">
+<figure><img src="images/steps/a-1.svg" alt="任务1"><figcaption>任务 1 · 浏览知识库目录</figcaption></figure>
+<figure><img src="images/steps/a-2.svg" alt="任务2"><figcaption>任务 2 · 打开一个 Ready 库,看懂管线</figcaption></figure>
+<figure><img src="images/steps/a-3.svg" alt="任务3"><figcaption>任务 3 · 给知识库添加文档</figcaption></figure>
+<figure><img src="images/steps/a-4.svg" alt="任务4"><figcaption>任务 4 · 执行一次一键构建</figcaption></figure>
+<figure><img src="images/steps/a-5.svg" alt="任务5"><figcaption>任务 5 · 查看权限与设置</figcaption></figure>
+</div>
+
+<h3>方案 B · 分角色聚光引导(Spotlight Tour)<span class="tag rec">主推</span></h3>
+<ul class="tight">
+<li><b>形态</b>:深色遮罩 + 目标镂空高亮 + 箭头气泡 + Prev/Next/Skip/Done;按 role-switch 当前角色分发两条 tour。</li>
+<li><b>Owner/Contributor(6 步)</b>:目录树 → 库列表(状态/Docs/Chunks/覆盖)→ 打开示例库看 Documents 与 Parse→Chunk→Enhancer→Embedding 四段 → Add documents → One-click build → 文件详情(fd-overlay)。</li>
+<li><b>Consumer/Viewer(4 步)</b>:库/目录浏览 → Information 页签(描述/归属/角色与访问)→ 受限库 No-access + Alice ID → 检索测试。</li>
+<li><b>契合点</b>:与 <code>defaultKbTab</code>、<code>.perm-*</code> 天然对齐;切 consumer 重播即演示"角色差异",是本系统引导的最大卖点。</li>
+<li><b>优劣</b>:✅ 最直观、演示质感强、权限边界讲得清、真实产品可沿用;❌ 需定位/遮罩逻辑与高质量措辞,需"只看一次 + 可跳过"。</li>
+<li><b>工作量</b>:M(120~200 行共享代码)。</li>
+</ul>
+<div class="fig"><img src="images/scheme-b.svg" alt="方案B示意"><div class="cap">图 3-B 聚光引导(镂空 + 气泡)示意</div></div>
+<h4 class="steps-h">分步示意 · Owner / Contributor 路径(6 步)</h4>
+<div class="steps">
+<figure><img src="images/steps/b-1.svg" alt="b-1"><figcaption>① 目录树(.kb-side)</figcaption></figure>
+<figure><img src="images/steps/b-2.svg" alt="b-2"><figcaption>② 库列表(#kb-detail)</figcaption></figure>
+<figure><img src="images/steps/b-3.svg" alt="b-3"><figcaption>③ 四段管线</figcaption></figure>
+<figure><img src="images/steps/b-4.svg" alt="b-4"><figcaption>④ Add documents</figcaption></figure>
+<figure><img src="images/steps/b-5.svg" alt="b-5"><figcaption>⑤ One-click build</figcaption></figure>
+<figure><img src="images/steps/b-6.svg" alt="b-6"><figcaption>⑥ 文件详情(fd-overlay)</figcaption></figure>
+</div>
+<h4 class="steps-h">分步示意 · Consumer / Viewer 路径(4 步)</h4>
+<div class="steps">
+<figure><img src="images/steps/b-c1.svg" alt="b-c1"><figcaption>① 库/目录浏览</figcaption></figure>
+<figure><img src="images/steps/b-c2.svg" alt="b-c2"><figcaption>② Information 页签</figcaption></figure>
+<figure><img src="images/steps/b-c3.svg" alt="b-c3"><figcaption>③ 受限库 No-access</figcaption></figure>
+<figure><img src="images/steps/b-c4.svg" alt="b-c4"><figcaption>④ 检索测试</figcaption></figure>
+</div>
+
+<h3>方案 C · 自动演示模式(Guided Demo)</h3>
+<ul class="tight">
+<li><b>形态</b>:"▶ Watch 3-min tour" 按钮,自动驱动 UI:burn 首屏 → 库列表 → 打开 "AML Regulatory Updates" → 切 Documents 播管线动画 → 打开文件详情 → 收尾 toast;支持暂停/退出。</li>
+<li><b>契合点</b>:页面已有大量 setTimeout 驱动模拟(build/jobs/管线状态),剧本只是串时间轴。</li>
+<li><b>优劣</b>:✅ 3 分钟讲完模块,评审/汇报极佳;❌ 对要自己动手的人价值低,剧本需随 UI 维护,可能与手动操作冲突。</li>
+<li><b>工作量</b>:M+,仅演示期叠加。</li>
+</ul>
+<div class="fig"><img src="images/scheme-c.svg" alt="方案C示意"><div class="cap">图 3-C 自动演示(DEMO 控制条 + 步骤标注)示意</div></div>
+<h4 class="steps-h">分步示意(自动演示剧本 5 幕)</h4>
+<div class="steps">
+<figure><img src="images/steps/c-1.svg" alt="c-1"><figcaption>① burn 首屏,锚定到库</figcaption></figure>
+<figure><img src="images/steps/c-2.svg" alt="c-2"><figcaption>② 进入库列表</figcaption></figure>
+<figure><img src="images/steps/c-3.svg" alt="c-3"><figcaption>③ 打开示例库 · 管线动画</figcaption></figure>
+<figure><img src="images/steps/c-4.svg" alt="c-4"><figcaption>④ 打开文件详情</figcaption></figure>
+<figure><img src="images/steps/c-5.svg" alt="c-5"><figcaption>⑤ 收尾 toast · 结束</figcaption></figure>
+</div>
+
+<h3>方案 D · 常驻帮助体系(Contextual Help)</h3>
+<ul class="tight">
+<li>① 页头 "?" 按钮 → Curate 帮助浮层(按"我的角色"讲能做什么/怎么申请权限/Alice 是什么);② 空态引导卡升级(插图 + 下一步按钮);③ 首见提示(复用 <code>data-tip</code>,第一次看到四段管线/No-access 时自动解释一次)。</li>
+<li><b>契合点</b>:与现有空态逻辑同源;无障碍友好;永不打扰。</li>
+<li><b>优劣</b>:✅ 成本最低、永久可用;❌ 无任务推进感。</li>
+<li><b>工作量</b>:S(可只做 1~2 件)。</li>
+</ul>
+<div class="fig"><img src="images/scheme-d.svg" alt="方案D示意"><div class="cap">图 3-D 常驻帮助("?" 入口 + 空态卡)示意</div></div>
+<h4 class="steps-h">分步示意(三件可拆)</h4>
+<div class="steps">
+<figure><img src="images/steps/d-1.svg" alt="d-1"><figcaption>① "?" 帮助浮层</figcaption></figure>
+<figure><img src="images/steps/d-2.svg" alt="d-2"><figcaption>② 空态引导卡</figcaption></figure>
+<figure><img src="images/steps/d-3.svg" alt="d-3"><figcaption>③ 首见提示(data-tip)</figcaption></figure>
+</div>
+
+<h3>方案 E · 平台级学习路径(Onboarding Hub)</h3>
+<ul class="tight">
+<li><b>形态</b>:平台层出现"导览"卡片(Chat→Explore→Curate→Build→Govern),带 <code>?guide=curate</code> 跳入本页自动启动模块 tour;共享引导引擎拷入各页。</li>
+<li><b>契合点</b>:贴合门户叙事,新人先有全局认知。</li>
+<li><b>优劣</b>:✅ 全域视角;❌ 跨文件改动面大,二期再铺开。</li>
+<li><b>工作量</b>:M。</li>
+</ul>
+<div class="fig"><img src="images/scheme-e.svg" alt="方案E示意"><div class="cap">图 3-E 平台级学习路径示意</div></div>
+<h4 class="steps-h">分步示意</h4>
+<div class="steps">
+<figure><img src="images/steps/e-1.svg" alt="e-1"><figcaption>① 平台导览卡</figcaption></figure>
+<figure><img src="images/steps/e-2.svg" alt="e-2"><figcaption>② ?guide=curate 自动起播</figcaption></figure>
+</div>
+</div>
+
+<div class="card" id="s4"><h2>4. 对比矩阵</h2>
+<table><tr><th>维度</th><th>A 清单</th><th>B 聚光</th><th>C 演示</th><th>D 帮助</th><th>E 平台级</th></tr>
+<tr><td>首访理解效率</td><td>★★★☆</td><td>★★★★★</td><td>★★★★★</td><td>★★☆</td><td>★★★★</td></tr>
+<tr><td>驱动自己动手</td><td>★★★★</td><td>★★★★☆</td><td>★☆</td><td>★★</td><td>★★★★</td></tr>
+<tr><td>演示/汇报价值</td><td>★★☆</td><td>★★★★</td><td>★★★★★</td><td>★★</td><td>★★★★</td></tr>
+<tr><td>真实产品可复用</td><td>★★★★</td><td>★★★★★</td><td>★★</td><td>★★★★★</td><td>★★★★★</td></tr>
+<tr><td>原型落地成本</td><td>S</td><td>M</td><td>M+</td><td>S</td><td>M</td></tr>
+<tr><td>打扰度</td><td>中</td><td>中</td><td>高</td><td>极低</td><td>低</td></tr>
+<tr><td>角色差异呈现</td><td>一般</td><td><b>强</b></td><td>中</td><td>中</td><td>强</td></tr>
+<tr><td>综合定位</td><td>轻量首选</td><td><b>主推</b></td><td>演示期叠加</td><td>常驻兜底</td><td>二期</td></tr></table>
+</div>
+
+<div class="card" id="s5"><h2>5. 推荐组合与理由</h2>
+<ul class="tight">
+<li><b>主引导 = B</b>:聚光最适合讲"哪里能点、哪里不能点";与 role-switch 联动可直接演示权限差异;引擎解耦,后续 A/E 可复用。</li>
+<li><b>兜底 = D</b>:错过/跳过引导的人随时自救;localStorage 记忆,无后端依赖。</li>
+<li><b>条件叠加 C</b>:近期有对外评审时,给 B 加"自动播放"入口(同一剧本)。</li>
+</ul></div>
+
+<div class="card" id="s6"><h2>6. 推荐方案(B)落地蓝图</h2>
+<h3>6.1 触发与记忆</h3>
+<pre>var tour = new GuideTour("curate", {
+  seenKey: "grc.curate.tour.seen.v1",
+  autoplay: /[?&amp;]guide=curate/.test(location.search)
+            || !localStorage.getItem("grc.curate.tour.seen.v1"),
+  role: function(){ return document.getElementById("role-switch").value; }
+});</pre>
+<p>首次自动播;页头"重播引导"入口;Esc、Skip、"不再显示"三路退出,退出写 seen。</p>
+<h3>6.2 步骤表(Owner/Contributor,6 步)</h3>
+<table><tr><th>#</th><th>锚点/动作</th><th>气泡要点</th><th>下一步动作</th></tr>
+<tr><td>1</td><td><code>.kb-side</code> 目录树</td><td>知识库按目录组织;Public/My 顶部切换</td><td>滚动聚焦 + 展开目录</td></tr>
+<tr><td>2</td><td><code>#kb-detail</code> 首行</td><td>每行=一个库;Status/Docs/Chunks/Coverage</td><td><code>openKb(...)</code></td></tr>
+<tr><td>3</td><td><code>.pipe</code> / 行内 <code>pipe-flow</code></td><td>Parse→Chunk→Enhancer→Embedding;FAILED 可点修</td><td>回 Documents</td></tr>
+<tr><td>4</td><td><code>#kb-upload</code></td><td>上传后自动解析入库</td><td>高亮停留</td></tr>
+<tr><td>5</td><td>One-click build 批量钮</td><td>选中文档一次构建;可单个 Configure</td><td>—</td></tr>
+<tr><td>6</td><td>行文档(触发 <code>openFile</code>)</td><td>文件详情=段落/分块/引用预览</td><td>toast + 写 seen</td></tr></table>
+<p><b>Consumer/Viewer(4 步)</b>:库/目录浏览 → Information(描述/归属/角色与访问)→ 受限库 No-access(Alice ID)→ 检索测试。</p>
+<div class="fig"><img src="images/flow-tour.svg" alt="角色路径流程图"><div class="cap">图 6-1 两条角色路径流程</div></div>
+<h3>6.3 视觉规格</h3>
+<ul class="tight">
+<li>遮罩 <code>rgba(5,10,18,.6)</code>;聚光框 2px 虚线 <code>--accent-bright</code> + 8px 圆角 + 柔影;</li>
+<li>气泡卡白底/深色标题,圆角 10px,箭头自动指向;按钮复用 <code>.btn.btn-secondary</code>(Back/Skip)与 <code>.btn.btn-solid</code>(Next/Done);右上 "n/6" + 分段圆点;文案用系统词表。</li>
+</ul>
+<h3>6.4 集成注意事项</h3>
+<ul class="tight">
+<li>启动时机:overview burn 之后或以 catalog 为目标,不依赖首屏元素;</li>
+<li>render 函数 innerHTML 重绘会替换节点,每步重新 <code>querySelector</code> 锚点;</li>
+<li>Viewer/受限库步骤替换为 No-access 页 + Alice ID,顺带完成权限教育;</li>
+<li>≤960px 时 <code>.kb-layout</code> 单列,聚光改"整块滚动定位 + 全宽气泡";</li>
+<li>角色切换期间如引导在播,按新角色重排剩余步骤。</li>
+</ul>
+<h3>6.5 验收标准</h3>
+<ul class="tight">
+<li>首次进入自动起播,关闭后刷新不再出现;手动重播可用;</li>
+<li>Owner 与 Consumer 两条路径步骤、默认页签正确;每步目标可见、聚焦、无遮挡;Esc/Skip 全程可用;</li>
+<li>与 modal/fd-overlay/role-switch/面包屑返回互不干扰;localStorage 清除后可复现首播。</li>
+</ul>
+<div class="fig"><img src="images/shot-3-kb-documents.png" alt="KB Documents 截图(待补)"><div class="cap">图 6-2 Documents 页签实景(截图标注,见附录 A)</div></div>
+</div>
+
+<div class="card" id="s7"><h2>7. 风险与缓解</h2>
+<table><tr><th>风险</th><th>缓解</th></tr>
+<tr><td>气泡措辞与真实文案脱节</td><td>文案走评审,纳入术语表</td></tr>
+<tr><td>重绘导致锚点丢失</td><td>每步重查选择器 + 兜底跳过该步</td></tr>
+<tr><td>演示剧本(C)与手动操作冲突</td><td>演示期间锁定输入,退出即恢复</td></tr>
+<tr><td>多页(E)代码漂移</td><td>引擎抽公共文件,页面仅配置步骤</td></tr></table>
+</div>
+
+<div class="card" id="s8"><h2>8. 附录</h2>
+<h3>A. 截图标注指引(自制 shot-*.png)</h3>
+<ul class="tight">
+<li><b>shot-1-overview</b>:首屏 Overview(banner/KPI/Build Pipeline/环形图);<b>shot-2-catalog</b>:库页(目录树、scope tabs、表头与空态 CTA);<b>shot-3-kb-documents</b>:KB 详情 Documents(Add documents、One-click build、四段管线、某行 FAILED);<b>shot-4-noaccess</b>:Viewer 受限库 No-access 页(Alice 角色 ID、Request in Alice)。</li>
+<li>标注统一:<code>#4DA8EE</code> 2px 虚线框 + ①②③ 圆点序号 + 图下短句说明。</li>
+</ul>
+<div class="fig"><img src="images/shot-4-noaccess.png" alt="No-access 截图(待补)"><div class="cap">图 8-1 No-access 实景(截图标注,见附录 A)</div></div>
+<h3>B. 图片清单</h3>
+<p>scheme-a/b/c/d/e.svg、flow-tour.svg(本包内嵌);steps/ 目录 25 张分步示意(a-1~5、b-1~6、b-c1~4、c-1~5、d-1~3、e-1~2,SVG + PNG 各一份);shot-1~4.png(按附录 A 补)。</p>
+<h3>C. docx 转换</h3>
+<pre>pandoc "GRC-Curate-新手引导方案.md" -o "GRC-Curate-新手引导方案.docx" --resource-path=.</pre>
+<p>或用 Word 打开本 HTML 另存为 .docx。</p>
+<h3>D. 术语</h3>
+<p>Owner / Contributor / Consumer / Viewer(角色)· Alice(IAM 权限系统)· Pipeline(Parse→Chunk→Enhancer→Embedding)· KB(知识库)· Retrieval(检索)</p>
+</div>
+
+</div>
+<footer>GRC AI Agent Portal · Curate 新手快速引导方案 · v1 · 2026-09-09</footer>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 460" font-family="Microsoft YaHei,PingFang SC,sans-serif">
+<rect width="760" height="460" fill="#0a0a0a"/>
+<rect x="0" y="0" width="760" height="48" fill="#000"/>
+<text x="24" y="30" fill="#fff" font-size="14">Mercedes-Benz · Curate</text>
+<rect x="0" y="48" width="760" height="412" fill="rgba(5,10,18,0.6)"/>
+<rect x="24" y="72" width="240" height="340" rx="10" fill="#fff"/>
+<text x="44" y="104" font-size="13" font-weight="700" fill="#1a1a1a">Knowledge Library</text>
+<g font-size="12" fill="#4a4a4a">
+<text x="44" y="134">▾ Policy</text><text x="60" y="156">Disclosure Requirements</text>
+<text x="60" y="176">AML Regulatory Updates</text><text x="44" y="204">▸ Risk</text><text x="44" y="224">▸ AML</text>
+</g>
+<rect x="24" y="72" width="240" height="340" rx="10" fill="none" stroke="#4DA8EE" stroke-width="2" stroke-dasharray="6 5"/>
+<path d="M270 240 L330 240" stroke="#4DA8EE" stroke-width="2" marker-end="url(#arr)"/>
+<defs><marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#4DA8EE"/></marker></defs>
+<rect x="336" y="168" width="360" height="150" rx="10" fill="#fff"/>
+<text x="360" y="200" font-size="15" font-weight="700" fill="#1a1a1a">第 1 步 · 目录树</text>
+<text x="360" y="226" font-size="12.5" fill="#4a4a4a">知识库按目录组织;顶部可在 Public 与</text>
+<text x="360" y="246" font-size="12.5" fill="#4a4a4a">My knowledge 之间切换。点击目录展开。</text>
+<g><circle cx="366" cy="286" r="4" fill="#0078D6"/><circle cx="382" cy="286" r="4" fill="#d8d8d6"/><circle cx="398" cy="286" r="4" fill="#d8d8d6"/><circle cx="414" cy="286" r="4" fill="#d8d8d6"/><circle cx="430" cy="286" r="4" fill="#d8d8d6"/><circle cx="446" cy="286" r="4" fill="#d8d8d6"/></g>
+<text x="660" y="290" font-size="11.5" fill="#6a6a6a" text-anchor="end">1/6</text>
+<rect x="470" y="272" width="72" height="28" rx="6" fill="none" stroke="#c9c9c7"/><text x="506" y="291" font-size="12" fill="#6a6a6a" text-anchor="middle">Skip</text>
+<rect x="552" y="272" width="96" height="28" rx="6" fill="#0078D6"/><text x="600" y="291" font-size="12" fill="#fff" text-anchor="middle">Next →</text>
+</svg>
