@@ -104,6 +104,7 @@
 | 78 | 【责任人：BA+UX】优化 Overview 页面 KPI——**已关闭（2026-09-04 用户裁定）**：展示知识库总数、可用知识库数、文档总数、构建失败文档数与知识库就绪度；就绪度遵循 spec 005 FR-056 的定义。已回写 spec 005 FR-056c 与 US-14 | KPI/交互 | spec 005 FR-056/FR-056c, US-14 | closed |
 | 79 | 一级导航信息架构冲突——**已关闭（2026-09-01 用户裁定）**：按 2026-08-26 会议决议采用新一级导航 Chat / Explore / Curate / Build / Govern；Agent/MCP 发现与订阅目录归 Explore；订阅者中心并入 Explore 页内（右上角 console 或页内入口，不再独立二级入口）；创作者中心归 Build（Build 同时承载上架入口、Dify 跳转、Agent Kit 预留）；Explore 引导 button 跳 Build 9/7 首期不做；已回写 spec 002 Clarifications（Session 2026-09-01）；遗留项——PRD §5.1/§5.2 升版对齐与 provider 审批 request 归 Build/Govern 未定论，转 #80 跟踪 | 基线冲突 | docs/prd/GRC-AI-Foundation-Platform-PRD-v1.2.md §5.1/§5.2, spec 002 Clarifications, 会议纪要 2026-08-26 平台导航与详情页设计, UI 0828, watchlist #80 | closed |
 | 80 | 【责任人：BA+UX】PRD 一级导航升版对齐 + provider 审批 request 归属——2026-09-01 用户裁定采用新一级导航（Chat/Explore/Curate/Build/Govern，详见 #79），PRD v1.2 §5.1/§5.2 仍为旧 IA，基线文档不直接反写，待走 PRD 升版流程对齐并同步受影响 spec/功能清单；遗留未定论：provider 审批 request 归 Build 还是 Govern（2026-08-26 会议未定） | 基线升版 | docs/prd/GRC-AI-Foundation-Platform-PRD-v1.2.md §5.1/§5.2, spec 002, watchlist #79 | open |
+| 88 | 【责任人：Azure 平台+开发】spec 014 开发演示后续生产化：①授予批准身份 Service Bus `listKeys` 或通过 Key Vault/CSI 注入连接串，将 Knowledge 从 local worker 切回 deployed；②PostgreSQL 管理员过渡连接改为最小权限服务账号并轮换；③从实际 VPN 客户端验证 Portal Internal LoadBalancer `172.27.104.8` 路由；④Java 镜像重建为 non-root、Mgmt 补正式 readiness。当前真实上传/解析/21 chunks/21 vectors/检索已通过 | 部署生产化 | spec 014, `docs/temp/当前环境演示部署Runbook.md` | open |
 
 ## 文档缺口
 

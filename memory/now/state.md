@@ -24,6 +24,13 @@
 - 环境与账号阻塞（2 项未闭环）：Alice admin 账号待申请（最晚 2026-08-19）、Azure→SharePoint 方案进行中；GitHub 账号已开通（2026-08-17）。
 
 ## 近期重要变化
+- 2026-09-11：**当前开发环境真实演示链路已打通（spec 014）**——Portal、Gateway、
+  Auth、Mgmt、Knowledge、Parser/Milvus 全部运行于 AKS；EC2 `grc_db` 已迁移至 Azure
+  PostgreSQL。固定 DOCX 完成 Blob 上传、Parser 解析、21 chunks、21 Milvus vectors、
+  文档 `ACTIVE` 与检索 5 条结果。Portal Internal LoadBalancer 为 `172.27.104.8`；
+  Service Bus `listKeys`、最小权限 DB 账号和 VPN 客户端路由仍待闭环。来源：
+  hub `db9cc26`，Portal `97c36ce`，Gateway `06c812c`，Auth `cf25a32`，
+  Mgmt `b563923`，Knowledge `f3f2405`/`88c503d`/`165a6b3`/`2197d65`/`794ad7f`。
 - 2026-09-10：**Parser 模型制品交付完成**——spec 012 从 EC2约 40 GiB下载目录提取
   518 个 canonical文件（21,278,861,712 字节），以三个 digest固定的 ACR初始化镜像写入
   `grc-parser/parser-models` 128 GiB Premium PVC。全量 SHA256、27.2秒幂等复跑、

@@ -10,10 +10,13 @@
 - 消费契约：grc-auth-service、grc-mgmt-service、grc-agent-service、grc-evaluation-service、grc-knowledge-engine
 
 ## 近期重要变化（最近 4 周）
+- W37: spec 014 AKS 演示运行时完成：新增 digest 固定清单，修复 production profile
+  localhost 覆盖和路由数组覆盖问题；无 token 返回 401，登录与携带 token 的知识库链路通过。
+  Gateway facade 契约发布为 0.2，部署工件 `06c812c`，契约提交 `db9cc26`。
 - W33: 服务孵化，初始化仓库脚手架
 
 ## 已知问题
-- 无
+- 当前镜像默认 root；后续需重建非 root 镜像。
 <!-- /自动区块 -->
 
 <!-- 人工区块：owner 手工维护 -->
