@@ -69,8 +69,9 @@ services:
       - contracts/events/eval-task.asyncapi.yaml
       - contracts/events/notification.asyncapi.yaml
     consumes:
+      - contracts/openapi/grc-knowledge-engine.yaml
       - contracts/events/eval-result.asyncapi.yaml
-    depends-on: [grc-auth-service]
+    depends-on: [grc-auth-service, grc-knowledge-engine]
 
   # ---- 对话/Agent 服务 ----
   - name: grc-agent-service

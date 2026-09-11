@@ -2745,8 +2745,6 @@ components:
           description: 增强配置
           type: array
           items: { $ref: '#/components/schemas/EnhanceConfig' }
-        embedding: { $ref: '#/components/schemas/EmbeddingConfig', description: 向量化配置 }
-        vectorStore: { $ref: '#/components/schemas/VectorStoreConfig', description: 向量库配置 }
 
     KnowledgeTagRequest:
       type: object

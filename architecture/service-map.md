@@ -53,6 +53,7 @@ graph LR
   knowledge --> parser
   knowledge --> auth
   mgmt --> auth
+  mgmt --> knowledge
   mcp --> auth
 ```
 
@@ -85,8 +86,8 @@ graph LR
 - repo: mercedes-benz.china/grc-mgmt-service
 - owner: @todo-owner
 - provides: contracts/openapi/grc-mgmt-service.yaml, contracts/events/eval-task.asyncapi.yaml, contracts/events/notification.asyncapi.yaml
-- consumes: contracts/events/eval-result.asyncapi.yaml
-- depends-on: grc-auth-service
+- consumes: contracts/openapi/grc-knowledge-engine.yaml, contracts/events/eval-result.asyncapi.yaml
+- depends-on: grc-auth-service, grc-knowledge-engine
 
 ### grc-agent-service
 - repo: mercedes-benz.china/grc-agent-service
