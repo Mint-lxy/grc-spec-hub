@@ -143,9 +143,9 @@
 9. **Given** 单文档单阶段执行, **When** 执行时长超过 10 分钟, **Then** 该阶段超时，系统自动重试 1 次；重试仍失败则标记为构建失败。
 10. **Given** 正在重建的文档, **When** 用户检索该知识库, **Then** 该文档沿用上一次成功的向量化结果参与检索，直到新结果就绪。
 
-**Stage Run Response Contract**:
+**Stage Run & Document List Contract**:
 
-单阶段执行响应必须返回 `parser`、`chunk`、`enhance` 三个阶段结果，以及 `retrievalReady`、`chunkCount`、`pageCount`、`charCount` 和 `updatedAt` 文档统计字段。每个阶段结果包含 `status`、`errorMsg` 和阶段专属的 `executionResult`；`enhance` 未执行时使用 `status=SKIPPED`。顶层响应不再提供泛化的 `executionResult` 字段。
+单阶段执行响应与知识库文档列表项响应必须返回 `parser`、`chunk`、`enhance` 三个阶段结果，以及 `retrievalReady`、`chunkCount`、`pageCount`、`charCount` 和 `updatedAt` 文档统计字段。每个阶段结果包含 `status`、`errorMsg` 和阶段专属的 `executionResult`；`enhance` 未执行时使用 `status=SKIPPED`。顶层响应不再提供泛化的 `executionResult` 字段。
 
 ---
 
@@ -495,6 +495,7 @@
 - **FR-056**: 系统 MUST 在知识库详情展示文档数、切片数、向量数与就绪度；就绪度＝已向量化文档数/未删除文档数，以百分比展示，未删除文档数为零时展示 0%；就绪度仅为展示指标，不改变知识库状态机。切片数＝已向量化文档的切片总数；向量数＝该库实际写入向量库的向量条数（理由：两者不等即暴露向量库写入失败或脏数据，指标有诊断价值；若同口径则向量数无信息量——2026-08-21 用户确认）。
 - **FR-056b**: 知识库 Overview 页 MUST 展示描述、标签、构建统计（文档阶段分布、最近构建时间）与构建状态；「内容摘要」为上述静态元信息的汇总视图，P0 不引入 AI 生成（AI 生成库级摘要列入 P1——2026-08-21 用户裁定）。
 - **FR-056c**: 知识库 Overview 页 MUST 展示五项 KPI：知识库总数、可用知识库数、文档总数、构建失败文档数与知识库就绪度；就绪度的计算遵循 FR-056 定义（2026-09-04 用户裁定）。
+- **FR-056d**: 知识管理 Overview 概览接口（`/mgmt/knowledge/overview`）MUST 提供构建流水线（Build Pipeline：按知识库展示当前构建进度、所属领域、文档数、构建阶段与状态）与按领域文档分布（Documents by Domain：文档总数、各顶级领域/根目录文档数及占比百分比）聚合数据。
 
 **文档级参数批量修改**
 

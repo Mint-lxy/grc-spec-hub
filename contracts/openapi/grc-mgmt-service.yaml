@@ -579,6 +579,19 @@ paths:
                         description: 响应数据
                         type: array
                         items: { $ref: '#/components/schemas/VectorStoreInstance' }
+  /mgmt/knowledge/overview:
+    get:
+      tags: [Knowledge Base]
+      operationId: getKnowledgeOverview
+      summary: 查询知识管理概览数据
+      description: 查询知识管理 Overview 页面数据，包含构建流水线（Build Pipeline）进度列表与按领域文档分布（Documents by Domain）统计。
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeOverviewEnvelope'
   /mgmt/knowledge/knowledge-bases/stats:
     get:
       tags: [Knowledge Base]
@@ -651,7 +664,8 @@ paths:
     get:
       tags: [Knowledge Base]
       operationId: listKnowledgeBaseDocuments
-      summary: 查询知识库文档列表
+      summary: 查询知识库文档
+      description: 分页查询知识库中的文档
       parameters:
         - { name: keyword, in: query, required: false, description: 文档名称关键字, schema: { type: string } }
         - { name: sourceType, in: query, required: false, description: 文档来源类型, schema: { type: string } }
@@ -3157,6 +3171,66 @@ components:
         notReadyKnowledgeBaseCount: { type: integer, description: 未就绪知识库数量 }
         notReadyReasonBreakdown: { type: object, additionalProperties: { type: integer }, description: 按未就绪原因聚合的知识库数量，例如 DRAFT 或 DISABLED }
 
+    KnowledgeOverviewResponse:
+      type: object
+      description: 知识管理概览数据。
+      required: [buildPipeline, documentsByDomain]
+      properties:
+        buildPipeline:
+          $ref: '#/components/schemas/KnowledgeOverviewBuildPipeline'
+        documentsByDomain:
+          $ref: '#/components/schemas/KnowledgeOverviewDocumentsByDomain'
+
+    KnowledgeOverviewBuildPipeline:
+      type: object
+      description: 构建流水线概览。
+      required: [stages, items]
+      properties:
+        stages:
+          type: array
+          items: { type: string }
+          description: 流水线标准阶段列表，如 ["Parse", "Chunk", "Enhancer", "Embedding"]
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/KnowledgeOverviewPipelineItem' }
+          description: 流水线构建项列表
+
+    KnowledgeOverviewPipelineItem:
+      type: object
+      description: 知识库流水线构建项。
+      required: [order, kbId, kbName, domainName, documentCount, progress, stage, stageDisplayName, status]
+      properties:
+        order: { type: string, description: 序号，如 "01", "02" }
+        kbId: { type: string, description: 知识库 ID }
+        kbName: { type: string, description: 知识库名称 }
+        domainName: { type: string, description: 所属领域名称 }
+        documentCount: { type: integer, description: 文档数量 }
+        progress: { type: integer, description: 构建总进度百分比（0-100） }
+        stage: { type: string, description: 当前阶段编码（parse/chunk/enhance/embed） }
+        stageDisplayName: { type: string, description: 当前阶段展示名称（Parsing/Chunking/Enhancing/Embedding） }
+        status: { type: string, description: 状态 }
+
+    KnowledgeOverviewDocumentsByDomain:
+      type: object
+      description: 按领域文档分布。
+      required: [totalDocuments, items]
+      properties:
+        totalDocuments: { type: integer, description: 文档总数 }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/KnowledgeOverviewDomainItem' }
+          description: 各领域文档统计分布
+
+    KnowledgeOverviewDomainItem:
+      type: object
+      description: 领域文档分布项。
+      required: [domainId, domainName, documentCount, percentage]
+      properties:
+        domainId: { type: string, description: 领域（根目录）ID }
+        domainName: { type: string, description: 领域名称 }
+        documentCount: { type: integer, description: 文档数量 }
+        percentage: { type: number, format: double, description: 占比百分比（如 38.0 表示 38%） }
+
     KnowledgePipelineDefaultConfigResponse:
       type: object
       description: 创建知识库时使用的默认管线配置。
@@ -3248,6 +3322,9 @@ components:
         docType: { type: string, description: 文档类型 }
         parseState: { type: string, description: 字段：parseState }
         buildStages: { $ref: '#/components/schemas/DocumentBuildStagesResponse', description: 文档构建阶段状态汇总 }
+        parser: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 解析阶段执行结果 }
+        chunk: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 切片阶段执行结果 }
+        enhance: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 增强阶段执行结果 }
         update: { type: object, additionalProperties: true, description: 字段：update }
         meta: { type: object, additionalProperties: true, description: 字段：meta }
         sourceType: { type: string, enum: [CONFLUENCE, SHAREPOINT, ONEDRIVE, BLOB, S3, LOCAL_UPLOAD], description: 来源类型 }
@@ -3630,6 +3707,7 @@ components:
     KnowledgeBaseConfigUpdateEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseConfigUpdateResponse', description: 响应数据 } } }] }
     KnowledgeBaseStatisticsEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseStatisticsResponse', description: 响应数据 } } }] }
     KnowledgeBaseAggregateStatisticsEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseAggregateStatisticsResponse', description: 响应数据 } } }] }
+    KnowledgeOverviewEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeOverviewResponse', description: 响应数据 } } }] }
     KnowledgePipelineDefaultConfigEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgePipelineDefaultConfigResponse', description: 响应数据 } } }] }
     KnowledgeDocumentCreateEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentCreateResponse', description: 响应数据 } } }] }
     KnowledgeBaseDocumentPageEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseDocumentPageResponse', description: 响应数据 } } }] }
