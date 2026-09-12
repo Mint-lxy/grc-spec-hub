@@ -143,6 +143,10 @@
 9. **Given** 单文档单阶段执行, **When** 执行时长超过 10 分钟, **Then** 该阶段超时，系统自动重试 1 次；重试仍失败则标记为构建失败。
 10. **Given** 正在重建的文档, **When** 用户检索该知识库, **Then** 该文档沿用上一次成功的向量化结果参与检索，直到新结果就绪。
 
+**Stage Run Response Contract**:
+
+单阶段执行响应必须返回 `parser`、`chunk`、`enhance` 三个阶段结果，以及 `retrievalReady`、`chunkCount`、`pageCount`、`charCount` 和 `updatedAt` 文档统计字段。每个阶段结果包含 `status`、`errorMsg` 和阶段专属的 `executionResult`；`enhance` 未执行时使用 `status=SKIPPED`。顶层响应不再提供泛化的 `executionResult` 字段。
+
 ---
 
 ### User Story 4 — 目录树管理与权限 (Delivery: P0, Story Order: S4)
