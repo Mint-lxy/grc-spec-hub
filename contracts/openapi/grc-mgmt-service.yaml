@@ -775,14 +775,13 @@ paths:
       parameters:
         - { name: jobId, in: query, description: 任务 ID, required: false, schema: { type: integer, format: int64 } }
       responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeDocumentParseEnvelope' } } } } }
-  /mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/enhance/{enhanceType}:
+  /mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/enhance:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
     get:
       tags: [Knowledge Base]
       operationId: listDocumentEnhanceArtifacts
       summary: 查询文档增强产物
       parameters:
-        - { name: enhanceType, in: path, description: 增强类型, required: true, schema: { type: string } }
         - { name: jobId, in: query, description: 任务 ID, required: false, schema: { type: integer, format: int64 } }
         - { name: page, in: query, description: 当前页码, required: false, schema: { type: integer, minimum: 1 } }
         - { name: pageSize, in: query, description: 每页数量, required: false, schema: { type: integer, minimum: 1 } }
@@ -3480,12 +3479,13 @@ components:
         knowledgeBaseId: { type: string, description: 知识库 ID }
         documentId: { type: string, description: 文档 ID }
         jobId: { type: string, description: 任务 ID }
-        enhanceType: { type: string, description: 增强类型 }
-        items: { type: array, items: { $ref: '#/components/schemas/KnowledgeDocumentEnhanceItemResponse' }, description: 列表项 }
-        stats: { type: object, additionalProperties: true, description: 统计信息 }
-        page: { type: integer, minimum: 1, description: 当前页码 }
-        pageSize: { type: integer, minimum: 1, description: 每页数量 }
-        total: { type: integer, format: int64, description: 总数 }
+        itemsByType:
+          type: object
+          description: 按增强类型分组的增强产物列表映射（如 summary、keyword、faq）
+          additionalProperties:
+            type: array
+            items: { $ref: '#/components/schemas/KnowledgeDocumentEnhanceItemResponse' }
+        stats: { type: object, additionalProperties: true, description: 增强统计信息 }
 
     KnowledgeDocumentParseInfoResponse:
       type: object
