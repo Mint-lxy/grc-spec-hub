@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: GRC Management Service API
-  version: "2.2"
+  version: "2.3"
   description: >-
     grc-mgt-service 的对外契约，覆盖 chat、文件、知识库、marketplace、RBAC 与 vault 管理接口。
     其中 chat 会话子域
@@ -3317,6 +3317,7 @@ components:
       description: 知识库文档创建响应数据
       properties:
         documentId: { type: string, description: 创建成功的文档 ID }
+        jobId: { type: string, description: 关联的构建任务 ID }
         status: { type: string, description: 当前状态 }
 
     KnowledgeDocumentBatchImportRequest:
