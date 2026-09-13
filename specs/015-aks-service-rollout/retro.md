@@ -32,6 +32,9 @@ Auth `c62dcd9` 和 Portal 当前构建无必要更新，保持 spec 014 digest�
 - E2E：文档 `357490951490396160` 为 `ACTIVE`，批次 `357491467674980352`
   为 `SUCCEEDED`；PostgreSQL 104 条 `INDEXED`，Milvus 104 条，检索返回 5 条。
 - Gateway 旧 digest 回滚和新 digest 恢复均通过健康检查。
+- 新增 EC2 `publish-to-acr.sh`：支持单服务/全部服务、可选运行既有 pipeline、运行
+  image ID 核对、OCI revision 精确校验、无标签 image-ID tag、ACR tag 防覆盖、
+  artifact 写入/删除锁定和脱敏发布证据；6 个 Bash 场景测试通过，且不修改 AKS。
 
 ## 关键决策
 

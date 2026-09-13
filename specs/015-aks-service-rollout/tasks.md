@@ -51,4 +51,5 @@
 - [x] T027 更新 `docs/temp/部署镜像清单.md`
 - [x] T028 完成并复核 `docs/temp/EC2已验证版本更新至AKS运维Runbook.md`
 - [x] T029 生成 `retro.md`
-- [ ] T030 更新 Project Memory 并提交人审
+- [x] T030 实现并测试 EC2 `publish-to-acr.sh`，同步详细 Runbook
+- [ ] T031 更新 Project Memory 并提交人审

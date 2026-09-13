@@ -91,6 +91,13 @@ Gateway `/open/v1/**` 私网临时放行是人工批准的演示例外，但仍�
 4. 固定 DOCX 完成上传、解析、chunks、vectors 和检索。
 5. 更新镜像清单、Runbook、retro 和 Project Memory。
 
+### Phase 6: EC2 发布工具
+
+1. 在 Hub 提供可复制到 EC2 `workspace/scripts` 的 `publish-to-acr.sh`。
+2. 默认发布当前运行且与本机 tag 一致的镜像；`--build` 才调用既有 pipeline。
+3. 拒绝 dirty worktree、缺失运行容器、tag 冲突和镜像 revision label 冲突。
+4. 输出不含 Secret 的 TSV/Markdown 发布记录和 ACR digest，不自动更新 AKS。
+
 ## 停止条件
 
 - 契约门禁未通过。

@@ -130,6 +130,9 @@
 - **FR-014**: 必须更新镜像清单，并在 `docs/temp/` 交付不含凭据的详细运维更新 Runbook。
 - **FR-015**: Runbook MUST 包含前置条件、取证、构建/复制、扫描、发布、数据库门禁、
   分阶段 rollout、验证、停止条件、回滚、故障排查和证据模板。
+- **FR-016**: 必须提供 EC2 一键 ACR 发布脚本，支持单服务和全部服务、clean worktree
+  检查、可选调用既有构建流水线、运行容器 image ID 核对、不可变 commit tag、防覆盖、
+  ACR digest 查询和脱敏发布记录；脚本 MUST NOT 更新 AKS。
 
 ## 非目标 / 边界
 
@@ -166,3 +169,6 @@
 - Q: 临时例外是否可进入生产？
   → A: 不可。仅限 XAG 私网 Internal LoadBalancer 与公司 VPN 路径，生产发布前必须恢复
   Gateway/Knowledge 的正式鉴权与 scope 校验。
+- Q: 后续 EC2 代码更新如何一键同步镜像？
+  → A: 在 EC2 提供 `publish-to-acr.sh`，一键完成取证、构建（可选）、tag、push 和 digest
+  记录；AKS 更新继续保留人工审批。
