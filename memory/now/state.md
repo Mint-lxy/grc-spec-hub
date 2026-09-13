@@ -24,11 +24,17 @@
 - 环境与账号阻塞（2 项未闭环）：Alice admin 账号待申请（最晚 2026-08-19）、Azure→SharePoint 方案进行中；GitHub 账号已开通（2026-08-17）。
 
 ## 近期重要变化
+- 2026-09-13：**spec 015 演示优先滚动更新完成**——Gateway、Mgmt、Knowledge、Parser
+  已更新至新 ACR digest，Portal/Auth 保持稳定基线。Knowledge migration 007 将
+  `kb_doc_chunk.update_time` 原地转换为 `timestamptz`；固定 DOCX 达到 `ACTIVE`，
+  生成 104 chunks/104 Milvus vectors，检索返回 5 条。Gateway `/open/v1/**`
+  临时跳过 JWT 仅限 XAG 私网客户演示，生产前必须恢复正式鉴权。
 - 2026-09-11：**当前开发环境真实演示链路已打通（spec 014）**——Portal、Gateway、
   Auth、Mgmt、Knowledge、Parser/Milvus 全部运行于 AKS；EC2 `grc_db` 已迁移至 Azure
   PostgreSQL。固定 DOCX 完成 Blob 上传、Parser 解析、21 chunks、21 Milvus vectors、
   文档 `ACTIVE` 与检索 5 条结果。Portal Internal LoadBalancer 为 `172.27.104.8`；
-  Service Bus `listKeys`、最小权限 DB 账号和 VPN 客户端路由仍待闭环。来源：
+  Service Bus `listKeys`、最小权限 DB 账号仍待闭环；VPN 客户端路由已通过
+  RITM1805985 打通。来源：
   hub `db9cc26`，Portal `97c36ce`，Gateway `06c812c`，Auth `cf25a32`，
   Mgmt `b563923`，Knowledge `f3f2405`/`88c503d`/`165a6b3`/`2197d65`/`794ad7f`。
 - 2026-09-10：**Parser 模型制品交付完成**——spec 012 从 EC2约 40 GiB下载目录提取

@@ -10,6 +10,9 @@
 - 消费契约：grc-auth-service、grc-mgmt-service、grc-agent-service、grc-evaluation-service、grc-knowledge-engine
 
 ## 近期重要变化（最近 4 周）
+- W37: spec 015 集成 release `3e63ec1` 并更新 AKS：新增 Knowledge
+  `/open/v1/**` 完整路径路由，ACR digest `f3330987...`；Auth/Mgmt 无 token 仍返回
+  401，Gateway 旧/新 digest 回滚恢复通过。跳过 Gateway JWT 是 XAG 私网演示临时例外。
 - W37: spec 014 AKS 演示运行时完成：新增 digest 固定清单，修复 production profile
   localhost 覆盖和路由数组覆盖问题；无 token 返回 401，登录与携带 token 的知识库链路通过。
   Gateway facade 契约发布为 0.2，部署工件 `06c812c`，契约提交 `db9cc26`。
@@ -17,6 +20,8 @@
 
 ## 已知问题
 - 当前镜像默认 root；后续需重建非 root 镜像。
+- `/open/v1/**` 临时跳过 Gateway JWT，仅允许 XAG 私网演示；生产前必须恢复正式
+  PAT/scope 鉴权（watchlist #89）。
 <!-- /自动区块 -->
 
 <!-- 人工区块：owner 手工维护 -->

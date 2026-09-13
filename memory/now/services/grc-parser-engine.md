@@ -10,6 +10,8 @@
 - 消费契约：无
 
 ## 近期重要变化（最近 4 周）
+- W37: spec 015 从 release `1b88123` 仅集成 PNG hotfix，保留既有 GPU/PVC/模型运行时；
+  发布 digest `a8e78795...`，Docling/MinerU warmup、PDF 回归和运行 Pod PNG 解析通过。
 - W35: 解析状态 fix（`c291db9`，+4756）——与 knowledge-engine `08a25b2` 构成解析链路两侧联动，支撑 005 Pipeline 阶段状态展示
 - W33: 服务孵化，初始化仓库脚手架
 

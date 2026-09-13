@@ -10,6 +10,9 @@
 - 消费契约：contracts/openapi/grc-parser-engine.yaml
 
 ## 近期重要变化（最近 4 周）
+- W37: spec 015 集成 release `843ee71` 并保留 AKS 认证/non-root/8080 修复；新增幂等
+  migration 007，将 1903 行 chunk 的 `update_time` 转为 `timestamptz`。发布 digest
+  `afe7e918...`；固定 DOCX 产出 104 chunks/104 vectors，任务 SUCCEEDED、检索 5 条。
 - W37: spec 014 AKS 真实文档链路完成：补 deployed Service Bus queue 生命周期、运行时
   fail-fast、`LOCAL_UPLOAD`、HTTPS SAS source 下载和 Parser bearer token；开发演示使用
   `local + real DB` worker。固定 DOCX 产出 21 chunks/21 vectors，文档 ACTIVE，检索返回
