@@ -465,6 +465,40 @@ paths:
         - { name: keyword, in: query, description: 搜索关键词, required: false, schema: { type: string } }
         - { name: directoryType, in: query, description: 目录类型, required: false, schema: { type: string, enum: [PUBLIC, PERSONAL] } }
       responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/DirectoryTreeResponse' } } } } }
+  /mgmt/knowledge/directories/filter-tree:
+    get:
+      tags: [Knowledge Directory]
+      operationId: filterCreatableDirectories
+      summary: 查询可创建目录选项
+      description: >-
+        递归检查指定目录类型下的完整目录树，并返回 canCreate 为 true 的目录选项。
+        返回数组按目录树深度优先顺序排列；name 为从根目录开始拼接的完整目录路径，id 为路径末尾目录的 ID。
+        filterType 为 kb 时仅叶子目录可创建知识库；filterType 为 dir 时仅未绑定知识库的目录可创建子目录。
+      parameters:
+        - name: directoryType
+          in: query
+          required: true
+          description: 目录类型过滤。PUBLIC 表示公共目录，PERSONAL 表示个人目录。
+          schema:
+            type: string
+            enum: [PUBLIC, PERSONAL]
+        - name: filterType
+          in: query
+          required: false
+          description: 创建目标类型。kb 表示筛选可创建知识库的目录，dir 表示筛选可创建子目录的目录。
+          schema:
+            type: string
+            enum: [dir, kb]
+            default: dir
+      responses:
+        '200':
+          description: 查询成功；data 为空数组表示没有满足条件的目录。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DirectoryCreateOptionListEnvelope'
+        '400':
+          description: directoryType 缺失或参数值不在允许范围内。
   /mgmt/knowledge/directories:
     post:
       tags: [Knowledge Directory]
@@ -533,8 +567,9 @@ paths:
       parameters:
         - { name: directoryId, in: query, description: 目录 ID, required: false, schema: { type: integer, format: int64 } }
         - { name: keyword, in: query, description: 搜索关键词, required: false, schema: { type: string } }
-        - { name: status, in: query, description: 状态过滤条件状态：DRAFT\ACTIVE\DISABLED, required: false, schema: { type: string, enum: [DRAFT, ACTIVE, DISABLED] } }
+        - { name: status, in: query, description: 状态过滤条件；只能是 DRAFT、ACTIVE 或 DISABLED, required: false, schema: { type: string, enum: [DRAFT, ACTIVE, DISABLED] } }
         - { name: retrievalReady, in: query, description: 是否仅查询已可检索数据, required: false, schema: { type: boolean } }
+        - { name: directoryType, in: query, description: 目录类型；只能是 PUBLIC 或 PERSONAL, required: false, schema: { type: string, enum: [PUBLIC, PERSONAL] } }
         - { name: page, in: query, description: 当前页码, required: false, schema: { type: integer, minimum: 1 } }
         - { name: pageSize, in: query, description: 每页数量, required: false, schema: { type: integer, minimum: 1 } }
         - name: sort
@@ -578,6 +613,19 @@ paths:
                         description: 响应数据
                         type: array
                         items: { $ref: '#/components/schemas/VectorStoreInstance' }
+  /mgmt/knowledge/overview:
+    get:
+      tags: [Knowledge Base]
+      operationId: getKnowledgeOverview
+      summary: 查询知识管理概览数据
+      description: 查询知识管理 Overview 页面数据，包含构建流水线（Build Pipeline）进度列表与按领域文档分布（Documents by Domain）统计。
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeOverviewEnvelope'
   /mgmt/knowledge/knowledge-bases/stats:
     get:
       tags: [Knowledge Base]
@@ -650,7 +698,8 @@ paths:
     get:
       tags: [Knowledge Base]
       operationId: listKnowledgeBaseDocuments
-      summary: 查询知识库文档列表
+      summary: 查询知识库文档
+      description: 分页查询知识库中的文档
       parameters:
         - { name: keyword, in: query, required: false, description: 文档名称关键字, schema: { type: string } }
         - { name: sourceType, in: query, required: false, description: 文档来源类型, schema: { type: string } }
@@ -716,8 +765,6 @@ paths:
       operationId: updateKnowledgeBase
       summary: 更新知识库
       parameters:
-        - { name: X-Idempotency-Key, in: header, required: true, description: 幂等请求键, schema: { type: string } }
-        - { name: If-Match, in: header, required: false, description: 资源版本条件, schema: { type: string } }
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/UpdateKnowledgeBaseRequest' } } }
@@ -749,7 +796,6 @@ paths:
       operationId: batchUpdateDocumentStageConfig
       summary: 批量更新文档阶段配置
       parameters:
-        - { name: X-Idempotency-Key, in: header, required: true, description: 幂等请求键, schema: { type: string } }
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/BatchUpdateKnowledgeDocumentStageConfigRequest' } } }
@@ -763,14 +809,13 @@ paths:
       parameters:
         - { name: jobId, in: query, description: 任务 ID, required: false, schema: { type: integer, format: int64 } }
       responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeDocumentParseEnvelope' } } } } }
-  /mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/enhance/{enhanceType}:
+  /mgmt/knowledge/knowledge-bases/{kbId}/documents/{docId}/enhance:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
     get:
       tags: [Knowledge Base]
       operationId: listDocumentEnhanceArtifacts
       summary: 查询文档增强产物
       parameters:
-        - { name: enhanceType, in: path, description: 增强类型, required: true, schema: { type: string } }
         - { name: jobId, in: query, description: 任务 ID, required: false, schema: { type: integer, format: int64 } }
         - { name: page, in: query, description: 当前页码, required: false, schema: { type: integer, minimum: 1 } }
         - { name: pageSize, in: query, description: 每页数量, required: false, schema: { type: integer, minimum: 1 } }
@@ -903,7 +948,6 @@ paths:
       summary: 创建原文访问地址
       description: 为文档原文创建临时访问地址。
       parameters:
-        - { name: X-Idempotency-Key, in: header, required: true, description: 防止重复创建访问地址的幂等键, schema: { type: string, minLength: 1 } }
       responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeOriginalDocumentUrlEnvelope' } } } } }
   /mgmt/knowledge/{kbId}/documents/{docId}/delete:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }]
@@ -913,8 +957,6 @@ paths:
       summary: 删除文档
       description: 删除知识库中的文档并提交异步清理操作。
       parameters:
-        - { name: X-Idempotency-Key, in: header, required: true, description: 防止重复删除的幂等键, schema: { type: string, minLength: 1 } }
-        - { name: If-Match, in: header, required: false, description: 文档版本校验值, schema: { type: string } }
       responses: { '200': { description: 删除操作已提交, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeDeleteResourceEnvelope' } } } } }
   /mgmt/knowledge/{kbId}/documents/{docId}/chunks/{chunkId}/delete:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }, { $ref: '#/components/parameters/DocumentId' }, { $ref: '#/components/parameters/ChunkId' }]
@@ -924,8 +966,6 @@ paths:
       summary: 删除文档切片
       description: 删除文档中的指定切片并提交异步清理操作。
       parameters:
-        - { name: X-Idempotency-Key, in: header, required: true, description: 防止重复删除的幂等键, schema: { type: string, minLength: 1 } }
-        - { name: If-Match, in: header, required: false, description: 切片版本校验值, schema: { type: string } }
       responses: { '200': { description: 删除操作已提交, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeDeleteResourceEnvelope' } } } } }
   /mgmt/knowledge/artifacts/access-urls:
     post:
@@ -946,38 +986,13 @@ paths:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/RetrievalRequest' } } }
       responses: { '200': { description: 检索成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeRetrievalEnvelope' } } } } }
-  /open/knowledge/knowledge-bases/{kbId}:
-    parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
-    get:
-      tags: [PAT Open API]
-      operationId: getOpenKnowledgeBase
-      summary: 通过 PAT 查询知识库元数据
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/OpenKnowledgeBaseEnvelope' } } } } }
-  /open/knowledge/retrievals:
-    post:
-      tags: [PAT Open API]
-      operationId: retrieveOpenKnowledge
-      summary: 通过 PAT scope 执行检索
-      requestBody:
-        required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/OpenRetrievalRequest' } } }
-      responses: { '200': { description: 检索成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeRetrievalEnvelope' } } } } }
-  /open/knowledge/knowledge-bases/{kbId}/documents:
-    parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
-    post:
-      tags: [PAT Open API]
-      operationId: updateOpenKnowledgeDocument
-      summary: 通过 PAT 更新单份文档并自动构建
-      requestBody:
-        required: true
-        content: { application/json: { schema: { $ref: '#/components/schemas/OpenDocumentUpdateRequest' } } }
-      responses: { '200': { description: 导入成功, content: { application/json: { schema: { $ref: '#/components/schemas/DocumentImportResultEnvelope' } } } } }
   /mgmt/knowledge/directories/{directoryId}/permissions:
     parameters: [{ $ref: '#/components/parameters/DirectoryId' }]
     get:
       tags: [Knowledge Permission]
       operationId: getDirectoryPermissions
       summary: 查询目录权限
+      description: 根据目录 ID 查询当前用户在该目录上的权限投影、Alice 同步状态和可申请权限项。
       responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/DirectoryPermissionEnvelope' } } } } }
   /mgmt/knowledge/knowledge-bases/{kbId}/permissions:
     parameters: [{ $ref: '#/components/parameters/KnowledgeBaseId' }]
@@ -985,6 +1000,7 @@ paths:
       tags: [Knowledge Permission]
       operationId: getKnowledgeBasePermissions
       summary: 查询知识库权限
+      description: 根据知识库 ID 查询目录继承链、权限序列、Alice 同步状态和当前用户权限项。
       responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/KnowledgeBasePermissionEnvelope' } } } } }
 
   /mgmt/marketplace/assets:
@@ -1359,7 +1375,9 @@ paths:
     parameters: [{ $ref: '#/components/parameters/UserId' }]
     put: { tags: [User-Role Binding], operationId: replaceUserRoles, summary: 替换用户角色, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UserRoleGrantRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/rbac/users/{userId}/roles/{roleId}:
-    parameters: [{ $ref: '#/components/parameters/UserId' }, { $ref: '#/components/parameters/RoleId' }]
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+      - $ref: '#/components/parameters/RoleId'
     post: { tags: [User-Role Binding], operationId: addRoleToUser, summary: 为用户授予角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
     delete: { tags: [User-Role Binding], operationId: removeRoleFromUser, summary: 移除用户角色, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/rbac/permissions:
@@ -1389,7 +1407,17 @@ paths:
   /mgmt/rbac/permissions/effective/self:
     get: { tags: [Effective Permission], operationId: getMyEffectivePermissions, summary: 查询我的有效权限, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/EffectivePermissionSetEnvelope' } } } } } }
   /mgmt/rbac/permissions/effective:
-    get: { tags: [Effective Permission], operationId: getUserEffectivePermissions, summary: 查询指定用户有效权限, parameters: [{ name: userId, in: query, description: 用户 ID, schema: { type: integer, format: int64 } }], responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/EffectivePermissionSetEnvelope' } } } } } }
+    get:
+      tags: [Effective Permission]
+      operationId: getUserEffectivePermissions
+      summary: 查询指定用户有效权限
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          description: 必填的目标用户 ID；返回该用户当前生效的菜单、数据范围、模型和目录权限。
+          schema: { type: integer, format: int64, minimum: 1 }
+      responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/EffectivePermissionSetEnvelope' } } } } }
   /mgmt/rbac/check:
     post: { tags: [Permission Check], operationId: checkPermissions, summary: 检查权限, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/PermissionCheckRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/PermissionCheckEnvelope' } } } } } }
   /mgmt/rbac/internal/check:
@@ -1431,7 +1459,9 @@ paths:
       summary: 查询出站凭据列表
       parameters:
         - { name: keyword, in: query, required: false, description: 凭据名称关键字, schema: { type: string } }
+        - { name: type, in: query, required: false, description: 凭据目标类型，例如 AGENT 或 MCP, schema: { type: string } }
         - { name: status, in: query, required: false, description: 凭据状态, schema: { type: string } }
+        - { name: sort, in: query, required: false, description: 排序字段和方向, schema: { type: string } }
         - { name: page, in: query, required: false, description: 页码, schema: { type: integer, minimum: 1, default: 1 } }
         - { name: size, in: query, required: false, description: 每页条数, schema: { type: integer, minimum: 1, default: 20 } }
       responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/OutboundCredentialPageEnvelope' } } } } }
@@ -1539,11 +1569,15 @@ components:
         authConfig: { type: object, additionalProperties: true, description: 资产鉴权配置 }
         capabilityConfig: { type: object, additionalProperties: true, description: 资产能力声明 }
         interfaceConfig: { type: object, additionalProperties: true, description: 接口清单配置 }
-        platformGovernance: { $ref: '#/components/schemas/MarketplaceAssetPlatformGovernance', description: 平台治理配置 }
+        platformGovernance: { type: object, additionalProperties: true, description: 平台治理配置 }
         manifestSnapshot: { type: object, additionalProperties: true, description: Agent Card 或 MCP Manifest 快照 }
         subscriptionFormYaml: { type: string, maxLength: 200000, description: 订阅申请表单 YAML }
         subscriptionApprovalEnabled: { type: boolean, description: 是否启用订阅审批 }
         subscriptionApprovers: { type: array, items: { $ref: '#/components/schemas/MarketplaceApprover' }, description: 订阅审批人配置 }
+        guardrailPolicies:
+          type: array
+          description: Agent 护栏策略配置；仅 AGENT 资产适用
+          items: { $ref: '#/components/schemas/MarketplaceGuardrailPolicy' }
         releaseNote: { type: string, maxLength: 4000, description: 当前版本发布说明 }
         termsVersion: { type: string, description: 使用条款版本号 }
         termsContent: { type: string, description: 使用条款正文 }
@@ -1554,6 +1588,12 @@ components:
         approverId: { type: integer, format: int64, description: 审批人用户 ID }
         approverName: { type: string, maxLength: 100, description: 审批人姓名快照 }
         order: { type: integer, description: 审批层级 }
+    MarketplaceGuardrailPolicy:
+      type: object
+      required: [templateId, enabled]
+      properties:
+        templateId: { type: integer, format: int64, description: 护栏策略模板 ID }
+        enabled: { type: boolean, description: 是否启用 }
     MarketplaceAssetPlatformGovernance:
       type: object
       additionalProperties: true
@@ -1580,17 +1620,17 @@ components:
       type: object
       required: [assetType, endpointUrl, healthCheckUrl]
       properties:
-        assetType: { type: string, enum: [AGENT, MCP], description: 资产类型 }
-        endpointUrl: { type: string, format: uri, description: 服务接入地址 }
-        healthCheckUrl: { type: string, format: uri, description: Health Check 探测地址 }
+        assetType: { type: string, description: 资产类型 }
+        endpointUrl: { type: string, description: 服务接入地址 }
+        healthCheckUrl: { type: string, description: Health Check 探测地址 }
         timeoutSeconds: { type: integer, minimum: 5, maximum: 120, default: 30, description: 单次探测超时秒数 }
         retryCount: { type: integer, minimum: 0, maximum: 3, default: 1, description: 失败重试次数 }
     MarketplaceAssetCapabilityPreviewRequest:
       type: object
       required: [assetType, endpointUrl]
       properties:
-        assetType: { type: string, enum: [AGENT, MCP], description: 资产类型 }
-        endpointUrl: { type: string, format: uri, description: Agent Card 或 MCP 工具清单的服务地址 }
+        assetType: { type: string, description: 资产类型 }
+        endpointUrl: { type: string, description: Agent Card 或 MCP 工具清单的服务地址 }
         timeoutSeconds: { type: integer, minimum: 5, maximum: 120, default: 30, description: 单次拉取超时秒数 }
         retryCount: { type: integer, minimum: 0, maximum: 3, default: 1, description: 失败重试次数 }
     ApprovalActionRequest:
@@ -1607,7 +1647,14 @@ components:
         termsVersion: { type: string, description: 提交时确认的条款版本 }
         termsAccepted: { type: boolean, description: 是否同意使用条款 }
     ResubmitSubscriptionRequest:
-      allOf: [{ $ref: '#/components/schemas/SubmitSubscriptionRequest' }]
+      type: object
+      required: [bizSystem, reason, formData]
+      properties:
+        bizSystem: { type: string, description: 申请使用的业务系统 }
+        reason: { type: string, description: 申请使用场景或原因 }
+        formData: { type: object, additionalProperties: true, description: 自定义订阅表单数据 }
+        termsVersion: { type: string, description: 提交时确认的条款版本 }
+        termsAccepted: { type: boolean, description: 是否同意使用条款 }
     CancelSubscriptionRequest:
       type: object
       properties:
@@ -1786,8 +1833,7 @@ components:
         flowId: { type: integer, format: int64, description: 审批流 ID }
         stepStatus: { type: string, description: 步骤更新后状态 }
         flowStatus: { type: string, description: 流程更新后状态 }
-        subscriptionStatus: { type: string, description: 订阅更新后状态 }
-        handledAt: { type: string, format: date-time, description: 处理时间 }
+        completedAt: { type: string, format: date-time, description: 处理完成时间 }
         message: { type: string, description: 操作结果消息 }
     ApprovalFlow:
       type: object
@@ -1898,11 +1944,13 @@ components:
       description: 订阅提交结果。
       properties:
         subscriptionId: { type: integer, format: int64, description: 订阅 ID }
+        approvalFlowId: { type: integer, format: int64, description: 关联的审批流 ID }
         assetId: { type: integer, format: int64, description: 资产 ID }
+        assetName: { type: string, description: 资产名称 }
         status: { type: string, description: 订阅状态 }
         displayStatus: { type: string, description: 展示状态 }
-        approvalFlowId: { type: integer, format: int64, description: 关联的审批流 ID }
-        createdAt: { type: string, format: date-time, description: 创建时间 }
+        termsAcceptedAt: { type: string, format: date-time, description: 条款确认时间 }
+        termsAcceptedBy: { type: string, description: 条款确认人 }
         message: { type: string, description: 结果消息 }
     SubscriberCenterSummary:
       type: object
@@ -2073,12 +2121,9 @@ components:
       description: 创作者审批结果。
       properties:
         subscriptionId: { type: integer, format: int64, description: 订阅 ID }
-        flowId: { type: integer, format: int64, description: 审批流 ID }
-        decision: { type: string, description: 决策 (APPROVE/REJECT) }
         status: { type: string, description: 订阅状态 }
         displayStatus: { type: string, description: 展示状态 }
-        handledAt: { type: string, format: date-time, description: 处理时间 }
-        message: { type: string, description: 结果消息 }
+        decidedAt: { type: string, format: date-time, description: 决策时间 }
     RevokeSubscriptionResponse:
       type: object
       properties:
@@ -2173,14 +2218,43 @@ components:
           description: 目标状态
     BatchUpdateKnowledgeDocumentStageConfigRequest:
       type: object
-      required: [documentIds, stageConfig]
+      required: [docIds]
       properties:
-        documentIds: { type: array, minItems: 1, items: { type: string }, description: 待更新文档 ID 列表 }
+        docIds: { type: array, minItems: 1, items: { type: string }, description: 待更新文档 ID 列表 }
         stageConfig: { $ref: '#/components/schemas/KnowledgeStageConfigRequest', description: 批量应用的阶段配置 }
     KnowledgePipelineOptionsResponse:
       type: object
-      additionalProperties: true
       description: 可用知识管线组件选项。
+      properties:
+        parser: { type: array, items: { type: string }, description: 可用解析器类型 }
+        chunking: { type: array, items: { type: string }, description: 可用切片类型 }
+        enhance: { type: array, items: { type: string }, description: 可用增强类型 }
+        embedding:
+          type: array
+          description: 可用向量模型选项
+          items:
+            type: object
+            properties:
+              type: { type: string }
+              dimensions: { type: integer }
+              available: { type: boolean }
+              reason: { type: string }
+        rerank:
+          type: object
+          description: 重排模型选项
+          properties:
+            available: { type: boolean }
+            reason: { type: string }
+        vectorStore:
+          type: array
+          description: 可用向量库选项
+          items:
+            type: object
+            properties:
+              type: { type: string }
+              state: { type: string }
+              available: { type: boolean }
+              reason: { type: string }
     KnowledgePurgeOperationResponse:
       type: object
       properties:
@@ -2233,13 +2307,38 @@ components:
     CreateKnowledgeArtifactAccessUrlsRequest:
       type: object
       description: 批量创建制品临时访问地址请求。
-      required: [artifactIds]
       properties:
-        artifactIds: { type: array, minItems: 1, items: { type: string }, description: 制品 ID 列表 }
+        items:
+          type: array
+          description: 制品访问地址请求项列表
+          items:
+            type: object
+            required: [assetId, rendition]
+            properties:
+              assetId: { type: string, description: 制品资源 ID }
+              rendition: { type: string, description: 制品版本或渲染类型 }
+        ttlSeconds: { type: integer, minimum: 1, description: 临时访问地址有效期（秒），默认 300 }
     KnowledgeBatchDocumentStageConfigUpdateResponse:
       type: object
-      additionalProperties: true
       description: 批量阶段配置更新结果。
+      properties:
+        updated:
+          type: array
+          description: 更新成功的文档阶段配置项
+          items:
+            type: object
+            properties:
+              documentId: { type: string }
+              stageConfig: { type: object, additionalProperties: true }
+        failed:
+          type: array
+          description: 更新失败的文档阶段配置项
+          items:
+            type: object
+            properties:
+              documentId: { type: string }
+              code: { type: string }
+              message: { type: string }
     KnowledgeBuildJobPageResponse:
       type: object
       properties:
@@ -2353,11 +2452,11 @@ components:
       type: object
       required: [bizType, bizRefId, fileName, size]
       properties:
-        bizType: { type: string, minLength: 1, description: 业务类型 }
-        bizRefId: { type: string, minLength: 1, description: 业务引用 ID }
-        fileName: { type: string, minLength: 1, description: 文件名 }
-        contentType: { type: string, description: 文件 MIME 类型 }
-        size: { type: integer, format: int64, minimum: 1, description: 文件大小（字节） }
+        bizType: { type: string, minLength: 1, enum: [KNOWLEDGE_SOURCE, AGENT_ASSET, PARSER_RESULT, KNOWLEDGE_RESULT], description: 业务类型 }
+        bizRefId: { type: string, minLength: 1, description: 文件所属业务对象 ID }
+        fileName: { type: string, minLength: 1, description: 原始文件名 }
+        contentType: { type: string, description: 文件 MIME 类型；未提供时由服务端按文件名推断 }
+        size: { type: integer, format: int64, minimum: 1, maximum: 5368709120, description: 文件大小（字节），最大 5 GiB }
 
     BatchCreateUploadSessionRequest:
       type: object
@@ -2397,7 +2496,7 @@ components:
 
     CompleteUploadRequest:
       type: object
-      required: [etag, size]
+      required: [etag]
       properties:
         etag: { type: string, minLength: 1, description: 对象 ETag }
         size: { type: integer, format: int64, minimum: 1, description: 文件大小（字节） }
@@ -2412,7 +2511,7 @@ components:
     CreateDownloadUrlRequest:
       type: object
       properties:
-        expireSeconds: { type: integer, minimum: 1, description: 字段：expireSeconds }
+        expireSeconds: { type: integer, minimum: 30, maximum: 1800, default: 300, description: 下载地址有效期（秒），取值范围 30-1800 }
 
     CreateDownloadUrlResponse:
       type: object
@@ -2420,10 +2519,11 @@ components:
         fileId: { type: string, description: 文件 ID }
         downloadUrl: { type: string, format: uri, description: 下载地址 }
         expireAt: { type: string, format: date-time, description: 过期时间 }
+        proxyDownloadUrl: { type: string, format: uri, description: 代理下载地址 }
 
     RegisterResultFileRequest:
       type: object
-      required: [sourceFileId, bizType, fileName, contentType, size]
+      required: [sourceFileId, bizType, fileName, size]
       properties:
         sourceFileId: { type: string, description: 源文件 ID }
         bizType: { type: string, description: 业务类型 }
@@ -2581,7 +2681,7 @@ components:
         selectable: { type: array, items: { type: object, additionalProperties: true }, description: 可选择导入的项目 }
         truncated: { type: boolean, description: 是否因深度或节点上限截断 }
         stats: { type: object, properties: { nodes: { type: integer }, max_depth_reached: { type: integer } }, description: 统计信息 }
-        traverse_children: { type: boolean, description: 是否遍历子节点 }
+        traverse_children: { type: boolean, description: 是否遍历子级页面 }
 
     McpImportRequest:
       type: object
@@ -2776,7 +2876,6 @@ components:
           maxItems: 20
           items: { $ref: '#/components/schemas/KnowledgeTagRequest' }
         pipelineConfig: { $ref: '#/components/schemas/KnowledgePipelineConfigRequest', description: 管线配置 }
-        metadata: { type: object, maxProperties: 50, additionalProperties: true, description: 扩展元数据 }
 
     KnowledgeBaseRoleApprovers:
       type: object
@@ -2867,14 +2966,17 @@ components:
 
     CreateDirectoryRequest:
       type: object
-      required: [name]
+      required: [name, directoryType]
       properties:
         parentId: { type: integer, format: int64, description: 父级 ID }
         name: { type: string, minLength: 1, description: 名称 }
+        sortNo: { type: integer, minimum: 0, maximum: 999999, default: 1000, description: 排序号 }
+        directoryType: { type: string, enum: [PUBLIC, PERSONAL], description: 目录类型 }
         approverIds:
           description: 字段：approverIds
           type: array
-          items: { type: string }
+          maxItems: 20
+          items: { type: integer, format: int64 }
 
     RenameDirectoryRequest:
       type: object
@@ -2934,7 +3036,7 @@ components:
       type: object
       properties:
         knowledgeBaseId: { type: string, description: 知识库 ID }
-        directoryId: { type: integer, format: int64, description: 所属目录 ID }
+        directoryId: { type: string, description: 所属目录 ID }
         directoryInfo:
           type: object
           description: 当前知识库所在目录信息
@@ -2946,9 +3048,12 @@ components:
         status: { type: string, description: 状态 }
         recommendedConfig: { type: boolean, description: 是否使用推荐配置 }
         tags: { type: array, items: { $ref: '#/components/schemas/KnowledgeTagResponse' }, description: 标签列表 }
+        version: { type: integer, description: 版本号 }
         documentCount: { type: integer, description: 文档总数 }
         liveDocumentCount: { type: integer, description: 已生效文档数 }
         buildingDocumentCount: { type: integer, description: 构建中文档数 }
+        chunkCount: { type: integer, description: 切片数 }
+        documentReadyCoveragePercent: { type: number, format: float, description: 文档可检索覆盖率 }
         retrievalReady: { type: boolean, description: 是否可检索 }
         pipelineConfig: { $ref: '#/components/schemas/KnowledgePipelineConfigRequest', description: 管线配置 }
         vectorCollection: { type: string, description: 向量集合名 }
@@ -2956,6 +3061,7 @@ components:
         lastBuildAt: { type: string, format: date-time, description: 最近构建时间 }
         createdAt: { type: string, format: date-time, description: 创建时间 }
         updatedAt: { type: string, format: date-time, description: 更新时间 }
+        vectorCount: { type: integer, description: 向量数 }
 
     KnowledgeBasePageResponse:
       type: object
@@ -3098,6 +3204,66 @@ components:
         notReadyKnowledgeBaseCount: { type: integer, description: 未就绪知识库数量 }
         notReadyReasonBreakdown: { type: object, additionalProperties: { type: integer }, description: 按未就绪原因聚合的知识库数量，例如 DRAFT 或 DISABLED }
 
+    KnowledgeOverviewResponse:
+      type: object
+      description: 知识管理概览数据。
+      required: [buildPipeline, documentsByDomain]
+      properties:
+        buildPipeline:
+          $ref: '#/components/schemas/KnowledgeOverviewBuildPipeline'
+        documentsByDomain:
+          $ref: '#/components/schemas/KnowledgeOverviewDocumentsByDomain'
+
+    KnowledgeOverviewBuildPipeline:
+      type: object
+      description: 构建流水线概览。
+      required: [stages, items]
+      properties:
+        stages:
+          type: array
+          items: { type: string }
+          description: 流水线标准阶段列表，如 ["Parse", "Chunk", "Enhancer", "Embedding"]
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/KnowledgeOverviewPipelineItem' }
+          description: 流水线构建项列表
+
+    KnowledgeOverviewPipelineItem:
+      type: object
+      description: 知识库流水线构建项。
+      required: [order, kbId, kbName, domainName, documentCount, progress, stage, stageDisplayName, status]
+      properties:
+        order: { type: string, description: 序号，如 "01", "02" }
+        kbId: { type: string, description: 知识库 ID }
+        kbName: { type: string, description: 知识库名称 }
+        domainName: { type: string, description: 所属领域名称 }
+        documentCount: { type: integer, description: 文档数量 }
+        progress: { type: integer, description: 构建总进度百分比（0-100） }
+        stage: { type: string, description: 当前阶段编码（parse/chunk/enhance/embed） }
+        stageDisplayName: { type: string, description: 当前阶段展示名称（Parsing/Chunking/Enhancing/Embedding） }
+        status: { type: string, description: 状态 }
+
+    KnowledgeOverviewDocumentsByDomain:
+      type: object
+      description: 按领域文档分布。
+      required: [totalDocuments, items]
+      properties:
+        totalDocuments: { type: integer, description: 文档总数 }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/KnowledgeOverviewDomainItem' }
+          description: 各领域文档统计分布
+
+    KnowledgeOverviewDomainItem:
+      type: object
+      description: 领域文档分布项。
+      required: [domainId, domainName, documentCount, percentage]
+      properties:
+        domainId: { type: string, description: 领域（根目录）ID }
+        domainName: { type: string, description: 领域名称 }
+        documentCount: { type: integer, description: 文档数量 }
+        percentage: { type: number, format: double, description: 占比百分比（如 38.0 表示 38%） }
+
     KnowledgePipelineDefaultConfigResponse:
       type: object
       description: 创建知识库时使用的默认管线配置。
@@ -3151,7 +3317,6 @@ components:
       description: 知识库文档创建响应数据
       properties:
         documentId: { type: string, description: 创建成功的文档 ID }
-        jobId: { type: string, description: 关联的构建任务 ID }
         status: { type: string, description: 当前状态 }
 
     KnowledgeDocumentBatchImportRequest:
@@ -3190,6 +3355,9 @@ components:
         docType: { type: string, description: 文档类型 }
         parseState: { type: string, description: 字段：parseState }
         buildStages: { $ref: '#/components/schemas/DocumentBuildStagesResponse', description: 文档构建阶段状态汇总 }
+        parser: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 解析阶段执行结果 }
+        chunk: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 切片阶段执行结果 }
+        enhance: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 增强阶段执行结果 }
         update: { type: object, additionalProperties: true, description: 字段：update }
         meta: { type: object, additionalProperties: true, description: 字段：meta }
         sourceType: { type: string, enum: [CONFLUENCE, SHAREPOINT, ONEDRIVE, BLOB, S3, LOCAL_UPLOAD], description: 来源类型 }
@@ -3345,12 +3513,13 @@ components:
         knowledgeBaseId: { type: string, description: 知识库 ID }
         documentId: { type: string, description: 文档 ID }
         jobId: { type: string, description: 任务 ID }
-        enhanceType: { type: string, description: 增强类型 }
-        items: { type: array, items: { $ref: '#/components/schemas/KnowledgeDocumentEnhanceItemResponse' }, description: 列表项 }
-        stats: { type: object, additionalProperties: true, description: 统计信息 }
-        page: { type: integer, minimum: 1, description: 当前页码 }
-        pageSize: { type: integer, minimum: 1, description: 每页数量 }
-        total: { type: integer, format: int64, description: 总数 }
+        itemsByType:
+          type: object
+          description: 按增强类型分组的增强产物列表映射（如 summary、keyword、faq）
+          additionalProperties:
+            type: array
+            items: { $ref: '#/components/schemas/KnowledgeDocumentEnhanceItemResponse' }
+        stats: { type: object, additionalProperties: true, description: 增强统计信息 }
 
     KnowledgeDocumentParseInfoResponse:
       type: object
@@ -3463,7 +3632,7 @@ components:
     KnowledgeStageRunResponse:
       type: object
       description: 文档单阶段执行结果。任务通常为异步执行，应使用 pipelineJobId 查询最终任务状态。
-      required: [pipelineJobId, isNewJob, stageStatus, runMode, docId, stageType, stages]
+      required: [pipelineJobId, isNewJob, stageStatus, runMode, docId, stageType, stages, parser, chunk, enhance, retrievalReady, chunkCount, pageCount, charCount, updatedAt]
       properties:
         pipelineJobId:
           type: string
@@ -3480,10 +3649,26 @@ components:
           items: { $ref: '#/components/schemas/KnowledgeJobStageResponse' }
         finishedAt: { type: [string, 'null'], description: 阶段或任务完成时间；执行中时为空 }
         errorMsg: { type: [string, 'null'], description: 阶段执行失败时的脱敏错误信息；成功或执行中时为空 }
+        parser: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 解析阶段执行结果 }
+        chunk: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 切片阶段执行结果 }
+        enhance: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 增强阶段执行结果 }
+        retrievalReady: { type: boolean, description: 文档是否已具备检索条件 }
+        chunkCount: { type: integer, description: 文档切片数量 }
+        pageCount: { type: integer, description: 文档页数 }
+        charCount: { type: integer, description: 文档字符数 }
+        updatedAt: { type: string, format: date-time, description: 文档结果更新时间 }
+
+    KnowledgeStageExecutionResult:
+      type: object
+      description: 单个知识处理阶段的执行结果。executionResult 的字段随阶段类型变化。
+      required: [status]
+      properties:
+        status: { type: string, description: 阶段执行状态，例如 SUCCESS、SKIPPED、FAILED }
+        errorMsg: { type: [string, 'null'], description: 阶段失败或跳过原因 }
         executionResult:
           type: [object, 'null']
           additionalProperties: true
-          description: 阶段执行产生的结构化结果；具体属性由阶段类型决定。
+          description: 阶段产生的结构化结果；解析、切片和增强阶段返回不同字段。
 
     KnowledgeJobStageResponse:
       type: object
@@ -3525,49 +3710,6 @@ components:
         results: { type: array, items: { type: object, additionalProperties: true }, description: 字段：results }
         retrievalMeta: { type: object, additionalProperties: true, description: 字段：retrievalMeta }
 
-    OpenKnowledgeBaseResponse:
-      type: object
-      properties:
-        knowledgeBaseId: { type: integer, format: int64, description: 知识库 ID }
-        name: { type: string, description: 知识库名称 }
-        description: { type: string, description: 描述 }
-        documentCount: { type: integer, description: 文档数量 }
-        embeddingModel: { type: string, description: 向量模型 }
-        dimensions: { type: integer, description: 向量维度 }
-        lastBuildAt: { type: string, description: 最后构建时间 }
-
-    OpenRetrievalRequest:
-      type: object
-      required: [query]
-      properties:
-        query: { type: string, minLength: 1, description: 用户检索问题 }
-        topK: { type: integer, minimum: 1, default: 10, description: TopK 返回数量 }
-        strategy: { type: string, description: 检索策略类型 }
-        retrieval: { type: object, additionalProperties: true, description: 检索策略配置 }
-        filters: { type: object, additionalProperties: true, description: 过滤条件配置 }
-        rerank: { type: object, additionalProperties: true, description: 重排配置 }
-        options: { type: object, additionalProperties: true, description: 检索选项配置 }
-
-    OpenDocumentUpdateRequest:
-      type: object
-      required: [sourceType, item]
-      properties:
-        sourceType: { type: string, default: FILE, description: 来源类型 }
-        item: { type: object, additionalProperties: true, description: 导入文档项 }
-        duplicatePolicy: { type: string, default: OVERWRITE, description: 重复处理策略 }
-        documentOverride: { type: object, additionalProperties: true, description: 管线覆盖配置 }
-
-    DocumentImportResultResponse:
-      type: object
-      properties:
-        operationId: { type: string, description: 操作流转 ID }
-        batchJobId: { type: object, description: 批处理任务 ID }
-        accepted: { type: array, items: { type: object, additionalProperties: true }, description: 已接受项列表 }
-        rejected: { type: array, items: { type: object, additionalProperties: true }, description: 已拒绝项列表 }
-
-    OpenKnowledgeBaseEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/OpenKnowledgeBaseResponse', description: 响应数据 } } }] }
-    DocumentImportResultEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/DocumentImportResultResponse', description: 响应数据 } } }] }
-
     DirectoryPermissionResponse:
       type: object
       properties:
@@ -3599,6 +3741,7 @@ components:
     KnowledgeBaseConfigUpdateEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseConfigUpdateResponse', description: 响应数据 } } }] }
     KnowledgeBaseStatisticsEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseStatisticsResponse', description: 响应数据 } } }] }
     KnowledgeBaseAggregateStatisticsEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseAggregateStatisticsResponse', description: 响应数据 } } }] }
+    KnowledgeOverviewEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeOverviewResponse', description: 响应数据 } } }] }
     KnowledgePipelineDefaultConfigEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgePipelineDefaultConfigResponse', description: 响应数据 } } }] }
     KnowledgeDocumentCreateEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeDocumentCreateResponse', description: 响应数据 } } }] }
     KnowledgeBaseDocumentPageEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/KnowledgeBaseDocumentPageResponse', description: 响应数据 } } }] }
@@ -3621,12 +3764,12 @@ components:
       type: object
       required: [usernameCn, usernameEn, password, email]
       properties:
-        usernameCn: { type: string, minLength: 1, description: 字段：usernameCn }
-        usernameEn: { type: string, minLength: 1, description: 字段：usernameEn }
-        password: { type: string, minLength: 1, writeOnly: true, description: 字段：password }
-        email: { type: string, format: email, description: 字段：email }
-        remark: { type: string, description: 字段：remark }
-        tenantId: { type: string, description: 字段：tenantId }
+        usernameCn: { type: string, minLength: 3, maxLength: 64, description: 中文用户名，长度 3-64 }
+        usernameEn: { type: string, minLength: 3, maxLength: 64, description: 英文用户名，长度 3-64 }
+        password: { type: string, minLength: 8, maxLength: 20, writeOnly: true, description: 初始密码，长度 8-20 }
+        email: { type: string, format: email, maxLength: 256, description: 用户邮箱 }
+        remark: { type: string, maxLength: 255, description: 用户备注 }
+        tenantId: { type: string, maxLength: 64, description: 租户 ID }
 
     UpdateUserRequest:
       type: object
@@ -3652,9 +3795,9 @@ components:
       type: object
       required: [roleCode, roleName]
       properties:
-        roleCode: { type: string, minLength: 1, description: 字段：roleCode }
-        roleName: { type: string, minLength: 1, description: 字段：roleName }
-        remark: { type: string, description: 字段：remark }
+        roleCode: { type: string, minLength: 3, maxLength: 64, pattern: '^[a-z][a-z0-9:_-]{2,63}$', description: 角色编码，必须以小写字母开头，仅允许小写字母、数字、冒号、下划线和连字符 }
+        roleName: { type: string, minLength: 1, maxLength: 128, description: 角色名称 }
+        remark: { type: string, maxLength: 255, description: 角色备注 }
 
     UpdateRoleRequest:
       type: object
@@ -3704,7 +3847,7 @@ components:
 
     CreatePermissionRequest:
       type: object
-      required: [permissionCode, permissionName, resourceType]
+      required: [permissionCode, permissionName, resourceType, resourcePath]
       properties:
         permissionCode: { type: string, minLength: 1, description: 字段：permissionCode }
         permissionName: { type: string, minLength: 1, description: 字段：permissionName }
@@ -3750,6 +3893,7 @@ components:
 
     RegeneratePatRequest:
       type: object
+      required: [expiresIn]
       properties:
         expiresIn: { type: integer, minimum: 1, description: 字段：expiresIn }
         expectedUpdateTime: { type: string, format: date-time, description: 字段：expectedUpdateTime }
@@ -3788,7 +3932,7 @@ components:
 
     CreateOutboundCredentialRequest:
       type: object
-      required: [name, targetType, targetId, fields]
+      required: [name, targetType, targetId]
       properties:
         name: { type: string, minLength: 1, description: 名称 }
         targetType: { type: string, minLength: 1, description: 字段：targetType }
@@ -3797,7 +3941,6 @@ components:
 
     UpdateOutboundCredentialRequest:
       type: object
-      required: [fields]
       properties:
         fields: { type: object, additionalProperties: { type: string }, description: 字段：fields }
 
@@ -3843,7 +3986,7 @@ components:
 
     PermissionCheckRequest:
       type: object
-      required: [checks]
+      required: [userId, checks]
       properties:
         userId: { type: integer, format: int64, description: 字段：userId }
         checks:
@@ -3887,7 +4030,6 @@ components:
 
     VerifyTokenRequest:
       type: object
-      required: [token]
       properties:
         token: { type: string, minLength: 1, description: 字段：token }
 
@@ -3903,7 +4045,6 @@ components:
 
     UpdateOutboundCredentialStatusRequest:
       type: object
-      required: [status]
       properties:
         status: { type: string, minLength: 1, description: 状态 }
 
@@ -3955,6 +4096,30 @@ components:
                   description: 字段：publicDirectories
                   type: array
                   items: { $ref: '#/components/schemas/DirectoryTreeNode' }
+
+    DirectoryCreateOptionListEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: 所有 canCreate 为 true 的目录选项，按目录树深度优先顺序返回。
+              items:
+                $ref: '#/components/schemas/DirectoryCreateOption'
+
+    DirectoryCreateOption:
+      type: object
+      required: [name, id]
+      description: 可创建目标目录的路径选项。
+      properties:
+        name:
+          type: string
+          description: 从根目录开始拼接的完整目录路径，例如 AML/Test0911/test。
+        id:
+          type: integer
+          format: int64
+          description: 完整路径末尾目录的 ID。
 
     DirectoryTreeNode:
       type: object
