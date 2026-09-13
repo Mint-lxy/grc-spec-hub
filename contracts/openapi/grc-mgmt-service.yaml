@@ -465,6 +465,40 @@ paths:
         - { name: keyword, in: query, description: 搜索关键词, required: false, schema: { type: string } }
         - { name: directoryType, in: query, description: 目录类型, required: false, schema: { type: string, enum: [PUBLIC, PERSONAL] } }
       responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/DirectoryTreeResponse' } } } } }
+  /mgmt/knowledge/directories/filter-tree:
+    get:
+      tags: [Knowledge Directory]
+      operationId: filterCreatableDirectories
+      summary: 查询可创建目录选项
+      description: >-
+        递归检查指定目录类型下的完整目录树，并返回 canCreate 为 true 的目录选项。
+        返回数组按目录树深度优先顺序排列；name 为从根目录开始拼接的完整目录路径，id 为路径末尾目录的 ID。
+        filterType 为 kb 时仅叶子目录可创建知识库；filterType 为 dir 时仅未绑定知识库的目录可创建子目录。
+      parameters:
+        - name: directoryType
+          in: query
+          required: true
+          description: 目录类型过滤。PUBLIC 表示公共目录，PERSONAL 表示个人目录。
+          schema:
+            type: string
+            enum: [PUBLIC, PERSONAL]
+        - name: filterType
+          in: query
+          required: false
+          description: 创建目标类型。kb 表示筛选可创建知识库的目录，dir 表示筛选可创建子目录的目录。
+          schema:
+            type: string
+            enum: [dir, kb]
+            default: dir
+      responses:
+        '200':
+          description: 查询成功；data 为空数组表示没有满足条件的目录。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DirectoryCreateOptionListEnvelope'
+        '400':
+          description: directoryType 缺失或参数值不在允许范围内。
   /mgmt/knowledge/directories:
     post:
       tags: [Knowledge Directory]
@@ -4062,6 +4096,30 @@ components:
                   description: 字段：publicDirectories
                   type: array
                   items: { $ref: '#/components/schemas/DirectoryTreeNode' }
+
+    DirectoryCreateOptionListEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              description: 所有 canCreate 为 true 的目录选项，按目录树深度优先顺序返回。
+              items:
+                $ref: '#/components/schemas/DirectoryCreateOption'
+
+    DirectoryCreateOption:
+      type: object
+      required: [name, id]
+      description: 可创建目标目录的路径选项。
+      properties:
+        name:
+          type: string
+          description: 从根目录开始拼接的完整目录路径，例如 AML/Test0911/test。
+        id:
+          type: integer
+          format: int64
+          description: 完整路径末尾目录的 ID。
 
     DirectoryTreeNode:
       type: object
