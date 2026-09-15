@@ -460,11 +460,57 @@ paths:
       tags: [Knowledge Directory]
       operationId: getDirectoryTree
       summary: 查询知识目录树
+      description: >-
+        查询当前系统登录用户可见的知识目录树层级结构，按公共目录（public）与个人目录（personal）分别聚合返回。
+        
+        【入参说明】：
+        - includeKbCount (query, boolean, 可选, 默认 false): 是否递归统计并返回目录节点绑定的知识库总数量。
+        - keyword (query, string, 可选): 目录名称过滤关键词，模糊匹配目录名称；命中时保留其祖先节点路径。
+        - directoryType (query, string, 可选, 枚举 PUBLIC/PERSONAL): 仅返回指定类型的目录树；不传则返回全部可见类型。
+
+        【出参说明】：
+        - 返回标准统一响应体（DirectoryTreeResponse），data 中包含 public（公共目录根节点列表）与 personal（个人目录根节点列表）。
+        - 每个目录节点（DirectoryTreeNode）包含：
+          1. id: 目录 ID
+          2. name: 目录名称
+          3. parentId: 父级目录 ID（根节点为 null）
+          4. path: 目录完整层级路径（如 /全部知识/合规专区）
+          5. childrenCount: 直接子目录数量
+          6. kbCount: 绑定的知识库数量（includeKbCount=true 时统计返回）
+          7. directoryType: 目录分类（PUBLIC 公共目录，PERSONAL 个人目录）
+          8. createKBFlag: 是否允许在当前目录创建知识库（叶子节点为 true，非叶子节点为 false）
+          9. createDirFlag: 是否允许在当前目录创建子目录（所有父级目录为 true；无知识库的叶子目录为 true；已挂载知识库的叶子目录为 false）
+          10. aliceSyncStatus: Alice 权限映射同步状态（SUCCESS / PENDING / FAIL）
+          11. permissionItems: 目录权限投影项列表（包含 DIR_CONTROL 目录控制权限、KB_CREATOR 知识库创建权限及申请 URL）
+          12. children: 子目录节点列表（递归结构）
       parameters:
-        - { name: includeKbCount, in: query, description: 是否包含知识库数量, schema: { type: boolean, default: false } }
-        - { name: keyword, in: query, description: 搜索关键词, required: false, schema: { type: string } }
-        - { name: directoryType, in: query, description: 目录类型, required: false, schema: { type: string, enum: [PUBLIC, PERSONAL] } }
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/DirectoryTreeResponse' } } } } }
+        - name: includeKbCount
+          in: query
+          description: 是否统计并返回知识库数量，默认 false
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: keyword
+          in: query
+          description: 目录名称搜索关键词
+          required: false
+          schema:
+            type: string
+        - name: directoryType
+          in: query
+          description: 目录分类过滤：PUBLIC 公共目录，PERSONAL 个人目录
+          required: false
+          schema:
+            type: string
+            enum: [PUBLIC, PERSONAL]
+      responses:
+        '200':
+          description: 查询成功，返回按 public/personal 分组的目录树
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DirectoryTreeResponse'
   /mgmt/knowledge/directories/filter-tree:
     get:
       tags: [Knowledge Directory]
@@ -644,10 +690,29 @@ paths:
       tags: [Knowledge Base]
       operationId: getDefaultKnowledgePipelineConfig
       summary: 查询知识库默认管线配置
-      description: 返回创建知识库时的默认解析、切片、增强、向量化和向量库存储配置。该接口无入参。
+      description: >-
+        查询创建知识库时使用的默认管线配置与动态表单 Schema 元数据。
+
+        【入参说明】：
+        - 该接口为无参 GET 请求，无需传递 Query 参数、Path 路径参数或 Request Body 请求体。
+        - 标准认证与追踪请求头（如 Authorization 认证令牌、X-Trace-Id 分布式链路追踪 ID）由网关/拦截器统一处理。
+
+        【出参说明】：
+        - 返回标准统一响应体（KnowledgePipelineDefaultConfigEnvelope），其 data 属性为 KnowledgePipelineDefaultConfigResponse。
+        - 包含：
+          1. schemaVersion: Schema 协议版本（如 '1.0'）
+          2. scene: 当前适用场景（如 'CREATE_KB'）
+          3. supportedScenes: 该 Schema 适用的全部场景列表（CREATE_KB, UPDATE_KB, DOCUMENT_OVERRIDE）
+          4. parser: 可选解析器列表（如 ['docling', 'mineru']）
+          5. chunking: 可选切片类型列表（如 ['fixed', 'semantic', 'hierarchical', 'parent']）
+          6. enhance: 可选增强类型列表（如 ['summary', 'keyword', 'faq']）
+          7. embedding: 向量模型配置选项列表（含类型、标签、维度、可用性等）
+          8. vectorStore: 向量库配置选项列表（含类型、标签、主从状态、可用性等）
+          9. pipelineConfigSchema: 管线各阶段（parser/chunking/enhance/embedding/vectorStore）详细表单控件类型、默认参数与校验约束定义
+          10. crossFieldRules: 跨字段与跨组件联动校验规则及错误提示文案
       responses:
         '200':
-          description: 查询成功
+          description: 查询成功，返回默认管线配置及 Schema 约束元数据
           content:
             application/json:
               schema:
@@ -1008,6 +1073,7 @@ paths:
       tags: [Marketplace Asset]
       operationId: createMarketplaceAsset
       summary: 创建资产
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CreateMarketplaceAssetRequest' } } } }
       responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/CreateMarketplaceAssetEnvelope' } } } } }
     get:
@@ -1035,6 +1101,7 @@ paths:
       tags: [Marketplace Asset]
       operationId: updateMarketplaceAsset
       summary: 更新资产
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateMarketplaceAssetRequest' } } } }
       responses: { '200': { description: 更新成功, content: { application/json: { schema: { $ref: '#/components/schemas/CreateMarketplaceAssetEnvelope' } } } } }
   /mgmt/marketplace/assets/{assetId}/publish:
@@ -1043,6 +1110,7 @@ paths:
       tags: [Marketplace Asset]
       operationId: publishMarketplaceAsset
       summary: 发布资产
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
       responses: { '200': { description: 发布成功, content: { application/json: { schema: { $ref: '#/components/schemas/PublishMarketplaceAssetEnvelope' } } } } }
   /mgmt/marketplace/assets/{assetId}/unpublish:
     parameters: [{ $ref: '#/components/parameters/AssetId' }]
@@ -1050,6 +1118,7 @@ paths:
       tags: [Marketplace Asset]
       operationId: unpublishMarketplaceAsset
       summary: 下架资产
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
       responses: { '200': { description: 下架成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } }
   /mgmt/marketplace/assets/{assetId}/archive:
     parameters: [{ $ref: '#/components/parameters/AssetId' }]
@@ -1057,6 +1126,7 @@ paths:
       tags: [Marketplace Asset]
       operationId: archiveMarketplaceAsset
       summary: 归档资产
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
       responses: { '200': { description: 归档成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } }
   /mgmt/marketplace/assets/{assetId}/transfer-owner:
     parameters: [{ $ref: '#/components/parameters/AssetId' }]
@@ -1064,6 +1134,7 @@ paths:
       tags: [Marketplace Asset]
       operationId: transferMarketplaceAssetOwner
       summary: 转移资产 Owner
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/TransferMarketplaceOwnerRequest' } } } }
       responses: { '200': { description: 转移成功, content: { application/json: { schema: { $ref: '#/components/schemas/OwnerTransferEnvelope' } } } } }
   /mgmt/marketplace/assets/{assetId}/precheck:
@@ -1107,6 +1178,7 @@ paths:
       tags: [Marketplace Asset]
       operationId: deleteMarketplaceDraft
       summary: 删除资产草稿
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
       responses: { '200': { description: 删除成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } }
   /mgmt/marketplace/approval-flows/{flowId}:
     parameters: [{ $ref: '#/components/parameters/FlowId' }]
@@ -1131,6 +1203,7 @@ paths:
       tags: [Marketplace Approval]
       operationId: approveApprovalStep
       summary: 审批通过
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
       requestBody: { content: { application/json: { schema: { $ref: '#/components/schemas/ApprovalActionRequest' } } } }
       responses: { '200': { description: 审批成功, content: { application/json: { schema: { $ref: '#/components/schemas/ApprovalActionEnvelope' } } } } }
   /mgmt/marketplace/approval-flows/{flowId}/steps/{stepId}/reject:
@@ -1139,6 +1212,7 @@ paths:
       tags: [Marketplace Approval]
       operationId: rejectApprovalStep
       summary: 审批驳回
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ApprovalActionRequest' } } } }
       responses: { '200': { description: 驳回成功, content: { application/json: { schema: { $ref: '#/components/schemas/ApprovalActionEnvelope' } } } } }
   /mgmt/marketplace/tags:
@@ -1168,6 +1242,7 @@ paths:
       tags: [Marketplace Subscription]
       operationId: submitSubscription
       summary: 提交订阅
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/SubmitSubscriptionRequest' } } } }
       responses: { '200': { description: 提交成功, content: { application/json: { schema: { $ref: '#/components/schemas/SubmitSubscriptionEnvelope' } } } } }
   /mgmt/marketplace/subscriber-center/summary:
@@ -1201,6 +1276,7 @@ paths:
       tags: [Marketplace Subscription]
       operationId: resubmitSubscription
       summary: 重新申请订阅
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
       requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ResubmitSubscriptionRequest' } } } }
       responses: { '200': { description: 提交成功, content: { application/json: { schema: { $ref: '#/components/schemas/ResubmitSubscriptionEnvelope' } } } } }
   /mgmt/marketplace/subscriptions/{subscriptionId}/cancel:
@@ -1209,6 +1285,7 @@ paths:
       tags: [Marketplace Subscription]
       operationId: cancelSubscription
       summary: 取消订阅
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
       requestBody: { required: false, content: { application/json: { schema: { $ref: '#/components/schemas/CancelSubscriptionRequest' } } } }
       responses: { '200': { description: 取消成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } }
   /mgmt/marketplace/favorites:
@@ -1526,6 +1603,12 @@ components:
         type: string
         enum: [parse, chunk, enhance, embed]
     AssetId: { name: assetId, in: path, required: true, description: 资产 ID, schema: { type: string } }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: 可选幂等键。相同键的重复写请求会被服务端拦截；未提供时不启用幂等保护。
+      schema: { type: string, minLength: 1, maxLength: 128 }
     FlowId: { name: flowId, in: path, required: true, description: 审批流 ID, schema: { type: string } }
     StepId: { name: stepId, in: path, required: true, description: 审批步骤 ID, schema: { type: string } }
     SubscriptionId: { name: subscriptionId, in: path, required: true, description: 订阅 ID, schema: { type: string } }
@@ -1600,11 +1683,27 @@ components:
       properties:
         guardrailTemplateId: { type: integer, format: int64, description: Agent 绑定的启用护栏模板 ID；Agent 提交时必填，MCP 不填写 }
     UpdateMarketplaceAssetRequest:
-      allOf:
-        - $ref: '#/components/schemas/MarketplaceAssetDraftData'
-        - type: object
-          properties:
-            submit: { type: boolean, default: false, description: 是否提交完成的草稿进入质量门控；false 时仅保存 DRAFT }
+      type: object
+      description: 更新资产或提交草稿的请求。字段均为可选；submit=false 时保存编辑结果，submit=true 时触发质量门控提交。
+      properties:
+        submit: { type: boolean, default: false, description: 是否提交完成的草稿进入质量门控 }
+        assetName: { type: string, maxLength: 200, description: 资产名称；提交或非草稿改名时校验唯一性 }
+        category: { type: string, maxLength: 100, description: 业务分类 }
+        description: { type: string, maxLength: 2000, description: 资产简介 }
+        assetIcon: { type: string, description: 资产图标地址 }
+        tagIds: { type: array, items: { type: integer, format: int64 }, description: 业务标签 ID 列表 }
+        hostingMode: { type: string, description: 托管方式 }
+        accessConfig: { type: object, additionalProperties: true, description: 接入配置，不得包含凭据明文 }
+        authConfig: { type: object, additionalProperties: true, description: 鉴权元数据，不得包含凭据明文 }
+        capabilityConfig: { type: object, additionalProperties: true, description: 能力声明配置 }
+        interfaceConfig: { type: object, additionalProperties: true, description: 接口清单配置 }
+        manifestSnapshot: { type: object, additionalProperties: true, description: Agent Card 或 MCP Manifest 快照 }
+        subscriptionFormYaml: { type: string, maxLength: 200000, description: 订阅申请表单 YAML 定义 }
+        subscriptionApprovalEnabled: { type: boolean, description: 是否启用订阅审批 }
+        subscriptionApprovers: { type: array, items: { $ref: '#/components/schemas/MarketplaceApprover' }, description: 订阅审批人及层级配置 }
+        releaseNote: { type: string, maxLength: 4000, description: 本次版本或资产更新说明 }
+        termsVersion: { type: string, description: 使用条款版本号 }
+        termsContent: { type: string, description: 使用条款正文 }
     TransferMarketplaceOwnerRequest:
       type: object
       required: [targetOwnerId]
@@ -1687,6 +1786,7 @@ components:
         optionalTemplates: { type: array, items: { type: string }, description: 可选测评模板列表 }
     MarketplaceAssetDetail:
       type: object
+      description: Marketplace 资产详情；接入配置和鉴权信息按当前用户关系投影，凭据明文不返回。
       properties:
         assetId: { type: integer, format: int64, description: 资产 ID }
         assetName: { type: string, description: 资产名称 }
@@ -1707,6 +1807,7 @@ components:
         protocolType: { type: string, description: 接入协议 }
         healthCheckEnabled: { type: boolean, description: 是否启用健康检查 }
         healthCheckStatus: { type: string, description: 最近健康检查状态 }
+        outboundDisabled: { type: boolean, description: 是否已被平台停用出站调用 }
         accessConfig: { type: object, additionalProperties: true, description: 接入配置 }
         authConfig: { type: object, additionalProperties: true, description: 鉴权配置 }
         capabilityConfig: { type: object, additionalProperties: true, description: 能力声明 }
@@ -1717,6 +1818,26 @@ components:
         publishedAt: { type: string, format: date-time, description: 发布时间 }
         createdAt: { type: string, format: date-time, description: 创建时间 }
         updatedAt: { type: string, format: date-time, description: 更新时间 }
+        currentVersion:
+          type: object
+          description: 当前版本摘要
+          properties:
+            versionId: { type: integer, format: int64, description: 当前版本 ID }
+            versionNo: { type: string, description: 当前版本号 }
+            versionName: { type: string, description: 当前版本名称 }
+            changeSummary: { type: string, description: 当前版本变更说明 }
+            createdAt: { type: string, format: date-time, description: 当前版本创建时间 }
+        historyVersions:
+          type: array
+          description: 历史版本摘要列表，不包含当前版本
+          items:
+            type: object
+            properties:
+              versionId: { type: integer, format: int64, description: 历史版本 ID }
+              versionNo: { type: string, description: 历史版本号 }
+              versionName: { type: string, description: 历史版本名称 }
+              changeSummary: { type: string, description: 历史版本变更说明 }
+              createdAt: { type: string, format: date-time, description: 历史版本创建时间 }
     AssetListItem:
       type: object
       properties:
@@ -1731,6 +1852,8 @@ components:
         ownerName: { type: string, description: Owner 名称 }
         tagNames: { type: array, items: { type: string }, description: 标签名称列表 }
         usageCount: { type: integer, description: 调用次数 }
+        healthCheckStatus: { type: string, description: 最近健康检查状态：PASSED、FAILED 或 UNKNOWN }
+        outboundDisabled: { type: boolean, description: 是否已被平台停用出站调用 }
         publishedAt: { type: string, format: date-time, description: 发布时间 }
         updatedAt: { type: string, format: date-time, description: 更新时间 }
     AssetPage:
@@ -1839,17 +1962,15 @@ components:
       type: object
       description: 审批流详情。
       properties:
-        id: { type: integer, format: int64, description: 审批流 ID }
+        flowId: { type: integer, format: int64, description: 审批流 ID }
         assetId: { type: integer, format: int64, description: 资产 ID }
+        assetName: { type: string, description: 资产名称 }
         subscriptionId: { type: integer, format: int64, description: 订阅 ID }
         flowType: { type: string, description: 流程类型 }
         status: { type: string, description: 流程状态 (PENDING/APPROVED/REJECTED/CANCELLED) }
         initiatorId: { type: integer, format: int64, description: 发起人用户 ID }
-        snapshot: { type: object, additionalProperties: true, description: 提交时的审批链快照 }
-        fallbackUsed: { type: boolean, description: 是否触发死锁回落 }
-        fallbackReason: { type: string, description: 回落原因说明 }
+        initiatorName: { type: string, description: 发起人名称；当前实现可能为空 }
         createdAt: { type: string, format: date-time, description: 创建时间 }
-        updatedAt: { type: string, format: date-time, description: 更新时间 }
         steps:
           type: array
           description: 审批步骤列表
@@ -1858,18 +1979,17 @@ components:
       type: object
       description: 审批步骤项。
       properties:
-        id: { type: integer, format: int64, description: 步骤 ID }
-        flowId: { type: integer, format: int64, description: 审批流 ID }
+        stepId: { type: integer, format: int64, description: 审批步骤 ID }
         approverId: { type: integer, format: int64, description: 审批人用户 ID }
         approverName: { type: string, description: 审批人姓名 }
         stepLevel: { type: integer, description: 审批层级 (同级 OR，跨级 AND) }
         status: { type: string, description: 步骤状态 (PENDING/APPROVED/REJECTED/CANCELLED) }
         comment: { type: string, description: 审批意见/驳回原因 }
-        handledAt: { type: string, format: date-time, description: 处理时间 }
+        approvedAt: { type: string, format: date-time, description: 审批处理时间；驳回时也记录处理时间 }
         createdAt: { type: string, format: date-time, description: 创建时间 }
-        updatedAt: { type: string, format: date-time, description: 更新时间 }
     PendingApproval:
       type: object
+      description: 当前用户的待审批步骤摘要，按用户、可选资产和数据库分页条件过滤。
       properties:
         flowId: { type: integer, format: int64, description: 审批流 ID }
         stepId: { type: integer, format: int64, description: 当前待处理步骤 ID }
@@ -1877,7 +1997,7 @@ components:
         assetId: { type: integer, format: int64, description: 资产 ID }
         assetName: { type: string, description: 资产名称 }
         subscriptionId: { type: integer, format: int64, description: 订阅 ID }
-        applicant: { type: string, description: 申请人 }
+        applicant: { type: string, description: 订阅申请人名称 }
         bizSystem: { type: string, description: 业务系统 }
         stepLevel: { type: integer, description: 当前审批层级 }
         createdAt: { type: string, format: date-time, description: 创建时间 }
@@ -1895,20 +2015,9 @@ components:
         assetId: { type: integer, format: int64, description: 资产 ID }
         assetName: { type: string, description: 资产名称 }
         assetType: { type: string, description: 资产类型 (AGENT/MCP) }
-        owner:
-          type: object
-          description: 资产 Owner 摘要
-          properties:
-            userId: { type: integer, format: int64, description: Owner 用户 ID }
-            name: { type: string, description: Owner 姓名 }
-        currentVersion:
-          type: object
-          description: 当前版本摘要
-          properties:
-            versionId: { type: integer, format: int64, description: 版本 ID }
-            versionNo: { type: string, description: 版本号 }
-            versionName: { type: string, description: 版本名称 }
-        releaseNote: { type: string, description: 发布说明 }
+        owner: { type: string, description: 资产 Owner 名称 }
+        versionNo: { type: string, description: 当前资产版本号 }
+        steps: { type: array, items: { type: string }, description: 订阅页面展示步骤名称列表 }
         formSchema: { type: object, additionalProperties: true, description: 表单 schema }
         terms:
           type: object
@@ -1916,29 +2025,23 @@ components:
           properties:
             version: { type: string, description: 条款版本 }
             content: { type: string, description: 条款正文 }
-        approvalChain:
+        approvals:
           type: array
-          description: 预览审批链层级列表
+          description: 当前生效的审批人节点列表
           items:
             type: object
             properties:
-              level: { type: integer, description: 层级 }
-              approvers:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    approverId: { type: integer, format: int64, description: 审批人 ID }
-                    name: { type: string, description: 审批人姓名 }
+              id: { type: string, description: 审批人 ID 的字符串表示 }
+              name: { type: string, description: 审批人姓名 }
+              mail: { type: string, description: 审批人邮箱；当前实现可能为空 }
+              status: { type: string, description: 当前节点状态 }
+              order: { type: integer, description: 审批层级或顺序 }
         submitRules:
           type: object
           description: 提交规则说明
           properties:
-            termsAcceptedRequired: { type: boolean, description: 是否要求勾选同意条款 }
+            requireTermsAccepted: { type: boolean, description: 是否要求勾选同意条款 }
             requiredFields: { type: array, items: { type: string }, description: 必填字段列表 }
-        subscriptionState: { type: string, description: 当前用户对该资产的订阅状态 }
-        canSubscribe: { type: boolean, description: 是否允许发起订阅 }
-        disabledReason: { type: string, description: 不可订阅原因提示 }
     SubmitSubscriptionResponse:
       type: object
       description: 订阅提交结果。
@@ -1974,13 +2077,24 @@ components:
         assetId: { type: integer, format: int64, description: 资产 ID }
         assetName: { type: string, description: 资产名称 }
         assetType: { type: string, description: 资产类型 (AGENT/MCP) }
+        assetIcon: { type: string, description: 资产图标 }
         owner: { type: string, description: Owner 姓名 }
-        bizSystem: { type: string, description: 业务系统 }
+        applicant: { type: string, description: 订阅申请人名称 }
         status: { type: string, description: 订阅状态 }
         displayStatus: { type: string, description: 展示状态 }
         createdAt: { type: string, format: date-time, description: 申请创建时间 }
+        termsAcceptedAt: { type: string, format: date-time, description: 条款确认时间 }
+        reason: { type: string, description: 申请原因 }
         approvals: { type: array, items: { $ref: '#/components/schemas/ApprovalSummaryVO' }, description: 审批阶段摘要 }
-        rejectInfo: { type: object, properties: { reason: { type: string, description: 驳回原因 }, suggestion: { type: string, description: 建议 } }, description: 驳回信息 }
+        actions: { $ref: '#/components/schemas/SubscriptionActions', description: 当前订阅可执行操作 }
+    SubscriptionActions:
+      type: object
+      properties:
+        canUse: { type: boolean, description: Agent 订阅是否允许使用 }
+        canConfigureCredential: { type: boolean, description: MCP 订阅是否允许配置凭据 }
+        canView: { type: boolean, description: 是否允许查看订阅详情 }
+        canResubmit: { type: boolean, description: 是否允许重新申请 }
+        canCancel: { type: boolean, description: 是否允许取消订阅 }
     ApprovalSummaryVO:
       type: object
       properties:
@@ -2043,20 +2157,22 @@ components:
       type: object
       description: 创作者资产项。
       properties:
-        id: { type: integer, format: int64, description: 资产 ID }
+        assetId: { type: integer, format: int64, description: 资产 ID }
         assetType: { type: string, description: 资产类型 }
-        agentMode: { type: string, description: Agent 形态 }
         assetName: { type: string, description: 资产名称 }
+        owner: { type: string, description: Owner 名称 }
         description: { type: string, description: 简介 }
-        assetIcon: { type: string, description: 图标 }
-        status: { type: string, description: 状态 }
-        category: { type: string, description: 分类 }
-        ownerName: { type: string, description: Owner 姓名 }
-        tagNames: { type: array, items: { type: string }, description: 标签列表 }
-        usageCount: { type: integer, description: 调用次数 }
+        version: { type: string, description: 当前版本号 }
+        updatedAt: { type: string, format: date-time, description: 最近更新时间 }
+        publishState: { type: string, description: 发布状态 }
+        displayStatus: { type: string, description: 面向创作者展示的状态 }
         pendingSubscriptionCount: { type: integer, description: 待处理订阅数 }
-        publishedAt: { type: string, format: date-time, description: 发布时间 }
-        updatedAt: { type: string, format: date-time, description: 更新时间 }
+        actions:
+          type: object
+          properties:
+            primary: { type: string, description: 当前主操作 }
+            canOpenConsole: { type: boolean, description: 是否允许打开资产控制台 }
+            canPublishNewVersion: { type: boolean, description: 是否允许发布新版本 }
     CreatorAssetPage:
       type: object
       description: 创作者资产分页结果。
@@ -2073,24 +2189,24 @@ components:
         assetId: { type: integer, format: int64, description: 资产 ID }
         assetName: { type: string, description: 资产名称 }
         assetType: { type: string, description: 资产类型 }
-        subscriberId: { type: integer, format: int64, description: 订阅者 ID }
-        subscriberName: { type: string, description: 订阅者姓名 }
+        applicant: { type: string, description: 订阅申请人名称 }
         bizSystem: { type: string, description: 业务系统 }
-        reason: { type: string, description: 申请原因 }
+        status: { type: string, description: 订阅状态 }
+        displayStatus: { type: string, description: 展示状态 }
         createdAt: { type: string, format: date-time, description: 申请时间 }
+        termsVersion: { type: string, description: 申请确认的条款版本 }
+        yamlAnswers: { type: object, additionalProperties: true, description: 订阅表单答案；不得包含凭据明文 }
     PendingPublishAssetItem:
       type: object
       description: 待发布资产项。
       properties:
-        id: { type: integer, format: int64, description: 资产 ID }
+        assetId: { type: integer, format: int64, description: 资产 ID }
         assetType: { type: string, description: 资产类型 }
-        agentMode: { type: string, description: Agent 形态 }
         assetName: { type: string, description: 资产名称 }
         description: { type: string, description: 简介 }
-        status: { type: string, description: 状态 }
-        evaluationStatus: { type: string, description: 测评状态 }
-        evaluationJobId: { type: string, description: 测评任务 ID }
-        updatedAt: { type: string, format: date-time, description: 最近更新时间 }
+        createdDate: { type: string, format: date, description: 资产创建日期 }
+        publishState: { type: string, description: 发布状态 }
+        displayStatus: { type: string, description: 面向创作者展示的状态 }
     PendingPublishAsset:
       type: object
       description: 待发布资产分页结果。
@@ -2101,14 +2217,27 @@ components:
         size: { type: integer, description: 每页条数 }
     AssetConsole:
       type: object
-      description: 创作者资产控制台数据。
+      description: 创作者资产控制台摘要，提供资产状态、摘要统计、页面标签和当前用户可执行权限。
       properties:
-        asset: { $ref: '#/components/schemas/MarketplaceAssetDetail', description: 资产详情 }
-        currentVersion: { type: object, properties: { versionId: { type: integer, format: int64 }, versionNo: { type: string }, versionName: { type: string }, changeSummary: { type: string }, createdAt: { type: string, format: date-time } }, description: 当前版本 }
-        historyVersions: { type: array, items: { type: object, properties: { versionId: { type: integer, format: int64 }, versionNo: { type: string }, versionName: { type: string }, changeSummary: { type: string }, createdAt: { type: string, format: date-time } } }, description: 历史版本 }
-        pendingSubscriptions: { type: array, items: { $ref: '#/components/schemas/PendingSubscriptionItem' }, description: 待审批订阅列表 }
-        subscriberStats: { type: object, additionalProperties: true, description: 订阅者统计数据 }
-        subscriptionSettings: { $ref: '#/components/schemas/SubscriptionSettings', description: 订阅设置 }
+        assetId: { type: integer, format: int64, description: 资产 ID }
+        assetName: { type: string, description: 资产名称 }
+        assetType: { type: string, description: 资产类型 }
+        owner: { type: string, description: Owner 名称 }
+        status: { type: string, description: 资产生命周期状态 }
+        displayStatus: { type: string, description: 面向创作者展示的状态 }
+        summary:
+          type: object
+          properties:
+            activeSubscriberCount: { type: integer, description: 当前有效订阅数 }
+            pendingSubscriberCount: { type: integer, description: 待处理订阅数 }
+            credentialMode: { type: string, description: 凭据模式摘要 }
+        tabs: { type: array, items: { type: string }, description: 控制台可见页签 }
+        permissions:
+          type: object
+          properties:
+            canPublishMcp: { type: boolean, description: 是否允许发布 MCP 资产 }
+            canPublishNewVersion: { type: boolean, description: 是否允许发布新版本 }
+            canManageSubscription: { type: boolean, description: 是否允许管理订阅设置 }
     SubscriptionSettings:
       type: object
       properties:
@@ -3266,14 +3395,576 @@ components:
 
     KnowledgePipelineDefaultConfigResponse:
       type: object
-      description: 创建知识库时使用的默认管线配置。
+      description: 知识库默认管线配置响应体，包含可用阶段选项、表单 Schema、适配器默认参数与跨字段校验规则。
+      required:
+        - schemaVersion
+        - scene
+        - supportedScenes
+        - parser
+        - chunking
+        - enhance
+        - embedding
+        - vectorStore
+        - pipelineConfigSchema
+        - crossFieldRules
+      properties:
+        schemaVersion:
+          type: string
+          description: 管线配置 Schema 规范版本号
+          example: '1.0'
+        scene:
+          type: string
+          description: 当前默认配置适用的业务场景
+          example: CREATE_KB
+          enum: [CREATE_KB, UPDATE_KB, DOCUMENT_OVERRIDE]
+        supportedScenes:
+          type: array
+          description: 支持使用该 Schema 的全部场景列表
+          items:
+            type: string
+            enum: [CREATE_KB, UPDATE_KB, DOCUMENT_OVERRIDE]
+          example: [CREATE_KB, UPDATE_KB, DOCUMENT_OVERRIDE]
+        parser:
+          type: array
+          description: 可选文档解析器标识列表
+          items:
+            type: string
+          example: [docling, mineru]
+        chunking:
+          type: array
+          description: 可选切片算法标识列表
+          items:
+            type: string
+          example: [fixed, semantic, hierarchical, parent]
+        enhance:
+          type: array
+          description: 可选增强类型标识列表
+          items:
+            type: string
+          example: [summary, keyword, faq]
+        embedding:
+          type: array
+          description: 可选向量模型配置列表
+          items:
+            $ref: '#/components/schemas/KnowledgePipelineEmbeddingOption'
+        vectorStore:
+          type: array
+          description: 可选向量库配置列表
+          items:
+            $ref: '#/components/schemas/KnowledgePipelineVectorStoreOption'
+        pipelineConfigSchema:
+          $ref: '#/components/schemas/KnowledgePipelineConfigSchema'
+          description: 知识管线各阶段组件与参数项的动态表单 Schema 描述
+        crossFieldRules:
+          type: array
+          description: 跨字段/跨阶段联动校验规则列表
+          items:
+            $ref: '#/components/schemas/KnowledgePipelineCrossFieldRule'
+
+    KnowledgePipelineEmbeddingOption:
+      type: object
+      description: 向量模型选项定义
+      required: [type, label, dimensions, available]
+      properties:
+        type:
+          type: string
+          description: 向量模型类型标识
+          example: gemini-embedding-001
+        label:
+          type: string
+          description: 向量模型前端展示名称
+          example: Gemini Embedding 001
+        dimensions:
+          type: integer
+          description: 向量维度大小
+          example: 1024
+        available:
+          type: boolean
+          description: 当前环境是否可用
+          example: true
+        reason:
+          type: string
+          nullable: true
+          description: 不可用时的原因说明（可用时为 null）
+
+    KnowledgePipelineVectorStoreOption:
+      type: object
+      description: 向量库选项定义
+      required: [type, label, available, state]
+      properties:
+        type:
+          type: string
+          description: 向量库类型标识
+          example: milvus
+        label:
+          type: string
+          description: 向量库前端展示名称
+          example: Milvus
+        available:
+          type: boolean
+          description: 当前环境是否可用
+          example: true
+        state:
+          type: string
+          description: 向量库集群状态或角色
+          example: PRIMARY
+        reason:
+          type: string
+          nullable: true
+          description: 不可用时的原因说明（可用时为 null）
+
+    KnowledgePipelineCrossFieldRule:
+      type: object
+      description: 跨字段校验与约束规则
+      required: [rule, message]
+      properties:
+        rule:
+          type: string
+          description: 校验规则表达式逻辑
+          example: fixed.chunkOverlap < fixed.chunkSize
+        message:
+          type: string
+          description: 校验失败时面向用户的错误提示文案
+          example: 固定切片重叠大小必须小于切片大小
+
+    KnowledgePipelineConfigSchema:
+      type: object
+      description: 管线全阶段 Schema 配置结构，包含 parser、chunking、enhance、embedding、vectorStore 各自的表单字段与适配器定义
       required: [parser, chunking, enhance, embedding, vectorStore]
       properties:
-        parser: { $ref: '#/components/schemas/KnowledgePipelineComponent', description: 默认解析器配置 }
-        chunking: { $ref: '#/components/schemas/KnowledgePipelineComponent', description: 默认切片配置 }
-        enhance: { type: array, items: { $ref: '#/components/schemas/KnowledgePipelineComponent' }, description: 默认内容增强配置列表 }
-        embedding: { $ref: '#/components/schemas/KnowledgePipelineComponent', description: 默认向量化配置 }
-        vectorStore: { $ref: '#/components/schemas/KnowledgePipelineComponent', description: 默认向量库配置 }
+        parser:
+          $ref: '#/components/schemas/KnowledgeParserPipelineSchema'
+          description: 文档解析阶段配置 Schema
+        chunking:
+          $ref: '#/components/schemas/KnowledgeChunkingPipelineSchema'
+          description: 文本切片阶段配置 Schema
+        enhance:
+          $ref: '#/components/schemas/KnowledgeEnhancePipelineSchema'
+          description: 内容增强阶段配置 Schema
+        embedding:
+          $ref: '#/components/schemas/KnowledgeEmbeddingPipelineSchema'
+          description: 向量化模型配置 Schema
+        vectorStore:
+          $ref: '#/components/schemas/KnowledgeVectorStorePipelineSchema'
+          description: 向量库存储配置 Schema
+
+    KnowledgeParserPipelineSchema:
+      type: object
+      description: 解析阶段配置 Schema 描述
+      required: [required, multiple, defaultType, editableScenes, changeEffect, typeOptions, commonFields, adapters]
+      properties:
+        required:
+          type: boolean
+          description: 该阶段配置是否必填
+          example: true
+        multiple:
+          type: boolean
+          description: 是否支持多选解析器
+          example: false
+        defaultType:
+          type: string
+          description: 默认推荐选中的解析器类型
+          example: docling
+        editableScenes:
+          type: array
+          description: 允许编辑解析配置的场景列表
+          items: { type: string }
+          example: [CREATE_KB, UPDATE_KB, DOCUMENT_OVERRIDE]
+        changeEffect:
+          type: string
+          description: 修改该阶段配置对已有构建任务的影响策略
+          example: REBUILD_FROM_PARSE
+        typeOptions:
+          type: array
+          description: 可选解析器选项详情列表
+          items:
+            $ref: '#/components/schemas/KnowledgeParserTypeOption'
+        commonFields:
+          type: array
+          description: 所有解析适配器通用的表单控制字段列表
+          items:
+            $ref: '#/components/schemas/KnowledgePipelineFormField'
+        adapters:
+          type: array
+          description: 具体解析器适配器的默认参数定义
+          items:
+            $ref: '#/components/schemas/KnowledgeParserAdapter'
+
+    KnowledgeParserTypeOption:
+      type: object
+      description: 解析器类型选项
+      required: [value, label, description, available]
+      properties:
+        value:
+          type: string
+          description: 解析器类型标识
+          example: docling
+        label:
+          type: string
+          description: 解析器显示名称
+          example: Docling
+        description:
+          type: string
+          description: 解析器适用场景说明
+          example: 适用于结构化 PDF、Word、PowerPoint 和 HTML 文档
+        available:
+          type: boolean
+          description: 是否可用
+          example: true
+        reason:
+          type: string
+          nullable: true
+          description: 不可用原因
+
+    KnowledgePipelineFormField:
+      type: object
+      description: 动态表单字段描述定义
+      required: [key, label, control, valueType, required, editable]
+      properties:
+        key:
+          type: string
+          description: 字段键名
+          example: parseMethod
+        label:
+          type: string
+          description: 字段在界面上的展示标签
+          example: 解析方式
+        control:
+          type: string
+          description: 渲染控件类型
+          example: SELECT
+          enum: [SELECT, SWITCH, NUMBER, SLIDER, TEXT]
+        valueType:
+          type: string
+          description: 字段取值的数据类型
+          example: STRING
+          enum: [STRING, BOOLEAN, INTEGER, NUMBER]
+        unit:
+          type: string
+          description: 数值单位（如字符数）
+          example: CHARACTER
+        required:
+          type: boolean
+          description: 是否为必填项
+          example: true
+        editable:
+          type: boolean
+          description: 是否允许用户交互编辑
+          example: true
+        derived:
+          type: boolean
+          description: 是否为根据其他字段自动计算的派生字段
+          example: false
+        derivedFrom:
+          type: string
+          description: 派生来源字段路径
+          example: embedding.type
+        formula:
+          type: string
+          description: 派生字段计算公式描述
+          example: chunkSize * parentFactor
+        defaultValue:
+          description: 字段默认值
+        minimum:
+          type: number
+          description: 数值最小值下限
+        maximum:
+          type: number
+          description: 数值最大值上限
+        step:
+          type: number
+          description: 滑块或步进器数值步长
+        options:
+          type: array
+          description: 下拉或单选可选值列表
+          items:
+            $ref: '#/components/schemas/KnowledgePipelineFieldOption'
+        valueMapping:
+          type: object
+          additionalProperties: true
+          description: 派生值到目标属性的映射字典
+
+    KnowledgePipelineFieldOption:
+      type: object
+      description: 表单字段枚举可选项
+      required: [value, label]
+      properties:
+        value:
+          description: 选项取值
+        label:
+          type: string
+          description: 选项展示文本
+          example: 文本解析
+        available:
+          type: boolean
+          description: 该选项是否可选
+          example: true
+        reason:
+          type: string
+          nullable: true
+          description: 该选项不可选时的原因
+
+    KnowledgeParserAdapter:
+      type: object
+      description: 解析器适配器默认配置定义
+      required: [type, defaultOptions]
+      properties:
+        type:
+          type: string
+          description: 适配器对应的解析器类型
+          example: docling
+        defaultOptions:
+          type: object
+          additionalProperties: true
+          description: 适配器默认参数集合（如 parseMethod、language、tableEnabled、formulaEnabled、imageMode 等）
+
+    KnowledgeChunkingPipelineSchema:
+      type: object
+      description: 切片阶段配置 Schema 描述
+      required: [required, multiple, defaultType, editableScenes, changeEffect, sizeUnit, typeOptions, adapters]
+      properties:
+        required:
+          type: boolean
+          description: 该阶段配置是否必填
+          example: true
+        multiple:
+          type: boolean
+          description: 是否支持多选切片算法
+          example: false
+        defaultType:
+          type: string
+          description: 默认切片算法类型
+          example: fixed
+        editableScenes:
+          type: array
+          description: 允许编辑切片配置的场景列表
+          items: { type: string }
+          example: [CREATE_KB, UPDATE_KB, DOCUMENT_OVERRIDE]
+        changeEffect:
+          type: string
+          description: 修改切片配置后触发的构建策略
+          example: REBUILD_FROM_CHUNK
+        sizeUnit:
+          type: string
+          description: 切片大小度量单位
+          example: CHARACTER
+        typeOptions:
+          type: array
+          description: 可选切片算法选项列表
+          items:
+            $ref: '#/components/schemas/KnowledgeTypeOptionItem'
+        adapters:
+          type: array
+          description: 各切片适配器详情（包含参数定义与默认值）
+          items:
+            $ref: '#/components/schemas/KnowledgeChunkingAdapter'
+
+    KnowledgeTypeOptionItem:
+      type: object
+      description: 通用类型选项描述
+      required: [value, label, available]
+      properties:
+        value:
+          type: string
+          description: 选项类型标识
+          example: fixed
+        label:
+          type: string
+          description: 选项展示标签
+          example: 固定长度切片
+        available:
+          type: boolean
+          description: 是否可用
+          example: true
+        reason:
+          type: string
+          nullable: true
+          description: 不可用原因说明
+
+    KnowledgeChunkingAdapter:
+      type: object
+      description: 切片算法适配器定义
+      required: [type, label, defaultOptions, fields]
+      properties:
+        type:
+          type: string
+          description: 切片算法类型
+          example: fixed
+        label:
+          type: string
+          description: 切片算法名称
+          example: 固定长度切片
+        defaultOptions:
+          type: object
+          additionalProperties: true
+          description: 该切片算法的默认配置选项
+        fields:
+          type: array
+          description: 该切片算法独有的表单字段定义列表
+          items:
+            $ref: '#/components/schemas/KnowledgePipelineFormField'
+
+    KnowledgeEnhancePipelineSchema:
+      type: object
+      description: 内容增强阶段配置 Schema 描述
+      required: [required, multiple, allowEmpty, defaultSelectedTypes, editableScenes, changeEffect, adapters]
+      properties:
+        required:
+          type: boolean
+          description: 是否必填
+          example: false
+        multiple:
+          type: boolean
+          description: 是否支持同时勾选多种增强
+          example: true
+        allowEmpty:
+          type: boolean
+          description: 是否允许完全不启用增强
+          example: true
+        defaultSelectedTypes:
+          type: array
+          description: 默认勾选的增强类型列表
+          items: { type: string }
+          example: [summary, keyword]
+        editableScenes:
+          type: array
+          description: 允许编辑增强配置的场景
+          items: { type: string }
+          example: [CREATE_KB, UPDATE_KB, DOCUMENT_OVERRIDE]
+        changeEffect:
+          type: string
+          description: 修改增强配置后的构建策略
+          example: REBUILD_FROM_ENHANCE
+        adapters:
+          type: array
+          description: 增强组件适配器列表
+          items:
+            $ref: '#/components/schemas/KnowledgeEnhanceAdapter'
+
+    KnowledgeEnhanceAdapter:
+      type: object
+      description: 增强组件适配器定义
+      required: [type, label, defaultOptions, fields]
+      properties:
+        type:
+          type: string
+          description: 增强类型标识
+          example: summary
+        label:
+          type: string
+          description: 增强类型展示名称
+          example: 摘要
+        defaultOptions:
+          type: object
+          additionalProperties: true
+          description: 默认参数
+        fields:
+          type: array
+          description: 独有配置字段列表
+          items:
+            $ref: '#/components/schemas/KnowledgePipelineFormField'
+
+    KnowledgeEmbeddingPipelineSchema:
+      type: object
+      description: 向量化模型阶段配置 Schema 描述
+      required: [required, multiple, defaultType, editableScenes, changeEffect, immutableAfterCreate, typeOptions, fields]
+      properties:
+        required:
+          type: boolean
+          description: 是否必填
+          example: true
+        multiple:
+          type: boolean
+          description: 是否多选
+          example: false
+        defaultType:
+          type: string
+          description: 默认选中的向量模型
+          example: gemini-embedding-001
+        editableScenes:
+          type: array
+          description: 允许编辑场景列表（仅建库时可选择）
+          items: { type: string }
+          example: [CREATE_KB]
+        changeEffect:
+          type: string
+          description: 变更影响（全量重构）
+          example: FULL_REBUILD
+        immutableAfterCreate:
+          type: boolean
+          description: 知识库创建后是否不可更改
+          example: true
+        typeOptions:
+          type: array
+          description: 可选向量模型选项列表
+          items:
+            $ref: '#/components/schemas/KnowledgePipelineEmbeddingOption'
+        fields:
+          type: array
+          description: 向量模型配置字段列表
+          items:
+            $ref: '#/components/schemas/KnowledgePipelineFormField'
+
+    KnowledgeVectorStorePipelineSchema:
+      type: object
+      description: 向量库存储阶段配置 Schema 描述
+      required: [required, multiple, editable, defaultType, fixedValue, changeEffect, immutableAfterCreate, runtimeDefaults]
+      properties:
+        required:
+          type: boolean
+          description: 是否必填
+          example: true
+        multiple:
+          type: boolean
+          description: 是否多选
+          example: false
+        editable:
+          type: boolean
+          description: 是否允许用户在界面编辑修改
+          example: false
+        defaultType:
+          type: string
+          description: 默认向量库类型
+          example: milvus
+        fixedValue:
+          type: object
+          description: 固定的向量库配置值
+        changeEffect:
+          type: string
+          description: 变更策略（不可变）
+          example: IMMUTABLE
+        immutableAfterCreate:
+          type: boolean
+          description: 创建后不可变更
+          example: true
+        runtimeDefaults:
+          $ref: '#/components/schemas/KnowledgeVectorStoreRuntimeDefaults'
+          description: 底层运行时默认索引与检索参数
+
+    KnowledgeVectorStoreRuntimeDefaults:
+      type: object
+      description: 向量库运行时默认索引与检索参数
+      required: [indexType, metricType, indexParams, sparseIndexType, sparseMetricType]
+      properties:
+        indexType:
+          type: string
+          description: 稠密向量索引类型
+          example: HNSW
+        metricType:
+          type: string
+          description: 稠密向量距离度量类型
+          example: COSINE
+        indexParams:
+          type: object
+          description: 稠密向量索引构建参数（如 M, efConstruction）
+        sparseIndexType:
+          type: string
+          description: 稀疏向量索引类型
+          example: SPARSE_INVERTED_INDEX
+        sparseMetricType:
+          type: string
+          description: 稀疏向量检索度量方式
+          example: BM25
 
     KnowledgePipelineComponent:
       type: object
@@ -3359,6 +4050,7 @@ components:
         parser: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 解析阶段执行结果 }
         chunk: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 切片阶段执行结果 }
         enhance: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 增强阶段执行结果 }
+        embed: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 向量化阶段执行结果 }
         update: { type: object, additionalProperties: true, description: 字段：update }
         meta: { type: object, additionalProperties: true, description: 字段：meta }
         sourceType: { type: string, enum: [CONFLUENCE, SHAREPOINT, ONEDRIVE, BLOB, S3, LOCAL_UPLOAD], description: 来源类型 }
@@ -3653,6 +4345,7 @@ components:
         parser: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 解析阶段执行结果 }
         chunk: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 切片阶段执行结果 }
         enhance: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 增强阶段执行结果 }
+        embed: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 向量化阶段执行结果 }
         retrievalReady: { type: boolean, description: 文档是否已具备检索条件 }
         chunkCount: { type: integer, description: 文档切片数量 }
         pageCount: { type: integer, description: 文档页数 }
@@ -4085,16 +4778,24 @@ components:
         - type: object
           properties:
             data:
-              description: 响应数据
+              description: 目录树数据体，按公共目录与个人目录分别返回根节点数组
               type: object
               required: [publicDirectories, personalDirectories]
               properties:
-                personalDirectories:
-                  description: 字段：personalDirectories
+                public:
+                  description: 公共目录树根节点列表（包含权限映射、Alice 同步状态与创建控制标识）
+                  type: array
+                  items: { $ref: '#/components/schemas/DirectoryTreeNode' }
+                personal:
+                  description: 个人目录树根节点列表（仅当前登录用户可见的目录节点）
                   type: array
                   items: { $ref: '#/components/schemas/DirectoryTreeNode' }
                 publicDirectories:
-                  description: 字段：publicDirectories
+                  description: 兼容别名字段：公共目录树根节点列表
+                  type: array
+                  items: { $ref: '#/components/schemas/DirectoryTreeNode' }
+                personalDirectories:
+                  description: 兼容别名字段：个人目录树根节点列表
                   type: array
                   items: { $ref: '#/components/schemas/DirectoryTreeNode' }
 
@@ -4124,36 +4825,107 @@ components:
 
     DirectoryTreeNode:
       type: object
-      required: [id, name, directoryType, children, permissionItems]
+      description: 知识目录树节点对象，包含目录基本属性、创建能力标识（createKBFlag/createDirFlag）、Alice 同步状态、权限投影与递归子目录列表。
+      required: [id, name, directoryType, createKBFlag, createDirFlag, children, permissionItems]
       properties:
-        id: { type: integer, format: int64, description: ID }
-        name: { type: string, description: 名称 }
-        parentId: { type: [integer, 'null'], format: int64, description: 父级 ID }
-        path: { type: string, description: 字段：path }
-        childrenCount: { type: integer, description: 字段：childrenCount }
-        kbCount: { type: integer, description: 字段：kbCount }
-        directoryType: { type: string, enum: [PUBLIC, PERSONAL], description: 字段：directoryType }
-        aliceSyncStatus: { type: [string, 'null'], description: 字段：aliceSyncStatus }
+        id:
+          type: integer
+          format: int64
+          description: 目录唯一主键 ID
+          example: 1001
+        name:
+          type: string
+          description: 目录名称
+          example: 全部知识
+        parentId:
+          type: integer
+          format: int64
+          nullable: true
+          description: 父级目录 ID（根目录节点为 null）
+          example: null
+        path:
+          type: string
+          description: 目录完整层级路径
+          example: /全部知识
+        childrenCount:
+          type: integer
+          description: 直接子节点数量
+          example: 1
+        kbCount:
+          type: integer
+          description: 绑定的知识库总数量（仅在 includeKbCount=true 时统计计算并返回）
+          example: 2
+        directoryType:
+          type: string
+          enum: [PUBLIC, PERSONAL]
+          description: 目录类型：PUBLIC 公共目录，PERSONAL 个人目录
+          example: PUBLIC
+        createKBFlag:
+          type: boolean
+          description: >-
+            用于标识当前目录是否能创建知识库。
+            判断逻辑：如果当前目录是叶子节点（无子目录），设置为 true，否则为 false。
+          example: false
+        createDirFlag:
+          type: boolean
+          description: >-
+            用于标识当前目录是否能创建子目录。
+            设置为 true 的场景：
+            1. 所有父级目录（包含子目录的非叶子节点）均可创建目录，设置为 true；
+            2. 当前目录是叶子目录且下面没有知识库，可创建目录，设置为 true；
+            3. 除以上场景外（如叶子目录下已挂载知识库），均设置为 false。
+          example: true
+        aliceSyncStatus:
+          type: string
+          nullable: true
+          description: Alice 权限映射同步状态（SUCCESS / PENDING / FAIL，个人目录为 null）
+          example: SUCCESS
         permissionItems:
-          description: 字段：permissionItems
+          description: 当前登录用户在该目录上的权限投影列表（包含 DIR_CONTROL 目录控制权限与 KB_CREATOR 知识库创建权限）
           type: array
           items: { $ref: '#/components/schemas/DirectoryPermissionItem' }
         children:
-          description: 字段：children
+          description: 子目录节点列表（递归结构）
           type: array
           items: { $ref: '#/components/schemas/DirectoryTreeNode' }
 
     DirectoryPermissionItem:
       type: object
+      description: 目录权限投影项定义
       required: [permissionCode, permissionName, granted, canApply]
       properties:
-        permissionCode: { type: string, enum: [DIR_CONTROL, KB_CREATOR], description: 字段：permissionCode }
-        permissionName: { type: string, description: 字段：permissionName }
-        roleId: { type: [string, 'null'], description: 字段：roleId }
-        entitlementId: { type: [string, 'null'], description: 字段：entitlementId }
-        granted: { type: boolean, description: 字段：granted }
-        canApply: { type: boolean, description: 字段：canApply }
-        applyUrl: { type: [string, 'null'], description: 字段：applyUrl }
+        permissionCode:
+          type: string
+          enum: [DIR_CONTROL, KB_CREATOR]
+          description: 权限编码（DIR_CONTROL 目录控制权限，KB_CREATOR 知识库创建权限）
+          example: DIR_CONTROL
+        permissionName:
+          type: string
+          description: 权限展示名称
+          example: 目录控制权限
+        roleId:
+          type: string
+          nullable: true
+          description: 绑定的 Alice Role 角色 ID
+          example: GRC-DIR-ALL-OWNER-ROLE
+        entitlementId:
+          type: string
+          nullable: true
+          description: 绑定的 Alice Entitlement 权限项 ID
+          example: GRC-DIR-ALL-OWNER-ENTITLEMENT
+        granted:
+          type: boolean
+          description: 当前用户是否已获得该权限
+          example: true
+        canApply:
+          type: boolean
+          description: 当前用户是否可在 Alice Access 申请该权限
+          example: false
+        applyUrl:
+          type: string
+          nullable: true
+          description: Alice Access 权限申请跳转 URL（不可申请或不适用时为 null）
+          example: null
 
     ErrorResponse:
       type: object
