@@ -1561,7 +1561,7 @@ paths:
       summary: 查询出站凭据列表
       parameters:
         - { name: keyword, in: query, required: false, description: 凭据名称关键字, schema: { type: string } }
-        - { name: type, in: query, required: false, description: 凭据目标类型，例如 AGENT 或 MCP, schema: { type: string } }
+        - { name: type, in: query, required: false, description: 凭据目标类型，例如 AGENT、MCP 或 NEXUS, schema: { type: string } }
         - { name: status, in: query, required: false, description: 凭据状态, schema: { type: string } }
         - { name: sort, in: query, required: false, description: 排序字段和方向, schema: { type: string } }
         - { name: page, in: query, required: false, description: 页码, schema: { type: integer, minimum: 1, default: 1 } }
@@ -1577,7 +1577,26 @@ paths:
     put: { tags: [Outbound Credential Management], operationId: updateOutboundCredentialStatus, summary: 更新出站凭据状态, requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/UpdateOutboundCredentialStatusRequest' } } } }, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/VoidEnvelope' } } } } } }
   /mgmt/vault/outbound/credentials/{id}/resolve:
     parameters: [{ $ref: '#/components/parameters/CredentialId' }]
-    get: { tags: [Internal Vault API], operationId: resolveOutboundCredential, summary: '[内部] 解析出站凭据', responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/ResolvedCredentialEnvelope' } } } } } }
+    get:
+      tags: [Internal Vault API]
+      operationId: resolveOutboundCredential
+      summary: '[内部] 解析出站凭据'
+      description: 供 agent-runtime / knowledge-engine 等内部服务根据凭据 ID（及可选的用户 ID 归属校验）解析并获取出站 Token 及认证参数。
+      parameters:
+        - name: userId
+          in: query
+          required: false
+          description: 用户 ID（用于校验凭据所有权，不传时默认以当前上下文用户校验）
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 成功返回明文解析结果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolvedCredentialEnvelope'
   /mgmt/vault/outbound/credentials/presets:
     get: { tags: [Outbound Credential Management], operationId: listCredentialPresets, summary: 获取认证参数预设列表, responses: { '200': { description: 成功, content: { application/json: { schema: { $ref: '#/components/schemas/AuthPresetMapEnvelope' } } } } } }
   /mgmt/vault/outbound/credentials/presets/{targetType}/{targetId}:
@@ -1642,7 +1661,7 @@ components:
     RoleId: { name: roleId, in: path, required: true, description: 角色 ID, schema: { type: integer, format: int64 } }
     PermissionId: { name: permissionId, in: path, required: true, description: 权限 ID, schema: { type: integer, format: int64 } }
     CredentialId: { name: id, in: path, required: true, description: 凭据 ID, schema: { type: integer, format: int64 } }
-    TargetType: { name: targetType, in: path, required: true, description: 目标资源类型, schema: { type: string } }
+    TargetType: { name: targetType, in: path, required: true, description: 目标资源类型（AGENT / MCP / NEXUS）, schema: { type: string, enum: [AGENT, MCP, NEXUS] } }
     TargetId: { name: targetId, in: path, required: true, description: 目标资源 ID, schema: { type: string } }
 
   responses:
@@ -4691,11 +4710,29 @@ components:
     CreateOutboundCredentialRequest:
       type: object
       required: [name, targetType, targetId]
+      description: 创建 Agent、MCP 或 Nexus 出站凭据的请求参数
       properties:
-        name: { type: string, minLength: 1, description: 名称 }
-        targetType: { type: string, minLength: 1, description: 字段：targetType }
-        targetId: { type: string, minLength: 1, description: 字段：targetId }
-        fields: { type: object, additionalProperties: { type: string }, description: 字段：fields }
+        name:
+          type: string
+          minLength: 1
+          description: 凭据名称
+          example: GPT-4.1 Nexus Token
+        targetType:
+          type: string
+          minLength: 1
+          enum: [AGENT, MCP, NEXUS]
+          description: 凭据目标类型：AGENT（高代码 Agent）、MCP（MCP 工具/服务）、NEXUS（Nexus 模型网关）
+          example: NEXUS
+        targetId:
+          type: string
+          minLength: 1
+          description: 目标资源 ID（如 gpt-4.1）
+          example: gpt-4.1
+        fields:
+          type: object
+          additionalProperties: { type: string }
+          description: 认证参数字典（如 nexus_token: "<token>"）
+          example: { "nexus_token": "nx-test-token-123456" }
 
     UpdateOutboundCredentialRequest:
       type: object
@@ -4724,6 +4761,7 @@ components:
         targetId: { type: string, description: 字段：targetId }
         targetName: { type: string, description: 字段：targetName }
         authType: { type: string, description: 字段：authType }
+        tokenMasked: { type: string, description: 令牌掩码脱敏展示值（如 sk-abc12************************456） }
         endpoint: { type: string, description: 字段：endpoint }
         protocol: { type: string, description: 字段：protocol }
         status: { type: string, description: 状态 }
