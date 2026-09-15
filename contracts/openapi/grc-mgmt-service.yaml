@@ -550,10 +550,35 @@ paths:
       tags: [Knowledge Directory]
       operationId: createDirectory
       summary: 创建知识目录
+      description: >-
+        创建用于组织和挂载知识库的新知识目录节点（支持公共目录与个人目录）。
+
+        【业务与层级约束】：
+        1. 目录层级深度限制：每个根目录下面（包含根目录在内）最多只能存在 5 个层级，新建目录若超过 5 层直接抛出错误（ADMIN-4006 目录层级不能超过5层）。
+        2. 目录与知识库互斥挂载：如果指定了 parentId 且父目录下已存在知识库，禁止新建子目录（ADMIN-4005 已存在知识库，不能新建子目录）。
+        3. 同级名称唯一：同一父目录下不允许存在同名活动子目录（ADMIN-4002 同级目录重名）。
+        4. 审批人必填：创建 PUBLIC 公共目录时，必须提供 approverIds 审批人列表（ADMIN-1002 公共目录创建时审批人不能为空）。
+
+        【入参说明】：
+        - 请求体为 JSON 对象（CreateDirectoryRequest）：
+          - parentId (int64, 可选): 父目录 ID，创建一级根目录时为 null。
+          - name (string, 必填, 长度 <= 128): 目录名称，去除首尾空格。
+          - sortNo (integer, 可选, 默认 1000): 目录在同级中的排序权重（0-999999）。
+          - directoryType (string, 必填, 枚举 PUBLIC/PERSONAL): 目录类型。
+          - approverIds (array<int64/string>, 公共目录必填): 目录权限审批人 ID 列表（最多 20 个）。
+
+        【出参说明】：
+        - 返回标准统一响应体（DirectoryDetailEnvelope），其 data 为 DirectoryDetail 对象，包含新创建目录的完整属性（ID、父级 ID、名称、路径快照、排序号、目录类型、创建时间、更新时间）。
       requestBody:
         required: true
         content: { application/json: { schema: { $ref: '#/components/schemas/CreateDirectoryRequest' } } }
-      responses: { '200': { description: 创建成功, content: { application/json: { schema: { $ref: '#/components/schemas/DirectoryDetailEnvelope' } } } } }
+      responses:
+        '200':
+          description: 创建成功，返回目录详情信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DirectoryDetailEnvelope'
   /mgmt/knowledge/directories/{directoryId}/rename:
     parameters: [{ $ref: '#/components/parameters/DirectoryId' }]
     patch:
@@ -3121,15 +3146,54 @@ components:
 
     DirectoryDetail:
       type: object
+      description: 知识目录详细信息对象
+      required:
+        - id
+        - name
+        - path
+        - sortNo
+        - directoryType
+        - createdAt
+        - updatedAt
       properties:
-        id: { type: integer, format: int64, description: ID }
-        parentId: { type: integer, format: int64, description: 父级 ID }
-        name: { type: string, description: 名称 }
-        path: { type: string, description: 字段：path }
-        sortNo: { type: integer, description: 字段：sortNo }
-        directoryType: { type: string, enum: [PUBLIC, PERSONAL], description: 字段：directoryType }
-        createdAt: { type: string, format: date-time, description: 创建时间 }
-        updatedAt: { type: string, format: date-time, description: 更新时间 }
+        id:
+          type: integer
+          format: int64
+          description: 目录唯一主键 ID
+          example: 2001
+        parentId:
+          type: integer
+          format: int64
+          nullable: true
+          description: 父级目录 ID（根目录节点为 null）
+          example: 1001
+        name:
+          type: string
+          description: 目录名称
+          example: 合规专区
+        path:
+          type: string
+          description: 目录完整层级路径快照
+          example: /全部知识/合规专区
+        sortNo:
+          type: integer
+          description: 排序号（数值越小排序越靠前）
+          example: 1000
+        directoryType:
+          type: string
+          enum: [PUBLIC, PERSONAL]
+          description: 目录类型：PUBLIC 公共目录，PERSONAL 个人目录
+          example: PUBLIC
+        createdAt:
+          type: string
+          format: date-time
+          description: 目录创建时间（ISO 8601 UTC 格式）
+          example: '2026-09-15T08:00:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          description: 目录最近更新时间（ISO 8601 UTC 格式）
+          example: '2026-09-15T08:00:00Z'
 
     DeleteDirectoryResponse:
       type: object
