@@ -460,11 +460,57 @@ paths:
       tags: [Knowledge Directory]
       operationId: getDirectoryTree
       summary: 查询知识目录树
+      description: >-
+        查询当前系统登录用户可见的知识目录树层级结构，按公共目录（public）与个人目录（personal）分别聚合返回。
+        
+        【入参说明】：
+        - includeKbCount (query, boolean, 可选, 默认 false): 是否递归统计并返回目录节点绑定的知识库总数量。
+        - keyword (query, string, 可选): 目录名称过滤关键词，模糊匹配目录名称；命中时保留其祖先节点路径。
+        - directoryType (query, string, 可选, 枚举 PUBLIC/PERSONAL): 仅返回指定类型的目录树；不传则返回全部可见类型。
+
+        【出参说明】：
+        - 返回标准统一响应体（DirectoryTreeResponse），data 中包含 public（公共目录根节点列表）与 personal（个人目录根节点列表）。
+        - 每个目录节点（DirectoryTreeNode）包含：
+          1. id: 目录 ID
+          2. name: 目录名称
+          3. parentId: 父级目录 ID（根节点为 null）
+          4. path: 目录完整层级路径（如 /全部知识/合规专区）
+          5. childrenCount: 直接子目录数量
+          6. kbCount: 绑定的知识库数量（includeKbCount=true 时统计返回）
+          7. directoryType: 目录分类（PUBLIC 公共目录，PERSONAL 个人目录）
+          8. createKBFlag: 是否允许在当前目录创建知识库（叶子节点为 true，非叶子节点为 false）
+          9. createDirFlag: 是否允许在当前目录创建子目录（所有父级目录为 true；无知识库的叶子目录为 true；已挂载知识库的叶子目录为 false）
+          10. aliceSyncStatus: Alice 权限映射同步状态（SUCCESS / PENDING / FAIL）
+          11. permissionItems: 目录权限投影项列表（包含 DIR_CONTROL 目录控制权限、KB_CREATOR 知识库创建权限及申请 URL）
+          12. children: 子目录节点列表（递归结构）
       parameters:
-        - { name: includeKbCount, in: query, description: 是否包含知识库数量, schema: { type: boolean, default: false } }
-        - { name: keyword, in: query, description: 搜索关键词, required: false, schema: { type: string } }
-        - { name: directoryType, in: query, description: 目录类型, required: false, schema: { type: string, enum: [PUBLIC, PERSONAL] } }
-      responses: { '200': { description: 查询成功, content: { application/json: { schema: { $ref: '#/components/schemas/DirectoryTreeResponse' } } } } }
+        - name: includeKbCount
+          in: query
+          description: 是否统计并返回知识库数量，默认 false
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: keyword
+          in: query
+          description: 目录名称搜索关键词
+          required: false
+          schema:
+            type: string
+        - name: directoryType
+          in: query
+          description: 目录分类过滤：PUBLIC 公共目录，PERSONAL 个人目录
+          required: false
+          schema:
+            type: string
+            enum: [PUBLIC, PERSONAL]
+      responses:
+        '200':
+          description: 查询成功，返回按 public/personal 分组的目录树
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DirectoryTreeResponse'
   /mgmt/knowledge/directories/filter-tree:
     get:
       tags: [Knowledge Directory]
@@ -4004,6 +4050,7 @@ components:
         parser: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 解析阶段执行结果 }
         chunk: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 切片阶段执行结果 }
         enhance: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 增强阶段执行结果 }
+        embed: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 向量化阶段执行结果 }
         update: { type: object, additionalProperties: true, description: 字段：update }
         meta: { type: object, additionalProperties: true, description: 字段：meta }
         sourceType: { type: string, enum: [CONFLUENCE, SHAREPOINT, ONEDRIVE, BLOB, S3, LOCAL_UPLOAD], description: 来源类型 }
@@ -4298,6 +4345,7 @@ components:
         parser: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 解析阶段执行结果 }
         chunk: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 切片阶段执行结果 }
         enhance: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 增强阶段执行结果 }
+        embed: { $ref: '#/components/schemas/KnowledgeStageExecutionResult', description: 向量化阶段执行结果 }
         retrievalReady: { type: boolean, description: 文档是否已具备检索条件 }
         chunkCount: { type: integer, description: 文档切片数量 }
         pageCount: { type: integer, description: 文档页数 }
@@ -4730,16 +4778,24 @@ components:
         - type: object
           properties:
             data:
-              description: 响应数据
+              description: 目录树数据体，按公共目录与个人目录分别返回根节点数组
               type: object
               required: [publicDirectories, personalDirectories]
               properties:
-                personalDirectories:
-                  description: 字段：personalDirectories
+                public:
+                  description: 公共目录树根节点列表（包含权限映射、Alice 同步状态与创建控制标识）
+                  type: array
+                  items: { $ref: '#/components/schemas/DirectoryTreeNode' }
+                personal:
+                  description: 个人目录树根节点列表（仅当前登录用户可见的目录节点）
                   type: array
                   items: { $ref: '#/components/schemas/DirectoryTreeNode' }
                 publicDirectories:
-                  description: 字段：publicDirectories
+                  description: 兼容别名字段：公共目录树根节点列表
+                  type: array
+                  items: { $ref: '#/components/schemas/DirectoryTreeNode' }
+                personalDirectories:
+                  description: 兼容别名字段：个人目录树根节点列表
                   type: array
                   items: { $ref: '#/components/schemas/DirectoryTreeNode' }
 
@@ -4769,36 +4825,107 @@ components:
 
     DirectoryTreeNode:
       type: object
-      required: [id, name, directoryType, children, permissionItems]
+      description: 知识目录树节点对象，包含目录基本属性、创建能力标识（createKBFlag/createDirFlag）、Alice 同步状态、权限投影与递归子目录列表。
+      required: [id, name, directoryType, createKBFlag, createDirFlag, children, permissionItems]
       properties:
-        id: { type: integer, format: int64, description: ID }
-        name: { type: string, description: 名称 }
-        parentId: { type: [integer, 'null'], format: int64, description: 父级 ID }
-        path: { type: string, description: 字段：path }
-        childrenCount: { type: integer, description: 字段：childrenCount }
-        kbCount: { type: integer, description: 字段：kbCount }
-        directoryType: { type: string, enum: [PUBLIC, PERSONAL], description: 字段：directoryType }
-        aliceSyncStatus: { type: [string, 'null'], description: 字段：aliceSyncStatus }
+        id:
+          type: integer
+          format: int64
+          description: 目录唯一主键 ID
+          example: 1001
+        name:
+          type: string
+          description: 目录名称
+          example: 全部知识
+        parentId:
+          type: integer
+          format: int64
+          nullable: true
+          description: 父级目录 ID（根目录节点为 null）
+          example: null
+        path:
+          type: string
+          description: 目录完整层级路径
+          example: /全部知识
+        childrenCount:
+          type: integer
+          description: 直接子节点数量
+          example: 1
+        kbCount:
+          type: integer
+          description: 绑定的知识库总数量（仅在 includeKbCount=true 时统计计算并返回）
+          example: 2
+        directoryType:
+          type: string
+          enum: [PUBLIC, PERSONAL]
+          description: 目录类型：PUBLIC 公共目录，PERSONAL 个人目录
+          example: PUBLIC
+        createKBFlag:
+          type: boolean
+          description: >-
+            用于标识当前目录是否能创建知识库。
+            判断逻辑：如果当前目录是叶子节点（无子目录），设置为 true，否则为 false。
+          example: false
+        createDirFlag:
+          type: boolean
+          description: >-
+            用于标识当前目录是否能创建子目录。
+            设置为 true 的场景：
+            1. 所有父级目录（包含子目录的非叶子节点）均可创建目录，设置为 true；
+            2. 当前目录是叶子目录且下面没有知识库，可创建目录，设置为 true；
+            3. 除以上场景外（如叶子目录下已挂载知识库），均设置为 false。
+          example: true
+        aliceSyncStatus:
+          type: string
+          nullable: true
+          description: Alice 权限映射同步状态（SUCCESS / PENDING / FAIL，个人目录为 null）
+          example: SUCCESS
         permissionItems:
-          description: 字段：permissionItems
+          description: 当前登录用户在该目录上的权限投影列表（包含 DIR_CONTROL 目录控制权限与 KB_CREATOR 知识库创建权限）
           type: array
           items: { $ref: '#/components/schemas/DirectoryPermissionItem' }
         children:
-          description: 字段：children
+          description: 子目录节点列表（递归结构）
           type: array
           items: { $ref: '#/components/schemas/DirectoryTreeNode' }
 
     DirectoryPermissionItem:
       type: object
+      description: 目录权限投影项定义
       required: [permissionCode, permissionName, granted, canApply]
       properties:
-        permissionCode: { type: string, enum: [DIR_CONTROL, KB_CREATOR], description: 字段：permissionCode }
-        permissionName: { type: string, description: 字段：permissionName }
-        roleId: { type: [string, 'null'], description: 字段：roleId }
-        entitlementId: { type: [string, 'null'], description: 字段：entitlementId }
-        granted: { type: boolean, description: 字段：granted }
-        canApply: { type: boolean, description: 字段：canApply }
-        applyUrl: { type: [string, 'null'], description: 字段：applyUrl }
+        permissionCode:
+          type: string
+          enum: [DIR_CONTROL, KB_CREATOR]
+          description: 权限编码（DIR_CONTROL 目录控制权限，KB_CREATOR 知识库创建权限）
+          example: DIR_CONTROL
+        permissionName:
+          type: string
+          description: 权限展示名称
+          example: 目录控制权限
+        roleId:
+          type: string
+          nullable: true
+          description: 绑定的 Alice Role 角色 ID
+          example: GRC-DIR-ALL-OWNER-ROLE
+        entitlementId:
+          type: string
+          nullable: true
+          description: 绑定的 Alice Entitlement 权限项 ID
+          example: GRC-DIR-ALL-OWNER-ENTITLEMENT
+        granted:
+          type: boolean
+          description: 当前用户是否已获得该权限
+          example: true
+        canApply:
+          type: boolean
+          description: 当前用户是否可在 Alice Access 申请该权限
+          example: false
+        applyUrl:
+          type: string
+          nullable: true
+          description: Alice Access 权限申请跳转 URL（不可申请或不适用时为 null）
+          example: null
 
     ErrorResponse:
       type: object
