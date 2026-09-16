@@ -6,9 +6,11 @@ info:
     grc-mgt-service 的对外契约，覆盖 chat、文件、知识库、marketplace、RBAC 与 vault 管理接口。
     其中 chat 会话子域
     （对应 specs/001-conversation/plan.md，api-landscape.md §3.7）：会话 CRUD、
-    知识库挂载管理，以及两个供 grc-agent-service 调用的内部接口；② 凭据库的模型调用解析
-    接口（对应 specs/007-credential/plan.md，ADR-003/ADR-005，api-landscape.md §3.5）：
+    知识库挂载管理，以及两个供 grc-agent-service 调用的内部接口；② vault 内部接口
+    （对应 specs/007-credential/plan.md，ADR-003/ADR-005，api-landscape.md §3.5）：
     `POST /mgmt/vault/inbound/tokens/verify` 与 `GET /mgmt/vault/outbound/credentials/{id}/resolve`。
+    后者是按 credentialId 精确解析的内部接口，供 grc-ai-sdk 等受信服务使用，不承担按 userId/modelId
+    自动选凭据的职责。
     其余接口按照对应 feature spec（002~006、008）持续补充，具体字段契约以各 feature
     contract 和实现同步更新为准。
 servers:
@@ -1580,13 +1582,28 @@ paths:
     get:
       tags: [Internal Vault API]
       operationId: resolveOutboundCredential
-      summary: '[内部] 解析出站凭据'
-      description: 供 agent-runtime / knowledge-engine 等内部服务根据凭据 ID（及可选的用户 ID 归属校验）解析并获取出站 Token 及认证参数。
+      summary: '[内部] 按凭据 ID 解析出站凭据'
+      description: >-
+        仅供受信内部调用方使用（例如 grc-ai-sdk 所在工作负载）。调用方需先在业务层完成
+        `credentialId` 选择、用户/业务授权，以及具体 credential 使用策略、fallback、retry 的决策；
+        本接口只精确解析路径中的 `credentialId`，不执行按 `userId` / `modelId` 自动选凭据。
+        服务间鉴权使用 bearerAuth；对该内部接口，访问令牌推荐由宿主工作负载的
+        Azure Workload Identity 提供，并由 mgmt-service 按服务身份授权。grc-ai-sdk 调用时
+        必须同时传 `userId`，由 mgmt-service 校验该凭据属于该用户；该 `userId`
+        只用于所有权校验与审计，不承担 SDK 凭据选择职责。当前 Nexus 模型调用对齐的成功响应
+        语义为 numeric `credentialId`、`targetType = NEXUS`、string `targetId`、
+        `authType = NEXUS_PERSONAL_TOKEN`、nullable `endpoint` / `protocol` 与
+        `resolvedFields`；其中 SDK 只用 `authType` / `resolvedFields` 做鉴权，
+        `endpoint` / `protocol` 不是模型调用 URL / provider 选择器。`model_gateway_base_url`、
+        provider 与 query params 由调用方或模型配置提供；响应字段仅供进程内即时调用，
+        不得写日志或持久化。
       parameters:
         - name: userId
           in: query
           required: false
-          description: 用户 ID（用于校验凭据所有权，不传时默认以当前上下文用户校验）
+          description: >-
+            用户 ID（int64），用于校验凭据所有权；grc-ai-sdk 调用时必须传入。
+            仅已有用户上下文的内部调用方可省略。
           schema:
             type: integer
             format: int64
@@ -1624,6 +1641,9 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: >-
+        服务间访问令牌。对 Internal Vault API，推荐由 Azure Workload Identity 为宿主工作负载
+        提供访问令牌，并由 mgmt-service 按服务身份授权。
   parameters:
     SessionId:
       name: sessionId
@@ -2555,15 +2575,28 @@ components:
     OutboundCredentialStatsEnvelope: { allOf: [{ $ref: '#/components/schemas/ApiResponseBase' }, { type: object, properties: { data: { $ref: '#/components/schemas/OutboundCredentialStats', description: 响应数据 } } }] }
     ResolvedCredentialResponse:
       type: object
-      description: 解析后的出站凭据，不包含未授权的凭据元数据。
+      description: 解析后的出站凭据；仅表达给定 credentialId 的解析结果，不承担凭据选择职责。对当前 Nexus 模型调用，运行时成功响应对齐为 numeric credentialId、targetType=NEXUS、targetId=string、authType=NEXUS_PERSONAL_TOKEN、nullable endpoint/protocol。
+      required: [credentialId, targetType, targetId, authType, resolvedFields]
       properties:
-        credentialId: { type: string, description: 凭据 ID }
-        targetType: { type: string, description: 目标资源类型 }
-        targetId: { type: string, description: 目标资源 ID }
-        authType: { type: string, description: 认证方式 }
-        endpoint: { type: string, format: uri, description: 目标服务地址 }
-        protocol: { type: string, description: 通信协议 }
-        resolvedFields: { type: object, additionalProperties: true, description: 已解析的认证字段；字段名由目标认证方式决定，值类型由认证方式决定，仅供内部调用方使用 }
+        credentialId: { type: integer, format: int64, description: 凭据 ID }
+        targetType: { type: string, description: 目标资源类型；当前 Nexus 模型凭据解析返回 `NEXUS` }
+        targetId: { type: string, description: 目标资源 ID；当前 Nexus 模型凭据解析返回 string }
+        authType: { type: string, description: 认证方式；当前 Nexus 模型凭据解析返回 `NEXUS_PERSONAL_TOKEN` }
+        endpoint: { type: [string, "null"], format: uri, description: 可选目标服务地址；当前模型类调用的 `model_gateway_base_url` 由调用方或模型配置提供，本字段不是 SDK 的模型调用 URL 选择器 }
+        protocol: { type: [string, "null"], description: 可选通信协议；当前模型类调用的 provider 与 query params 由调用方或模型配置提供，本字段不是 SDK 的 provider 选择器 }
+        resolvedFields:
+          type: object
+          additionalProperties: true
+          description: 已解析的认证字段；当前 Nexus 模型凭据解析中 `NEXUS_PERSONAL_TOKEN` 使用 `nexus_token` 作为 Nexus Authorization token。SDK 只消费 `authType` / `resolvedFields` 做鉴权；字段仅供内部调用方进程内即时使用，不得写日志或持久化
+      example:
+        credentialId: 358281582005460992
+        targetType: NEXUS
+        targetId: '44'
+        authType: NEXUS_PERSONAL_TOKEN
+        endpoint: null
+        protocol: null
+        resolvedFields:
+          nexus_token: test-token
     AuthPresetResponse:
       type: object
       description: 目标资源认证参数预设。
@@ -4731,7 +4764,7 @@ components:
         fields:
           type: object
           additionalProperties: { type: string }
-          description: 认证参数字典（如 nexus_token: "<token>"）
+          description: '认证参数字典（如 nexus_token: "<token>"）'
           example: { "nexus_token": "nx-test-token-123456" }
 
     UpdateOutboundCredentialRequest:
@@ -5157,7 +5190,7 @@ components:
         sessionId: { type: string, description: 上传会话 ID }
         userId:
           type: [string, "null"]
-          description: 触发本次请求的用户 ID（供 grc-agent-service 走 grc-python-sdk 的 for_user 凭据解析路径；为 null 时 agent-service 降级为静态凭据）
+          description: 触发本次请求的用户 ID（供上层业务授权上下文与审计；若该上下文继续驱动 grc-ai-sdk 凭据解析，SDK 仍需把该值传给 mgmt-service 做凭据归属校验，但不据此选凭据）
         knowledgeBaseIds:
           type: array
           items: { type: string }
@@ -5213,30 +5246,3 @@ components:
               properties:
                 messageId: { type: string, description: 字段：messageId }
                 createdAt: { type: string, format: date-time, description: 创建时间 }
-
-    ResolveModelResponseEnvelope:
-      allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
-        - type: object
-          properties:
-            data:
-              description: 响应数据
-              type: object
-              required: [resolved, credential, source]
-              properties:
-                resolved: { type: boolean, description: 字段：resolved }
-                credential:
-                  description: 字段：credential
-                  type: object
-                  required: [type, token]
-                  properties:
-                    type: { type: string, enum: [bearer, api_key], description: 类型 }
-                    token: { type: string, description: 字段：token }
-                source:
-                  description: 字段：source
-                  type: string
-                  enum: [personal, platform_default]
-                availableModels:
-                  description: 字段：availableModels
-                  type: array
-                  items: { type: string }
