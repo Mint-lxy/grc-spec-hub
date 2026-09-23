@@ -1,0 +1,23 @@
+# 样例 AsyncAPI 事件契约 —— 仅供参照。
+# 正式契约请置于 contracts/events/<domain>.asyncapi.yaml。
+asyncapi: 2.6.0
+info:
+  title: Example Domain Events
+  version: "1.0"
+channels:
+  example.created:
+    description: 样例被创建时发布
+    subscribe:
+      operationId: onExampleCreated
+      message:
+        $ref: "#/components/messages/ExampleCreated"
+components:
+  messages:
+    ExampleCreated:
+      name: ExampleCreated
+      payload:
+        type: object
+        required: [id, occurredAt]
+        properties:
+          id: { type: string }
+          occurredAt: { type: string, format: date-time }

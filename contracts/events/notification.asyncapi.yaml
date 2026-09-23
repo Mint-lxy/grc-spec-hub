@@ -1,0 +1,9 @@
+# 事件契约骨架（占位）—— 提供方：grc-mgmt-service。正式内容 [待确认]。
+asyncapi: 2.6.0
+info:
+  title: Notification Events
+  version: "0.1"
+  description: "[待确认] 平台通知事件。"
+channels: {}
+components:
+  messages: {}

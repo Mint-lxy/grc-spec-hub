@@ -1,0 +1,139 @@
+# services.manifest.yaml — 已拆解服务的“声明清单”（批量孵化的单一输入）
+#
+# 用途：当项目启动时子服务已经拆解完毕，在此一次性声明全部服务。
+# 它是 service-map.md 的“上游事实源”：
+#   /onboard-services 读取本清单 → 批量生成 service-map 段落 + 记忆卡 + 服务仓库 + 门禁。
+# 之后日常新增单个服务仍可用 /new-service，但务必回填本清单，保持两者一致。
+#
+# 依赖必须单向无环（DAG）。孵化前 /onboard-services 会校验拓扑；成环会被拒绝。
+
+project: grc                   # 必须与 hub.config.yaml 的 project.id 一致
+
+# 各服务契约文件的约定路径（供生成 provides/consumes 时对齐 contracts/POLICY.md）
+conventions:
+  openapi: contracts/openapi/<svc>.yaml
+  events:  contracts/events/<domain>.asyncapi.yaml
+  shared:  contracts/shared/<name>.schema.json
+
+services:
+  # ---- 前端 ----
+  - name: grc-ai-portal
+    repo: mercedes-benz.china/grc-ai-portal
+    owner: "@todo-owner"
+    domain: "AI 平台前端门户（SPA），提供管理、配置、对话、测评等全部用户界面"
+    milestone: M1
+    status: planned
+    provides: []
+    consumes:
+      - contracts/openapi/grc-api-gateway.yaml
+    depends-on: [grc-api-gateway]
+
+  # ---- 网关层 ----
+  - name: grc-api-gateway
+    repo: mercedes-benz.china/grc-api-gateway
+    owner: "@todo-owner"
+    domain: "统一 API 网关：路由、限流、鉴权转发、护栏检测代理、凭据解析、审计记录、流式输出缓冲与回放"
+    milestone: M1
+    status: planned
+    provides:
+      - contracts/openapi/grc-api-gateway.yaml
+    consumes:
+      - contracts/openapi/grc-auth-service.yaml
+      - contracts/openapi/grc-mgmt-service.yaml
+      - contracts/openapi/grc-agent-service.yaml
+      - contracts/openapi/grc-evaluation-service.yaml
+      - contracts/openapi/grc-knowledge-engine.yaml
+    depends-on: [grc-auth-service, grc-mgmt-service, grc-agent-service, grc-evaluation-service, grc-knowledge-engine, grc-mcp-server]
+
+  # ---- 认证服务 ----
+  - name: grc-auth-service
+    repo: mercedes-benz.china/grc-auth-service
+    owner: "@todo-owner"
+    domain: "统一身份认证：Alice SSO 对接、Token 颁发与校验、PAT 管理"
+    milestone: M1
+    status: planned
+    provides:
+      - contracts/openapi/grc-auth-service.yaml
+    consumes: []
+    depends-on: []
+
+  # ---- 管理服务 ----
+  - name: grc-mgmt-service
+    repo: mercedes-benz.china/grc-mgmt-service
+    owner: "@todo-owner"
+    domain: "管理服务：资产目录（CRUD/状态机/Marketplace）、订阅引擎（审批链/状态机）、资产创建与质量门控、发布链路（版本/下架/重新上架）、护栏模板管理、密钥库（PAT/个人凭据）、管理后台（治理中心/推荐位/角色映射/模型设置/平台资源注册表）、通知"
+    milestone: M1
+    status: planned
+    provides:
+      - contracts/openapi/grc-mgmt-service.yaml
+      - contracts/events/eval-task.asyncapi.yaml
+      - contracts/events/notification.asyncapi.yaml
+    consumes:
+      - contracts/openapi/grc-knowledge-engine.yaml
+      - contracts/events/eval-result.asyncapi.yaml
+    depends-on: [grc-auth-service, grc-knowledge-engine]
+
+  # ---- 对话/Agent 服务 ----
+  - name: grc-agent-service
+    repo: mercedes-benz.china/grc-agent-service
+    owner: "@todo-owner"
+    domain: "Agent 服务：对话编排（Chat agent-runtime + 资产 Agent 透传）、MCP Tool 调用、LLM 推理调度、会话持久化、知识库挂载检索代理"
+    milestone: M1
+    status: planned
+    provides:
+      - contracts/openapi/grc-agent-service.yaml
+    consumes:
+      - contracts/openapi/grc-knowledge-engine.yaml
+      - contracts/openapi/grc-mgmt-service.yaml
+    depends-on: [grc-knowledge-engine, grc-mgmt-service, grc-mcp-server]
+
+  # ---- 测评服务 ----
+  - name: grc-evaluation-service
+    repo: mercedes-benz.china/grc-evaluation-service
+    owner: "@todo-owner"
+    domain: "测评服务：发布准入测评任务执行（三类检测）、结果计算与回写"
+    milestone: M1
+    status: planned
+    provides:
+      - contracts/openapi/grc-evaluation-service.yaml
+      - contracts/events/eval-result.asyncapi.yaml
+    consumes:
+      - contracts/events/eval-task.asyncapi.yaml
+    depends-on: [grc-mgmt-service]
+
+  # ---- 知识引擎 ----
+  - name: grc-knowledge-engine
+    repo: mercedes-benz.china/grc-knowledge-engine
+    owner: "@todo-owner"
+    domain: "知识引擎：目录树管理、知识库 CRUD 与状态机、四通道文档导入、四阶段构建管线（解析/切片/增强/向量化）、向量检索、开放接口（PAT 认证）"
+    milestone: M1
+    status: planned
+    provides:
+      - contracts/openapi/grc-knowledge-engine.yaml
+      - contracts/events/knowledge-build.asyncapi.yaml
+    consumes:
+      - contracts/openapi/grc-parser-engine.yaml
+    depends-on: [grc-auth-service, grc-parser-engine]
+
+  # ---- 文档解析引擎 ----
+  - name: grc-parser-engine
+    repo: mercedes-benz.china/grc-parser-engine
+    owner: "@todo-owner"
+    domain: "文档解析（GPU 优化）：Docling/MinerU 解析器执行，接收知识引擎调度"
+    milestone: M1
+    status: planned
+    provides:
+      - contracts/openapi/grc-parser-engine.yaml
+    consumes: []
+    depends-on: []
+
+  # ---- 平台原生 MCP 工具 ----
+  - name: grc-mcp-server
+    repo: mercedes-benz.china/grc-mcp-server
+    owner: "@todo-owner"
+    domain: "平台原生 MCP 工具集：mcp-m365-server（SharePoint/OneDrive）、mcp-conf-server（Confluence）、mcp-dp-server（数据平台 ADF/Databricks）、mcp-web-server（Web 抓取）"
+    milestone: M1
+    status: planned
+    provides: []
+    consumes: []
+    depends-on: [grc-auth-service]

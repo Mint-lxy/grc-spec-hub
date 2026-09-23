@@ -1,0 +1,2308 @@
+openapi: 3.1.0
+info:
+  title: GRC Knowledge Engine
+  description: grc-knowledge-engine
+  version: 0.1.0
+paths:
+  /api/v1/knowledge/tags:
+    get:
+      tags:
+        - knowledge-bases
+      summary: List Knowledge Tags
+      operationId: list_knowledge_tags_api_v1_knowledge_tags_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response List Knowledge Tags Api V1 Knowledge Tags Get
+    post:
+      tags:
+        - knowledge-bases
+      summary: Create Knowledge Tag
+      operationId: create_knowledge_tag_api_v1_knowledge_tags_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateKnowledgeTagRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Create Knowledge Tag Api V1 Knowledge Tags Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases:
+    get:
+      tags:
+        - knowledge-bases
+      summary: List Knowledge Bases
+      operationId: list_knowledge_bases_api_v1_knowledge_knowledge_bases_get
+      parameters:
+        - name: directoryId
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Directoryid
+        - name: directoryType
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - $ref: '#/components/schemas/DirectoryType'
+              - type: 'null'
+            title: Directorytype
+        - name: status
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Status
+        - name: keyword
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+                maxLength: 255
+              - type: 'null'
+            title: Keyword
+        - name: retrievalReady
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: boolean
+              - type: 'null'
+            title: Retrievalready
+        - name: sort
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Sort
+        - name: page
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+                minimum: 1
+              - type: 'null'
+            title: Page
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+                maximum: 100
+                minimum: 1
+              - type: 'null'
+            title: Pagesize
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response List Knowledge Bases Api V1 Knowledge Knowledge Bases Get
+        '422':
+          description: Invalid sort parameter
+    post:
+      tags:
+        - knowledge-bases
+      summary: Create Knowledge Base
+      operationId: create_knowledge_base_api_v1_knowledge_knowledge_bases_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateKnowledgeBaseRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Create Knowledge Base Api V1 Knowledge Knowledge Bases Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/stats:
+    get:
+      tags:
+        - knowledge-bases
+      summary: Knowledge Base Summary Statistics
+      operationId: knowledge_base_summary_statistics_api_v1_knowledge_knowledge_bases_stats_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Knowledge Base Summary Statistics Api V1 Knowledge Knowledge Bases Stats Get
+  /api/v1/knowledge/knowledge-bases/pipeline-options:
+    get:
+      tags:
+        - knowledge-bases
+      summary: Get Pipeline Options
+      operationId: get_pipeline_options_api_v1_knowledge_knowledge_bases_pipeline_options_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Get Pipeline Options Api V1 Knowledge Knowledge Bases Pipeline Options Get
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}:
+    get:
+      tags:
+        - knowledge-bases
+      summary: Get Knowledge Base
+      operationId: get_knowledge_base_api_v1_knowledge_knowledge_bases__knowledgeBaseId__get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Knowledge Base Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/config:
+    patch:
+      tags:
+        - knowledge-bases
+      summary: Update Pipeline Config
+      operationId: update_pipeline_config_api_v1_knowledge_knowledge_bases__knowledgeBaseId__config_patch
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateKnowledgeBaseConfigRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Update Pipeline Config Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Config Patch
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/enable:
+    post:
+      tags:
+        - knowledge-bases
+      summary: Enable Knowledge Base
+      operationId: enable_knowledge_base_api_v1_knowledge_knowledge_bases__knowledgeBaseId__enable_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Enable Knowledge Base Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Enable Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/publish:
+    post:
+      tags:
+        - knowledge-bases
+      summary: Publish Knowledge Base
+      operationId: publish_knowledge_base_api_v1_knowledge_knowledge_bases__knowledgeBaseId__publish_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Publish Knowledge Base Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Publish Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/offline:
+    post:
+      tags:
+        - knowledge-bases
+      summary: Disable Knowledge Base
+      operationId: disable_knowledge_base_api_v1_knowledge_knowledge_bases__knowledgeBaseId__offline_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Disable Knowledge Base Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Offline Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/status:
+    patch:
+      tags:
+        - knowledge-bases
+      summary: Update Knowledge Base Status
+      operationId: update_knowledge_base_status_api_v1_knowledge_knowledge_bases__knowledgeBaseId__status_patch
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateKnowledgeBaseStatusRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Update Knowledge Base Status Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Status Patch
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/delete:
+    post:
+      tags:
+        - knowledge-bases
+      summary: Delete Knowledge Base
+      operationId: delete_knowledge_base_api_v1_knowledge_knowledge_bases__knowledgeBaseId__delete_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Delete Knowledge Base Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Delete Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/stats:
+    get:
+      tags:
+        - knowledge-bases
+      summary: Knowledge Base Stats
+      operationId: knowledge_base_stats_api_v1_knowledge_knowledge_bases__knowledgeBaseId__stats_get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Knowledge Base Stats Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Stats Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/operations/{operationId}:
+    get:
+      tags:
+        - operations
+      summary: Get Purge Operation
+      operationId: get_purge_operation_api_v1_knowledge_operations__operationId__get
+      parameters:
+        - name: operationId
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Operationid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Purge Operation Api V1 Knowledge Operations  Operationid  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/retrievals:
+    post:
+      tags:
+        - retrievals
+      summary: Retrieve
+      operationId: retrieve_api_v1_knowledge_retrievals_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RetrievalRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Retrieve Api V1 Knowledge Retrievals Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents:
+    post:
+      tags:
+        - documents
+      summary: Create Document
+      operationId: create_document_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDocumentRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentRegistrationEnvelope'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+        - documents
+      summary: List Documents
+      operationId: list_documents_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents_get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: page
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+                minimum: 1
+              - type: 'null'
+            title: Page
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+                maximum: 100
+                minimum: 1
+              - type: 'null'
+            title: Pagesize
+        - name: status
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Status
+        - name: sort
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Sort
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response List Documents Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents Get
+        '422':
+          description: Invalid sort parameter
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/parse:
+    get:
+      tags:
+        - documents
+      summary: Get Document Parse View
+      operationId: get_document_parse_view_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__parse_get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+        - name: jobId
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Jobid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Document Parse View Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Parse Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/pages/{page}:
+    get:
+      tags:
+        - documents
+      summary: Get Document Page Workspace
+      operationId: get_document_page_workspace_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__pages__page__get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+        - name: page
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            title: Page
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Document Page Workspace Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Pages  Page  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/chunks:
+    get:
+      tags:
+        - chunks
+      summary: List Leaf Chunks
+      operationId: list_leaf_chunks_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__chunks_get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+        - name: jobId
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Jobid
+        - name: keyword
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+                maxLength: 255
+              - type: 'null'
+            title: Keyword
+        - name: page
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+                minimum: 1
+              - type: 'null'
+            title: Page
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+                maximum: 100
+                minimum: 1
+              - type: 'null'
+            title: Pagesize
+        - name: snippetContext
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            title: Snippetcontext
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response List Leaf Chunks Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Chunks Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/enhance:
+    get:
+      tags:
+        - enhance
+      summary: List Enhancements
+      operationId: list_enhancements_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__enhance_get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+        - name: jobId
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Jobid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response List Enhancements Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Enhance Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}:
+    get:
+      tags:
+        - documents
+      summary: Get Document
+      operationId: get_document_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Document Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/original-url:
+    post:
+      tags:
+        - documents
+      summary: Create Original Document Url
+      operationId: create_original_document_url_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__original_url_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Create Original Document Url Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Original Url Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/chunks/{chunkId}:
+    get:
+      tags:
+        - chunks
+      summary: Get Leaf Chunk
+      operationId: get_leaf_chunk_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__chunks__chunkId__get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+        - name: chunkId
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Chunkid
+        - name: jobId
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Jobid
+        - name: snippetContext
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            title: Snippetcontext
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Leaf Chunk Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Chunks  Chunkid  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+        - chunks
+      summary: Update Leaf Chunk
+      operationId: update_leaf_chunk_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__chunks__chunkId__put
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+        - name: chunkId
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Chunkid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateChunkContentRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Update Leaf Chunk Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Chunks  Chunkid  Put
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/delete:
+    post:
+      tags:
+        - documents
+      summary: Delete Document
+      operationId: delete_document_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__delete_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Delete Document Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Delete Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/imports:
+    post:
+      tags:
+        - documents
+      summary: Import Documents
+      operationId: import_documents_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents_imports_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchDocumentsRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Import Documents Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents Imports Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/build-jobs:
+    get:
+      tags:
+        - jobs
+      summary: List Build Jobs
+      operationId: list_build_jobs_api_v1_knowledge_knowledge_bases__knowledgeBaseId__build_jobs_get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: page
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+                minimum: 1
+              - type: 'null'
+            title: Page
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+                maximum: 100
+                minimum: 1
+              - type: 'null'
+            title: Pagesize
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response List Build Jobs Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Build Jobs Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+        - jobs
+      summary: Create Build Job
+      operationId: create_build_job_api_v1_knowledge_knowledge_bases__knowledgeBaseId__build_jobs_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBuildJobRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuildJobEnvelope'
+        '409':
+          description: A document already has an active build job
+          content:
+            application/problem+json:
+              schema:
+                additionalProperties: true
+                properties:
+                  code:
+                    title: Code
+                    type: string
+                  message:
+                    title: Message
+                    type: string
+                  traceId:
+                    title: Traceid
+                    type: string
+                  timestamp:
+                    title: Timestamp
+                    type: string
+                  path:
+                    title: Path
+                    type: string
+                required:
+                  - code
+                  - message
+                  - traceId
+                  - timestamp
+                  - path
+                title: ProblemDetail
+                type: object
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/documents/{documentId}/stages/{stageType}/run:
+    post:
+      tags:
+        - jobs
+      summary: Run Document Stage
+      operationId: run_document_stage_api_v1_knowledge_documents__documentId__stages__stageType__run_post
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+        - name: stageType
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Stagetype
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StageRunRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Run Document Stage Api V1 Knowledge Documents  Documentid  Stages  Stagetype  Run Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/jobs/{jobId}:
+    get:
+      tags:
+        - jobs
+      summary: Get Build Job
+      operationId: get_build_job_api_v1_knowledge_jobs__jobId__get
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Jobid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Build Job Api V1 Knowledge Jobs  Jobid  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/jobs/{jobId}/cancel:
+    post:
+      tags:
+        - jobs
+      summary: Cancel Build Job
+      operationId: cancel_build_job_api_v1_knowledge_jobs__jobId__cancel_post
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Jobid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Cancel Build Job Api V1 Knowledge Jobs  Jobid  Cancel Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/jobs/{jobId}/retry:
+    post:
+      tags:
+        - jobs
+      summary: Retry Build Job
+      operationId: retry_build_job_api_v1_knowledge_jobs__jobId__retry_post
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Jobid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Retry Build Job Api V1 Knowledge Jobs  Jobid  Retry Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/update:
+    post:
+      tags:
+        - knowledge-bases
+      summary: Update Knowledge Base
+      operationId: update_knowledge_base_api_v1_knowledge_knowledge_bases__knowledgeBaseId__update_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateKnowledgeBaseRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Update Knowledge Base Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Update Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/stage-config:
+    patch:
+      tags:
+        - documents
+      summary: Update Document Stage Config
+      operationId: update_document_stage_config_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__stage_config_patch
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDocumentStageConfigRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Update Document Stage Config Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Stage Config Patch
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/document-stage-config-batches:
+    post:
+      tags:
+        - documents
+      summary: Batch Update Document Stage Config
+      operationId: batch_update_document_stage_config_api_v1_knowledge_knowledge_bases__knowledgeBaseId__document_stage_config_batches_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchUpdateDocumentStageConfigRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Batch Update Document Stage Config Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Document Stage Config Batches Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents/{documentId}/chunks/{chunkId}/delete:
+    post:
+      tags:
+        - chunks
+      summary: Delete Leaf Chunk
+      operationId: delete_leaf_chunk_api_v1_knowledge_knowledge_bases__knowledgeBaseId__documents__documentId__chunks__chunkId__delete_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Documentid
+        - name: chunkId
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Chunkid
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Delete Leaf Chunk Api V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents  Documentid  Chunks  Chunkid  Delete Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/knowledge/artifacts/access-urls:
+    post:
+      tags:
+        - artifacts
+      summary: Create Artifact Access Urls
+      operationId: create_artifact_access_urls_api_v1_knowledge_artifacts_access_urls_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: true
+              type: object
+              title: Request
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Create Artifact Access Urls Api V1 Knowledge Artifacts Access Urls Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /dify/v1/knowledge/knowledge-bases/{knowledgeBaseId}:
+    get:
+      summary: Get Open Knowledge Base Alias
+      operationId: get_open_knowledge_base_alias_dify_v1_knowledge_knowledge_bases__knowledgeBaseId__get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Open Knowledge Base Alias Dify V1 Knowledge Knowledge Bases  Knowledgebaseid  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /dify/v1/knowledge/retrievals:
+    post:
+      summary: Retrieve Open Knowledge Alias
+      operationId: retrieve_open_knowledge_alias_dify_v1_knowledge_retrievals_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DifyRetrievalRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Retrieve Open Knowledge Alias Dify V1 Knowledge Retrievals Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /dify/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents:
+    post:
+      summary: Update Open Knowledge Document Alias
+      operationId: update_open_knowledge_document_alias_dify_v1_knowledge_knowledge_bases__knowledgeBaseId__documents_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchDocumentsRequest'
+      responses:
+        '202':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Update Open Knowledge Document Alias Dify V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /open/v1/knowledge/knowledge-bases/{knowledgeBaseId}:
+    get:
+      summary: Get General Open Knowledge Base
+      operationId: get_general_open_knowledge_base_open_v1_knowledge_knowledge_bases__knowledgeBaseId__get
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get General Open Knowledge Base Open V1 Knowledge Knowledge Bases  Knowledgebaseid  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /open/v1/knowledge/retrievals:
+    post:
+      summary: Retrieve General Open Knowledge
+      operationId: retrieve_general_open_knowledge_open_v1_knowledge_retrievals_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RetrievalRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Retrieve General Open Knowledge Open V1 Knowledge Retrievals Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /open/v1/knowledge/knowledge-bases/{knowledgeBaseId}/documents:
+    post:
+      summary: Create General Open Document
+      operationId: create_general_open_document_open_v1_knowledge_knowledge_bases__knowledgeBaseId__documents_post
+      parameters:
+        - name: knowledgeBaseId
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Knowledgebaseid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenRegisterDocumentRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Create General Open Document Open V1 Knowledge Knowledge Bases  Knowledgebaseid  Documents Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /health:
+    get:
+      summary: Health
+      operationId: health_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Health Health Get
+  /readyz:
+    get:
+      summary: Readyz
+      operationId: readyz_readyz_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Readyz Readyz Get
+components:
+  schemas:
+    AdapterConfig:
+      properties:
+        type:
+          type: string
+          title: Type
+        options:
+          additionalProperties: true
+          type: object
+          title: Options
+      additionalProperties: true
+      type: object
+      required:
+        - type
+      title: AdapterConfig
+    BatchDocumentsRequest:
+      properties:
+        stageConfig:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Stageconfig
+        sources:
+          items:
+            $ref: '#/components/schemas/SourceItem'
+          type: array
+          maxItems: 200
+          minItems: 1
+          title: Sources
+      additionalProperties: true
+      type: object
+      required:
+        - sources
+      title: BatchDocumentsRequest
+    BatchUpdateDocumentStageConfigRequest:
+      properties:
+        stageConfig:
+          additionalProperties: true
+          type: object
+          title: Stageconfig
+        docIds:
+          items:
+            type: integer
+          type: array
+          maxItems: 200
+          minItems: 1
+          title: Docids
+      additionalProperties: true
+      type: object
+      required:
+        - stageConfig
+        - docIds
+      title: BatchUpdateDocumentStageConfigRequest
+    BuildJobData:
+      properties:
+        batchJobId:
+          type: string
+          title: Batchjobid
+        knowledgeBaseId:
+          type: string
+          title: Knowledgebaseid
+        type:
+          type: string
+          const: BATCH_BUILD
+          title: Type
+        status:
+          type: string
+          enum:
+            - PENDING
+            - RUNNING
+          title: Status
+        totalDocs:
+          type: integer
+          minimum: 1
+          title: Totaldocs
+        pipelineJobs:
+          items:
+            $ref: '#/components/schemas/PipelineJobSummary'
+          type: array
+          title: Pipelinejobs
+      additionalProperties: true
+      type: object
+      required:
+        - batchJobId
+        - knowledgeBaseId
+        - type
+        - status
+        - totalDocs
+        - pipelineJobs
+      title: BuildJobData
+    BuildJobEnvelope:
+      properties:
+        code:
+          type: string
+          const: '0'
+          title: Code
+        message:
+          type: string
+          title: Message
+        traceId:
+          type: string
+          title: Traceid
+        timestamp:
+          type: string
+          title: Timestamp
+        data:
+          $ref: '#/components/schemas/BuildJobData'
+      additionalProperties: true
+      type: object
+      required:
+        - code
+        - message
+        - traceId
+        - timestamp
+        - data
+      title: BuildJobEnvelope
+    CreateBuildJobRequest:
+      properties:
+        stageConfig:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Stageconfig
+        sources:
+          items:
+            $ref: '#/components/schemas/SourceItem'
+          type: array
+          maxItems: 200
+          minItems: 1
+          title: Sources
+        runMode:
+          type: string
+          enum:
+            - auto
+            - manual
+          title: Runmode
+          default: auto
+      additionalProperties: true
+      type: object
+      required:
+        - sources
+      title: CreateBuildJobRequest
+    CreateKnowledgeBaseRequest:
+      properties:
+        directoryId:
+          type: integer
+          minimum: 1
+          title: Directoryid
+        name:
+          type: string
+          maxLength: 255
+          minLength: 1
+          title: Name
+        description:
+          anyOf:
+            - type: string
+              maxLength: 512
+            - type: 'null'
+          title: Description
+        visibility:
+          $ref: '#/components/schemas/KnowledgeBaseVisibility'
+        recommendedConfig:
+          type: boolean
+          title: Recommendedconfig
+          default: true
+        tags:
+          items:
+            $ref: '#/components/schemas/KnowledgeTagRequest'
+          type: array
+          maxItems: 20
+          title: Tags
+        pipelineConfig:
+          $ref: '#/components/schemas/PipelineConfig'
+        metadata:
+          additionalProperties: true
+          type: object
+          title: Metadata
+      additionalProperties: true
+      type: object
+      required:
+        - directoryId
+        - name
+        - visibility
+        - pipelineConfig
+      title: CreateKnowledgeBaseRequest
+    CreateKnowledgeTagRequest:
+      properties:
+        name:
+          type: string
+          maxLength: 64
+          minLength: 1
+          title: Name
+      additionalProperties: true
+      type: object
+      required:
+        - name
+      title: CreateKnowledgeTagRequest
+    DifyRetrievalRequest:
+      properties:
+        knowledge_id:
+          type: string
+          maxLength: 64
+          minLength: 1
+          title: Knowledge Id
+        query:
+          type: string
+          maxLength: 10000
+          minLength: 1
+          title: Query
+        retrieval_setting:
+          $ref: '#/components/schemas/DifyRetrievalSetting'
+      additionalProperties: true
+      type: object
+      required:
+        - knowledge_id
+        - query
+      title: DifyRetrievalRequest
+    DifyRetrievalSetting:
+      properties:
+        top_k:
+          type: integer
+          maximum: 100
+          minimum: 1
+          title: Top K
+          default: 10
+        score_threshold:
+          anyOf:
+            - type: number
+              maximum: 1
+              minimum: 0
+            - type: 'null'
+          title: Score Threshold
+      additionalProperties: true
+      type: object
+      title: DifyRetrievalSetting
+    DirectoryType:
+      type: string
+      enum:
+        - PUBLIC
+        - PERSONAL
+      title: DirectoryType
+    DocumentRegistrationData:
+      properties:
+        documentId:
+          type: string
+          title: Documentid
+        status:
+          type: string
+          const: PENDING
+          title: Status
+      additionalProperties: true
+      type: object
+      required:
+        - documentId
+        - status
+      title: DocumentRegistrationData
+    DocumentRegistrationEnvelope:
+      properties:
+        code:
+          type: string
+          const: '0'
+          title: Code
+        message:
+          type: string
+          title: Message
+        traceId:
+          type: string
+          title: Traceid
+        timestamp:
+          type: string
+          title: Timestamp
+        data:
+          $ref: '#/components/schemas/DocumentRegistrationData'
+      additionalProperties: true
+      type: object
+      required:
+        - code
+        - message
+        - traceId
+        - timestamp
+        - data
+      title: DocumentRegistrationEnvelope
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    KnowledgeBaseStatus:
+      type: string
+      enum:
+        - DRAFT
+        - ACTIVE
+        - DISABLED
+      title: KnowledgeBaseStatus
+    KnowledgeBaseVisibility:
+      type: string
+      enum:
+        - PRIVATE
+        - PUBLIC
+        - RESTRICTED
+      title: KnowledgeBaseVisibility
+    KnowledgeTagRequest:
+      properties:
+        tagId:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Tagid
+        name:
+          type: string
+          maxLength: 64
+          minLength: 1
+          title: Name
+      additionalProperties: true
+      type: object
+      required:
+        - name
+      title: KnowledgeTagRequest
+    OpenRegisterDocumentRequest:
+      properties:
+        fileName:
+          type: string
+          maxLength: 512
+          minLength: 1
+          title: Filename
+        sourceType:
+          type: string
+          minLength: 1
+          title: Sourcetype
+        fileId:
+          type: integer
+          title: Fileid
+        sourceMeta:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Sourcemeta
+        docType:
+          type: string
+          minLength: 1
+          title: Doctype
+        stageOverrides:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Stageoverrides
+        runMode:
+          type: string
+          enum:
+            - auto
+            - manual
+          title: Runmode
+          default: auto
+      additionalProperties: true
+      type: object
+      required:
+        - fileName
+        - sourceType
+        - fileId
+        - docType
+      title: OpenRegisterDocumentRequest
+    PipelineConfig:
+      properties:
+        parser:
+          $ref: '#/components/schemas/AdapterConfig'
+        chunking:
+          $ref: '#/components/schemas/AdapterConfig'
+        enhance:
+          items:
+            $ref: '#/components/schemas/AdapterConfig'
+          type: array
+          title: Enhance
+        embedding:
+          $ref: '#/components/schemas/AdapterConfig'
+        vectorStore:
+          $ref: '#/components/schemas/AdapterConfig'
+      additionalProperties: true
+      type: object
+      required:
+        - parser
+        - chunking
+        - enhance
+        - embedding
+        - vectorStore
+      title: PipelineConfig
+    PipelineJobSummary:
+      properties:
+        pipelineJobId:
+          type: string
+          title: Pipelinejobid
+        documentId:
+          type: string
+          title: Documentid
+        sourceType:
+          type: string
+          title: Sourcetype
+        status:
+          type: string
+          enum:
+            - PENDING
+            - PAUSED
+          title: Status
+      additionalProperties: true
+      type: object
+      required:
+        - pipelineJobId
+        - documentId
+        - sourceType
+        - status
+      title: PipelineJobSummary
+    RegisterDocumentRequest:
+      properties:
+        fileName:
+          type: string
+          maxLength: 512
+          minLength: 1
+          title: Filename
+        sourceType:
+          type: string
+          minLength: 1
+          title: Sourcetype
+        fileId:
+          type: integer
+          title: Fileid
+        sourceMeta:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Sourcemeta
+        docType:
+          type: string
+          minLength: 1
+          title: Doctype
+        stageOverrides:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Stageoverrides
+      additionalProperties: true
+      type: object
+      required:
+        - fileName
+        - sourceType
+        - fileId
+        - docType
+      title: RegisterDocumentRequest
+    RetrievalOptions:
+      properties:
+        strategy:
+          type: string
+          title: Strategy
+          default: vector
+        options:
+          additionalProperties: true
+          type: object
+          title: Options
+      additionalProperties: true
+      type: object
+      title: RetrievalOptions
+    RetrievalRequest:
+      properties:
+        query:
+          type: string
+          maxLength: 10000
+          minLength: 1
+          title: Query
+        knowledgeBaseIds:
+          items:
+            type: string
+          type: array
+          maxItems: 10
+          minItems: 1
+          title: Knowledgebaseids
+        topK:
+          type: integer
+          maximum: 100
+          minimum: 1
+          title: Topk
+          default: 10
+        retrieval:
+          $ref: '#/components/schemas/RetrievalOptions'
+        filters:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Filters
+        rerank:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Rerank
+      additionalProperties: true
+      type: object
+      required:
+        - query
+        - knowledgeBaseIds
+      title: RetrievalRequest
+    SourceItem:
+      properties:
+        documentId:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Documentid
+        type:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Type
+        fileId:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Fileid
+        fileName:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Filename
+        fileType:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Filetype
+        url:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Url
+        stageConfig:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Stageconfig
+      additionalProperties: true
+      type: object
+      title: SourceItem
+    StageRunRequest:
+      properties:
+        stageConfig:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Stageconfig
+        persist:
+          type: boolean
+          title: Persist
+          default: false
+      additionalProperties: true
+      type: object
+      title: StageRunRequest
+    UpdateChunkContentRequest:
+      properties:
+        content:
+          type: string
+          maxLength: 1000000
+          minLength: 1
+          title: Content
+        metadata:
+          anyOf:
+            - additionalProperties: true
+              type: object
+            - type: 'null'
+          title: Metadata
+      additionalProperties: true
+      type: object
+      required:
+        - content
+      title: UpdateChunkContentRequest
+    UpdateDocumentStageConfigRequest:
+      properties:
+        stageConfig:
+          additionalProperties: true
+          type: object
+          title: Stageconfig
+      additionalProperties: true
+      type: object
+      required:
+        - stageConfig
+      title: UpdateDocumentStageConfigRequest
+    UpdateKnowledgeBaseConfigRequest:
+      properties:
+        parser:
+          anyOf:
+            - $ref: '#/components/schemas/AdapterConfig'
+            - type: 'null'
+        chunking:
+          anyOf:
+            - $ref: '#/components/schemas/AdapterConfig'
+            - type: 'null'
+        enhance:
+          anyOf:
+            - items:
+                $ref: '#/components/schemas/AdapterConfig'
+              type: array
+            - type: 'null'
+          title: Enhance
+        embedding:
+          anyOf:
+            - $ref: '#/components/schemas/AdapterConfig'
+            - type: 'null'
+        vectorStore:
+          anyOf:
+            - $ref: '#/components/schemas/AdapterConfig'
+            - type: 'null'
+      additionalProperties: true
+      type: object
+      title: UpdateKnowledgeBaseConfigRequest
+    UpdateKnowledgeBaseRequest:
+      properties:
+        directoryId:
+          type: integer
+          minimum: 1
+          title: Directoryid
+        name:
+          anyOf:
+            - type: string
+              maxLength: 255
+              minLength: 1
+            - type: 'null'
+          title: Name
+        description:
+          anyOf:
+            - type: string
+              maxLength: 4000
+            - type: 'null'
+          title: Description
+        visibility:
+          anyOf:
+            - $ref: '#/components/schemas/KnowledgeBaseVisibility'
+            - type: 'null'
+        tags:
+          anyOf:
+            - items:
+                $ref: '#/components/schemas/KnowledgeTagRequest'
+              type: array
+              maxItems: 20
+            - type: 'null'
+          title: Tags
+        pipelineConfig:
+          anyOf:
+            - $ref: '#/components/schemas/UpdateKnowledgeBaseConfigRequest'
+            - type: 'null'
+      additionalProperties: true
+      type: object
+      title: UpdateKnowledgeBaseRequest
+    UpdateKnowledgeBaseStatusRequest:
+      properties:
+        status:
+          $ref: '#/components/schemas/KnowledgeBaseStatus'
+      additionalProperties: false
+      type: object
+      required:
+        - status
+      title: UpdateKnowledgeBaseStatusRequest
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: ValidationError
